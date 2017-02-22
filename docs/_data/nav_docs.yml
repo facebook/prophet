@@ -1,0 +1,19 @@
+- title: Documentation
+  items:
+  - id: installation
+  - id: quick_start
+  - id: forecasting_growth
+  - id: trend_changepoints
+  - id: holiday_effects
+  - id: uncertainty_intervals
+  - id: outliers
+  - id: non-daily_data
+  - id: contributing
+
+# n title:, 1 items: per title:, n id: per items:
+# - title: A
+#   items:
+#   - id: B
+#   - id: C
+# - title: D
+#   - id: E
