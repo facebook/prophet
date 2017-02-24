@@ -115,7 +115,7 @@ class Prophet(object):
             return pickle.load(f)
 
     def setup_dataframe(self, df, initialize_scales=False):
-        """Create auxillary columns 't', 't_ix', 'y_scaled', and 'cap_scaled'.
+        """Create auxiliary columns 't', 't_ix', 'y_scaled', and 'cap_scaled'.
 
         These columns are used during both fitting and prediction.
         """
@@ -160,7 +160,7 @@ class Prophet(object):
                 if too_low or too_high:
                     raise ValueError('Changepoints must fall within training data.')
         elif self.n_changepoints > 0:
-            # Place potential changepoints evenly throuh first 80% of history
+            # Place potential changepoints evenly through first 80% of history
             max_ix = np.floor(self.history.shape[0] * 0.8)
             cp_indexes = (
                 np.linspace(0, max_ix, self.n_changepoints + 1)
