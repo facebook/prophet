@@ -61,6 +61,8 @@ which will include uncertainty in seasonality.}
 uncertainty intervals.}
 
 \item{fit}{Boolean, if FALSE the model is initialized but not fit.}
+
+\item{...}{Additional arguments, passed to \code{\link{fit.prophet}}}
 }
 \value{
 A prophet model.

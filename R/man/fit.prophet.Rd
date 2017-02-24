@@ -10,6 +10,9 @@ fit.prophet(m, df)
 \item{m}{Prophet object.}
 
 \item{df}{Data frame.}
+
+\item{...}{Additional arguments passed to the \code{optimizing} or 
+\code{sampling} functions in Stan.}
 }
 \description{
 Fit the prophet model.

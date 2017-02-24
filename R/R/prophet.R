@@ -51,6 +51,7 @@ globalVariables(c(
 #' @param uncertainty.samples Number of simulated draws used to estimate
 #'  uncertainty intervals.
 #' @param fit Boolean, if FALSE the model is initialized but not fit.
+#' @param ... Additional arguments, passed to \code{\link{fit.prophet}}
 #'
 #' @return A prophet model.
 #'
@@ -77,7 +78,8 @@ prophet <- function(df = df,
                     mcmc.samples = 0,
                     interval.width = 0.80,
                     uncertainty.samples = 1000,
-                    fit = TRUE
+                    fit = TRUE,
+                    ...
 ) {
   # fb-block 1
 
@@ -108,7 +110,7 @@ prophet <- function(df = df,
   validate_inputs(m)
   class(m) <- append(class(m), "prophet")
   if (fit) {
-    m <- fit.prophet(m, df)
+    m <- fit.prophet(m, df, ...)
   }
 
   # fb-block 2
@@ -452,9 +454,11 @@ logistic_growth_init <- function(df) {
 #'
 #' @param m Prophet object.
 #' @param df Data frame.
+#' @param ... Additional arguments passed to the \code{optimizing} or 
+#'  \code{sampling} functions in Stan.
 #'
 #' @export
-fit.prophet <- function(m, df) {
+fit.prophet <- function(m, df, ...) {
   history <- df %>%
     dplyr::filter(!is.na(y))
 
@@ -506,7 +510,8 @@ fit.prophet <- function(m, df) {
       model,
       data = dat,
       init = stan_init,
-      iter = m$mcmc.samples
+      iter = m$mcmc.samples,
+      ...
     )
     m$params <- rstan::extract(stan.fit)
     n.iteration <- length(m$params$k)
@@ -516,7 +521,8 @@ fit.prophet <- function(m, df) {
       data = dat,
       init = stan_init,
       iter = 1e4,
-      as_vector = FALSE
+      as_vector = FALSE,
+      ...
     )
     m$params <- stan.fit$par
     n.iteration <- 1
