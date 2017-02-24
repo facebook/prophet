@@ -23,7 +23,7 @@ Prophet is a [CRAN package](https://cran.r-project.org/package=prophet) so you c
 > install.packages('prophet')
 ```
 
-After installation, you can [get started!](quick_start.html#r-api)
+After installation, you can [get started!](https://facebookincubator.github.io/prophet/docs/quick_start.html#r-api)
 
 ### Windows
 
@@ -40,7 +40,7 @@ $ pip install fbprophet
 
 The major dependency that Prophet has is `pystan`.   PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html).
 
-After installation, you can [get started!](quick_start.html#python-api)
+After installation, you can [get started!](https://facebookincubator.github.io/prophet/docs/quick_start.html#python-api)
 
 ### Windows
 
