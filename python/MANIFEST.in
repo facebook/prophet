@@ -1,1 +1,2 @@
 include stan/*.stan
+include LICENSE
