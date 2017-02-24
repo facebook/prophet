@@ -13,4 +13,4 @@
 
 - title: Available in R or Python.
   text: |
-        We've implemented the Prophet procedure in R and Python, but they share the same underlying [Stan](http://mc-stan) code for fitting. Use whatever language you're comfortable with to get forecasts.
+        We've implemented the Prophet procedure in R and Python, but they share the same underlying [Stan](http://mc-stan.org) code for fitting. Use whatever language you're comfortable with to get forecasts.
