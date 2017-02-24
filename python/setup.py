@@ -75,7 +75,7 @@ setup(
     author='Sean J. Taylor <sjt@fb.com>, Ben Letham <bletham@fb.com>',
     author_email='sjt@fb.com',
     license='BSD',
-    packages=['fbprophet'],
+    packages=['fbprophet', 'fbprophet.tests'],
     setup_requires=[
         'Cython>=0.22',
         'pystan>=2.8',
