@@ -81,8 +81,10 @@ setup(
         'pystan>=2.8',
     ],
     install_requires=[
+        'matplotlib',
+        'numpy',
         'pandas',
-        'pystan',
+        'pystan>=2.8',
     ],
     zip_safe=False,
     include_package_data=True,
