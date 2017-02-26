@@ -618,13 +618,15 @@ class Prophet(object):
 
         return pd.DataFrame({'ds': dates})
 
-    def plot(self, fcst, uncertainty=True):
+    def plot(self, fcst, uncertainty=True, xlabel='ds', ylabel='y'):
         """Plot the Prophet forecast.
 
         Parameters
         ----------
         fcst: pd.DataFrame output of self.predict.
         uncertainty: Optional boolean to plot uncertainty intervals.
+        xlabel: Optional label name on X-axis
+        ylabel: Optional label name on Y-axis
 
         Returns
         -------
@@ -641,8 +643,8 @@ class Prophet(object):
             ax.fill_between(fcst['ds'].values, fcst['yhat_lower'],
                             fcst['yhat_upper'], color=forecast_color, alpha=0.2)
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
-        ax.set_xlabel('ds')
-        ax.set_ylabel('y')
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
         fig.tight_layout()
         return fig
 
