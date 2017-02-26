@@ -876,6 +876,8 @@ df_for_plotting <- function(m, fcst) {
 #' @param fcst Data frame returned by predict(m, df).
 #' @param uncertainty Boolean indicating if the uncertainty interval for yhat
 #'  should be plotted. Must be present in fcst as yhat_lower and yhat_upper.
+#' @param xlabel Optional label for x-axis
+#' @param ylabel Optional label for y-axis
 #' @param ... additional arguments
 #'
 #' @return A ggplot2 plot.
@@ -891,10 +893,12 @@ df_for_plotting <- function(m, fcst) {
 #' }
 #'
 #' @export
-plot.prophet <- function(x, fcst, uncertainty = TRUE, ...) {
+plot.prophet <- function(x, fcst, uncertainty = TRUE, xlabel = 'ds',
+                         ylabel = 'y', ...) {
   df <- df_for_plotting(x, fcst)
   forecast.color <- "#0072B2"
-  gg <- ggplot2::ggplot(df, ggplot2::aes(x = ds, y = y))
+  gg <- ggplot2::ggplot(df, ggplot2::aes(x = ds, y = y)) +
+    ggplot2::labs(x = xlabel, y = ylabel)
   if (exists('cap', where = df)) {
     gg <- gg + ggplot2::geom_line(
       ggplot2::aes(y = cap), linetype = 'dashed', na.rm = TRUE)
