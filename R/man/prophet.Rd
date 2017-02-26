@@ -9,7 +9,7 @@ prophet(df = df, growth = "linear", changepoints = NULL,
   weekly.seasonality = TRUE, holidays = NULL,
   seasonality.prior.scale = 10, changepoint.prior.scale = 0.05,
   holidays.prior.scale = 10, mcmc.samples = 0, interval.width = 0.8,
-  uncertainty.samples = 1000, fit = TRUE)
+  uncertainty.samples = 1000, fit = TRUE, ...)
 }
 \arguments{
 \item{df}{Data frame with columns ds (date type) and y, the time series.

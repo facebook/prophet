@@ -4,7 +4,7 @@
 \alias{fit.prophet}
 \title{Fit the prophet model.}
 \usage{
-fit.prophet(m, df)
+fit.prophet(m, df, ...)
 }
 \arguments{
 \item{m}{Prophet object.}
