@@ -6,6 +6,17 @@ This directory will contain the user and feature documentation for Prophet. The 
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for details on how to add or modify content.
 
+## Jupyter Notebooks
+
+Most of the `doc` pages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebookincubator/prophet/tree/master/notebooks) directory at the base of the source tree.  Please make changes there and then rebuild the docs:
+
+```
+$ cd docs
+$ make notebooks
+```
+
+Make sure you have installed [rpy2](https://rpy2.bitbucket.io/) so that the R code can be run as well.
+
 ### Run the Site Locally
 
 The requirements for running a GitHub pages site locally is described in [GitHub help](https://help.github.com/articles/setting-up-your-github-pages-site-locally-with-jekyll/#requirements). The steps below summarize these steps.

@@ -12,3 +12,14 @@ We appreciate all contributions. If you are planning to contribute back bug-fixe
 If you plan to contribute new features or extensions to the core, please first open an issue and discuss the feature with us. Sending a pull request is fine, too, but if it is a large change we suggest you run it by us first.
 
 We require that any API changes or feature additions are made available for both Python and R in parallel.
+
+## Documentation
+
+Most of the `doc` paages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebookincubator/prophet/tree/master/notebooks) directory at the base of the source tree.  Please make changes there and then rebuild the docs:
+
+```
+$ cd docs
+$ make notebooks
+```
+
+Make sure you have installed [rpy2](https://rpy2.bitbucket.io/) so that the R code can be run as well.
