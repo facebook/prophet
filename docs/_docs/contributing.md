@@ -15,7 +15,7 @@ We require that any API changes or feature additions are made available for both
 
 ## Documentation
 
-Most of the `doc` paages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebookincubator/prophet/tree/master/notebooks) directory at the base of the source tree.  Please make changes there and then rebuild the docs:
+Most of the `doc` pages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebookincubator/prophet/tree/master/notebooks) directory at the base of the source tree.  Please make changes there and then rebuild the docs:
 
 ```
 $ cd docs
