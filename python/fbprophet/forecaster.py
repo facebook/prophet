@@ -721,6 +721,7 @@ class Prophet(object):
                 ax.fill_between(range(len(days)), y_weekly_l, y_weekly_u,
                                 color=forecast_color, alpha=0.2)
             ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
+            ax.set_xticks(range(len(days)))
             ax.set_xticklabels(days)
             ax.set_xlabel('Day of week')
             ax.set_ylabel('weekly')
