@@ -9,7 +9,7 @@
 globalVariables(c(
   "ds", "y", "cap", ".",
   "component", "dow", "doy", "holiday", "holidays", "holidays_lower", "holidays_upper", "ix",
-  "lower", "n", "stat", "trend",
+  "lower", "n", "stat", "trend", "row_number",
   "trend_lower", "trend_upper", "upper", "value", "weekly", "weekly_lower", "weekly_upper",
   "x", "yearly", "yearly_lower", "yearly_upper", "yhat", "yhat_lower", "yhat_upper"))
 
@@ -323,6 +323,7 @@ make_holiday_features <- function(m, dates) {
   wide <- m$holidays %>%
     dplyr::mutate(ds = zoo::as.Date(ds)) %>%
     dplyr::group_by(holiday, ds) %>%
+    dplyr::filter(row_number() == 1) %>%
     dplyr::do({
       if (exists('lower_window', where = .) && !is.na(.$lower_window)
           && !is.na(.$upper_window)) {
