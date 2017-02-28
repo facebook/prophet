@@ -182,7 +182,7 @@ compile_stan_model <- function(model) {
   stanc <- rstan::stanc(stan.src)
 
   model.name <- paste(model, 'growth', sep = '_')
-  rstan::stan_model(stanc_ret = stanc, model_name = model.name)
+  return(rstan::stan_model(stanc_ret = stanc, model_name = model.name))
 }
 
 #' Prepare dataframe for fitting or predicting.
@@ -199,7 +199,7 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
   if (exists('y', where=df)) {
     df$y <- as.numeric(df$y)
   }
-  df$ds = zoo::as.Date(df$ds)
+  df$ds <- zoo::as.Date(df$ds)
 
   df <- df %>%
     dplyr::arrange(ds)
