@@ -951,13 +951,13 @@ prophet_plot_components <- function(m, fcst, uncertainty = TRUE) {
   panels <- list(gg.trend)
   # Plot holiday components, if present.
   if (!is.null(m$holidays)) {
-    holiday.comps <- unique(m$holidays$holiday)
+    holiday.comps <- unique(m$holidays$holiday) %>% as.character()
     df.s <- data.frame(ds = df$ds,
-                       holidays = rowSums(df[, holiday.comps]),
+                       holidays = rowSums(df[, holiday.comps, drop = FALSE]),
                        holidays_lower = rowSums(df[, paste0(holiday.comps,
-                                                            "_lower")]),
+                                                            "_lower"), drop = FALSE]),
                        holidays_upper = rowSums(df[, paste0(holiday.comps,
-                                                            "_upper")]))
+                                                            "_upper"), drop = FALSE]))
     # NOTE the above CI calculation is incorrect if holidays overlap in time.
     # Since it is just for the visualization we will not worry about it now.
     gg.holidays <- ggplot2::ggplot(df.s, ggplot2::aes(x = ds, y = holidays)) +
