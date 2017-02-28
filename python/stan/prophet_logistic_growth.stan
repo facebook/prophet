@@ -1,33 +1,16 @@
-# Copyright (c) 2017-present, Facebook, Inc.
-# All rights reserved.
-#
-# This source code is licensed under the BSD-style license found in the
-# LICENSE file in the root directory of this source tree. An additional grant 
-# of patent rights can be found in the PATENTS file in the same directory.
-
 data {
   int T;                                // Sample size
   int<lower=1> K;                       // Number of seasonal vectors
   vector[T] t;                            // Day
   vector[T] cap;                          // Capacities
   vector[T] y;                            // Time-series
-  int S;                                // Number of split points
+  int S;                                // Number of changepoints
   matrix[T, S] A;                   // Split indicators
-  int s_indx[S];                 // Index of split points
+  real t_change[S];                 // Index of changepoints
   matrix[T,K] X;                    // season vectors
   real<lower=0> sigma;              // scale on seasonality prior
   real<lower=0> tau;                  // scale on changepoints prior
 }
-
-
-transformed data {
-  int s_ext[S + 1];  // Segment endpoints
-  for (j in 1:S) {
-    s_ext[j] = s_indx[j];
-  }
-  s_ext[S + 1] = T + 1;  // Used for the m_adj loop below.
-}
-
 
 parameters {
   real k;                            // Base growth rate
@@ -36,7 +19,6 @@ parameters {
   real<lower=0> sigma_obs;               // Observation noise (incl. seasonal variation)
   vector[K] beta;                    // seasonal vector
 }
-
 
 transformed parameters {
   vector[S] gamma;                  // adjusted offsets, for piecewise continuity
@@ -52,7 +34,7 @@ transformed parameters {
   // Piecewise offsets
   m_pr = m; // The offset in the previous segment
   for (i in 1:S) {
-    gamma[i] = (t[s_indx[i]] - m_pr) * (1 - k_s[i] / k_s[i + 1]);
+    gamma[i] = (t_change[i] - m_pr) * (1 - k_s[i] / k_s[i + 1]);
     m_pr = m_pr + gamma[i];  // update for the next segment
   }
 }

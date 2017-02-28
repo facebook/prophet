@@ -101,8 +101,9 @@ prophet <- function(df = df,
     interval.width = interval.width,
     uncertainty.samples = uncertainty.samples,
     start = NULL,  # This and following attributes are set during fitting
-    end = NULL,
     y.scale = NULL,
+    t.scale = NULL,
+    changepoints.t = NULL,
     stan.fit = NULL,
     params = list(),
     history = NULL
@@ -206,12 +207,10 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
   if (initialize_scales) {
     m$y.scale <- max(df$y)
     m$start <- min(df$ds)
-    m$end <- max(df$ds)
+    m$t.scale <- as.numeric(max(df$ds) - m$start)
   }
 
-  t.scale <- as.numeric(m$end - m$start)
-
-  df$t <- as.numeric(df$ds - m$start) / t.scale
+  df$t <- as.numeric(df$ds - m$start) / m$t.scale
   if (exists('y', where=df)) {
     df$y_scaled <- df$y / m$y.scale
   }
@@ -254,32 +253,13 @@ set_changepoints <- function(m) {
       m$changepoints <- c()
     }
   }
-  return(m)
-}
-
-#' Gets changepoint indexes in history dataframe.
-#'
-#' @param m Prophet object.
-#'
-#' @return array of indexes.
-#'
-get_changepoint_indexes <- function(m) {
-  if (length(m$changepoints) == 0) {
-    return(c(1))
+  if (length(m$changepoints) > 0) {
+    m$changepoints <- zoo::as.Date(m$changepoints)
+    m$changepoints.t <- sort(as.numeric(m$changepoints - m$start) / m$t.scale)
   } else {
-    return(match(zoo::as.Date(m$changepoints), m$history$ds))
+    m$changepoints.t <- c(0)  # dummy changepoint
   }
-}
-
-#' Gets changepoint times, in scaled space.
-#'
-#' @param m Prophet object.
-#'
-#' @return array of times.
-#'
-get_changepoint_times <- function(m) {
-  cpi <- get_changepoint_indexes(m)
-  return(m$history$t[cpi])
+  return(m)
 }
 
 #' Gets changepoint matrix for history dataframe.
@@ -289,11 +269,9 @@ get_changepoint_times <- function(m) {
 #' @return array of indexes.
 #'
 get_changepoint_matrix <- function(m) {
-  changepoint.indexes <- get_changepoint_indexes(m)
-
-  A <- matrix(0, nrow(m$history), length(changepoint.indexes))
-  for (i in 1:length(changepoint.indexes)) {
-    A[changepoint.indexes[i]:nrow(m$history), i] <- 1
+  A <- matrix(0, nrow(m$history), length(m$changepoints.t))
+  for (i in 1:length(m$changepoints.t)) {
+    A[m$history$t >= m$changepoints.t[i], i] <- 1
   }
   return(A)
 }
@@ -470,17 +448,16 @@ fit.prophet <- function(m, df, ...) {
 
   m <- set_changepoints(m)
   A <- get_changepoint_matrix(m)
-  changepoint.indexes <- get_changepoint_indexes(m)
 
   # Construct input to stan
   dat <- list(
     T = nrow(history),
     K = ncol(seasonal.features),
-    S = length(changepoint.indexes),
+    S = length(m$changepoints.t),
     y = history$y_scaled,
     t = history$t,
     A = A,
-    s_indx = array(changepoint.indexes),
+    t_change = array(m$changepoints.t),
     X = as.matrix(seasonal.features),
     sigma = m$seasonality.prior.scale,
     tau = m$changepoint.prior.scale
@@ -499,7 +476,7 @@ fit.prophet <- function(m, df, ...) {
   stan_init <- function() {
     list(k = kinit[1],
          m = kinit[2],
-         delta = array(rep(0, length(changepoint.indexes))),
+         delta = array(rep(0, length(m$changepoints.t))),
          beta = array(rep(0, ncol(seasonal.features))),
          sigma_obs = 1
     )
@@ -649,12 +626,12 @@ predict_trend <- function(model, df) {
   deltas <- colMeans(model$params$delta, na.rm = TRUE)
 
   t <- df$t
-  cpts <- get_changepoint_times(model)
   if (model$growth == 'linear') {
-    trend <- piecewise_linear(t, deltas, k, param.m, cpts)
+    trend <- piecewise_linear(t, deltas, k, param.m, model$changepoints.t)
   } else {
     cap <- df$cap_scaled
-    trend <- piecewise_logistic(t, cap, deltas, k, param.m, cpts)
+    trend <- piecewise_logistic(
+      t, cap, deltas, k, param.m, model$changepoints.t)
   }
   return(trend * model$y.scale)
 }
@@ -785,7 +762,6 @@ sample_predictive_trend <- function(model, df, iteration) {
   deltas <- model$params$delta[iteration,]
 
   t <- df$t
-  changepoint.ts <- get_changepoint_times(model)
   T <- max(t)
 
   if (T > 1) {
@@ -794,7 +770,7 @@ sample_predictive_trend <- function(model, df, iteration) {
     dt <- min(dt[dt > 0])
     # Number of time periods in the future
     N <- ceiling((T - 1) / dt)
-    S <- length(changepoint.ts)
+    S <- length(model$changepoints.t)
     # The history had S split points, over t = [0, 1].
     # The forecast is on [1, T], and should have the same average frequency of
     # rate changes. Thus for N time periods in the future, we want an average
@@ -820,7 +796,7 @@ sample_predictive_trend <- function(model, df, iteration) {
   deltas.new <- extraDistr::rlaplace(n.changes, mu = 0, sigma = lambda)
 
   # Combine with changepoints from the history
-  changepoint.ts <- c(changepoint.ts, changepoint.ts.new)
+  changepoint.ts <- c(model$changepoints.t, changepoint.ts.new)
   deltas <- c(deltas, deltas.new)
 
   # Get the corresponding trend

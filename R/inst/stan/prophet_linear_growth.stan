@@ -3,9 +3,9 @@ data {
   int<lower=1> K;                       // Number of seasonal vectors
   vector[T] t;                            // Day
   vector[T] y;                            // Time-series
-  int S;                                // Number of split points
+  int S;                                // Number of changepoints
   matrix[T, S] A;                   // Split indicators
-  int s_indx[S];                 // Index of split points
+  real t_change[S];                 // Index of changepoints
   matrix[T,K] X;                // season vectors
   real<lower=0> sigma;              // scale on seasonality prior
   real<lower=0> tau;                  // scale on changepoints prior
@@ -23,7 +23,7 @@ transformed parameters {
   vector[S] gamma;                  // adjusted offsets, for piecewise continuity
 
   for (i in 1:S) {
-    gamma[i] = -t[s_indx[i]] * delta[i];
+    gamma[i] = -t_change[i] * delta[i];
   }
 }
 

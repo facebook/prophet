@@ -57,6 +57,25 @@ class TestProphet(TestCase):
         forecaster.fit(train)
         forecaster.predict(future)
 
+    def test_fit_changepoint_not_in_history(self):
+        train = DATA[(DATA['ds'] < '2013-01-01') | (DATA['ds'] > '2014-01-01')]
+        train[(train['ds'] > '2014-01-01')] += 20
+        future = pd.DataFrame({'ds': DATA['ds']})
+        forecaster = Prophet(changepoints=['2013-06-06'])
+        forecaster.fit(train)
+        forecaster.predict(future)
+
+    def test_fit_predict_duplicates(self):
+        N = DATA.shape[0]
+        train1 = DATA.head(N // 2).copy()
+        train2 = DATA.head(N // 2).copy()
+        train2['y'] += 10
+        train = train1.append(train2)
+        future = pd.DataFrame({'ds': DATA['ds'].tail(N // 2)})
+        forecaster = Prophet()
+        forecaster.fit(train)
+        forecaster.predict(future)
+
     def test_setup_dataframe(self):
         m = Prophet()
         N = DATA.shape[0]
@@ -81,7 +100,7 @@ class TestProphet(TestCase):
 
         m.set_changepoints()
 
-        cp = m.get_changepoint_indexes()
+        cp = m.changepoints_t
         self.assertEqual(cp.shape[0], m.n_changepoints)
         self.assertEqual(len(cp.shape), 1)
         self.assertTrue(cp.min() > 0)
@@ -100,7 +119,7 @@ class TestProphet(TestCase):
         m.history = history
 
         m.set_changepoints()
-        cp = m.get_changepoint_indexes()
+        cp = m.changepoints_t
         self.assertEqual(cp.shape[0], 1)
         self.assertEqual(cp[0], 0)
 

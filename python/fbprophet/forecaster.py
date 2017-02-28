@@ -84,8 +84,9 @@ class Prophet(object):
 
         # Set during fitting
         self.start = None
-        self.end = None
         self.y_scale = None
+        self.t_scale = None
+        self.changepoints_t = None
         self.stan_fit = None
         self.params = {}
         self.history = None
@@ -124,14 +125,14 @@ class Prophet(object):
         df['ds'] = pd.to_datetime(df['ds'])
 
         df = df.sort_values('ds')
+        df.reset_index(inplace=True, drop=True)
 
         if initialize_scales:
             self.y_scale = df['y'].max()
-            self.start, self.end = df['ds'].min(), df['ds'].max()
+            self.start = df['ds'].min()
+            self.t_scale = df['ds'].max() - self.start
 
-        t_scale = self.end - self.start
-
-        df['t'] = (df['ds'] - self.start) / t_scale
+        df['t'] = (df['ds'] - self.start) / self.t_scale
         if 'y' in df:
             df['y_scaled'] = df['y'] / self.y_scale
 
@@ -171,31 +172,17 @@ class Prophet(object):
         else:
             # set empty changepoints
             self.changepoints = []
-
-    def get_changepoint_indexes(self):
-        if len(self.changepoints) == 0:
-            return np.array([0])  # a dummy changepoint
+        if len(self.changepoints) > 0:
+            self.changepoints_t = np.sort(np.array(
+                (self.changepoints - self.start) / self.t_scale))
         else:
-            row_index = pd.DatetimeIndex(self.history['ds'])
-            indexes = []
-            for cp in self.changepoints:
-                # In the future this may raise a KeyError, but for now we
-                # should guarantee that all changepoint dates are included in
-                # the historical data.
-                indexes.append(row_index.get_loc(cp))
-            return np.array(indexes).astype(np.int)
+            self.changepoints_t = np.array([0])  # dummy changepoint
 
-    def get_changepoint_times(self):
-        cpi = self.get_changepoint_indexes()
-        return np.array(self.history['t'].iloc[cpi])
 
     def get_changepoint_matrix(self):
-        changepoint_indexes = self.get_changepoint_indexes()
-
-        A = np.zeros((self.history.shape[0], len(changepoint_indexes)))
-        for i, index in enumerate(changepoint_indexes):
-            A[index:self.history.shape[0], i] = 1
-
+        A = np.zeros((self.history.shape[0], len(self.changepoints_t)))
+        for i, t_i in enumerate(self.changepoints_t):
+            A[self.history['t'].values >= t_i, i] = 1
         return A
 
     @staticmethod
@@ -345,7 +332,6 @@ class Prophet(object):
         The fitted Prophet object.
         """
         history = df[df['y'].notnull()].copy()
-        history.reset_index(inplace=True, drop=True)
 
         history = self.setup_dataframe(history, initialize_scales=True)
         self.history = history
@@ -353,17 +339,15 @@ class Prophet(object):
 
         self.set_changepoints()
         A = self.get_changepoint_matrix()
-        changepoint_indexes = self.get_changepoint_indexes()
 
         dat = {
             'T': history.shape[0],
             'K': seasonal_features.shape[1],
-            'S': len(changepoint_indexes),
+            'S': len(self.changepoints_t),
             'y': history['y_scaled'],
             't': history['t'],
             'A': A,
-            # Need to add one because Stan is 1-indexed.
-            's_indx': changepoint_indexes + 1,
+            't_change': self.changepoints_t,
             'X': seasonal_features,
             'sigma': self.seasonality_prior_scale,
             'tau': self.changepoint_prior_scale,
@@ -381,7 +365,7 @@ class Prophet(object):
             return {
                 'k': kinit[0],
                 'm': kinit[1],
-                'delta': np.zeros(len(changepoint_indexes)),
+                'delta': np.zeros(len(self.changepoints_t)),
                 'beta': np.zeros(seasonal_features.shape[1]),
                 'sigma_obs': 1,
             }
@@ -419,7 +403,7 @@ class Prophet(object):
         `df` can be None, in which case we predict only on history.
         """
         if df is None:
-            df = self.history
+            df = self.history.copy()
         else:
             df = self.setup_dataframe(df)
 
@@ -469,12 +453,12 @@ class Prophet(object):
         deltas = np.nanmean(self.params['delta'], axis=0)
 
         t = np.array(df['t'])
-        cpts = self.get_changepoint_times()
         if self.growth == 'linear':
-            trend = self.piecewise_linear(t, deltas, k, m, cpts)
+            trend = self.piecewise_linear(t, deltas, k, m, self.changepoints_t)
         else:
             cap = df['cap_scaled']
-            trend = self.piecewise_logistic(t, cap, deltas, k, m, cpts)
+            trend = self.piecewise_logistic(
+                t, cap, deltas, k, m, self.changepoints_t)
 
         return trend * self.y_scale
 
@@ -565,7 +549,6 @@ class Prophet(object):
         deltas = self.params['delta'][iteration]
 
         t = np.array(df['t'])
-        changepoint_ts = self.get_changepoint_times()
         T = t.max()
 
         if T > 1:
@@ -574,7 +557,7 @@ class Prophet(object):
             dt = np.min(dt[dt > 0])
             # Number of time periods in the future
             N = np.ceil((T - 1) / float(dt))
-            S = len(changepoint_ts)
+            S = len(self.changepoints_t)
 
             prob_change = min(1, (S * (T - 1)) / N)
             n_changes = np.random.binomial(N, prob_change)
@@ -593,7 +576,8 @@ class Prophet(object):
         deltas_new = np.random.laplace(0, lambda_, n_changes)
 
         # Prepend the times and deltas from the history
-        changepoint_ts = np.concatenate((changepoint_ts, changepoint_ts_new))
+        changepoint_ts = np.concatenate((self.changepoints_t,
+                                         changepoint_ts_new))
         deltas = np.concatenate((deltas, deltas_new))
 
         if self.growth == 'linear':

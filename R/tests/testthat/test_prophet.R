@@ -30,6 +30,25 @@ test_that("fit_predict_no_changepoints", {
   expect_error(predict(m, future), NA)
 })
 
+test_that("fit_predict_changepoint_not_in_history", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  train_t <- dplyr::mutate(DATA, ds=zoo::as.Date(ds))
+  train_t <- dplyr::filter(train_t, (ds < zoo::as.Date('2013-01-01')) | 
+                                (ds > zoo::as.Date('2014-01-01')))
+  future <- data.frame(ds=DATA$ds)
+  m <- prophet(train_t, changepoints=c('2013-06-06'))
+  expect_error(predict(m, future), NA)
+})
+
+test_that("fit_predict_duplicates", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  train2 <- train
+  train2$y <- train2$y + 10
+  train_t <- rbind(train, train2)
+  m <- prophet(train_t)
+  expect_error(predict(m, future), NA)
+})
+
 test_that("setup_dataframe", {
   history <- train
   m <- prophet(history, fit = FALSE)
@@ -56,7 +75,7 @@ test_that("get_changepoints", {
 
   m <- prophet:::set_changepoints(m)
 
-  cp <- prophet:::get_changepoint_indexes(m)
+  cp <- m$changepoints.t
   expect_equal(length(cp), m$n.changepoints)
   expect_true(min(cp) > 0)
   expect_true(max(cp) < N)
@@ -76,9 +95,9 @@ test_that("get_zero_changepoints", {
   m$history <- history
 
   m <- prophet:::set_changepoints(m)
-  cp <- prophet:::get_changepoint_indexes(m)
+  cp <- m$changepoints.t
   expect_equal(length(cp), 1)
-  expect_equal(cp[1], 1)
+  expect_equal(cp[1], 0)
 
   mat <- prophet:::get_changepoint_matrix(m)
   expect_equal(nrow(mat), floor(N / 2))
