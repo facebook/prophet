@@ -951,11 +951,10 @@ prophet_plot_components <- function(m, fcst, uncertainty = TRUE) {
   }
   # Plot weekly seasonality, if present
   if ("weekly" %in% colnames(df)) {
+    # Get weekday names in current locale
+    days <- weekdays(seq.Date(as.Date('2017-01-01'), by='d', length.out=7))
     df.s <- df %>%
-      dplyr::mutate(dow = factor(
-        weekdays(ds), levels = c('Sunday', 'Monday', 'Tuesday', 'Wednesday',
-                                 'Thursday', 'Friday', 'Saturday')
-      )) %>%
+      dplyr::mutate(dow = factor(weekdays(ds), levels = days)) %>%
       dplyr::group_by(dow) %>%
       dplyr::slice(1) %>%
       dplyr::ungroup() %>%

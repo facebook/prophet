@@ -695,8 +695,7 @@ class Prophet(object):
             df_s = fcst.copy()
             df_s['dow'] = df_s['ds'].dt.weekday_name
             df_s = df_s.groupby('dow').first()
-            days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-                    'Friday', 'Saturday']
+            days = pd.date_range(start='2017-01-01', periods=7).weekday_name
             y_weekly = [df_s.loc[d]['weekly'] for d in days]
             y_weekly_l = [df_s.loc[d]['weekly_lower'] for d in days]
             y_weekly_u = [df_s.loc[d]['weekly_upper'] for d in days]
