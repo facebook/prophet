@@ -202,7 +202,7 @@ class Prophet(object):
         # convert to days since epoch
         t = np.array(
             (dates - pd.datetime(1970, 1, 1))
-            .apply(lambda x: x.days)
+            .dt.days
             .astype(np.float)
         )
         return np.column_stack([
