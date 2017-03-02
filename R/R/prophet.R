@@ -134,8 +134,8 @@ validate_inputs <- function(m) {
       stop('Holidays dataframe must have ds field.')
     }
     for (h in unique(m$holidays$holiday)) {
-      if (grepl("_", h)) {
-        stop('Holiday name cannot contain "_"')
+      if (grepl("_delim_", h)) {
+        stop('Holiday name cannot contain "_delim_"')
       }
       if (h %in% c('zeros', 'yearly', 'weekly', 'yhat', 'seasonal', 'trend')) {
         stop(paste0('Holiday name "', h, '" reserved.'))
@@ -306,7 +306,7 @@ fourier_series <- function(dates, period, series.order) {
 #'
 make_seasonality_features <- function(dates, period, series.order, prefix) {
   features <- fourier_series(dates, period, series.order)
-  colnames(features) <- paste(prefix, 1:ncol(features), sep = '_')
+  colnames(features) <- paste(prefix, 1:ncol(features), sep = '_delim_')
   return(data.frame(features))
 }
 
@@ -332,7 +332,7 @@ make_holiday_features <- function(m, dates) {
         offsets <- c(0)
       }
       names <- paste(
-        .$holiday, '_', ifelse(offsets < 0, '-', '+'), abs(offsets), sep = '')
+        .$holiday, '_delim_', ifelse(offsets < 0, '-', '+'), abs(offsets), sep = '')
       dplyr::data_frame(ds = .$ds + offsets, holiday = names)
     }) %>%
     dplyr::mutate(x = scale.ratio) %>%
@@ -650,7 +650,7 @@ predict_seasonal_components <- function(m, df) {
   # Broken down into components
   components <- dplyr::data_frame(component = colnames(seasonal.features)) %>%
     dplyr::mutate(col = 1:n()) %>%
-    tidyr::separate(component, c('component', 'part'), sep = "_",
+    tidyr::separate(component, c('component', 'part'), sep = "_delim_",
                     extra = "merge", fill = "right") %>%
     dplyr::filter(component != 'zeros')
 

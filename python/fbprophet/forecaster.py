@@ -49,9 +49,6 @@ class Prophet(object):
             interval_width=0.80,
             uncertainty_samples=1000,
     ):
-        if growth not in ('linear', 'logistic'):
-            raise ValueError("growth setting must be 'linear' or 'logistic'")
-
         self.growth = growth
 
         self.changepoints = pd.to_datetime(changepoints)
@@ -90,6 +87,19 @@ class Prophet(object):
         self.stan_fit = None
         self.params = {}
         self.history = None
+        self.validate_inputs()
+
+    def validate_inputs(self):
+        if self.growth not in ('linear', 'logistic'):
+            raise ValueError(
+                "Parameter 'growth' should be 'linear' or 'logistic'.")
+        if self.holidays is not None:
+            for h in self.holidays['holiday'].unique():
+                if '_delim_' in h:
+                    raise ValueError('Holiday name cannot contain "_delim_"')
+                if h in ['zeros', 'yearly', 'weekly', 'yhat', 'seasonal',
+                         'trend']:
+                    raise ValueError('Holiday name {} reserved.'.format(h))
 
     @classmethod
     def get_linear_model(cls):
@@ -215,7 +225,7 @@ class Prophet(object):
     def make_seasonality_features(cls, dates, period, series_order, prefix):
         features = cls.fourier_series(dates, period, series_order)
         columns = [
-            '{}_{}'.format(prefix, i + 1)
+            '{}_delim_{}'.format(prefix, i + 1)
             for i in range(features.shape[1])
         ]
         return pd.DataFrame(features, columns=columns)
@@ -245,7 +255,7 @@ class Prophet(object):
                 except KeyError:
                     loc = None
 
-                key = '{}_{}{}'.format(
+                key = '{}_delim_{}{}'.format(
                     row.holiday,
                     '+' if offset >= 0 else '-',
                     abs(offset)
@@ -469,7 +479,7 @@ class Prophet(object):
 
         components = pd.DataFrame({
             'col': np.arange(seasonal_features.shape[1]),
-            'component': [x.split('_')[0] for x in seasonal_features.columns],
+            'component': [x.split('_delim_')[0] for x in seasonal_features.columns],
         })
         # Remove the placeholder
         components = components[components['component'] != 'zeros']
