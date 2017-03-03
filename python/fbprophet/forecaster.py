@@ -127,14 +127,20 @@ class Prophet(object):
 
     def setup_dataframe(self, df, initialize_scales=False):
         """Create auxillary columns 't', 't_ix', 'y_scaled', and 'cap_scaled'.
+        If minimum difference between two dates of data is more than 7, then 
+        we don't create weekly seasonality
 
         These columns are used during both fitting and prediction.
         """
         if 'y' in df:
             df['y'] = pd.to_numeric(df['y'])
         df['ds'] = pd.to_datetime(df['ds'])
-
+        
         df = df.sort_values('ds')
+
+        if (df.ds - df.ds.shift(1)).dt.days.min() >=7:
+            self.weekly_seasonality = False
+
         df.reset_index(inplace=True, drop=True)
 
         if initialize_scales:
