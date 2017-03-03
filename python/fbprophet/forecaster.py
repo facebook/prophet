@@ -34,9 +34,6 @@ except ImportError:
 # fb-block 2
 
 class Prophet(object):
-    # Plotting default color for R/Python consistency
-    forecast_color = '#0072B2'
-
     def __init__(
             self,
             growth='linear',
@@ -620,12 +617,12 @@ class Prophet(object):
         fig = plt.figure(facecolor='w', figsize=(10, 6))
         ax = fig.add_subplot(111)
         ax.plot(self.history['ds'].values, self.history['y'], 'k.')
-        ax.plot(fcst['ds'].values, fcst['yhat'], ls='-', c=self.forecast_color)
+        ax.plot(fcst['ds'].values, fcst['yhat'], ls='-', c='#0072B2')
         if 'cap' in fcst:
             ax.plot(fcst['ds'].values, fcst['cap'], ls='--', c='k')
         if uncertainty:
             ax.fill_between(fcst['ds'].values, fcst['yhat_lower'],
-                            fcst['yhat_upper'], color=self.forecast_color,
+                            fcst['yhat_upper'], color='#0072B2',
                             alpha=0.2)
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         ax.set_xlabel(xlabel)
@@ -672,13 +669,13 @@ class Prophet(object):
         if not ax:
             ax = fig.add_subplot(111)
         artists += ax.plot(fcst['ds'].values, fcst['trend'], ls='-',
-                           c=self.forecast_color)
+                           c='#0072B2')
         if 'cap' in fcst:
             artists += ax.plot(fcst['ds'].values, fcst['cap'], ls='--', c='k')
         if uncertainty:
             artists += [ax.fill_between(
                 fcst['ds'].values, fcst['trend_lower'], fcst['trend_upper'],
-                color=self.forecast_color, alpha=0.2)]
+                color='#0072B2', alpha=0.2)]
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=7))
         ax.set_xlabel('ds')
@@ -697,11 +694,11 @@ class Prophet(object):
         # in time. Since it is just for the visualization we will not
         # worry about it now.
         artists += ax.plot(fcst['ds'].values, y_holiday, ls='-',
-                           c=self.forecast_color)
+                           c='#0072B2')
         if uncertainty:
             artists += [ax.fill_between(fcst['ds'].values,
                                         y_holiday_l, y_holiday_u,
-                                        color=self.forecast_color, alpha=0.2)]
+                                        color='#0072B2', alpha=0.2)]
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=7))
         ax.set_xlabel('ds')
@@ -720,11 +717,11 @@ class Prophet(object):
         y_weekly_l = [df_s.loc[d]['weekly_lower'] for d in days]
         y_weekly_u = [df_s.loc[d]['weekly_upper'] for d in days]
         artists += ax.plot(range(len(days)), y_weekly, ls='-',
-                           c=self.forecast_color)
+                           c='#0072B2')
         if uncertainty:
             artists += [ax.fill_between(range(len(days)),
                                         y_weekly_l, y_weekly_u,
-                                        color=self.forecast_color, alpha=0.2)]
+                                        color='#0072B2', alpha=0.2)]
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         ax.set_xticks(range(len(days)))
         ax.set_xticklabels(days)
@@ -740,11 +737,11 @@ class Prophet(object):
         df_s['doy'] = df_s['ds'].map(lambda x: x.strftime('2000-%m-%d'))
         df_s = df_s.groupby('doy').first().sort_index()
         artists += ax.plot(pd.to_datetime(df_s.index), df_s['yearly'], ls='-',
-                           c=self.forecast_color)
+                           c='#0072B2')
         if uncertainty:
             artists += [ax.fill_between(
                 pd.to_datetime(df_s.index), df_s['yearly_lower'],
-                df_s['yearly_upper'], color=self.forecast_color, alpha=0.2)]
+                df_s['yearly_upper'], color='#0072B2', alpha=0.2)]
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         months = MonthLocator(range(1, 13), bymonthday=1, interval=2)
         ax.xaxis.set_major_formatter(DateFormatter('%B %-d'))
