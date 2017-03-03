@@ -664,7 +664,20 @@ class Prophet(object):
         fig.tight_layout()
         return artists
 
-    def plot_trend(self, fcst, ax=None, uncertainty=True, **plotargs):
+    def plot_trend(self, fcst, ax=None, uncertainty=True):
+        """Plot the trend component of the forecast.
+
+        Parameters
+        ----------
+        fcst: pd.DataFrame output of self.predict.
+        ax: Optional matplotlib Axes to plot on.
+        uncertainty: Optional boolean to plot uncertainty intervals.
+
+        Returns
+        -------
+        a list of matplotlib artists
+        """
+
         artists = []
         if not ax:
             ax = fig.add_subplot(111)
@@ -683,6 +696,19 @@ class Prophet(object):
         return artists
 
     def plot_holidays(self, fcst, ax=None, uncertainty=True):
+        """Plot the holidays component of the forecast.
+
+        Parameters
+        ----------
+        fcst: pd.DataFrame output of self.predict.
+        ax: Optional matplotlib Axes to plot on. One will be created if this 
+            is not provided.
+        uncertainty: Optional boolean to plot uncertainty intervals.
+
+        Returns
+        -------
+        a list of matplotlib artists
+        """
         artists = []
         if not ax:
             ax = fig.add_subplot(111)
@@ -706,6 +732,19 @@ class Prophet(object):
         return artists
 
     def plot_weekly(self, fcst, ax=None, uncertainty=True):
+        """Plot the weekly component of the forecast.
+
+        Parameters
+        ----------
+        fcst: pd.DataFrame output of self.predict.
+        ax: Optional matplotlib Axes to plot on. One will be created if this 
+            is not provided.
+        uncertainty: Optional boolean to plot uncertainty intervals.
+
+        Returns
+        -------
+        a list of matplotlib artists
+        """
         artists = []
         if not ax:
             ax = fig.add_subplot(111)
@@ -730,6 +769,19 @@ class Prophet(object):
         return artists
 
     def plot_yearly(self, fcst, ax=None, uncertainty=True):
+        """Plot the yearly component of the forecast.
+
+        Parameters
+        ----------
+        fcst: pd.DataFrame output of self.predict.
+        ax: Optional matplotlib Axes to plot on. One will be created if 
+            this is not provided.
+        uncertainty: Optional boolean to plot uncertainty intervals.
+
+        Returns
+        -------
+        a list of matplotlib artists
+        """
         artists = []
         if not ax:
             ax = fig.add_subplot(npanel, 1, panel_num)
