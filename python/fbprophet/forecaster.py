@@ -2,7 +2,7 @@
 # All rights reserved.
 #
 # This source code is licensed under the BSD-style license found in the
-# LICENSE file in the root directory of this source tree. An additional grant 
+# LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
 from __future__ import absolute_import
@@ -36,6 +36,7 @@ except ImportError:
 class Prophet(object):
     # Plotting default color for R/Python consistency
     forecast_color = '#0072B2'
+
     def __init__(
             self,
             growth='linear',
@@ -180,7 +181,6 @@ class Prophet(object):
         else:
             self.changepoints_t = np.array([0])  # dummy changepoint
 
-
     def get_changepoint_matrix(self):
         A = np.zeros((self.history.shape[0], len(self.changepoints_t)))
         for i, t_i in enumerate(self.changepoints_t):
@@ -260,7 +260,6 @@ class Prophet(object):
 
         # This relies pretty importantly on pandas keeping the columns in order.
         return pd.DataFrame(expanded_holidays)
-
 
     def make_all_seasonality_features(self, df):
         seasonal_features = [
@@ -626,7 +625,8 @@ class Prophet(object):
             ax.plot(fcst['ds'].values, fcst['cap'], ls='--', c='k')
         if uncertainty:
             ax.fill_between(fcst['ds'].values, fcst['yhat_lower'],
-                            fcst['yhat_upper'], color=self.forecast_color, alpha=0.2)
+                            fcst['yhat_upper'], color=self.forecast_color,
+                            alpha=0.2)
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
@@ -655,21 +655,24 @@ class Prophet(object):
                       ('plot_yearly', 'yearly' in fcst)]
         components = [(plot, cond) for plot, cond in components if cond]
         npanel = len(components)
-        
-        fig, axes = plt.subplots(npanel, 1, facecolor='w', figsize=(9, 3 * npanel))
+
+        fig, axes = plt.subplots(npanel, 1, facecolor='w',
+                                 figsize=(9, 3 * npanel))
 
         artists = []
-        for ax, plot in zip(axes, [getattr(self, plot) for plot, _ in components]):
+        for ax, plot in zip(axes,
+                            [getattr(self, plot) for plot, _ in components]):
             artists += plot(fcst, ax=ax, uncertainty=uncertainty)
-        
+
         fig.tight_layout()
         return artists
-            
+
     def plot_trend(self, fcst, ax=None, uncertainty=True, **plotargs):
         artists = []
         if not ax:
             ax = fig.add_subplot(111)
-        artists += ax.plot(fcst['ds'].values, fcst['trend'], ls='-', c=self.forecast_color)
+        artists += ax.plot(fcst['ds'].values, fcst['trend'], ls='-',
+                           c=self.forecast_color)
         if 'cap' in fcst:
             artists += ax.plot(fcst['ds'].values, fcst['cap'], ls='--', c='k')
         if uncertainty:
@@ -682,7 +685,6 @@ class Prophet(object):
         ax.set_ylabel('trend')
         return artists
 
-
     def plot_holidays(self, fcst, ax=None, uncertainty=True):
         artists = []
         if not ax:
@@ -694,10 +696,12 @@ class Prophet(object):
         # NOTE the above CI calculation is incorrect if holidays overlap
         # in time. Since it is just for the visualization we will not
         # worry about it now.
-        artists += ax.plot(fcst['ds'].values, y_holiday, ls='-', c=self.forecast_color)
+        artists += ax.plot(fcst['ds'].values, y_holiday, ls='-',
+                           c=self.forecast_color)
         if uncertainty:
-            artists += [ax.fill_between(fcst['ds'].values, y_holiday_l, y_holiday_u,
-                                       color=self.forecast_color, alpha=0.2)]
+            artists += [ax.fill_between(fcst['ds'].values,
+                                        y_holiday_l, y_holiday_u,
+                                        color=self.forecast_color, alpha=0.2)]
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=7))
         ax.set_xlabel('ds')
@@ -715,10 +719,12 @@ class Prophet(object):
         y_weekly = [df_s.loc[d]['weekly'] for d in days]
         y_weekly_l = [df_s.loc[d]['weekly_lower'] for d in days]
         y_weekly_u = [df_s.loc[d]['weekly_upper'] for d in days]
-        artists += ax.plot(range(len(days)), y_weekly, ls='-', c=self.forecast_color)
+        artists += ax.plot(range(len(days)), y_weekly, ls='-',
+                           c=self.forecast_color)
         if uncertainty:
-            artists += [ax.fill_between(range(len(days)), y_weekly_l, y_weekly_u,
-                                       color=self.forecast_color, alpha=0.2)]
+            artists += [ax.fill_between(range(len(days)),
+                                        y_weekly_l, y_weekly_u,
+                                        color=self.forecast_color, alpha=0.2)]
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         ax.set_xticks(range(len(days)))
         ax.set_xticklabels(days)
@@ -734,7 +740,7 @@ class Prophet(object):
         df_s['doy'] = df_s['ds'].map(lambda x: x.strftime('2000-%m-%d'))
         df_s = df_s.groupby('doy').first().sort_index()
         artists += ax.plot(pd.to_datetime(df_s.index), df_s['yearly'], ls='-',
-                c=self.forecast_color)
+                           c=self.forecast_color)
         if uncertainty:
             artists += [ax.fill_between(
                 pd.to_datetime(df_s.index), df_s['yearly_lower'],
@@ -746,7 +752,6 @@ class Prophet(object):
         ax.set_xlabel('Day of year')
         ax.set_ylabel('yearly')
         return artists
-
 
 
 # fb-block 9
