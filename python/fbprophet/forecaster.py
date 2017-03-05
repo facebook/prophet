@@ -690,6 +690,7 @@ class Prophet(object):
 
         artists = []
         if not ax:
+            fig = plt.figure(facecolor='w', figsize=(10, 6))
             ax = fig.add_subplot(111)
         artists += ax.plot(fcst['ds'].values, fcst['trend'], ls='-',
                            c='#0072B2')
@@ -721,6 +722,7 @@ class Prophet(object):
         """
         artists = []
         if not ax:
+            fig = plt.figure(facecolor='w', figsize=(10, 6))
             ax = fig.add_subplot(111)
         holiday_comps = self.holidays['holiday'].unique()
         y_holiday = fcst[holiday_comps].sum(1)
@@ -757,6 +759,7 @@ class Prophet(object):
         """
         artists = []
         if not ax:
+            fig = plt.figure(facecolor='w', figsize=(10, 6))
             ax = fig.add_subplot(111)
         df_s = fcst.copy()
         df_s['dow'] = df_s['ds'].dt.weekday_name
@@ -794,7 +797,8 @@ class Prophet(object):
         """
         artists = []
         if not ax:
-            ax = fig.add_subplot(npanel, 1, panel_num)
+            fig = plt.figure(facecolor='w', figsize=(10, 6))
+            ax = fig.add_subplot(111)
         df_s = fcst.copy()
         df_s['doy'] = df_s['ds'].map(lambda x: x.strftime('2000-%m-%d'))
         df_s = df_s.groupby('doy').first().sort_index()
