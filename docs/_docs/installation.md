@@ -38,3 +38,7 @@ After installation, you can [get started!](quick_start.html#python-api)
 ### Windows
 
 On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html).  The key step is installing a recent [C++ compiler](http://landinghub.visualstudio.com/visual-cpp-build-tools).
+
+### Linux VM
+
+If you want to use Prophet in a VM, you will need at least 2GB of memory to run PyStan.
