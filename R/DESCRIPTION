@@ -19,7 +19,7 @@ Imports:
     extraDistr,
     ggplot2,
     grid,
-    rstan,
+    rstan (>= 2.14.0),
     scales,
     stats,
     tidyr,

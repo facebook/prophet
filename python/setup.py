@@ -78,13 +78,13 @@ setup(
     packages=['fbprophet', 'fbprophet.tests'],
     setup_requires=[
         'Cython>=0.22',
-        'pystan>=2.8',
+        'pystan>=2.14',
     ],
     install_requires=[
         'matplotlib',
         'numpy',
         'pandas>=0.16',
-        'pystan>=2.8',
+        'pystan>=2.14',
     ],
     zip_safe=False,
     include_package_data=True,
