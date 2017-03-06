@@ -109,7 +109,7 @@ prophet <- function(df = df,
     history = NULL
   )
   validate_inputs(m)
-  class(m) <- append(class(m), "prophet")
+  class(m) <- append("prophet", class(m))
   if (fit) {
     m <- fit.prophet(m, df, ...)
   }
