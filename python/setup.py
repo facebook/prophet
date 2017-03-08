@@ -31,7 +31,7 @@ class BuildPyCommand(build_py):
                 model_code = f.read()
             sm = StanModel(model_code=model_code)
             with open(os.path.join(target_dir, '{}_growth.pkl'.format(model_type)), 'wb') as f:
-                pickle.dump(sm, f)
+                pickle.dump(sm, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 class TestCommand(test_command):
     """We must run tests on the build directory, not source."""
