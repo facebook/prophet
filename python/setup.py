@@ -1,5 +1,6 @@
 import os.path
 import pickle
+import platform
 import sys
 
 from pkg_resources import (
@@ -26,8 +27,13 @@ class BuildPyCommand(build_py):
         target_dir = os.path.join(self.build_lib, 'fbprophet/stan_models')
         self.mkpath(target_dir)
 
+        if platform.platform().startswith('Win'):
+            plat = 'win'
+        else:
+            plat = 'unix'
+
         for model_type in ['linear', 'logistic']:
-            with open('stan/prophet_{}_growth.stan'.format(model_type)) as f:
+            with open('stan/{}/prophet_{}_growth.stan'.format(plat, model_type)) as f:
                 model_code = f.read()
             sm = StanModel(model_code=model_code)
             with open(os.path.join(target_dir, '{}_growth.pkl'.format(model_type)), 'wb') as f:
