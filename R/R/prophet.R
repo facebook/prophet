@@ -873,7 +873,6 @@ df_for_plotting <- function(m, fcst) {
 plot.prophet <- function(x, fcst, uncertainty = TRUE, xlabel = 'ds',
                          ylabel = 'y', ...) {
   df <- df_for_plotting(x, fcst)
-  forecast.color <- "#0072B2"
   gg <- ggplot2::ggplot(df, ggplot2::aes(x = ds, y = y)) +
     ggplot2::labs(x = xlabel, y = ylabel)
   if (exists('cap', where = df)) {
@@ -884,12 +883,12 @@ plot.prophet <- function(x, fcst, uncertainty = TRUE, xlabel = 'ds',
     gg <- gg +
       ggplot2::geom_ribbon(ggplot2::aes(ymin = yhat_lower, ymax = yhat_upper),
                            alpha = 0.2,
-                           fill = forecast.color,
+                           fill = "#0072B2",
                            na.rm = TRUE)
   }
   gg <- gg +
     ggplot2::geom_point(na.rm=TRUE) +
-    ggplot2::geom_line(ggplot2::aes(y = yhat), color = forecast.color,
+    ggplot2::geom_line(ggplot2::aes(y = yhat), color = "#0072B2",
                        na.rm = TRUE) +
     ggplot2::theme(aspect.ratio = 3 / 5)
   return(gg)
@@ -908,10 +907,39 @@ plot.prophet <- function(x, fcst, uncertainty = TRUE, xlabel = 'ds',
 #' @importFrom dplyr "%>%"
 prophet_plot_components <- function(m, fcst, uncertainty = TRUE) {
   df <- df_for_plotting(m, fcst)
-  forecast.color <- "#0072B2"
   # Plot the trend
+  panels <- list(plot_trend(df, uncertainty))
+  # Plot holiday components, if present.
+  if (!is.null(m$holidays)) {
+    panels[[length(panels) + 1]] <- plot_holidays(m, df, uncertainty)
+  }
+  # Plot weekly seasonality, if present
+  if ("weekly" %in% colnames(df)) {
+    panels[[length(panels) + 1]] <- plot_weekly(df, uncertainty)
+  }
+  # Plot yearly seasonality, if present
+  if ("yearly" %in% colnames(df)) {
+    panels[[length(panels) + 1]] <- plot_yearly(df, uncertainty)
+  }
+  # Make the plot.
+  grid::grid.newpage()
+  grid::pushViewport(grid::viewport(layout = grid::grid.layout(length(panels),
+                                                               1)))
+  for (i in 1:length(panels)) {
+    print(panels[[i]], vp = grid::viewport(layout.pos.row = i,
+                                           layout.pos.col = 1))
+  }
+}
+
+#' Plot the prophet trend.
+#'
+#' @param df Forecast dataframe for plotting.
+#' @param uncertainty Boolean to plot uncertainty intervals.
+#'
+#' @return A ggplot2 plot.
+plot_trend <- function(df, uncertainty = TRUE) {
   gg.trend <- ggplot2::ggplot(df, ggplot2::aes(x = ds, y = trend)) +
-    ggplot2::geom_line(color = forecast.color, na.rm = TRUE)
+    ggplot2::geom_line(color = "#0072B2", na.rm = TRUE)
   if (exists('cap', where = df)) {
     gg.trend <- gg.trend + ggplot2::geom_line(ggplot2::aes(y = cap),
                                               linetype = 'dashed',
@@ -922,90 +950,101 @@ prophet_plot_components <- function(m, fcst, uncertainty = TRUE) {
       ggplot2::geom_ribbon(ggplot2::aes(ymin = trend_lower,
                                         ymax = trend_upper),
                            alpha = 0.2,
-                           fill = forecast.color,
+                           fill = "#0072B2",
                            na.rm = TRUE)
   }
-  panels <- list(gg.trend)
-  # Plot holiday components, if present.
-  if (!is.null(m$holidays)) {
-    holiday.comps <- unique(m$holidays$holiday) %>% as.character()
-    df.s <- data.frame(ds = df$ds,
-                       holidays = rowSums(df[, holiday.comps, drop = FALSE]),
-                       holidays_lower = rowSums(df[, paste0(holiday.comps,
-                                                            "_lower"), drop = FALSE]),
-                       holidays_upper = rowSums(df[, paste0(holiday.comps,
-                                                            "_upper"), drop = FALSE]))
-    # NOTE the above CI calculation is incorrect if holidays overlap in time.
-    # Since it is just for the visualization we will not worry about it now.
-    gg.holidays <- ggplot2::ggplot(df.s, ggplot2::aes(x = ds, y = holidays)) +
-      ggplot2::geom_line(color = forecast.color, na.rm = TRUE)
-    if (uncertainty) {
-      gg.holidays <- gg.holidays +
-      ggplot2::geom_ribbon(ggplot2::aes(ymin = holidays_lower,
-                                        ymax = holidays_upper),
-                           alpha = 0.2,
-                           fill = forecast.color,
-                           na.rm = TRUE)
-    }
-    panels[[length(panels) + 1]] <- gg.holidays
+  return(gg.trend)
+}
+
+#' Plot the holidays component of the forecast.
+#'
+#' @param m Prophet model
+#' @param df Forecast dataframe for plotting.
+#' @param uncertainty Boolean to plot uncertainty intervals.
+#'
+#' @return A ggplot2 plot.
+plot_holidays <- function(m, df, uncertainty = TRUE) {
+  holiday.comps <- unique(m$holidays$holiday) %>% as.character()
+  df.s <- data.frame(ds = df$ds,
+                     holidays = rowSums(df[, holiday.comps, drop = FALSE]),
+                     holidays_lower = rowSums(df[, paste0(holiday.comps,
+                                                          "_lower"), drop = FALSE]),
+                     holidays_upper = rowSums(df[, paste0(holiday.comps,
+                                                          "_upper"), drop = FALSE]))
+  # NOTE the above CI calculation is incorrect if holidays overlap in time.
+  # Since it is just for the visualization we will not worry about it now.
+  gg.holidays <- ggplot2::ggplot(df.s, ggplot2::aes(x = ds, y = holidays)) +
+    ggplot2::geom_line(color = "#0072B2", na.rm = TRUE)
+  if (uncertainty) {
+    gg.holidays <- gg.holidays +
+    ggplot2::geom_ribbon(ggplot2::aes(ymin = holidays_lower,
+                                      ymax = holidays_upper),
+                         alpha = 0.2,
+                         fill = "#0072B2",
+                         na.rm = TRUE)
   }
-  # Plot weekly seasonality, if present
-  if ("weekly" %in% colnames(df)) {
-    # Get weekday names in current locale
-    days <- weekdays(seq.Date(as.Date('2017-01-01'), by='d', length.out=7))
-    df.s <- df %>%
-      dplyr::mutate(dow = factor(weekdays(ds), levels = days)) %>%
-      dplyr::group_by(dow) %>%
-      dplyr::slice(1) %>%
-      dplyr::ungroup() %>%
-      dplyr::arrange(dow)
-    gg.weekly <- ggplot2::ggplot(df.s, ggplot2::aes(x = dow, y = weekly,
-                                                    group = 1)) +
-      ggplot2::geom_line(color = forecast.color, na.rm = TRUE) +
-      ggplot2::labs(x = "Day of week")
-    if (uncertainty) {
-      gg.weekly <- gg.weekly +
-      ggplot2::geom_ribbon(ggplot2::aes(ymin = weekly_lower,
-                                        ymax = weekly_upper),
-                           alpha = 0.2,
-                           fill = forecast.color,
-                           na.rm = TRUE)
-    }
-    panels[[length(panels) + 1]] <- gg.weekly
+  return(gg.holidays)
+}
+
+#' Plot the weekly component of the forecast.
+#'
+#' @param df Forecast dataframe for plotting.
+#' @param uncertainty Boolean to plot uncertainty intervals.
+#'
+#' @return A ggplot2 plot.
+plot_weekly <- function(df, uncertainty = TRUE) {
+  # Get weekday names in current locale
+  days <- weekdays(seq.Date(as.Date('2017-01-01'), by='d', length.out=7))
+  df.s <- df %>%
+    dplyr::mutate(dow = factor(weekdays(ds), levels = days)) %>%
+    dplyr::group_by(dow) %>%
+    dplyr::slice(1) %>%
+    dplyr::ungroup() %>%
+    dplyr::arrange(dow)
+  gg.weekly <- ggplot2::ggplot(df.s, ggplot2::aes(x = dow, y = weekly,
+                                                  group = 1)) +
+    ggplot2::geom_line(color = "#0072B2", na.rm = TRUE) +
+    ggplot2::labs(x = "Day of week")
+  if (uncertainty) {
+    gg.weekly <- gg.weekly +
+    ggplot2::geom_ribbon(ggplot2::aes(ymin = weekly_lower,
+                                      ymax = weekly_upper),
+                         alpha = 0.2,
+                         fill = "#0072B2",
+                         na.rm = TRUE)
   }
-  # Plot yearly seasonality, if present
-  if ("yearly" %in% colnames(df)) {
-    # Drop year from the dates
-    df.s <- df %>%
-      dplyr::mutate(doy = strftime(ds, format = "2000-%m-%d")) %>%
-      dplyr::group_by(doy) %>%
-      dplyr::slice(1) %>%
-      dplyr::ungroup() %>%
-      dplyr::mutate(doy = zoo::as.Date(doy)) %>%
-      dplyr::arrange(doy)
-    gg.yearly <- ggplot2::ggplot(df.s, ggplot2::aes(x = doy, y = yearly,
-                                                    group = 1)) +
-      ggplot2::geom_line(color = forecast.color, na.rm = TRUE) +
-      ggplot2::scale_x_date(labels = scales::date_format('%B %d')) +
-      ggplot2::labs(x = "Day of year")
-    if (uncertainty) {
-      gg.yearly <- gg.yearly +
-      ggplot2::geom_ribbon(ggplot2::aes(ymin = yearly_lower,
-                                        ymax = yearly_upper),
-                           alpha = 0.2,
-                           fill = forecast.color,
-                           na.rm = TRUE)
-    }
-    panels[[length(panels) + 1]] = gg.yearly
+  return(gg.weekly)
+}
+
+#' Plot the yearly component of the forecast.
+#'
+#' @param df Forecast dataframe for plotting.
+#' @param uncertainty Boolean to plot uncertainty intervals.
+#'
+#' @return A ggplot2 plot.
+plot_yearly <- function(df, uncertainty = TRUE) {
+  # Drop year from the dates
+  df.s <- df %>%
+    dplyr::mutate(doy = strftime(ds, format = "2000-%m-%d")) %>%
+    dplyr::group_by(doy) %>%
+    dplyr::slice(1) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(doy = zoo::as.Date(doy)) %>%
+    dplyr::arrange(doy)
+  gg.yearly <- ggplot2::ggplot(df.s, ggplot2::aes(x = doy, y = yearly,
+                                                  group = 1)) +
+    ggplot2::geom_line(color = "#0072B2", na.rm = TRUE) +
+    ggplot2::scale_x_date(labels = scales::date_format('%B %d')) +
+    ggplot2::labs(x = "Day of year")
+  if (uncertainty) {
+    gg.yearly <- gg.yearly +
+    ggplot2::geom_ribbon(ggplot2::aes(ymin = yearly_lower,
+                                      ymax = yearly_upper),
+                         alpha = 0.2,
+                         fill = "#0072B2",
+                         na.rm = TRUE)
   }
-  # Make the plot.
-  grid::grid.newpage()
-  grid::pushViewport(grid::viewport(layout = grid::grid.layout(length(panels),
-                                                               1)))
-  for (i in 1:length(panels)) {
-    print(panels[[i]], vp = grid::viewport(layout.pos.row = i,
-                                           layout.pos.col = 1))
-  }
+  return(gg.yearly)
 }
 
 # fb-block 3
