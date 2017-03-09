@@ -1,2 +1,3 @@
-include stan/*.stan
+include stan/unix/*.stan
+include stan/win/*.stan
 include LICENSE
