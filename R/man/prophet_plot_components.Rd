@@ -16,6 +16,9 @@ prophet_plot_components(m, fcst, uncertainty = TRUE)
 \item{uncertainty}{Boolean indicating if the uncertainty interval should be
 plotted for the trend, from fcst columns trend_lower and trend_upper.}
 }
+\value{
+Invisibly return a list containing the plotted ggplot objects
+}
 \description{
 Plot the components of a prophet forecast.
 Prints a ggplot2 with panels for trend, weekly and yearly seasonalities if
