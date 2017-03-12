@@ -2,7 +2,7 @@
 % Please edit documentation in R/prophet.R
 \name{prophet}
 \alias{prophet}
-\title{Prophet forecast.}
+\title{Prophet forecaster.}
 \usage{
 prophet(df = df, growth = "linear", changepoints = NULL,
   n.changepoints = 25, yearly.seasonality = TRUE,
@@ -34,7 +34,8 @@ first 80 percent of df$ds.}
 
 \item{holidays}{data frame with columns holiday (character) and ds (date
 type)and optionally columns lower_window and upper_window which specify a
-range of days around the date to be included as holidays.}
+range of days around the date to be included as holidays. lower_window=-2
+will include 2 days prior to the date as holidays.}
 
 \item{seasonality.prior.scale}{Parameter modulating the strength of the
 seasonality model. Larger values allow the model to fit larger seasonal
@@ -68,7 +69,7 @@ uncertainty intervals.}
 A prophet model.
 }
 \description{
-Prophet forecast.
+Prophet forecaster.
 }
 \examples{
 \dontrun{

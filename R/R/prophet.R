@@ -13,7 +13,7 @@ globalVariables(c(
   "trend_lower", "trend_upper", "upper", "value", "weekly", "weekly_lower", "weekly_upper",
   "x", "yearly", "yearly_lower", "yearly_upper", "yhat", "yhat_lower", "yhat_upper"))
 
-#' Prophet forecast.
+#' Prophet forecaster.
 #'
 #' @param df Data frame with columns ds (date type) and y, the time series.
 #'  If growth is logistic, then df must also have a column cap that specifies
@@ -31,7 +31,8 @@ globalVariables(c(
 #' @param weekly.seasonality Boolean, fit weekly seasonality.
 #' @param holidays data frame with columns holiday (character) and ds (date
 #'  type)and optionally columns lower_window and upper_window which specify a
-#'  range of days around the date to be included as holidays.
+#'  range of days around the date to be included as holidays. lower_window=-2
+#'  will include 2 days prior to the date as holidays.
 #' @param seasonality.prior.scale Parameter modulating the strength of the
 #'  seasonality model. Larger values allow the model to fit larger seasonal
 #'  fluctuations, smaller values dampen the seasonality.
@@ -132,6 +133,20 @@ validate_inputs <- function(m) {
     }
     if (!(exists('ds', where = m$holidays))) {
       stop('Holidays dataframe must have ds field.')
+    }
+    has.lower <- exists('lower_window', where = m$holidays)
+    has.upper <- exists('upper_window', where = m$holidays)
+    if (has.lower + has.upper == 1) {
+      stop(paste('Holidays must have both lower_window and upper_window,',
+                 'or neither.'))
+    }
+    if (has.lower) {
+      if(max(m$holidays$lower_window, na.rm=TRUE) > 0) {
+        stop('Holiday lower_window should be <= 0')
+      }
+      if(min(m$holidays$upper_window, na.rm=TRUE) < 0) {
+        stop('Holiday upper_window should be >= 0')
+      }
     }
     for (h in unique(m$holidays$holiday)) {
       if (grepl("_delim_", h)) {

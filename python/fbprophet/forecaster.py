@@ -94,6 +94,16 @@ class Prophet(object):
             raise ValueError(
                 "Parameter 'growth' should be 'linear' or 'logistic'.")
         if self.holidays is not None:
+            has_lower = 'lower_window' in self.holidays
+            has_upper = 'upper_window' in self.holidays
+            if has_lower + has_upper == 1:
+                raise ValueError('Holidays must have both lower_window and ' +
+                                 'upper_window, or neither')
+            if has_lower:
+                if max(self.holidays['lower_window']) > 0:
+                    raise ValueError('Holiday lower_window should be <= 0')
+                if min(self.holidays['upper_window']) < 0:
+                    raise ValueError('Holiday upper_window should be >= 0')
             for h in self.holidays['holiday'].unique():
                 if '_delim_' in h:
                     raise ValueError('Holiday name cannot contain "_delim_"')
