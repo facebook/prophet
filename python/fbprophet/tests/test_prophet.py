@@ -236,6 +236,26 @@ class TestProphet(TestCase):
         model = Prophet(holidays=holidays, uncertainty_samples=0)
         model.fit(DATA).predict()
 
+    def test_make_future_dataframe(self):
+        N = DATA.shape[0]
+        train = DATA.head(N // 2)
+        forecaster = Prophet()
+        forecaster.fit(train)
+        future = forecaster.make_future_dataframe(periods=3, freq='D',
+                                                  include_history=False)
+        correct = pd.DatetimeIndex(['2013-04-26', '2013-04-27', '2013-04-28'])
+        self.assertEqual(len(future), 3)
+        for i in range(3):
+            self.assertEqual(future.iloc[i]['ds'], correct[i])
+
+        future = forecaster.make_future_dataframe(periods=3, freq='M',
+                                                  include_history=False)
+        correct = pd.DatetimeIndex(['2013-04-30', '2013-05-31', '2013-06-30'])
+        self.assertEqual(len(future), 3)
+        for i in range(3):
+            self.assertEqual(future.iloc[i]['ds'], correct[i])
+
+
 DATA = pd.read_csv(StringIO("""
 ds,y
 2012-05-18,38.23

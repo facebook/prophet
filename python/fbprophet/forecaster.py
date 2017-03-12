@@ -601,9 +601,10 @@ class Prophet(object):
         last_date = self.history['ds'].max()
         dates = pd.date_range(
             start=last_date,
-            periods=periods + 1,  # closed='right' removes a period
-            freq=freq,
-            closed='right')  # omits the start date
+            periods=periods + 1,  # An extra in case we include start
+            freq=freq)
+        dates = dates[dates > last_date]  # Drop start if equals last_date
+        dates = dates[:periods]  # Return correct number of periods
 
         if include_history:
             dates = np.concatenate((np.array(self.history['ds']), dates))

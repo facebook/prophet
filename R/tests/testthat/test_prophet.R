@@ -206,3 +206,17 @@ test_that("fit_with_holidays", {
   m <- prophet(DATA, holidays = holidays, uncertainty.samples = 0)
   expect_error(predict(m), NA)
 })
+
+test_that("make_future_dataframe", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  m <- prophet(train)
+  future <- make_future_dataframe(m, periods = 3, freq = 'd',
+                                  include_history = FALSE)
+  correct <- as.Date(c('2013-04-26', '2013-04-27', '2013-04-28'))
+  expect_equal(future$ds, correct)
+
+  future <- make_future_dataframe(m, periods = 3, freq = 'm',
+                                  include_history = FALSE)
+  correct <- as.Date(c('2013-05-25', '2013-06-25', '2013-07-25'))
+  expect_equal(future$ds, correct)
+})

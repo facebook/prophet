@@ -824,7 +824,8 @@ sample_predictive_trend <- function(model, df, iteration) {
 #' @export
 make_future_dataframe <- function(m, periods, freq = 'd',
                                   include_history = TRUE) {
-  dates <- seq(max(m$history$ds), length.out = periods, by = freq)[2:periods]
+  dates <- seq(max(m$history$ds), length.out = periods + 1, by = freq)
+  dates <- dates[2:(periods + 1)]  # Drop the first, which is max(history$ds)
   if (include_history) {
     dates <- c(m$history$ds, dates)
   }
