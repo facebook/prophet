@@ -919,6 +919,8 @@ plot.prophet <- function(x, fcst, uncertainty = TRUE, xlabel = 'ds',
 #' @param uncertainty Boolean indicating if the uncertainty interval should be
 #'  plotted for the trend, from fcst columns trend_lower and trend_upper.
 #'
+#' @return Invisibly return a list containing the plotted ggplot objects
+#'
 #' @export
 #' @importFrom dplyr "%>%"
 prophet_plot_components <- function(m, fcst, uncertainty = TRUE) {
@@ -945,6 +947,7 @@ prophet_plot_components <- function(m, fcst, uncertainty = TRUE) {
     print(panels[[i]], vp = grid::viewport(layout.pos.row = i,
                                            layout.pos.col = 1))
   }
+  return(invisible(panels))
 }
 
 #' Plot the prophet trend.
