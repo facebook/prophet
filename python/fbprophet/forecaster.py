@@ -40,7 +40,7 @@ class Prophet(object):
             changepoints=None,
             n_changepoints=25,
             yearly_seasonality=True,
-            weekly_seasonality=True,
+            weekly_seasonality='auto',
             holidays=None,
             seasonality_prior_scale=10.0,
             holidays_prior_scale=10.0,
@@ -138,7 +138,7 @@ class Prophet(object):
         
         df = df.sort_values('ds')
 
-        if (df.ds - df.ds.shift(1)).dt.days.min() >=7:
+        if self.weekly_seasonality=='auto' and  df.ds - df.ds.shift(1)).dt.days.min() >=7:
             self.weekly_seasonality = False
 
         df.reset_index(inplace=True, drop=True)
