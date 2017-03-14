@@ -89,7 +89,7 @@ setup(
     install_requires=[
         'matplotlib',
         'numpy',
-        'pandas>=0.16',
+        'pandas>=0.18.1',
         'pystan>=2.14',
     ],
     zip_safe=False,
