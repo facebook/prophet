@@ -16,7 +16,6 @@ import pickle
 
 from matplotlib import pyplot as plt
 from matplotlib.dates import DateFormatter, MonthLocator
-from matplotlib.ticker import MaxNLocator
 
 import numpy as np
 import pandas as pd
@@ -712,7 +711,6 @@ class Prophet(object):
                 fcst['ds'].values, fcst['trend_lower'], fcst['trend_upper'],
                 color='#0072B2', alpha=0.2)]
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
-        ax.xaxis.set_major_locator(MaxNLocator(nbins=7))
         ax.set_xlabel('ds')
         ax.set_ylabel('trend')
         return artists
@@ -749,7 +747,6 @@ class Prophet(object):
                                         y_holiday_l, y_holiday_u,
                                         color='#0072B2', alpha=0.2)]
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
-        ax.xaxis.set_major_locator(MaxNLocator(nbins=7))
         ax.set_xlabel('ds')
         ax.set_ylabel('holidays')
         return artists
