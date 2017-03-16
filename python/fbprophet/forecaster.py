@@ -15,7 +15,8 @@ from datetime import timedelta
 import pickle
 
 from matplotlib import pyplot as plt
-from matplotlib.dates import DateFormatter, MonthLocator
+from matplotlib.dates import DateFormatter, MonthLocator, num2date
+from matplotlib.ticker import FuncFormatter
 
 import numpy as np
 import pandas as pd
@@ -818,7 +819,8 @@ class Prophet(object):
                 df_s['yearly_upper'], color='#0072B2', alpha=0.2)]
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         months = MonthLocator(range(1, 13), bymonthday=1, interval=2)
-        ax.xaxis.set_major_formatter(DateFormatter('%B %-d'))
+        ax.xaxis.set_major_formatter(FuncFormatter(
+            lambda x, pos=None: '{dt:%B} {dt.day}'.format(dt=num2date(x))))
         ax.xaxis.set_major_locator(months)
         ax.set_xlabel('Day of year')
         ax.set_ylabel('yearly')
