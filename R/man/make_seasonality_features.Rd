@@ -13,7 +13,7 @@ make_seasonality_features(dates, period, series.order, prefix)
 
 \item{series.order}{Number of components.}
 
-\item{prefix}{Column name prefix}
+\item{prefix}{Column name prefix.}
 }
 \value{
 Dataframe with seasonality.

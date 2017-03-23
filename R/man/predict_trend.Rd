@@ -9,7 +9,10 @@ predict_trend(model, df)
 \arguments{
 \item{model}{Prophet object.}
 
-\item{df}{Data frame.}
+\item{df}{Prediction dataframe.}
+}
+\value{
+Vector with trend on prediction dates.
 }
 \description{
 Predict trend using the prophet model.

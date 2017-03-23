@@ -2,13 +2,13 @@
 % Please edit documentation in R/prophet.R
 \name{linear_growth_init}
 \alias{linear_growth_init}
-\title{Initialize linear growth}
+\title{Initialize linear growth.}
 \usage{
 linear_growth_init(df)
 }
 \arguments{
-\item{df}{Data frame with columns ds (date), cap_scaled (scaled capacity),
-y_scaled (scaled time series), and t (scaled time).}
+\item{df}{Data frame with columns ds (date), y_scaled (scaled time series),
+and t (scaled time).}
 }
 \value{
 A vector (k, m) with the rate (k) and offset (m) of the linear

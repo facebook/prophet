@@ -2,16 +2,19 @@
 % Please edit documentation in R/prophet.R
 \name{predict_seasonal_components}
 \alias{predict_seasonal_components}
-\title{Seasonality broken down into components}
+\title{Predict seasonality broken down into components.}
 \usage{
 predict_seasonal_components(m, df)
 }
 \arguments{
 \item{m}{Prophet object.}
 
-\item{df}{Data frame.}
+\item{df}{Prediction dataframe.}
+}
+\value{
+Dataframe with seasonal components.
 }
 \description{
-Seasonality broken down into components
+Predict seasonality broken down into components.
 }
 

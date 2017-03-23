@@ -13,6 +13,11 @@ set_changepoints(m)
 m with changepoints set.
 }
 \description{
-Sets m$changepoints to the dates of changepoints.
+Sets m$changepoints to the dates of changepoints. Either:
+1) The changepoints were passed in explicitly.
+  A) They are empty.
+  B) They are not empty, and need validation.
+2) We are generating a grid of them.
+3) The user prefers no changepoints be used.
 }
 

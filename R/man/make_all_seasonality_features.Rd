@@ -2,7 +2,7 @@
 % Please edit documentation in R/prophet.R
 \name{make_all_seasonality_features}
 \alias{make_all_seasonality_features}
-\title{Data frame seasonality features.}
+\title{Dataframe with seasonality features.}
 \usage{
 make_all_seasonality_features(m, df)
 }
@@ -15,6 +15,6 @@ make_all_seasonality_features(m, df)
 Dataframe with seasonality.
 }
 \description{
-Data frame seasonality features.
+Dataframe with seasonality features.
 }
 

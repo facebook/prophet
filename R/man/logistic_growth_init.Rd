@@ -2,7 +2,7 @@
 % Please edit documentation in R/prophet.R
 \name{logistic_growth_init}
 \alias{logistic_growth_init}
-\title{Initialize logistic growth}
+\title{Initialize logistic growth.}
 \usage{
 logistic_growth_init(df)
 }

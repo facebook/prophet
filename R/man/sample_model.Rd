@@ -9,11 +9,11 @@ sample_model(m, df, seasonal.features, iteration)
 \arguments{
 \item{m}{Prophet object.}
 
-\item{df}{Dataframe that was fit by Prophet.}
+\item{df}{Prediction dataframe.}
 
 \item{seasonal.features}{Data frame of seasonal features}
 
-\item{iteration}{Int sampling iteration ot use parameters from.}
+\item{iteration}{Int sampling iteration to use parameters from.}
 }
 \value{
 List of trend, seasonality, and yhat, each a vector like df$t.

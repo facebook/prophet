@@ -15,14 +15,14 @@ globalVariables(c(
 
 #' Prophet forecaster.
 #'
-#' @param df Data frame with columns ds (date type) and y, the time series.
-#'  If growth is logistic, then df must also have a column cap that specifies
-#'  the capacity at each ds.
+#' @param df Dataframe containing the history. Must have columns ds (date type)
+#'  and y, the time series. If growth is logistic, then df must also have a
+#'  column cap that specifies the capacity at each ds.
 #' @param growth String 'linear' or 'logistic' to specify a linear or logistic
 #'  trend.
 #' @param changepoints Vector of dates at which to include potential
-#'  changepoints. Each date must be present in df$ds. If not specified,
-#'  potential changepoints are selected automatically.
+#'  changepoints. If not specified, potential changepoints are selected
+#'  automatically.
 #' @param n.changepoints Number of potential changepoints to include. Not used
 #'  if input `changepoints` is supplied. If `changepoints` is not supplied,
 #'  then n.changepoints potential changepoints are selected uniformly from the
@@ -36,11 +36,11 @@ globalVariables(c(
 #' @param seasonality.prior.scale Parameter modulating the strength of the
 #'  seasonality model. Larger values allow the model to fit larger seasonal
 #'  fluctuations, smaller values dampen the seasonality.
+#' @param holidays.prior.scale Parameter modulating the strength of the holiday
+#'  components model.
 #' @param changepoint.prior.scale Parameter modulating the flexibility of the
 #'  automatic changepoint selection. Large values will allow many changepoints,
 #'  small values will allow few changepoints.
-#' @param holidays.prior.scale Parameter modulating the strength of the holiday
-#'  components model.
 #' @param mcmc.samples Integer, if great than 0, will do full Bayesian
 #'  inference with the specified number of MCMC samples. If 0, will do MAP
 #'  estimation.
@@ -74,8 +74,8 @@ prophet <- function(df = df,
                     weekly.seasonality = TRUE,
                     holidays = NULL,
                     seasonality.prior.scale = 10,
-                    changepoint.prior.scale = 0.05,
                     holidays.prior.scale = 10,
+                    changepoint.prior.scale = 0.05,
                     mcmc.samples = 0,
                     interval.width = 0.80,
                     uncertainty.samples = 1000,
@@ -203,7 +203,9 @@ compile_stan_model <- function(model) {
 
 #' Prepare dataframe for fitting or predicting.
 #'
-#' Adds a time index and scales y.
+#' Adds a time index and scales y. Creates auxillary columns 't', 't_ix',
+#' 'y_scaled', and 'cap_scaled'. These columns are used during both fitting
+#' and predicting.
 #'
 #' @param m Prophet object.
 #' @param df Data frame with columns ds, y, and cap if logistic growth.
@@ -243,7 +245,12 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
 
 #' Set changepoints
 #'
-#' Sets m$changepoints to the dates of changepoints.
+#' Sets m$changepoints to the dates of changepoints. Either:
+#' 1) The changepoints were passed in explicitly.
+#'   A) They are empty.
+#'   B) They are not empty, and need validation.
+#' 2) We are generating a grid of them.
+#' 3) The user prefers no changepoints be used.
 #'
 #' @param m Prophet object.
 #'
@@ -292,7 +299,7 @@ get_changepoint_matrix <- function(m) {
   return(A)
 }
 
-#' Provides fourier series components with the specified frequency.
+#' Provides Fourier series components with the specified frequency and order.
 #'
 #' @param dates Vector of dates.
 #' @param period Number of days of the period.
@@ -316,7 +323,7 @@ fourier_series <- function(dates, period, series.order) {
 #' @param dates Vector of dates.
 #' @param period Number of days of the period.
 #' @param series.order Number of components.
-#' @param prefix Column name prefix
+#' @param prefix Column name prefix.
 #'
 #' @return Dataframe with seasonality.
 #'
@@ -331,7 +338,7 @@ make_seasonality_features <- function(dates, period, series.order, prefix) {
 #' @param m Prophet object.
 #' @param dates Vector with dates used for computing seasonality.
 #'
-#' @return A dataframe with a column for each holiday
+#' @return A dataframe with a column for each holiday.
 #'
 #' @importFrom dplyr "%>%"
 make_holiday_features <- function(m, dates) {
@@ -362,7 +369,7 @@ make_holiday_features <- function(m, dates) {
   return(holiday.mat)
 }
 
-#' Data frame seasonality features.
+#' Dataframe with seasonality features.
 #'
 #' @param m Prophet object.
 #' @param df Dataframe with dates for computing seasonality features.
@@ -391,14 +398,14 @@ make_all_seasonality_features <- function(m, df) {
   return(seasonal.features)
 }
 
-#' Initialize linear growth
+#' Initialize linear growth.
 #'
 #' Provides a strong initialization for linear growth by calculating the
 #' growth and offset parameters that pass the function through the first and
 #' last points in the time series.
 #'
-#' @param df Data frame with columns ds (date), cap_scaled (scaled capacity),
-#'  y_scaled (scaled time series), and t (scaled time).
+#' @param df Data frame with columns ds (date), y_scaled (scaled time series),
+#'  and t (scaled time).
 #'
 #' @return A vector (k, m) with the rate (k) and offset (m) of the linear
 #'  growth function.
@@ -414,7 +421,7 @@ linear_growth_init <- function(df) {
   return(c(k, m))
 }
 
-#' Initialize logistic growth
+#' Initialize logistic growth.
 #'
 #' Provides a strong initialization for logistic growth by calculating the
 #' growth and offset parameters that pass the function through the first and
@@ -543,11 +550,12 @@ fit.prophet <- function(m, df, ...) {
 #' Predict using the prophet model.
 #'
 #' @param object Prophet object.
-#' @param df Dataframe with dates for predictions, and capacity if logistic
-#'  growth. If not provided, predictions are made on the history.
-#' @param ... additional arguments
+#' @param df Dataframe with dates for predictions (column ds), and capacity
+#'  (column cap) if logistic growth. If not provided, predictions are made on
+#'  the history.
+#' @param ... additional arguments.
 #'
-#' @return A data_frame with a forecast
+#' @return A dataframe with the forecast components.
 #'
 #' @examples
 #' \dontrun{
@@ -636,7 +644,9 @@ piecewise_logistic <- function(t, cap, deltas, k, m, changepoint.ts) {
 #' Predict trend using the prophet model.
 #'
 #' @param model Prophet object.
-#' @param df Data frame.
+#' @param df Prediction dataframe.
+#'
+#' @return Vector with trend on prediction dates.
 #'
 predict_trend <- function(model, df) {
   k <- mean(model$params$k, na.rm = TRUE)
@@ -654,10 +664,12 @@ predict_trend <- function(model, df) {
   return(trend * model$y.scale)
 }
 
-#' Seasonality broken down into components
+#' Predict seasonality broken down into components.
 #'
 #' @param m Prophet object.
-#' @param df Data frame.
+#' @param df Prediction dataframe.
+#'
+#' @return Dataframe with seasonal components.
 #'
 predict_seasonal_components <- function(m, df) {
   seasonal.features <- make_all_seasonality_features(m, df)
@@ -700,7 +712,9 @@ predict_seasonal_components <- function(m, df) {
 #' Prophet uncertainty intervals.
 #'
 #' @param m Prophet object.
-#' @param df Data frame.
+#' @param df Prediction dataframe.
+#'
+#' @return Dataframe with uncertainty intervals.
 #'
 predict_uncertainty <- function(m, df) {
   # Sample trend, seasonality, and yhat from the extrapolation model.
@@ -746,9 +760,9 @@ predict_uncertainty <- function(m, df) {
 #' Simulate observations from the extrapolated generative model.
 #'
 #' @param m Prophet object.
-#' @param df Dataframe that was fit by Prophet.
+#' @param df Prediction dataframe.
 #' @param seasonal.features Data frame of seasonal features
-#' @param iteration Int sampling iteration ot use parameters from.
+#' @param iteration Int sampling iteration to use parameters from.
 #'
 #' @return List of trend, seasonality, and yhat, each a vector like df$t.
 #'
@@ -769,8 +783,8 @@ sample_model <- function(m, df, seasonal.features, iteration) {
 #' Simulate the trend using the extrapolated generative model.
 #'
 #' @param model Prophet object.
-#' @param df Dataframe that was fit by Prophet.
-#' @param iteration Int sampling iteration ot use parameters from.
+#' @param df Prediction dataframe.
+#' @param iteration Int sampling iteration to use parameters from.
 #'
 #' @return Vector of simulated trend over df$t.
 #'

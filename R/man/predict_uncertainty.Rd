@@ -9,7 +9,10 @@ predict_uncertainty(m, df)
 \arguments{
 \item{m}{Prophet object.}
 
-\item{df}{Data frame.}
+\item{df}{Prediction dataframe.}
+}
+\value{
+Dataframe with uncertainty intervals.
 }
 \description{
 Prophet uncertainty intervals.

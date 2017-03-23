@@ -2,7 +2,7 @@
 % Please edit documentation in R/prophet.R
 \name{fourier_series}
 \alias{fourier_series}
-\title{Provides fourier series components with the specified frequency.}
+\title{Provides Fourier series components with the specified frequency and order.}
 \usage{
 fourier_series(dates, period, series.order)
 }
@@ -17,6 +17,6 @@ fourier_series(dates, period, series.order)
 Matrix with seasonality features.
 }
 \description{
-Provides fourier series components with the specified frequency.
+Provides Fourier series components with the specified frequency and order.
 }
 

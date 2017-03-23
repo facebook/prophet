@@ -34,6 +34,44 @@ except ImportError:
 # fb-block 2
 
 class Prophet(object):
+    """Prophet forecaster.
+
+    Parameters
+    ----------
+    growth: String 'linear' or 'logistic' to specify a linear or logistic
+        trend.
+    changepoints: List of dates at which to include potential changepoints. If
+        not specified, potential changepoints are selected automatically.
+    n_changepoints: Number of potential changepoints to include. Not used
+        if input `changepoints` is supplied. If `changepoints` is not supplied,
+        then n.changepoints potential changepoints are selected uniformly from
+        the first 80 percent of the history.
+    yearly_seasonality: Boolean, fit yearly seasonality.
+    weekly_seasonality: Boolean, fit weekly seasonality.
+    holidays: pd.DataFrame with columns holiday (string) and ds (date type)
+        and optionally columns lower_window and upper_window which specify a
+        range of days around the date to be included as holidays.
+        lower_window=-2 will include 2 days prior to the date as holidays.
+    seasonality_prior_scale: Parameter modulating the strength of the
+        seasonality model. Larger values allow the model to fit larger seasonal
+        fluctuations, smaller values dampen the seasonality.
+    holidays_prior_scale: Parameter modulating the strength of the holiday
+        components model.
+    changepoint_prior_scale: Parameter modulating the flexibility of the
+        automatic changepoint selection. Large values will allow many
+        changepoints, small values will allow few changepoints.
+    mcmc_samples: Integer, if great than 0, will do full Bayesian inference
+        with the specified number of MCMC samples. If 0, will do MAP
+        estimation.
+    interval_width: Float, width of the uncertainty intervals provided
+        for the forecast. If mcmc_samples=0, this will be only the uncertainty
+        in the trend using the MAP estimate of the extrapolated generative
+        model. If mcmc.samples>0, this will be integrated over all model
+        parameters, which will include uncertainty in seasonality.
+    uncertainty_samples: Number of simulated draws used to estimate
+        uncertainty intervals.
+    """
+
     def __init__(
             self,
             growth='linear',
@@ -91,6 +129,7 @@ class Prophet(object):
         self.validate_inputs()
 
     def validate_inputs(self):
+        """Validates the inputs to Prophet."""
         if self.growth not in ('linear', 'logistic'):
             raise ValueError(
                 "Parameter 'growth' should be 'linear' or 'logistic'.")
@@ -114,6 +153,7 @@ class Prophet(object):
 
     @classmethod
     def get_linear_model(cls):
+        """Load compiled linear trend Stan model"""
         # fb-block 3
         # fb-block 4 start
         model_file = pkg_resources.resource_filename(
@@ -126,6 +166,7 @@ class Prophet(object):
 
     @classmethod
     def get_logistic_model(cls):
+        """Load compiled logistic trend Stan model"""
         # fb-block 5
         # fb-block 6 start
         model_file = pkg_resources.resource_filename(
@@ -137,9 +178,20 @@ class Prophet(object):
             return pickle.load(f)
 
     def setup_dataframe(self, df, initialize_scales=False):
-        """Create auxillary columns 't', 't_ix', 'y_scaled', and 'cap_scaled'.
+        """Prepare dataframe for fitting or predicting.
 
-        These columns are used during both fitting and prediction.
+        Adds a time index and scales y. Creates auxillary columns 't', 't_ix',
+        'y_scaled', and 'cap_scaled'. These columns are used during both
+        fitting and predicting.
+
+        Parameters
+        ----------
+        df: pd.DataFrame with columns ds, y, and cap if logistic growth.
+        initialize_scales: Boolean set scaling factors in self from df.
+
+        Returns
+        -------
+        pd.DataFrame prepared for fitting or predicting.
         """
         if 'y' in df:
             df['y'] = pd.to_numeric(df['y'])
@@ -164,14 +216,14 @@ class Prophet(object):
         return df
 
     def set_changepoints(self):
-        """Generate a list of changepoints.
+        """Set changepoints
 
-        Either:
-        1) the changepoints were passed in explicitly
-           A) they are empty
-           B) not empty, needs validation
-        2) we are generating a grid of them
-        3) the user prefers no changepoints to be used
+        Sets m$changepoints to the dates of changepoints. Either:
+        1) The changepoints were passed in explicitly.
+            A) They are empty.
+            B) They are not empty, and need validation.
+        2) We are generating a grid of them.
+        3) The user prefers no changepoints be used.
         """
         if self.changepoints is not None:
             if len(self.changepoints) == 0:
@@ -200,6 +252,7 @@ class Prophet(object):
             self.changepoints_t = np.array([0])  # dummy changepoint
 
     def get_changepoint_matrix(self):
+        """Gets changepoint matrix for history dataframe."""
         A = np.zeros((self.history.shape[0], len(self.changepoints_t)))
         for i, t_i in enumerate(self.changepoints_t):
             A[self.history['t'].values >= t_i, i] = 1
@@ -207,17 +260,18 @@ class Prophet(object):
 
     @staticmethod
     def fourier_series(dates, period, series_order):
-        """Generate a Fourier expansion for a fixed frequency and order.
+        """Provides Fourier series components with the specified frequency
+        and order.
 
         Parameters
         ----------
-        dates: a pd.Series containing timestamps
-        period: an integer frequency (number of days)
-        series_order: number of components to generate
+        dates: pd.Series containing timestamps.
+        period: Number of days of the period.
+        series_order: Number of components.
 
         Returns
         -------
-        a 2-dimensional np.array with one row per row in `dt`
+        Matrix with seasonality features.
         """
         # convert to days since epoch
         t = np.array(
@@ -233,6 +287,20 @@ class Prophet(object):
 
     @classmethod
     def make_seasonality_features(cls, dates, period, series_order, prefix):
+        """Data frame with seasonality features.
+
+        Parameters
+        ----------
+        cls: Prophet class.
+        dates: pd.Series containing timestamps.
+        period: Number of days of the period.
+        series_order: Number of components.
+        prefix: Column name prefix.
+
+        Returns
+        -------
+        pd.DataFrame with seasonality features.
+        """
         features = cls.fourier_series(dates, period, series_order)
         columns = [
             '{}_delim_{}'.format(prefix, i + 1)
@@ -241,7 +309,15 @@ class Prophet(object):
         return pd.DataFrame(features, columns=columns)
 
     def make_holiday_features(self, dates):
-        """Generate a DataFrame with each column corresponding to a holiday.
+        """Construct a dataframe of holiday features.
+
+        Parameters
+        ----------
+        dates: pd.Series containing timestamps used for computing seasonality.
+
+        Returns
+        -------
+        pd.DataFrame with a column for each holiday.
         """
         # A smaller prior scale will shrink holiday estimates more
         scale_ratio = self.holidays_prior_scale / self.seasonality_prior_scale
@@ -280,6 +356,16 @@ class Prophet(object):
         return pd.DataFrame(expanded_holidays)
 
     def make_all_seasonality_features(self, df):
+        """Dataframe with seasonality features.
+
+        Parameters
+        ----------
+        df: pd.DataFrame with dates for computing seasonality features.
+
+        Returns
+        -------
+        pd.DataFrame with seasonality.
+        """
         seasonal_features = [
             # Add a column of zeros in case no seasonality is used.
             pd.DataFrame({'zeros': np.zeros(df.shape[0])})
@@ -308,6 +394,22 @@ class Prophet(object):
 
     @staticmethod
     def linear_growth_init(df):
+        """Initialize linear growth.
+
+        Provides a strong initialization for linear growth by calculating the
+        growth and offset parameters that pass the function through the first
+        and last points in the time series.
+
+        Parameters
+        ----------
+        df: pd.DataFrame with columns ds (date), y_scaled (scaled time series),
+            and t (scaled time).
+
+        Returns
+        -------
+        A tuple (k, m) with the rate (k) and offset (m) of the linear growth
+        function.
+        """
         i0, i1 = df['ds'].idxmin(), df['ds'].idxmax()
         T = df['t'].ix[i1] - df['t'].ix[i0]
         k = (df['y_scaled'].ix[i1] - df['y_scaled'].ix[i0]) / T
@@ -316,6 +418,22 @@ class Prophet(object):
 
     @staticmethod
     def logistic_growth_init(df):
+        """Initialize logistic growth.
+
+        Provides a strong initialization for logistic growth by calculating the
+        growth and offset parameters that pass the function through the first
+        and last points in the time series.
+
+        Parameters
+        ----------
+        df: pd.DataFrame with columns ds (date), cap_scaled (scaled capacity),
+            y_scaled (scaled time series), and t (scaled time).
+
+        Returns
+        -------
+        A tuple (k, m) with the rate (k) and offset (m) of the logistic growth
+        function.
+        """
         i0, i1 = df['ds'].idxmin(), df['ds'].idxmax()
         T = df['t'].ix[i1] - df['t'].ix[i0]
 
@@ -337,14 +455,16 @@ class Prophet(object):
 
     # fb-block 7
     def fit(self, df, **kwargs):
-        """Fit the Prophet model to data.
+        """Fit the Prophet model.
 
         Parameters
         ----------
-        df: pd.DataFrame containing history. Must have columns 'ds', 'y', and
-            if logistic growth, 'cap'.
-        kwargs: Additional arguments passed to Stan's sampling or optimizing
-            function, as appropriate.
+        df: pd.DataFrame containing the history. Must have columns ds (date
+            type) and y, the time series. If self.growth is 'logistic', then
+            df must also have a column cap that specifies the capacity at
+            each ds.
+        kwargs: Additional arguments passed to the optimizing or sampling
+            functions in Stan.
 
         Returns
         -------
@@ -415,12 +535,17 @@ class Prophet(object):
 
     # fb-block 8
     def predict(self, df=None):
-        """Predict historical and future values for y.
+        """Predict using the prophet model.
 
-        Note: you must only pass in future dates here.
-        Historical dates are prepended before predictions are made.
+        Parameters
+        ----------
+        df: pd.DataFrame with dates for predictions (column ds), and capacity
+            (column cap) if logistic growth. If not provided, predictions are
+            made on the history.
 
-        `df` can be None, in which case we predict only on history.
+        Returns
+        -------
+        A pd.DataFrame with the forecast components.
         """
         if df is None:
             df = self.history.copy()
@@ -437,6 +562,20 @@ class Prophet(object):
 
     @staticmethod
     def piecewise_linear(t, deltas, k, m, changepoint_ts):
+        """Evaluate the piecewise linear function.
+
+        Parameters
+        ----------
+        t: np.array of times on which the function is evaluated.
+        deltas: np.array of rate changes at each changepoint.
+        k: Float initial rate.
+        m: Float initial offset.
+        changepoint_ts: np.array of changepoint times.
+
+        Returns
+        -------
+        Vector y(t).
+        """
         # Intercept changes
         gammas = -changepoint_ts * deltas
         # Get cumulative slope and intercept at each t
@@ -450,6 +589,21 @@ class Prophet(object):
 
     @staticmethod
     def piecewise_logistic(t, cap, deltas, k, m, changepoint_ts):
+        """Evaluate the piecewise logistic function.
+
+        Parameters
+        ----------
+        t: np.array of times on which the function is evaluated.
+        cap: np.array of capacities at each t.
+        deltas: np.array of rate changes at each changepoint.
+        k: Float initial rate.
+        m: Float initial offset.
+        changepoint_ts: np.array of changepoint times.
+
+        Returns
+        -------
+        Vector y(t).
+        """
         # Compute offset changes
         k_cum = np.concatenate((np.atleast_1d(k), np.cumsum(deltas) + k))
         gammas = np.zeros(len(changepoint_ts))
@@ -468,6 +622,16 @@ class Prophet(object):
         return cap / (1 + np.exp(-k_t * (t - m_t)))
 
     def predict_trend(self, df):
+        """Predict trend using the prophet model.
+
+        Parameters
+        ----------
+        df: Prediction dataframe.
+
+        Returns
+        -------
+        Vector with trend on prediction dates.
+        """
         k = np.nanmean(self.params['k'])
         m = np.nanmean(self.params['m'])
         deltas = np.nanmean(self.params['delta'], axis=0)
@@ -483,6 +647,16 @@ class Prophet(object):
         return trend * self.y_scale
 
     def predict_seasonal_components(self, df):
+        """Predict seasonality broken down into components.
+
+        Parameters
+        ----------
+        df: Prediction dataframe.
+
+        Returns
+        -------
+        Dataframe with seasonal components.
+        """
         seasonal_features = self.make_all_seasonality_features(df)
         lower_p = 100 * (1.0 - self.interval_width) / 2
         upper_p = 100 * (1.0 + self.interval_width) / 2
@@ -520,6 +694,16 @@ class Prophet(object):
         return component_predictions
 
     def predict_uncertainty(self, df):
+        """Predict seasonality broken down into components.
+
+        Parameters
+        ----------
+        df: Prediction dataframe.
+
+        Returns
+        -------
+        Dataframe with uncertainty intervals.
+        """
         n_iterations = self.params['k'].shape[0]
         samp_per_iter = max(1, int(np.ceil(
             self.uncertainty_samples / float(n_iterations)
@@ -549,6 +733,18 @@ class Prophet(object):
         return pd.DataFrame(series)
 
     def sample_model(self, df, seasonal_features, iteration):
+        """Simulate observations from the extrapolated generative model.
+
+        Parameters
+        ----------
+        df: Prediction dataframe.
+        seasonal_features: pd.DataFrame of seasonal features.
+        iteration: Int sampling iteration to use parameters from.
+
+        Returns
+        -------
+        Dataframe with trend, seasonality, and yhat, each like df['t'].
+        """
         trend = self.sample_predictive_trend(df, iteration)
 
         beta = self.params['beta'][iteration]
@@ -564,6 +760,18 @@ class Prophet(object):
         })
 
     def sample_predictive_trend(self, df, iteration):
+        """Simulate the trend using the extrapolated generative model.
+
+        Parameters
+        ----------
+        df: Prediction dataframe.
+        seasonal_features: pd.DataFrame of seasonal features.
+        iteration: Int sampling iteration to use parameters from.
+
+        Returns
+        -------
+        np.array of simulated trend over df['t'].
+        """
         k = self.params['k'][iteration]
         m = self.params['m'][iteration]
         deltas = self.params['delta'][iteration]
@@ -610,6 +818,20 @@ class Prophet(object):
         return trend * self.y_scale
 
     def make_future_dataframe(self, periods, freq='D', include_history=True):
+        """Simulate the trend using the extrapolated generative model.
+
+        Parameters
+        ----------
+        periods: Int number of periods to forecast forward.
+        freq: Any valid frequency for pd.date_range, such as 'D' or 'M'.
+        include_history: Boolean to include the historical dates in the data
+            frame for predictions.
+
+        Returns
+        -------
+        pd.Dataframe that extends forward from the end of self.history for the
+        requested number of periods.
+        """
         last_date = self.history_dates.max()
         dates = pd.date_range(
             start=last_date,

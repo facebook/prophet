@@ -17,6 +17,8 @@ setup_dataframe(m, df, initialize_scales = FALSE)
 list with items 'df' and 'm'.
 }
 \description{
-Adds a time index and scales y.
+Adds a time index and scales y. Creates auxillary columns 't', 't_ix',
+'y_scaled', and 'cap_scaled'. These columns are used during both fitting
+and predicting.
 }
 

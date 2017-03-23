@@ -9,13 +9,14 @@
 \arguments{
 \item{object}{Prophet object.}
 
-\item{df}{Dataframe with dates for predictions, and capacity if logistic
-growth. If not provided, predictions are made on the history.}
+\item{df}{Dataframe with dates for predictions (column ds), and capacity
+(column cap) if logistic growth. If not provided, predictions are made on
+the history.}
 
-\item{...}{additional arguments}
+\item{...}{additional arguments.}
 }
 \value{
-A data_frame with a forecast
+A dataframe with the forecast components.
 }
 \description{
 Predict using the prophet model.

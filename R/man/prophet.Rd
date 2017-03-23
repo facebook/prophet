@@ -7,21 +7,21 @@
 prophet(df = df, growth = "linear", changepoints = NULL,
   n.changepoints = 25, yearly.seasonality = TRUE,
   weekly.seasonality = TRUE, holidays = NULL,
-  seasonality.prior.scale = 10, changepoint.prior.scale = 0.05,
-  holidays.prior.scale = 10, mcmc.samples = 0, interval.width = 0.8,
+  seasonality.prior.scale = 10, holidays.prior.scale = 10,
+  changepoint.prior.scale = 0.05, mcmc.samples = 0, interval.width = 0.8,
   uncertainty.samples = 1000, fit = TRUE, ...)
 }
 \arguments{
-\item{df}{Data frame with columns ds (date type) and y, the time series.
-If growth is logistic, then df must also have a column cap that specifies
-the capacity at each ds.}
+\item{df}{Dataframe containing the history. Must have columns ds (date type)
+and y, the time series. If growth is logistic, then df must also have a
+column cap that specifies the capacity at each ds.}
 
 \item{growth}{String 'linear' or 'logistic' to specify a linear or logistic
 trend.}
 
 \item{changepoints}{Vector of dates at which to include potential
-changepoints. Each date must be present in df$ds. If not specified,
-potential changepoints are selected automatically.}
+changepoints. If not specified, potential changepoints are selected
+automatically.}
 
 \item{n.changepoints}{Number of potential changepoints to include. Not used
 if input `changepoints` is supplied. If `changepoints` is not supplied,
@@ -41,12 +41,12 @@ will include 2 days prior to the date as holidays.}
 seasonality model. Larger values allow the model to fit larger seasonal
 fluctuations, smaller values dampen the seasonality.}
 
+\item{holidays.prior.scale}{Parameter modulating the strength of the holiday
+components model.}
+
 \item{changepoint.prior.scale}{Parameter modulating the flexibility of the
 automatic changepoint selection. Large values will allow many changepoints,
 small values will allow few changepoints.}
-
-\item{holidays.prior.scale}{Parameter modulating the strength of the holiday
-components model.}
 
 \item{mcmc.samples}{Integer, if great than 0, will do full Bayesian
 inference with the specified number of MCMC samples. If 0, will do MAP
