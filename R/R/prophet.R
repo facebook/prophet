@@ -107,7 +107,8 @@ prophet <- function(df = df,
     changepoints.t = NULL,
     stan.fit = NULL,
     params = list(),
-    history = NULL
+    history = NULL,
+    history.dates = NULL
   )
   validate_inputs(m)
   class(m) <- append("prophet", class(m))
@@ -455,6 +456,7 @@ logistic_growth_init <- function(df) {
 fit.prophet <- function(m, df, ...) {
   history <- df %>%
     dplyr::filter(!is.na(y))
+  m$history.dates <- sort(zoo::as.Date(df$ds))
 
   out <- setup_dataframe(m, history, initialize_scales = TRUE)
   history <- out$df
@@ -839,10 +841,10 @@ sample_predictive_trend <- function(model, df, iteration) {
 #' @export
 make_future_dataframe <- function(m, periods, freq = 'd',
                                   include_history = TRUE) {
-  dates <- seq(max(m$history$ds), length.out = periods + 1, by = freq)
+  dates <- seq(max(m$history.dates), length.out = periods + 1, by = freq)
   dates <- dates[2:(periods + 1)]  # Drop the first, which is max(history$ds)
   if (include_history) {
-    dates <- c(m$history$ds, dates)
+    dates <- c(m$history.dates, dates)
   }
   return(data.frame(ds = dates))
 }

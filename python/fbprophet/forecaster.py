@@ -87,6 +87,7 @@ class Prophet(object):
         self.stan_fit = None
         self.params = {}
         self.history = None
+        self.history_dates = None
         self.validate_inputs()
 
     def validate_inputs(self):
@@ -350,6 +351,7 @@ class Prophet(object):
         The fitted Prophet object.
         """
         history = df[df['y'].notnull()].copy()
+        self.history_dates = pd.to_datetime(df['ds']).sort_values()
 
         history = self.setup_dataframe(history, initialize_scales=True)
         self.history = history
@@ -608,7 +610,7 @@ class Prophet(object):
         return trend * self.y_scale
 
     def make_future_dataframe(self, periods, freq='D', include_history=True):
-        last_date = self.history['ds'].max()
+        last_date = self.history_dates.max()
         dates = pd.date_range(
             start=last_date,
             periods=periods + 1,  # An extra in case we include start
@@ -617,7 +619,7 @@ class Prophet(object):
         dates = dates[:periods]  # Return correct number of periods
 
         if include_history:
-            dates = np.concatenate((np.array(self.history['ds']), dates))
+            dates = np.concatenate((np.array(self.history_dates), dates))
 
         return pd.DataFrame({'ds': dates})
 
