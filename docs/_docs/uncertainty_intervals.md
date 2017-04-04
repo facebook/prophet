@@ -52,3 +52,5 @@ prophet_plot_components(m, forecast);
  
 ![png](/prophet/static/uncertainty_intervals_files/uncertainty_intervals_10_0.png) 
 
+
+There are upstream issues in PyStan for Windows which make MCMC sampling extremely slow. The best choice for MCMC sampling in Windows is to use R, or Python in a Linux VM.
