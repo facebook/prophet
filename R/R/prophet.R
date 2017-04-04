@@ -218,6 +218,9 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
     df$y <- as.numeric(df$y)
   }
   df$ds <- zoo::as.Date(df$ds)
+  if (anyNA(df$ds)) {
+    stop('Unable to parse date format in column ds. Convert to date format.')
+  }
 
   df <- df %>%
     dplyr::arrange(ds)
