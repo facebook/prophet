@@ -15,6 +15,13 @@ fit.prophet(m, df, ...)
 \code{sampling} functions in Stan.}
 }
 \description{
-Fit the prophet model.
+This sets m$params to contain the fitted model parameters. It is a list
+with the following elements:
+  k (M array): M posterior samples of the initial slope.
+  m (M array): The initial intercept.
+  delta (MxN matrix): The slope change at each of N changepoints.
+  beta (MxK matrix): Coefficients for K seasonality features.
+  sigma_obs (M array): Noise level.
+Note that M=1 if MAP estimation.
 }
 

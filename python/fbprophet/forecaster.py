@@ -457,6 +457,15 @@ class Prophet(object):
     def fit(self, df, **kwargs):
         """Fit the Prophet model.
 
+        This sets self.params to contain the fitted model parameters. It is a
+        dictionary parameter names as keys and the following items:
+            k (Mx1 array): M posterior samples of the initial slope.
+            m (Mx1 array): The initial intercept.
+            delta (MxN array): The slope change at each of N changepoints.
+            beta (MxK matrix): Coefficients for K seasonality features.
+            sigma_obs (Mx1 array): Noise level.
+        Note that M=1 if MAP estimation.
+
         Parameters
         ----------
         df: pd.DataFrame containing the history. Must have columns ds (date
