@@ -473,6 +473,9 @@ logistic_growth_init <- function(df) {
 #'
 #' @export
 fit.prophet <- function(m, df, ...) {
+  if (!is.null(m$history)) {
+    stop("Prophet object can only be fit once. Instantiate a new object.")
+  }
   history <- df %>%
     dplyr::filter(!is.na(y))
   m$history.dates <- sort(zoo::as.Date(df$ds))

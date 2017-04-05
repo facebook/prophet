@@ -479,6 +479,9 @@ class Prophet(object):
         -------
         The fitted Prophet object.
         """
+        if self.history is not None:
+            raise Exception('Prophet object can only be fit once. '
+                            'Instantiate a new object.')
         history = df[df['y'].notnull()].copy()
         self.history_dates = pd.to_datetime(df['ds']).sort_values()
 
