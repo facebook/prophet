@@ -15,7 +15,7 @@ from datetime import timedelta
 import pickle
 
 from matplotlib import pyplot as plt
-from matplotlib.dates import DateFormatter, MonthLocator, num2date
+from matplotlib.dates import MonthLocator, num2date
 from matplotlib.ticker import FuncFormatter
 
 import numpy as np
@@ -326,7 +326,7 @@ class Prophet(object):
         # Makes an index so we can perform `get_loc` below.
         row_index = pd.DatetimeIndex(dates)
 
-        for ix, row in self.holidays.iterrows():
+        for _ix, row in self.holidays.iterrows():
             dt = row.ds.date()
             try:
                 lw = int(row.get('lower_window', 0))
@@ -726,7 +726,7 @@ class Prophet(object):
 
         sim_values = {'yhat': [], 'trend': [], 'seasonal': []}
         for i in range(n_iterations):
-            for j in range(samp_per_iter):
+            for _j in range(samp_per_iter):
                 sim = self.sample_model(df, seasonal_features, i)
                 for key in sim_values:
                     sim_values[key].append(sim[key])
@@ -958,7 +958,7 @@ class Prophet(object):
         Parameters
         ----------
         fcst: pd.DataFrame output of self.predict.
-        ax: Optional matplotlib Axes to plot on. One will be created if this 
+        ax: Optional matplotlib Axes to plot on. One will be created if this
             is not provided.
         uncertainty: Optional boolean to plot uncertainty intervals.
 
@@ -994,7 +994,7 @@ class Prophet(object):
         Parameters
         ----------
         fcst: pd.DataFrame output of self.predict.
-        ax: Optional matplotlib Axes to plot on. One will be created if this 
+        ax: Optional matplotlib Axes to plot on. One will be created if this
             is not provided.
         uncertainty: Optional boolean to plot uncertainty intervals.
 
@@ -1032,7 +1032,7 @@ class Prophet(object):
         Parameters
         ----------
         fcst: pd.DataFrame output of self.predict.
-        ax: Optional matplotlib Axes to plot on. One will be created if 
+        ax: Optional matplotlib Axes to plot on. One will be created if
             this is not provided.
         uncertainty: Optional boolean to plot uncertainty intervals.
 
