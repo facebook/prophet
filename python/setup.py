@@ -109,7 +109,7 @@ setup(
     ],
     install_requires=[
         'matplotlib',
-        'numpy',
+        'numpy>=1.10.0',
         'pandas>=0.18.1',
         'pystan>=2.14',
     ],
