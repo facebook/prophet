@@ -1,0 +1,11 @@
+language: python
+python:
+  - "2.7"
+  - "3.6"
+
+install:
+  - pip install --upgrade pip
+  - pip install numpy pystan pandas matplotlib
+
+script:
+  - cd python && python setup.py develop test
