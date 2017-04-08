@@ -11,7 +11,7 @@ fit.prophet(m, df, ...)
 
 \item{df}{Data frame.}
 
-\item{...}{Additional arguments passed to the \code{optimizing} or 
+\item{...}{Additional arguments passed to the \code{optimizing} or
 \code{sampling} functions in Stan.}
 }
 \description{

@@ -33,7 +33,7 @@ test_that("fit_predict_no_changepoints", {
 test_that("fit_predict_changepoint_not_in_history", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   train_t <- dplyr::mutate(DATA, ds=zoo::as.Date(ds))
-  train_t <- dplyr::filter(train_t, (ds < zoo::as.Date('2013-01-01')) | 
+  train_t <- dplyr::filter(train_t, (ds < zoo::as.Date('2013-01-01')) |
                                 (ds > zoo::as.Date('2014-01-01')))
   future <- data.frame(ds=DATA$ds)
   m <- prophet(train_t, changepoints=c('2013-06-06'))

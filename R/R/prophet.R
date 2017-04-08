@@ -2,7 +2,7 @@
 ## All rights reserved.
 
 ## This source code is licensed under the BSD-style license found in the
-## LICENSE file in the root directory of this source tree. An additional grant 
+## LICENSE file in the root directory of this source tree. An additional grant
 ## of patent rights can be found in the PATENTS file in the same directory.
 
 ## Makes R CMD CHECK happy due to dplyr syntax below
@@ -468,7 +468,7 @@ logistic_growth_init <- function(df) {
 #'
 #' @param m Prophet object.
 #' @param df Data frame.
-#' @param ... Additional arguments passed to the \code{optimizing} or 
+#' @param ... Additional arguments passed to the \code{optimizing} or
 #'  \code{sampling} functions in Stan.
 #'
 #' @export
@@ -581,7 +581,7 @@ fit.prophet <- function(m, df, ...) {
 #' forecast <- predict(m, future)
 #' plot(m, forecast)
 #' }
-#' 
+#'
 #' @export
 predict.prophet <- function(object, df = NULL, ...) {
   if (is.null(df)) {
