@@ -5,7 +5,7 @@ python:
 
 install:
   - pip install --upgrade pip
-  - pip install numpy pystan pandas matplotlib
+  - pip install -U -r python/requirements.txt
 
 script:
   - cd python && python setup.py develop test
