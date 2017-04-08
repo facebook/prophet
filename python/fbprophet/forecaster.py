@@ -60,7 +60,7 @@ class Prophet(object):
     changepoint_prior_scale: Parameter modulating the flexibility of the
         automatic changepoint selection. Large values will allow many
         changepoints, small values will allow few changepoints.
-    mcmc_samples: Integer, if great than 0, will do full Bayesian inference
+    mcmc_samples: Integer, if greater than 0, will do full Bayesian inference
         with the specified number of MCMC samples. If 0, will do MAP
         estimation.
     interval_width: Float, width of the uncertainty intervals provided
