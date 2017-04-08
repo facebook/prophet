@@ -41,7 +41,7 @@ globalVariables(c(
 #' @param changepoint.prior.scale Parameter modulating the flexibility of the
 #'  automatic changepoint selection. Large values will allow many changepoints,
 #'  small values will allow few changepoints.
-#' @param mcmc.samples Integer, if great than 0, will do full Bayesian
+#' @param mcmc.samples Integer, if greater than 0, will do full Bayesian
 #'  inference with the specified number of MCMC samples. If 0, will do MAP
 #'  estimation.
 #' @param interval.width Numeric, width of the uncertainty intervals provided
