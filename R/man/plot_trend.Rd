@@ -4,12 +4,15 @@
 \alias{plot_trend}
 \title{Plot the prophet trend.}
 \usage{
-plot_trend(df, uncertainty = TRUE)
+plot_trend(df, uncertainty = TRUE, plot_cap = TRUE)
 }
 \arguments{
 \item{df}{Forecast dataframe for plotting.}
 
 \item{uncertainty}{Boolean to plot uncertainty intervals.}
+
+\item{plot_cap}{Boolean indicating if the capacity should be shown in the
+figure, if available.}
 }
 \value{
 A ggplot2 plot.

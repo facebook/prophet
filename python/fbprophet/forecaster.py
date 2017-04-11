@@ -857,13 +857,16 @@ class Prophet(object):
 
         return pd.DataFrame({'ds': dates})
 
-    def plot(self, fcst, uncertainty=True, xlabel='ds', ylabel='y'):
+    def plot(self, fcst, uncertainty=True, plot_cap=True, xlabel='ds',
+             ylabel='y'):
         """Plot the Prophet forecast.
 
         Parameters
         ----------
         fcst: pd.DataFrame output of self.predict.
         uncertainty: Optional boolean to plot uncertainty intervals.
+        plot_cap: Optional boolean indicating if the capacity should be shown
+            in the figure, if available.
         xlabel: Optional label name on X-axis
         ylabel: Optional label name on Y-axis
 
@@ -875,7 +878,7 @@ class Prophet(object):
         ax = fig.add_subplot(111)
         ax.plot(self.history['ds'].values, self.history['y'], 'k.')
         ax.plot(fcst['ds'].values, fcst['yhat'], ls='-', c='#0072B2')
-        if 'cap' in fcst:
+        if 'cap' in fcst and plot_cap:
             ax.plot(fcst['ds'].values, fcst['cap'], ls='--', c='k')
         if uncertainty:
             ax.fill_between(fcst['ds'].values, fcst['yhat_lower'],
@@ -887,7 +890,7 @@ class Prophet(object):
         fig.tight_layout()
         return fig
 
-    def plot_components(self, fcst, uncertainty=True):
+    def plot_components(self, fcst, uncertainty=True, plot_cap=True):
         """Plot the Prophet forecast components.
 
         Will plot whichever are available of: trend, holidays, weekly
@@ -897,31 +900,41 @@ class Prophet(object):
         ----------
         fcst: pd.DataFrame output of self.predict.
         uncertainty: Optional boolean to plot uncertainty intervals.
+        plot_cap: Optional boolean indicating if the capacity should be shown
+            in the figure, if available.
 
         Returns
         -------
         a matplotlib figure.
         """
         # Identify components to be plotted
-        components = [('plot_trend', True),
-                      ('plot_holidays', self.holidays is not None),
-                      ('plot_weekly', 'weekly' in fcst),
-                      ('plot_yearly', 'yearly' in fcst)]
-        components = [(plot, cond) for plot, cond in components if cond]
+        components = [('trend', True),
+                      ('holidays', self.holidays is not None),
+                      ('weekly', 'weekly' in fcst),
+                      ('yearly', 'yearly' in fcst)]
+        components = [plot for plot, cond in components if cond]
         npanel = len(components)
 
         fig, axes = plt.subplots(npanel, 1, facecolor='w',
                                  figsize=(9, 3 * npanel))
 
         artists = []
-        for ax, plot in zip(axes,
-                            [getattr(self, plot) for plot, _ in components]):
-            artists += plot(fcst, ax=ax, uncertainty=uncertainty)
+        for ax, plot in zip(axes, components):
+            if plot == 'trend':
+                artists += self.plot_trend(
+                    fcst, ax=ax, uncertainty=uncertainty, plot_cap=plot_cap)
+            elif plot == 'holidays':
+                artists += self.plot_holidays(fcst, ax=ax,
+                                              uncertainty=uncertainty)
+            elif plot == 'weekly':
+                artists += self.plot_weekly(ax=ax, uncertainty=uncertainty)
+            elif plot == 'yearly':
+                artists += self.plot_yearly(ax=ax, uncertainty=uncertainty)
 
         fig.tight_layout()
         return artists
 
-    def plot_trend(self, fcst, ax=None, uncertainty=True):
+    def plot_trend(self, fcst, ax=None, uncertainty=True, plot_cap=True):
         """Plot the trend component of the forecast.
 
         Parameters
@@ -929,6 +942,8 @@ class Prophet(object):
         fcst: pd.DataFrame output of self.predict.
         ax: Optional matplotlib Axes to plot on.
         uncertainty: Optional boolean to plot uncertainty intervals.
+        plot_cap: Optional boolean indicating if the capacity should be shown
+            in the figure, if available.
 
         Returns
         -------
@@ -941,7 +956,7 @@ class Prophet(object):
             ax = fig.add_subplot(111)
         artists += ax.plot(fcst['ds'].values, fcst['trend'], ls='-',
                            c='#0072B2')
-        if 'cap' in fcst:
+        if 'cap' in fcst and plot_cap:
             artists += ax.plot(fcst['ds'].values, fcst['cap'], ls='--', c='k')
         if uncertainty:
             artists += [ax.fill_between(
@@ -988,12 +1003,11 @@ class Prophet(object):
         ax.set_ylabel('holidays')
         return artists
 
-    def plot_weekly(self, fcst, ax=None, uncertainty=True):
+    def plot_weekly(self, ax=None, uncertainty=True):
         """Plot the weekly component of the forecast.
 
         Parameters
         ----------
-        fcst: pd.DataFrame output of self.predict.
         ax: Optional matplotlib Axes to plot on. One will be created if this
             is not provided.
         uncertainty: Optional boolean to plot uncertainty intervals.
@@ -1008,7 +1022,7 @@ class Prophet(object):
             ax = fig.add_subplot(111)
         # Compute weekly seasonality for a Sun-Sat sequence of dates.
         days = pd.date_range(start='2017-01-01', periods=7)
-        df_w = pd.DataFrame({'ds': days})
+        df_w = pd.DataFrame({'ds': days, 'cap': 1.})
         df_w = self.setup_dataframe(df_w)
         seas = self.predict_seasonal_components(df_w)
         days = days.weekday_name
@@ -1025,12 +1039,11 @@ class Prophet(object):
         ax.set_ylabel('weekly')
         return artists
 
-    def plot_yearly(self, fcst, ax=None, uncertainty=True):
+    def plot_yearly(self, ax=None, uncertainty=True):
         """Plot the yearly component of the forecast.
 
         Parameters
         ----------
-        fcst: pd.DataFrame output of self.predict.
         ax: Optional matplotlib Axes to plot on. One will be created if
             this is not provided.
         uncertainty: Optional boolean to plot uncertainty intervals.
@@ -1044,7 +1057,8 @@ class Prophet(object):
             fig = plt.figure(facecolor='w', figsize=(10, 6))
             ax = fig.add_subplot(111)
         # Compute yearly seasonality for a Jan 1 - Dec 31 sequence of dates.
-        df_y = pd.DataFrame({'ds': pd.date_range(start='2017-01-01', periods=365)})
+        df_y = pd.DataFrame(
+            {'ds': pd.date_range(start='2017-01-01', periods=365), 'cap': 1.})
         df_y = self.setup_dataframe(df_y)
         seas = self.predict_seasonal_components(df_y)
         artists += ax.plot(df_y['ds'], seas['yearly'], ls='-',

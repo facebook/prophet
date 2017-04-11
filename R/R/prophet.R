@@ -900,6 +900,8 @@ df_for_plotting <- function(m, fcst) {
 #' @param fcst Data frame returned by predict(m, df).
 #' @param uncertainty Boolean indicating if the uncertainty interval for yhat
 #'  should be plotted. Must be present in fcst as yhat_lower and yhat_upper.
+#' @param plot_cap Boolean indicating if the capacity should be shown in the
+#'  figure, if available.
 #' @param xlabel Optional label for x-axis
 #' @param ylabel Optional label for y-axis
 #' @param ... additional arguments
@@ -917,12 +919,12 @@ df_for_plotting <- function(m, fcst) {
 #' }
 #'
 #' @export
-plot.prophet <- function(x, fcst, uncertainty = TRUE, xlabel = 'ds',
-                         ylabel = 'y', ...) {
+plot.prophet <- function(x, fcst, uncertainty = TRUE, plot_cap = TRUE,
+                         xlabel = 'ds', ylabel = 'y', ...) {
   df <- df_for_plotting(x, fcst)
   gg <- ggplot2::ggplot(df, ggplot2::aes(x = ds, y = y)) +
     ggplot2::labs(x = xlabel, y = ylabel)
-  if (exists('cap', where = df)) {
+  if (exists('cap', where = df) && plot_cap) {
     gg <- gg + ggplot2::geom_line(
       ggplot2::aes(y = cap), linetype = 'dashed', na.rm = TRUE)
   }
@@ -949,15 +951,18 @@ plot.prophet <- function(x, fcst, uncertainty = TRUE, xlabel = 'ds',
 #' @param fcst Data frame returned by predict(m, df).
 #' @param uncertainty Boolean indicating if the uncertainty interval should be
 #'  plotted for the trend, from fcst columns trend_lower and trend_upper.
+#' @param plot_cap Boolean indicating if the capacity should be shown in the
+#'  figure, if available.
 #'
 #' @return Invisibly return a list containing the plotted ggplot objects
 #'
 #' @export
 #' @importFrom dplyr "%>%"
-prophet_plot_components <- function(m, fcst, uncertainty = TRUE) {
+prophet_plot_components <- function(m, fcst, uncertainty = TRUE,
+                                    plot_cap = TRUE) {
   df <- df_for_plotting(m, fcst)
   # Plot the trend
-  panels <- list(plot_trend(df, uncertainty))
+  panels <- list(plot_trend(df, uncertainty, plot_cap))
   # Plot holiday components, if present.
   if (!is.null(m$holidays)) {
     panels[[length(panels) + 1]] <- plot_holidays(m, df, uncertainty)
@@ -985,13 +990,15 @@ prophet_plot_components <- function(m, fcst, uncertainty = TRUE) {
 #'
 #' @param df Forecast dataframe for plotting.
 #' @param uncertainty Boolean to plot uncertainty intervals.
+#' @param plot_cap Boolean indicating if the capacity should be shown in the
+#'  figure, if available.
 #'
 #' @return A ggplot2 plot.
-plot_trend <- function(df, uncertainty = TRUE) {
+plot_trend <- function(df, uncertainty = TRUE, plot_cap = TRUE) {
   df.t <- df[!is.na(df$trend),]
   gg.trend <- ggplot2::ggplot(df.t, ggplot2::aes(x = ds, y = trend)) +
     ggplot2::geom_line(color = "#0072B2", na.rm = TRUE)
-  if (exists('cap', where = df.t)) {
+  if (exists('cap', where = df.t) && plot_cap) {
     gg.trend <- gg.trend + ggplot2::geom_line(ggplot2::aes(y = cap),
                                               linetype = 'dashed',
                                               na.rm = TRUE)
@@ -1046,8 +1053,8 @@ plot_holidays <- function(m, df, uncertainty = TRUE) {
 #' @return A ggplot2 plot.
 plot_weekly <- function(m, uncertainty = TRUE) {
   # Compute weekly seasonality for a Sun-Sat sequence of dates.
-  df.w <- data.frame(ds=seq.Date(zoo::as.Date('2017-01-01'), by='d',
-                                 length.out=7))
+  df.w <- data.frame(
+    ds=seq.Date(zoo::as.Date('2017-01-01'), by='d', length.out=7), cap=1.)
   df.w <- setup_dataframe(m, df.w)$df
   seas <- predict_seasonal_components(m, df.w)
   seas$dow <- factor(weekdays(df.w$ds), levels=weekdays(df.w$ds))
@@ -1075,8 +1082,8 @@ plot_weekly <- function(m, uncertainty = TRUE) {
 #' @return A ggplot2 plot.
 plot_yearly <- function(m, uncertainty = TRUE) {
   # Compute yearly seasonality for a Jan 1 - Dec 31 sequence of dates.
-  df.y <- data.frame(ds=seq.Date(zoo::as.Date('2017-01-01'), by='d',
-                                 length.out=365))
+  df.y <- data.frame(
+    ds=seq.Date(zoo::as.Date('2017-01-01'), by='d', length.out=365), cap=1.)
   df.y <- setup_dataframe(m, df.y)$df
   seas <- predict_seasonal_components(m, df.y)
   seas$ds <- df.y$ds
