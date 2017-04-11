@@ -857,7 +857,7 @@ class Prophet(object):
 
         return pd.DataFrame({'ds': dates})
 
-    def plot(self, fcst, uncertainty=True, xlabel='ds', ylabel='y'):
+    def plot(self, fcst, uncertainty=True, xlabel='ds', ylabel='y', **kwargs):
         """Plot the Prophet forecast.
 
         Parameters
@@ -866,12 +866,14 @@ class Prophet(object):
         uncertainty: Optional boolean to plot uncertainty intervals.
         xlabel: Optional label name on X-axis
         ylabel: Optional label name on Y-axis
+        kwargs: Additional arguments passed to the matplotlib figure
 
         Returns
         -------
         a matplotlib figure.
         """
-        fig = plt.figure(facecolor='w', figsize=(10, 6))
+        figsize = kwargs.get('figsize', (10,6))
+        fig = plt.figure(facecolor='w', figsize=figsize, **kwargs)
         ax = fig.add_subplot(111)
         ax.plot(self.history['ds'].values, self.history['y'], 'k.')
         ax.plot(fcst['ds'].values, fcst['yhat'], ls='-', c='#0072B2')
