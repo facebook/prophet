@@ -4,10 +4,10 @@
 \alias{plot_yearly}
 \title{Plot the yearly component of the forecast.}
 \usage{
-plot_yearly(df, uncertainty = TRUE)
+plot_yearly(m, uncertainty = TRUE)
 }
 \arguments{
-\item{df}{Forecast dataframe for plotting.}
+\item{m}{Prophet model object.}
 
 \item{uncertainty}{Boolean to plot uncertainty intervals.}
 }

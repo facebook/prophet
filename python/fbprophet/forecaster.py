@@ -1006,18 +1006,17 @@ class Prophet(object):
         if not ax:
             fig = plt.figure(facecolor='w', figsize=(10, 6))
             ax = fig.add_subplot(111)
-        df_s = fcst.copy()
-        df_s['dow'] = df_s['ds'].dt.weekday_name
-        df_s = df_s.groupby('dow').first()
-        days = pd.date_range(start='2017-01-01', periods=7).weekday_name
-        y_weekly = [df_s.loc[d]['weekly'] for d in days]
-        y_weekly_l = [df_s.loc[d]['weekly_lower'] for d in days]
-        y_weekly_u = [df_s.loc[d]['weekly_upper'] for d in days]
-        artists += ax.plot(range(len(days)), y_weekly, ls='-',
+        # Compute weekly seasonality for a Sun-Sat sequence of dates.
+        days = pd.date_range(start='2017-01-01', periods=7)
+        df_w = pd.DataFrame({'ds': days})
+        df_w = self.setup_dataframe(df_w)
+        seas = self.predict_seasonal_components(df_w)
+        days = days.weekday_name
+        artists += ax.plot(range(len(days)), seas['weekly'], ls='-',
                            c='#0072B2')
         if uncertainty:
             artists += [ax.fill_between(range(len(days)),
-                                        y_weekly_l, y_weekly_u,
+                                        seas['weekly_lower'], seas['weekly_upper'],
                                         color='#0072B2', alpha=0.2)]
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         ax.set_xticks(range(len(days)))
@@ -1044,15 +1043,16 @@ class Prophet(object):
         if not ax:
             fig = plt.figure(facecolor='w', figsize=(10, 6))
             ax = fig.add_subplot(111)
-        df_s = fcst.copy()
-        df_s['doy'] = df_s['ds'].map(lambda x: x.strftime('2000-%m-%d'))
-        df_s = df_s.groupby('doy').first().sort_index()
-        artists += ax.plot(pd.to_datetime(df_s.index), df_s['yearly'], ls='-',
+        # Compute yearly seasonality for a Jan 1 - Dec 31 sequence of dates.
+        df_y = pd.DataFrame({'ds': pd.date_range(start='2017-01-01', periods=365)})
+        df_y = self.setup_dataframe(df_y)
+        seas = self.predict_seasonal_components(df_y)
+        artists += ax.plot(df_y['ds'], seas['yearly'], ls='-',
                            c='#0072B2')
         if uncertainty:
             artists += [ax.fill_between(
-                pd.to_datetime(df_s.index), df_s['yearly_lower'],
-                df_s['yearly_upper'], color='#0072B2', alpha=0.2)]
+                df_y['ds'].values, seas['yearly_lower'],
+                seas['yearly_upper'], color='#0072B2', alpha=0.2)]
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         months = MonthLocator(range(1, 13), bymonthday=1, interval=2)
         ax.xaxis.set_major_formatter(FuncFormatter(

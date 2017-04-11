@@ -48,7 +48,7 @@ components model.}
 automatic changepoint selection. Large values will allow many changepoints,
 small values will allow few changepoints.}
 
-\item{mcmc.samples}{Integer, if great than 0, will do full Bayesian
+\item{mcmc.samples}{Integer, if greater than 0, will do full Bayesian
 inference with the specified number of MCMC samples. If 0, will do MAP
 estimation.}
 

@@ -4,10 +4,10 @@
 \alias{plot_weekly}
 \title{Plot the weekly component of the forecast.}
 \usage{
-plot_weekly(df, uncertainty = TRUE)
+plot_weekly(m, uncertainty = TRUE)
 }
 \arguments{
-\item{df}{Forecast dataframe for plotting.}
+\item{m}{Prophet model object}
 
 \item{uncertainty}{Boolean to plot uncertainty intervals.}
 }

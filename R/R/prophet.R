@@ -964,11 +964,11 @@ prophet_plot_components <- function(m, fcst, uncertainty = TRUE) {
   }
   # Plot weekly seasonality, if present
   if ("weekly" %in% colnames(df)) {
-    panels[[length(panels) + 1]] <- plot_weekly(df, uncertainty)
+    panels[[length(panels) + 1]] <- plot_weekly(m, uncertainty)
   }
   # Plot yearly seasonality, if present
   if ("yearly" %in% colnames(df)) {
-    panels[[length(panels) + 1]] <- plot_yearly(df, uncertainty)
+    panels[[length(panels) + 1]] <- plot_yearly(m, uncertainty)
   }
   # Make the plot.
   grid::grid.newpage()
@@ -988,9 +988,10 @@ prophet_plot_components <- function(m, fcst, uncertainty = TRUE) {
 #'
 #' @return A ggplot2 plot.
 plot_trend <- function(df, uncertainty = TRUE) {
-  gg.trend <- ggplot2::ggplot(df, ggplot2::aes(x = ds, y = trend)) +
+  df.t <- df[!is.na(df$trend),]
+  gg.trend <- ggplot2::ggplot(df.t, ggplot2::aes(x = ds, y = trend)) +
     ggplot2::geom_line(color = "#0072B2", na.rm = TRUE)
-  if (exists('cap', where = df)) {
+  if (exists('cap', where = df.t)) {
     gg.trend <- gg.trend + ggplot2::geom_line(ggplot2::aes(y = cap),
                                               linetype = 'dashed',
                                               na.rm = TRUE)
@@ -1021,6 +1022,7 @@ plot_holidays <- function(m, df, uncertainty = TRUE) {
                                                           "_lower"), drop = FALSE]),
                      holidays_upper = rowSums(df[, paste0(holiday.comps,
                                                           "_upper"), drop = FALSE]))
+  df.s <- df.s[!is.na(df.s$holidays),]
   # NOTE the above CI calculation is incorrect if holidays overlap in time.
   # Since it is just for the visualization we will not worry about it now.
   gg.holidays <- ggplot2::ggplot(df.s, ggplot2::aes(x = ds, y = holidays)) +
@@ -1038,20 +1040,19 @@ plot_holidays <- function(m, df, uncertainty = TRUE) {
 
 #' Plot the weekly component of the forecast.
 #'
-#' @param df Forecast dataframe for plotting.
+#' @param m Prophet model object
 #' @param uncertainty Boolean to plot uncertainty intervals.
 #'
 #' @return A ggplot2 plot.
-plot_weekly <- function(df, uncertainty = TRUE) {
-  # Get weekday names in current locale
-  days <- weekdays(seq.Date(as.Date('2017-01-01'), by='d', length.out=7))
-  df.s <- df %>%
-    dplyr::mutate(dow = factor(weekdays(ds), levels = days)) %>%
-    dplyr::group_by(dow) %>%
-    dplyr::slice(1) %>%
-    dplyr::ungroup() %>%
-    dplyr::arrange(dow)
-  gg.weekly <- ggplot2::ggplot(df.s, ggplot2::aes(x = dow, y = weekly,
+plot_weekly <- function(m, uncertainty = TRUE) {
+  # Compute weekly seasonality for a Sun-Sat sequence of dates.
+  df.w <- data.frame(ds=seq.Date(zoo::as.Date('2017-01-01'), by='d',
+                                 length.out=7))
+  df.w <- setup_dataframe(m, df.w)$df
+  seas <- predict_seasonal_components(m, df.w)
+  seas$dow <- factor(weekdays(df.w$ds), levels=weekdays(df.w$ds))
+
+  gg.weekly <- ggplot2::ggplot(seas, ggplot2::aes(x = dow, y = weekly,
                                                   group = 1)) +
     ggplot2::geom_line(color = "#0072B2", na.rm = TRUE) +
     ggplot2::labs(x = "Day of week")
@@ -1068,20 +1069,19 @@ plot_weekly <- function(df, uncertainty = TRUE) {
 
 #' Plot the yearly component of the forecast.
 #'
-#' @param df Forecast dataframe for plotting.
+#' @param m Prophet model object.
 #' @param uncertainty Boolean to plot uncertainty intervals.
 #'
 #' @return A ggplot2 plot.
-plot_yearly <- function(df, uncertainty = TRUE) {
-  # Drop year from the dates
-  df.s <- df %>%
-    dplyr::mutate(doy = strftime(ds, format = "2000-%m-%d")) %>%
-    dplyr::group_by(doy) %>%
-    dplyr::slice(1) %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate(doy = zoo::as.Date(doy)) %>%
-    dplyr::arrange(doy)
-  gg.yearly <- ggplot2::ggplot(df.s, ggplot2::aes(x = doy, y = yearly,
+plot_yearly <- function(m, uncertainty = TRUE) {
+  # Compute yearly seasonality for a Jan 1 - Dec 31 sequence of dates.
+  df.y <- data.frame(ds=seq.Date(zoo::as.Date('2017-01-01'), by='d',
+                                 length.out=365))
+  df.y <- setup_dataframe(m, df.y)$df
+  seas <- predict_seasonal_components(m, df.y)
+  seas$ds <- df.y$ds
+
+  gg.yearly <- ggplot2::ggplot(seas, ggplot2::aes(x = ds, y = yearly,
                                                   group = 1)) +
     ggplot2::geom_line(color = "#0072B2", na.rm = TRUE) +
     ggplot2::scale_x_date(labels = scales::date_format('%B %d')) +
