@@ -559,6 +559,7 @@ fit.prophet <- function(m, df, ...) {
     m$params$k <- m$params$k + m$params$delta[, 1]
     m$params$delta <- matrix(rep(0, length(m$params$delta)), nrow = n.iteration)
   }
+  gc() ## This is hack.  We don't know why it works but it solves issue #93.
   return(m)
 }
 
