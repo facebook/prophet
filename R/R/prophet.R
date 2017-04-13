@@ -987,13 +987,16 @@ plot.prophet <- function(x, fcst, uncertainty = TRUE, plot_cap = TRUE,
 #'  plotted for the trend, from fcst columns trend_lower and trend_upper.
 #' @param plot_cap Boolean indicating if the capacity should be shown in the
 #'  figure, if available.
+#' @param weekly_start Integer specifying the start day of the weekly
+#'  seasonality plot. 0 (default) starts the week on Sunday. 1 shifts by 1 day
+#'  to Monday, and so on.
 #'
 #' @return Invisibly return a list containing the plotted ggplot objects
 #'
 #' @export
 #' @importFrom dplyr "%>%"
 prophet_plot_components <- function(m, fcst, uncertainty = TRUE,
-                                    plot_cap = TRUE) {
+                                    plot_cap = TRUE, weekly_start = 0) {
   df <- df_for_plotting(m, fcst)
   # Plot the trend
   panels <- list(plot_trend(df, uncertainty, plot_cap))
@@ -1003,7 +1006,7 @@ prophet_plot_components <- function(m, fcst, uncertainty = TRUE,
   }
   # Plot weekly seasonality, if present
   if ("weekly" %in% colnames(df)) {
-    panels[[length(panels) + 1]] <- plot_weekly(m, uncertainty)
+    panels[[length(panels) + 1]] <- plot_weekly(m, uncertainty, weekly_start)
   }
   # Plot yearly seasonality, if present
   if ("yearly" %in% colnames(df)) {
@@ -1083,12 +1086,16 @@ plot_holidays <- function(m, df, uncertainty = TRUE) {
 #'
 #' @param m Prophet model object
 #' @param uncertainty Boolean to plot uncertainty intervals.
+#' @param weekly_start Integer specifying the start day of the weekly
+#'  seasonality plot. 0 (default) starts the week on Sunday. 1 shifts by 1 day
+#'  to Monday, and so on.
 #'
 #' @return A ggplot2 plot.
-plot_weekly <- function(m, uncertainty = TRUE) {
+plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0) {
   # Compute weekly seasonality for a Sun-Sat sequence of dates.
   df.w <- data.frame(
-    ds=seq.Date(zoo::as.Date('2017-01-01'), by='d', length.out=7), cap=1.)
+    ds=seq.Date(zoo::as.Date('2017-01-01'), by='d', length.out=7) +
+    weekly_start, cap=1.)
   df.w <- setup_dataframe(m, df.w)$df
   seas <- predict_seasonal_components(m, df.w)
   seas$dow <- factor(weekdays(df.w$ds), levels=weekdays(df.w$ds))

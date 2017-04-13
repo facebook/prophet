@@ -914,7 +914,8 @@ class Prophet(object):
         fig.tight_layout()
         return fig
 
-    def plot_components(self, fcst, uncertainty=True, plot_cap=True):
+    def plot_components(self, fcst, uncertainty=True, plot_cap=True,
+                        weekly_start=0):
         """Plot the Prophet forecast components.
 
         Will plot whichever are available of: trend, holidays, weekly
@@ -926,6 +927,9 @@ class Prophet(object):
         uncertainty: Optional boolean to plot uncertainty intervals.
         plot_cap: Optional boolean indicating if the capacity should be shown
             in the figure, if available.
+        weekly_start: Optional int specifying the start day of the weekly
+            seasonality plot. 0 (default) starts the week on Sunday. 1 shifts
+            by 1 day to Monday, and so on.
 
         Returns
         -------
@@ -951,7 +955,8 @@ class Prophet(object):
                 artists += self.plot_holidays(fcst, ax=ax,
                                               uncertainty=uncertainty)
             elif plot == 'weekly':
-                artists += self.plot_weekly(ax=ax, uncertainty=uncertainty)
+                artists += self.plot_weekly(ax=ax, uncertainty=uncertainty,
+                                            weekly_start=weekly_start)
             elif plot == 'yearly':
                 artists += self.plot_yearly(ax=ax, uncertainty=uncertainty)
 
@@ -1027,7 +1032,7 @@ class Prophet(object):
         ax.set_ylabel('holidays')
         return artists
 
-    def plot_weekly(self, ax=None, uncertainty=True):
+    def plot_weekly(self, ax=None, uncertainty=True, weekly_start=0):
         """Plot the weekly component of the forecast.
 
         Parameters
@@ -1035,6 +1040,9 @@ class Prophet(object):
         ax: Optional matplotlib Axes to plot on. One will be created if this
             is not provided.
         uncertainty: Optional boolean to plot uncertainty intervals.
+        weekly_start: Optional int specifying the start day of the weekly
+            seasonality plot. 0 (default) starts the week on Sunday. 1 shifts
+            by 1 day to Monday, and so on.
 
         Returns
         -------
@@ -1045,7 +1053,8 @@ class Prophet(object):
             fig = plt.figure(facecolor='w', figsize=(10, 6))
             ax = fig.add_subplot(111)
         # Compute weekly seasonality for a Sun-Sat sequence of dates.
-        days = pd.date_range(start='2017-01-01', periods=7)
+        days = (pd.date_range(start='2017-01-01', periods=7) +
+                pd.Timedelta(days=weekly_start))
         df_w = pd.DataFrame({'ds': days, 'cap': 1.})
         df_w = self.setup_dataframe(df_w)
         seas = self.predict_seasonal_components(df_w)

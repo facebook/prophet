@@ -6,7 +6,8 @@
 Prints a ggplot2 with panels for trend, weekly and yearly seasonalities if
 present, and holidays if present.}
 \usage{
-prophet_plot_components(m, fcst, uncertainty = TRUE, plot_cap = TRUE)
+prophet_plot_components(m, fcst, uncertainty = TRUE, plot_cap = TRUE,
+  weekly_start = 0)
 }
 \arguments{
 \item{m}{Prophet object.}
@@ -18,6 +19,10 @@ plotted for the trend, from fcst columns trend_lower and trend_upper.}
 
 \item{plot_cap}{Boolean indicating if the capacity should be shown in the
 figure, if available.}
+
+\item{weekly_start}{Integer specifying the start day of the weekly
+seasonality plot. 0 (default) starts the week on Sunday. 1 shifts by 1 day
+to Monday, and so on.}
 }
 \value{
 Invisibly return a list containing the plotted ggplot objects
