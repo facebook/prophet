@@ -915,7 +915,7 @@ class Prophet(object):
         return fig
 
     def plot_components(self, fcst, uncertainty=True, plot_cap=True,
-                        weekly_start=0):
+                        weekly_start=0, yearly_start=0):
         """Plot the Prophet forecast components.
 
         Will plot whichever are available of: trend, holidays, weekly
@@ -930,6 +930,9 @@ class Prophet(object):
         weekly_start: Optional int specifying the start day of the weekly
             seasonality plot. 0 (default) starts the week on Sunday. 1 shifts
             by 1 day to Monday, and so on.
+        yearly_start: Optional int specifying the start day of the yearly
+            seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts
+            by 1 day to Jan 2, and so on.
 
         Returns
         -------
@@ -958,7 +961,8 @@ class Prophet(object):
                 artists += self.plot_weekly(ax=ax, uncertainty=uncertainty,
                                             weekly_start=weekly_start)
             elif plot == 'yearly':
-                artists += self.plot_yearly(ax=ax, uncertainty=uncertainty)
+                artists += self.plot_yearly(ax=ax, uncertainty=uncertainty,
+                                            yearly_start=yearly_start)
 
         fig.tight_layout()
         return artists
@@ -1072,7 +1076,7 @@ class Prophet(object):
         ax.set_ylabel('weekly')
         return artists
 
-    def plot_yearly(self, ax=None, uncertainty=True):
+    def plot_yearly(self, ax=None, uncertainty=True, yearly_start=0):
         """Plot the yearly component of the forecast.
 
         Parameters
@@ -1080,6 +1084,9 @@ class Prophet(object):
         ax: Optional matplotlib Axes to plot on. One will be created if
             this is not provided.
         uncertainty: Optional boolean to plot uncertainty intervals.
+        yearly_start: Optional int specifying the start day of the yearly
+            seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts
+            by 1 day to Jan 2, and so on.
 
         Returns
         -------
@@ -1091,7 +1098,8 @@ class Prophet(object):
             ax = fig.add_subplot(111)
         # Compute yearly seasonality for a Jan 1 - Dec 31 sequence of dates.
         df_y = pd.DataFrame(
-            {'ds': pd.date_range(start='2017-01-01', periods=365), 'cap': 1.})
+            {'ds': pd.date_range(start='2017-01-01', periods=365) +
+             pd.Timedelta(days=yearly_start), 'cap': 1.})
         df_y = self.setup_dataframe(df_y)
         seas = self.predict_seasonal_components(df_y)
         artists += ax.plot(df_y['ds'], seas['yearly'], ls='-',

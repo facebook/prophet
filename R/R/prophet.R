@@ -990,13 +990,17 @@ plot.prophet <- function(x, fcst, uncertainty = TRUE, plot_cap = TRUE,
 #' @param weekly_start Integer specifying the start day of the weekly
 #'  seasonality plot. 0 (default) starts the week on Sunday. 1 shifts by 1 day
 #'  to Monday, and so on.
+#' @param yearly_start Integer specifying the start day of the yearly
+#'  seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts by 1 day
+#'  to Jan 2, and so on.
 #'
 #' @return Invisibly return a list containing the plotted ggplot objects
 #'
 #' @export
 #' @importFrom dplyr "%>%"
-prophet_plot_components <- function(m, fcst, uncertainty = TRUE,
-                                    plot_cap = TRUE, weekly_start = 0) {
+prophet_plot_components <- function(
+    m, fcst, uncertainty = TRUE, plot_cap = TRUE, weekly_start = 0,
+    yearly_start = 0) {
   df <- df_for_plotting(m, fcst)
   # Plot the trend
   panels <- list(plot_trend(df, uncertainty, plot_cap))
@@ -1010,7 +1014,7 @@ prophet_plot_components <- function(m, fcst, uncertainty = TRUE,
   }
   # Plot yearly seasonality, if present
   if ("yearly" %in% colnames(df)) {
-    panels[[length(panels) + 1]] <- plot_yearly(m, uncertainty)
+    panels[[length(panels) + 1]] <- plot_yearly(m, uncertainty, yearly_start)
   }
   # Make the plot.
   grid::grid.newpage()
@@ -1119,12 +1123,16 @@ plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0) {
 #'
 #' @param m Prophet model object.
 #' @param uncertainty Boolean to plot uncertainty intervals.
+#' @param yearly_start Integer specifying the start day of the yearly
+#'  seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts by 1 day
+#'  to Jan 2, and so on.
 #'
 #' @return A ggplot2 plot.
-plot_yearly <- function(m, uncertainty = TRUE) {
+plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0) {
   # Compute yearly seasonality for a Jan 1 - Dec 31 sequence of dates.
   df.y <- data.frame(
-    ds=seq.Date(zoo::as.Date('2017-01-01'), by='d', length.out=365), cap=1.)
+    ds=seq.Date(zoo::as.Date('2017-01-01'), by='d', length.out=365) +
+    yearly_start, cap=1.)
   df.y <- setup_dataframe(m, df.y)$df
   seas <- predict_seasonal_components(m, df.y)
   seas$ds <- df.y$ds

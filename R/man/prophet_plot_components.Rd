@@ -7,7 +7,7 @@ Prints a ggplot2 with panels for trend, weekly and yearly seasonalities if
 present, and holidays if present.}
 \usage{
 prophet_plot_components(m, fcst, uncertainty = TRUE, plot_cap = TRUE,
-  weekly_start = 0)
+  weekly_start = 0, yearly_start = 0)
 }
 \arguments{
 \item{m}{Prophet object.}
@@ -23,6 +23,10 @@ figure, if available.}
 \item{weekly_start}{Integer specifying the start day of the weekly
 seasonality plot. 0 (default) starts the week on Sunday. 1 shifts by 1 day
 to Monday, and so on.}
+
+\item{yearly_start}{Integer specifying the start day of the yearly
+seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts by 1 day
+to Jan 2, and so on.}
 }
 \value{
 Invisibly return a list containing the plotted ggplot objects
