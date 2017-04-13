@@ -27,8 +27,8 @@ globalVariables(c(
 #'  if input `changepoints` is supplied. If `changepoints` is not supplied,
 #'  then n.changepoints potential changepoints are selected uniformly from the
 #'  first 80 percent of df$ds.
-#' @param yearly.seasonality Boolean, fit yearly seasonality.
-#' @param weekly.seasonality Boolean, fit weekly seasonality.
+#' @param yearly.seasonality Fit yearly seasonality; 'auto', TRUE, or FALSE.
+#' @param weekly.seasonality Fit weekly seasonality; 'auto', TRUE, or FALSE.
 #' @param holidays data frame with columns holiday (character) and ds (date
 #'  type)and optionally columns lower_window and upper_window which specify a
 #'  range of days around the date to be included as holidays. lower_window=-2
@@ -70,8 +70,8 @@ prophet <- function(df = df,
                     growth = 'linear',
                     changepoints = NULL,
                     n.changepoints = 25,
-                    yearly.seasonality = TRUE,
-                    weekly.seasonality = TRUE,
+                    yearly.seasonality = 'auto',
+                    weekly.seasonality = 'auto',
                     holidays = NULL,
                     seasonality.prior.scale = 10,
                     holidays.prior.scale = 10,
@@ -401,6 +401,38 @@ make_all_seasonality_features <- function(m, df) {
   return(seasonal.features)
 }
 
+#' Set seasonalities that were left on auto.
+#'
+#' Turns on yearly seasonality if there is >=2 years of history.
+#' Turns on weekly seasonality if there is >=2 weeks of history, and the
+#' spacing between dates in the history is <7 days.
+#'
+#' @param m Prophet object.
+#'
+#' @return The prophet model with seasonalities set.
+#'
+set_auto_seasonalities <- function(m) {
+  first <- min(m$history$ds)
+  last <- max(m$history$ds)
+  if (m$yearly.seasonality == 'auto') {
+    if (last - first < 730) {
+      m$yearly.seasonality <- FALSE
+    } else {
+      m$yearly.seasonality <- TRUE
+    }
+  }
+  if (m$weekly.seasonality == 'auto') {
+    dt <- diff(m$history$ds)
+    min.dt <- min(dt[dt > 0])
+    if ((last - first < 14) || (min.dt >= 7)) {
+      m$weekly.seasonality <- FALSE
+    } else {
+      m$weekly.seasonality <- TRUE
+    }
+  }
+  return(m)
+}
+
 #' Initialize linear growth.
 #'
 #' Provides a strong initialization for linear growth by calculating the
@@ -484,6 +516,7 @@ fit.prophet <- function(m, df, ...) {
   history <- out$df
   m <- out$m
   m$history <- history
+  m <- set_auto_seasonalities(m)
   seasonal.features <- make_all_seasonality_features(m, history)
 
   m <- set_changepoints(m)

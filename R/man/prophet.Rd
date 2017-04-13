@@ -5,8 +5,8 @@
 \title{Prophet forecaster.}
 \usage{
 prophet(df = df, growth = "linear", changepoints = NULL,
-  n.changepoints = 25, yearly.seasonality = TRUE,
-  weekly.seasonality = TRUE, holidays = NULL,
+  n.changepoints = 25, yearly.seasonality = "auto",
+  weekly.seasonality = "auto", holidays = NULL,
   seasonality.prior.scale = 10, holidays.prior.scale = 10,
   changepoint.prior.scale = 0.05, mcmc.samples = 0, interval.width = 0.8,
   uncertainty.samples = 1000, fit = TRUE, ...)
@@ -28,9 +28,9 @@ if input `changepoints` is supplied. If `changepoints` is not supplied,
 then n.changepoints potential changepoints are selected uniformly from the
 first 80 percent of df$ds.}
 
-\item{yearly.seasonality}{Boolean, fit yearly seasonality.}
+\item{yearly.seasonality}{Fit yearly seasonality; 'auto', TRUE, or FALSE.}
 
-\item{weekly.seasonality}{Boolean, fit weekly seasonality.}
+\item{weekly.seasonality}{Fit weekly seasonality; 'auto', TRUE, or FALSE.}
 
 \item{holidays}{data frame with columns holiday (character) and ds (date
 type)and optionally columns lower_window and upper_window which specify a

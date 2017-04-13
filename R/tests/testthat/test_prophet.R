@@ -119,7 +119,7 @@ test_that("fourier_series_yearly", {
 })
 
 test_that("growth_init", {
-  history <- DATA
+  history <- DATA[1:468, ]
   history$cap <- max(history$y)
   m <- prophet(history, growth = 'logistic', fit = FALSE)
 
@@ -209,7 +209,8 @@ test_that("fit_with_holidays", {
 
 test_that("make_future_dataframe", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
-  m <- prophet(train)
+  train.t <- DATA[1:234, ]
+  m <- prophet(train.t)
   future <- make_future_dataframe(m, periods = 3, freq = 'd',
                                   include_history = FALSE)
   correct <- as.Date(c('2013-04-26', '2013-04-27', '2013-04-28'))
@@ -219,4 +220,42 @@ test_that("make_future_dataframe", {
                                   include_history = FALSE)
   correct <- as.Date(c('2013-05-25', '2013-06-25', '2013-07-25'))
   expect_equal(future$ds, correct)
+})
+
+test_that("auto_weekly_seasonality", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  # Should be True
+  N.w <- 15
+  train.w <- DATA[1:N.w, ]
+  m <- prophet(train.w, fit = FALSE)
+  expect_equal(m$weekly.seasonality, 'auto')
+  m <- prophet:::fit.prophet(m, train.w)
+  expect_equal(m$weekly.seasonality, TRUE)
+  # Should be False due to too short history
+  N.w <- 9
+  train.w <- DATA[1:N.w, ]
+  m <- prophet(train.w)
+  expect_equal(m$weekly.seasonality, FALSE)
+  m <- prophet(train.w, weekly.seasonality = TRUE)
+  expect_equal(m$weekly.seasonality, TRUE)
+  # Should be False due to weekly spacing
+  train.w <- DATA[seq(1, nrow(DATA), 7), ]
+  m <- prophet(train.w)
+  expect_equal(m$weekly.seasonality, FALSE)
+})
+
+test_that("auto_yearly_seasonality", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  # Should be True
+  m <- prophet(DATA, fit = FALSE)
+  expect_equal(m$yearly.seasonality, 'auto')
+  m <- prophet:::fit.prophet(m, DATA)
+  expect_equal(m$yearly.seasonality, TRUE)
+  # Should be False due to too short history
+  N.w <- 240
+  train.y <- DATA[1:N.w, ]
+  m <- prophet(train.y)
+  expect_equal(m$yearly.seasonality, FALSE)
+  m <- prophet(train.y, yearly.seasonality = TRUE)
+  expect_equal(m$yearly.seasonality, TRUE)
 })

@@ -46,8 +46,8 @@ class Prophet(object):
         if input `changepoints` is supplied. If `changepoints` is not supplied,
         then n.changepoints potential changepoints are selected uniformly from
         the first 80 percent of the history.
-    yearly_seasonality: Boolean, fit yearly seasonality.
-    weekly_seasonality: Boolean, fit weekly seasonality.
+    yearly_seasonality: Fit yearly seasonality. Can be 'auto', True, or False.
+    weekly_seasonality: Fit weekly seasonality. Can be 'auto', True, or False.
     holidays: pd.DataFrame with columns holiday (string) and ds (date type)
         and optionally columns lower_window and upper_window which specify a
         range of days around the date to be included as holidays.
@@ -77,8 +77,8 @@ class Prophet(object):
             growth='linear',
             changepoints=None,
             n_changepoints=25,
-            yearly_seasonality=True,
-            weekly_seasonality=True,
+            yearly_seasonality='auto',
+            weekly_seasonality='auto',
             holidays=None,
             seasonality_prior_scale=10.0,
             holidays_prior_scale=10.0,
@@ -392,6 +392,29 @@ class Prophet(object):
             seasonal_features.append(self.make_holiday_features(df['ds']))
         return pd.concat(seasonal_features, axis=1)
 
+    def set_auto_seasonalities(self):
+        """Set seasonalities that were left on auto.
+
+        Turns on yearly seasonality if there is >=2 years of history.
+        Turns on weekly seasonality if there is >=2 weeks of history, and the
+        spacing between dates in the history is <7 days.
+        """
+        first = self.history['ds'].min()
+        last = self.history['ds'].max()
+        if self.yearly_seasonality == 'auto':
+            if last - first < pd.Timedelta(days=730):
+                self.yearly_seasonality = False
+            else:
+                self.yearly_seasonality = True
+        if self.weekly_seasonality == 'auto':
+            dt = self.history['ds'].diff()
+            min_dt = dt.iloc[dt.nonzero()[0]].min()
+            if ((last - first < pd.Timedelta(weeks=2)) or
+                (min_dt >= pd.Timedelta(weeks=1))):
+                self.weekly_seasonality = False
+            else:
+                self.weekly_seasonality = True
+
     @staticmethod
     def linear_growth_init(df):
         """Initialize linear growth.
@@ -487,6 +510,7 @@ class Prophet(object):
 
         history = self.setup_dataframe(history, initialize_scales=True)
         self.history = history
+        self.set_auto_seasonalities()
         seasonal_features = self.make_all_seasonality_features(history)
 
         self.set_changepoints()
