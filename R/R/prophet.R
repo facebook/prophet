@@ -539,11 +539,15 @@ fit.prophet <- function(m, df, ...) {
   # Run stan
   if (m$growth == 'linear') {
     kinit <- linear_growth_init(history)
-    model <- get_prophet_stan_model('linear')
   } else {
     dat$cap <- history$cap_scaled  # Add capacities to the Stan data
     kinit <- logistic_growth_init(history)
-    model <- get_prophet_stan_model('logistic')
+  }
+
+  if (exists(".prophet.stan.models")) {
+    model <- .prophet.stan.models[[m$growth]]
+  } else {
+    model <- get_prophet_stan_model(m$growth)
   }
 
   stan_init <- function() {
@@ -592,7 +596,6 @@ fit.prophet <- function(m, df, ...) {
     m$params$k <- m$params$k + m$params$delta[, 1]
     m$params$delta <- matrix(rep(0, length(m$params$delta)), nrow = n.iteration)
   }
-  gc() ## This is hack.  We don't know why it works but it solves issue #93.
   return(m)
 }
 

@@ -7,11 +7,6 @@ N <- nrow(DATA)
 train <- DATA[1:floor(N / 2), ]
 future <- DATA[(ceiling(N/2) + 1):N, ]
 
-test_that("load_models", {
-  expect_error(prophet:::get_prophet_stan_model('linear'), NA)
-  expect_error(prophet:::get_prophet_stan_model('logistic'), NA)
-})
-
 test_that("fit_predict", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   m <- prophet(train)
