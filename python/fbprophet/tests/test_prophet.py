@@ -25,10 +25,6 @@ from fbprophet import Prophet
 # fb-block 2
 
 class TestProphet(TestCase):
-    def test_load_models(self):
-        forecaster = Prophet()
-        forecaster.get_linear_model()
-        forecaster.get_logistic_model()
 
     def test_fit_predict(self):
         N = DATA.shape[0]
