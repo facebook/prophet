@@ -892,6 +892,13 @@ class Prophet(object):
         Will plot whichever are available of: trend, holidays, weekly
         seasonality, and yearly seasonality.
 
+        This method returns a list of matplotlib artists. To show the plot,
+        >>> m.plot_components(fcst)
+        >>> from matplotlib import pyplot as plt
+        >>> plt.show()
+
+        To save the figure, replace plt.show with plt.savefig.
+
         Parameters
         ----------
         fcst: pd.DataFrame output of self.predict.
@@ -907,7 +914,7 @@ class Prophet(object):
 
         Returns
         -------
-        a matplotlib figure.
+        A list of matplotlib artists.
         """
         # Identify components to be plotted
         components = [('trend', True),
