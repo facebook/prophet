@@ -416,6 +416,8 @@ set_auto_seasonalities <- function(m) {
   last <- max(m$history$ds)
   if (m$yearly.seasonality == 'auto') {
     if (last - first < 730) {
+      warn('Disabling yearly seasonality. ',
+           'Run prophet with `yearly.seasonality=TRUE` to override this.')
       m$yearly.seasonality <- FALSE
     } else {
       m$yearly.seasonality <- TRUE
@@ -425,6 +427,8 @@ set_auto_seasonalities <- function(m) {
     dt <- diff(m$history$ds)
     min.dt <- min(dt[dt > 0])
     if ((last - first < 14) || (min.dt >= 7)) {
+      warning('Disabling weekly seasonality. ',
+              'Run prophet with `weekly.seasonality=TRUE` to override this.')
       m$weekly.seasonality <- FALSE
     } else {
       m$weekly.seasonality <- TRUE
