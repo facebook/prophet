@@ -6,3 +6,5 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 
 from fbprophet.forecaster import Prophet
+
+__version__ = '0.1.1'
