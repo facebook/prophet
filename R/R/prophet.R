@@ -417,7 +417,7 @@ set_auto_seasonalities <- function(m) {
   if (m$yearly.seasonality == 'auto') {
     if (last - first < 730) {
       warning('Disabling yearly seasonality. ',
-           'Run prophet with `yearly.seasonality=TRUE` to override this.')
+              'Run prophet with `yearly.seasonality=TRUE` to override this.')
       m$yearly.seasonality <- FALSE
     } else {
       m$yearly.seasonality <- TRUE

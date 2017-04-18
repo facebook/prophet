@@ -52,6 +52,7 @@ On Windows, PyStan requires a compiler so you'll need to [follow the instruction
 ### Version 0.1.1 (2017.04.17)
 
 - Bugfixes
+- New options for detecting yearly and weekly seasonality (now the default)
 
 ### Version 0.1 (2017.02.23)
 
