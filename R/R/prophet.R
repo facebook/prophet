@@ -751,7 +751,7 @@ predict_seasonal_components <- function(m, df) {
                           upper = apply(comp, 1, stats::quantile, upper.p,
                                         na.rm = TRUE))
       }) %>%
-      tidyr::gather(stat, value, c(mean, lower, upper)) %>%
+      tidyr::gather(stat, value, mean, lower, upper) %>%
       dplyr::mutate(stat = ifelse(stat == 'mean', '', paste0('_', stat))) %>%
       tidyr::unite(component, component, stat, sep="") %>%
       tidyr::spread(component, value) %>%
