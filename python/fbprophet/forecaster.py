@@ -375,6 +375,8 @@ class Prophet(object):
         if self.yearly_seasonality == 'auto':
             if last - first < pd.Timedelta(days=730):
                 self.yearly_seasonality = False
+                print('Disabling yearly seasonality. Run prophet with '
+                      'yearly_seasonality=True to override this.')
             else:
                 self.yearly_seasonality = True
         if self.weekly_seasonality == 'auto':
@@ -383,6 +385,8 @@ class Prophet(object):
             if ((last - first < pd.Timedelta(weeks=2)) or
                 (min_dt >= pd.Timedelta(weeks=1))):
                 self.weekly_seasonality = False
+                print('Disabling weekly seasonality. Run prophet with '
+                      'weekly_seasonality=True to override this.')
             else:
                 self.weekly_seasonality = True
 
