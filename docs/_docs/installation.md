@@ -41,4 +41,8 @@ On Windows, PyStan requires a compiler so you'll need to [follow the instruction
 
 ### Linux
 
-Make sure compilers (gcc, g++) and Python development tools (python-dev) are installed. If you are using Anaconda, you will need `conda install gcc`. If you are using a VM, be aware that you will need at least 2GB of memory to run PyStan.
+Make sure compilers (gcc, g++) and Python development tools (python-dev) are installed. If you are using a VM, be aware that you will need at least 2GB of memory to run PyStan.
+
+### Anaconda
+
+Use `conda install gcc` to set up gcc. The easiest way to install Prophet is through conda-forge: `conda install -c conda-forge fbprophet`.
