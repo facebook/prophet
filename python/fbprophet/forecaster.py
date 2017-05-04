@@ -20,7 +20,9 @@ from matplotlib.ticker import FuncFormatter
 import numpy as np
 import pandas as pd
 
+# fb-block 1 start
 from fbprophet.models import prophet_stan_models
+# fb-block 1 end
 
 try:
     import pystan
@@ -383,7 +385,7 @@ class Prophet(object):
             dt = self.history['ds'].diff()
             min_dt = dt.iloc[dt.nonzero()[0]].min()
             if ((last - first < pd.Timedelta(weeks=2)) or
-                (min_dt >= pd.Timedelta(weeks=1))):
+                    (min_dt >= pd.Timedelta(weeks=1))):
                 self.weekly_seasonality = False
                 print('Disabling weekly seasonality. Run prophet with '
                       'weekly_seasonality=True to override this.')
@@ -539,8 +541,8 @@ class Prophet(object):
         # If no changepoints were requested, replace delta with 0s
         if len(self.changepoints) == 0:
             # Fold delta into the base rate k
-            params['k'] = params['k'] + params['delta']
-            params['delta'] = np.zeros(params['delta'].shape)
+            self.params['k'] = self.params['k'] + self.params['delta']
+            self.params['delta'] = np.zeros(self.params['delta'].shape)
 
         return self
 
@@ -1093,6 +1095,3 @@ class Prophet(object):
         ax.set_xlabel('Day of year')
         ax.set_ylabel('yearly')
         return artists
-
-
-# fb-block 9

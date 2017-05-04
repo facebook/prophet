@@ -15,6 +15,8 @@ import pickle
 # fb-block 1 start
 import pkg_resources
 # fb-block 1 end
+# fb-block 2
+
 
 def get_prophet_stan_model(model):
     """Load compiled Stan model"""
@@ -27,6 +29,7 @@ def get_prophet_stan_model(model):
     # fb-block 4 end
     with open(model_file, 'rb') as f:
         return pickle.load(f)
+
 
 prophet_stan_models = {
     'linear': get_prophet_stan_model('linear'),
