@@ -43,7 +43,7 @@ class Prophet(object):
         not specified, potential changepoints are selected automatically.
     n_changepoints: Number of potential changepoints to include. Not used
         if input `changepoints` is supplied. If `changepoints` is not supplied,
-        then n.changepoints potential changepoints are selected uniformly from
+        then n_changepoints potential changepoints are selected uniformly from
         the first 80 percent of the history.
     yearly_seasonality: Fit yearly seasonality. Can be 'auto', True, or False.
     weekly_seasonality: Fit weekly seasonality. Can be 'auto', True, or False.
