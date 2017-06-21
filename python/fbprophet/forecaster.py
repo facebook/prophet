@@ -12,6 +12,9 @@ from __future__ import unicode_literals
 
 from collections import defaultdict
 from datetime import timedelta
+import logging
+
+logger = logging.getLogger(__name__)
 
 from matplotlib import pyplot as plt
 from matplotlib.dates import MonthLocator, num2date
@@ -27,10 +30,12 @@ from fbprophet.models import prophet_stan_models
 try:
     import pystan
 except ImportError:
-    print('You cannot run prophet without pystan installed')
+    logger.error('You cannot run prophet without pystan installed')
     raise
 
 # fb-block 2
+
+
 
 class Prophet(object):
     """Prophet forecaster.
@@ -377,8 +382,8 @@ class Prophet(object):
         if self.yearly_seasonality == 'auto':
             if last - first < pd.Timedelta(days=730):
                 self.yearly_seasonality = False
-                print('Disabling yearly seasonality. Run prophet with '
-                      'yearly_seasonality=True to override this.')
+                logger.info('Disabling yearly seasonality. Run prophet with '
+                      		'yearly_seasonality=True to override this.')
             else:
                 self.yearly_seasonality = True
         if self.weekly_seasonality == 'auto':
@@ -387,8 +392,8 @@ class Prophet(object):
             if ((last - first < pd.Timedelta(weeks=2)) or
                     (min_dt >= pd.Timedelta(weeks=1))):
                 self.weekly_seasonality = False
-                print('Disabling weekly seasonality. Run prophet with '
-                      'weekly_seasonality=True to override this.')
+                logger.info('Disabling weekly seasonality. Run prophet with '
+                      		'weekly_seasonality=True to override this.')
             else:
                 self.weekly_seasonality = True
 
