@@ -83,6 +83,7 @@ class Prophet(object):
             n_changepoints=25,
             yearly_seasonality='auto',
             weekly_seasonality='auto',
+            hourly_seasonality='auto',
             holidays=None,
             seasonality_prior_scale=10.0,
             holidays_prior_scale=10.0,
@@ -101,6 +102,7 @@ class Prophet(object):
 
         self.yearly_seasonality = yearly_seasonality
         self.weekly_seasonality = weekly_seasonality
+        self.hourly_seasonality = hourly_seasonality
 
         if holidays is not None:
             if not (
@@ -366,6 +368,14 @@ class Prophet(object):
                 'weekly',
             ))
 
+        if self.hourly_seasonality:
+            seasonal_features.append(self.make_seasonality_features(
+                df['ds'],
+                1 / 24,
+                2,
+                'hourly',
+            ))
+
         if self.holidays is not None:
             seasonal_features.append(self.make_holiday_features(df['ds']))
         return pd.concat(seasonal_features, axis=1)
@@ -376,6 +386,9 @@ class Prophet(object):
         Turns on yearly seasonality if there is >=2 years of history.
         Turns on weekly seasonality if there is >=2 weeks of history, and the
         spacing between dates in the history is <7 days.
+
+        Turns on hourly seasonality if there is >=2 hours of history, and the
+        spacing between dates in the history is <1 hour.
         """
         first = self.history['ds'].min()
         last = self.history['ds'].max()
@@ -396,6 +409,16 @@ class Prophet(object):
                             'weekly_seasonality=True to override this.')
             else:
                 self.weekly_seasonality = True
+        if self.hourly_seasonality == 'auto':
+            dt = self.history['ds'].diff()
+            min_dt = dt.iloc[dt.nonzero()[0]].min()
+            if ((last - first < pd.Timedelta(hours=2)) or
+                    (min_dt >= pd.Timedelta(hours=1))):
+                self.hourly_seasonality = False
+                print('Disabling hourly seasonality. Run prophet with '
+                      'hourly_seasonality=True to override this.')
+            else:
+                self.hourly_seasonality = True
 
     @staticmethod
     def linear_growth_init(df):
