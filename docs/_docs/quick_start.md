@@ -75,7 +75,7 @@ We fit the model by instantiated a new `Prophet` object.  Any settings to the fo
 ```python
 # Python
 m = Prophet()
-m.fit(df);
+m.fit(df)
 ```
 Predictions are then made on a dataframe with a column `ds` containing the dates for which a prediction is to be made. You can get a suitable dataframe that extends into the future a specified number of days using the helper method `Prophet.make_future_dataframe`. By default it will also include the dates from the history, so we will see the model fit as well. 
 
@@ -189,7 +189,7 @@ You can plot the forecast by calling the `Prophet.plot` method and passing in yo
 
 ```python
 # Python
-m.plot(forecast);
+m.plot(forecast)
 ```
  
 ![png](/prophet/static/quick_start_files/quick_start_12_0.png) 
@@ -199,7 +199,7 @@ If you want to see the forecast components, you can use the `Prophet.plot_compon
 
 ```python
 # Python
-m.plot_components(forecast);
+m.plot_components(forecast)
 ```
  
 ![png](/prophet/static/quick_start_files/quick_start_14_0.png) 
