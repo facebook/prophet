@@ -74,6 +74,7 @@ class Prophet(object):
         parameters, which will include uncertainty in seasonality.
     uncertainty_samples: Number of simulated draws used to estimate
         uncertainty intervals.
+    daily_seasonality: Boolean, fit daily seasonality
     """
 
     def __init__(
@@ -90,6 +91,7 @@ class Prophet(object):
             mcmc_samples=0,
             interval_width=0.80,
             uncertainty_samples=1000,
+            daily_seasonality=False,
     ):
         self.growth = growth
 
@@ -101,6 +103,7 @@ class Prophet(object):
 
         self.yearly_seasonality = yearly_seasonality
         self.weekly_seasonality = weekly_seasonality
+        self.daily_seasonality = daily_seasonality
 
         if holidays is not None:
             if not (
@@ -256,8 +259,7 @@ class Prophet(object):
         # convert to days since epoch
         t = np.array(
             (dates - pd.datetime(1970, 1, 1))
-            .dt.days
-            .astype(np.float)
+            .dt.total_seconds()/(24*3600)
         )
         return np.column_stack([
             fun((2.0 * (i + 1) * np.pi * t / period))
@@ -366,6 +368,14 @@ class Prophet(object):
                 7,
                 3,
                 'weekly',
+            ))
+
+        if self.daily_seasonality:
+            seasonal_features.append(self.make_seasonality_features(
+                df['ds'],
+                1,
+                3,
+                'daily'
             ))
 
         if self.holidays is not None:
