@@ -1,0 +1,11 @@
+language: python
+python:
+  - "2.7"
+  - "3.6"
+
+install:
+  - pip install --upgrade pip
+  - pip install -U -r python/requirements.txt
+
+script:
+  - cd python && python setup.py develop test
