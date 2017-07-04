@@ -252,43 +252,51 @@ class TestProphet(TestCase):
             self.assertEqual(future.iloc[i]['ds'], correct[i])
 
     def test_auto_weekly_seasonality(self):
-        # Should be True
+        # Should be enabled
         N = 15
         train = DATA.head(N)
         m = Prophet()
         self.assertEqual(m.weekly_seasonality, 'auto')
         m.fit(train)
-        self.assertEqual(m.weekly_seasonality, True)
-        # Should be False due to too short history
+        self.assertIn('weekly', m.seasonalities)
+        self.assertEqual(m.seasonalities['weekly'], (7, 3))
+        # Should be disabled due to too short history
         N = 9
         train = DATA.head(N)
         m = Prophet()
         m.fit(train)
-        self.assertEqual(m.weekly_seasonality, False)
+        self.assertNotIn('weekly', m.seasonalities)
         m = Prophet(weekly_seasonality=True)
         m.fit(train)
-        self.assertEqual(m.weekly_seasonality, True)
+        self.assertIn('weekly', m.seasonalities)
         # Should be False due to weekly spacing
         train = DATA.iloc[::7, :]
         m = Prophet()
         m.fit(train)
-        self.assertEqual(m.weekly_seasonality, False)
+        self.assertNotIn('weekly', m.seasonalities)
+        m = Prophet(weekly_seasonality=2)
+        m.fit(DATA)
+        self.assertEqual(m.seasonalities['weekly'], (7, 2))
 
     def test_auto_yearly_seasonality(self):
-        # Should be True
+        # Should be enabled
         m = Prophet()
         self.assertEqual(m.yearly_seasonality, 'auto')
         m.fit(DATA)
-        self.assertEqual(m.yearly_seasonality, True)
-        # Should be False due to too short history
+        self.assertIn('yearly', m.seasonalities)
+        self.assertEqual(m.seasonalities['yearly'], (365.25, 10))
+        # Should be disabled due to too short history
         N = 240
         train = DATA.head(N)
         m = Prophet()
         m.fit(train)
-        self.assertEqual(m.yearly_seasonality, False)
+        self.assertNotIn('yearly', m.seasonalities)
         m = Prophet(yearly_seasonality=True)
         m.fit(train)
-        self.assertEqual(m.yearly_seasonality, True)
+        self.assertIn('yearly', m.seasonalities)
+        m = Prophet(yearly_seasonality=7)
+        m.fit(DATA)
+        self.assertEqual(m.seasonalities['yearly'], (365.25, 7))
 
 
 DATA = pd.read_csv(StringIO("""
