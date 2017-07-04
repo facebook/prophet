@@ -12,6 +12,9 @@ from __future__ import unicode_literals
 
 from collections import defaultdict
 from datetime import timedelta
+import logging
+
+logger = logging.getLogger(__name__)
 
 from matplotlib import pyplot as plt
 from matplotlib.dates import MonthLocator, num2date
@@ -20,15 +23,19 @@ from matplotlib.ticker import FuncFormatter
 import numpy as np
 import pandas as pd
 
+# fb-block 1 start
 from fbprophet.models import prophet_stan_models
+# fb-block 1 end
 
 try:
     import pystan
 except ImportError:
-    print('You cannot run prophet without pystan installed')
+    logger.error('You cannot run prophet without pystan installed')
     raise
 
 # fb-block 2
+
+
 
 class Prophet(object):
     """Prophet forecaster.
@@ -41,7 +48,7 @@ class Prophet(object):
         not specified, potential changepoints are selected automatically.
     n_changepoints: Number of potential changepoints to include. Not used
         if input `changepoints` is supplied. If `changepoints` is not supplied,
-        then n.changepoints potential changepoints are selected uniformly from
+        then n_changepoints potential changepoints are selected uniformly from
         the first 80 percent of the history.
     yearly_seasonality: Fit yearly seasonality. Can be 'auto', True, or False.
     weekly_seasonality: Fit weekly seasonality. Can be 'auto', True, or False.
@@ -151,7 +158,7 @@ class Prophet(object):
     def setup_dataframe(self, df, initialize_scales=False):
         """Prepare dataframe for fitting or predicting.
 
-        Adds a time index and scales y. Creates auxillary columns 't', 't_ix',
+        Adds a time index and scales y. Creates auxiliary columns 't', 't_ix',
         'y_scaled', and 'cap_scaled'. These columns are used during both
         fitting and predicting.
 
@@ -167,12 +174,14 @@ class Prophet(object):
         if 'y' in df:
             df['y'] = pd.to_numeric(df['y'])
         df['ds'] = pd.to_datetime(df['ds'])
+        if df['ds'].isnull().any():
+            raise ValueError('Found NaN in column ds.')
 
         df = df.sort_values('ds')
         df.reset_index(inplace=True, drop=True)
 
         if initialize_scales:
-            self.y_scale = df['y'].max()
+            self.y_scale = df['y'].abs().max()
             self.start = df['ds'].min()
             self.t_scale = df['ds'].max() - self.start
 
@@ -205,7 +214,7 @@ class Prophet(object):
                 if too_low or too_high:
                     raise ValueError('Changepoints must fall within training data.')
         elif self.n_changepoints > 0:
-            # Place potential changepoints evenly throuh first 80% of history
+            # Place potential changepoints evenly through first 80% of history
             max_ix = np.floor(self.history.shape[0] * 0.8)
             cp_indexes = (
                 np.linspace(0, max_ix, self.n_changepoints + 1)
@@ -375,14 +384,18 @@ class Prophet(object):
         if self.yearly_seasonality == 'auto':
             if last - first < pd.Timedelta(days=730):
                 self.yearly_seasonality = False
+                logger.info('Disabling yearly seasonality. Run prophet with '
+                            'yearly_seasonality=True to override this.')
             else:
                 self.yearly_seasonality = True
         if self.weekly_seasonality == 'auto':
             dt = self.history['ds'].diff()
             min_dt = dt.iloc[dt.nonzero()[0]].min()
             if ((last - first < pd.Timedelta(weeks=2)) or
-                (min_dt >= pd.Timedelta(weeks=1))):
+                    (min_dt >= pd.Timedelta(weeks=1))):
                 self.weekly_seasonality = False
+                logger.info('Disabling weekly seasonality. Run prophet with '
+                            'weekly_seasonality=True to override this.')
             else:
                 self.weekly_seasonality = True
 
@@ -477,6 +490,8 @@ class Prophet(object):
             raise Exception('Prophet object can only be fit once. '
                             'Instantiate a new object.')
         history = df[df['y'].notnull()].copy()
+        if np.isinf(history['y'].values).any():
+            raise ValueError('Found infinity in column y.')
         self.history_dates = pd.to_datetime(df['ds']).sort_values()
 
         history = self.setup_dataframe(history, initialize_scales=True)
@@ -528,15 +543,22 @@ class Prophet(object):
                 self.params[par] = stan_fit[par]
 
         else:
-            params = model.optimizing(dat, init=stan_init, iter=1e4, **kwargs)
+            try:
+                params = model.optimizing(
+                    dat, init=stan_init, iter=1e4, **kwargs)
+            except RuntimeError:
+                params = model.optimizing(
+                    dat, init=stan_init, iter=1e4, algorithm='Newton',
+                    **kwargs
+                )
             for par in params:
                 self.params[par] = params[par].reshape((1, -1))
 
         # If no changepoints were requested, replace delta with 0s
         if len(self.changepoints) == 0:
             # Fold delta into the base rate k
-            params['k'] = params['k'] + params['delta']
-            params['delta'] = np.zeros(params['delta'].shape)
+            self.params['k'] = self.params['k'] + self.params['delta']
+            self.params['delta'] = np.zeros(self.params['delta'].shape)
 
         return self
 
@@ -852,13 +874,14 @@ class Prophet(object):
 
         return pd.DataFrame({'ds': dates})
 
-    def plot(self, fcst, uncertainty=True, plot_cap=True, xlabel='ds',
+    def plot(self, fcst, ax=None, uncertainty=True, plot_cap=True, xlabel='ds',
              ylabel='y'):
         """Plot the Prophet forecast.
 
         Parameters
         ----------
         fcst: pd.DataFrame output of self.predict.
+        ax: Optional matplotlib axes on which to plot.
         uncertainty: Optional boolean to plot uncertainty intervals.
         plot_cap: Optional boolean indicating if the capacity should be shown
             in the figure, if available.
@@ -867,10 +890,13 @@ class Prophet(object):
 
         Returns
         -------
-        a matplotlib figure.
+        A matplotlib figure.
         """
-        fig = plt.figure(facecolor='w', figsize=(10, 6))
-        ax = fig.add_subplot(111)
+        if ax is None:
+            fig = plt.figure(facecolor='w', figsize=(10, 6))
+            ax = fig.add_subplot(111)
+        else:
+            fig = ax.get_figure()
         ax.plot(self.history['ds'].values, self.history['y'], 'k.')
         ax.plot(fcst['ds'].values, fcst['yhat'], ls='-', c='#0072B2')
         if 'cap' in fcst and plot_cap:
@@ -907,7 +933,7 @@ class Prophet(object):
 
         Returns
         -------
-        a matplotlib figure.
+        A matplotlib figure.
         """
         # Identify components to be plotted
         components = [('trend', True),
@@ -920,23 +946,21 @@ class Prophet(object):
         fig, axes = plt.subplots(npanel, 1, facecolor='w',
                                  figsize=(9, 3 * npanel))
 
-        artists = []
         for ax, plot in zip(axes, components):
             if plot == 'trend':
-                artists += self.plot_trend(
+                self.plot_trend(
                     fcst, ax=ax, uncertainty=uncertainty, plot_cap=plot_cap)
             elif plot == 'holidays':
-                artists += self.plot_holidays(fcst, ax=ax,
-                                              uncertainty=uncertainty)
+                self.plot_holidays(fcst, ax=ax, uncertainty=uncertainty)
             elif plot == 'weekly':
-                artists += self.plot_weekly(ax=ax, uncertainty=uncertainty,
-                                            weekly_start=weekly_start)
+                self.plot_weekly(
+                    ax=ax, uncertainty=uncertainty, weekly_start=weekly_start)
             elif plot == 'yearly':
-                artists += self.plot_yearly(ax=ax, uncertainty=uncertainty,
-                                            yearly_start=yearly_start)
+                self.plot_yearly(
+                    ax=ax, uncertainty=uncertainty, yearly_start=yearly_start)
 
         fig.tight_layout()
-        return artists
+        return fig
 
     def plot_trend(self, fcst, ax=None, uncertainty=True, plot_cap=True):
         """Plot the trend component of the forecast.
@@ -1087,6 +1111,3 @@ class Prophet(object):
         ax.set_xlabel('Day of year')
         ax.set_ylabel('yearly')
         return artists
-
-
-# fb-block 9

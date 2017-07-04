@@ -17,4 +17,3 @@ Vector with trend on prediction dates.
 \description{
 Predict trend using the prophet model.
 }
-

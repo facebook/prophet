@@ -13,6 +13,7 @@ Prophet is [open source software](https://code.facebook.com/projects/) released 
 - Source code repository: https://github.com/facebookincubator/prophet
 - Prophet R package: https://cran.r-project.org/package=prophet
 - Prophet Python package: https://pypi.python.org/pypi/fbprophet/
+- Release blogpost: https://research.fb.com/prophet-forecasting-at-scale/
 
 ## Installation in R
 
@@ -46,3 +47,13 @@ After installation, you can [get started!](https://facebookincubator.github.io/p
 
 On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html).  The key step is installing a recent [C++ compiler](http://landinghub.visualstudio.com/visual-cpp-build-tools).
 
+## Changelog
+
+### Version 0.1.1 (2017.04.17)
+
+- Bugfixes
+- New options for detecting yearly and weekly seasonality (now the default)
+
+### Version 0.1 (2017.02.23)
+
+- Initial release

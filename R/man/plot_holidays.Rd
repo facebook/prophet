@@ -19,4 +19,3 @@ A ggplot2 plot.
 \description{
 Plot the holidays component of the forecast.
 }
-

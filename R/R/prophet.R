@@ -226,7 +226,7 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
     dplyr::arrange(ds)
 
   if (initialize_scales) {
-    m$y.scale <- max(df$y)
+    m$y.scale <- max(abs(df$y))
     m$start <- min(df$ds)
     m$t.scale <- as.numeric(max(df$ds) - m$start)
   }
@@ -416,6 +416,8 @@ set_auto_seasonalities <- function(m) {
   last <- max(m$history$ds)
   if (m$yearly.seasonality == 'auto') {
     if (last - first < 730) {
+      warning('Disabling yearly seasonality. ',
+              'Run prophet with `yearly.seasonality=TRUE` to override this.')
       m$yearly.seasonality <- FALSE
     } else {
       m$yearly.seasonality <- TRUE
@@ -425,6 +427,8 @@ set_auto_seasonalities <- function(m) {
     dt <- diff(m$history$ds)
     min.dt <- min(dt[dt > 0])
     if ((last - first < 14) || (min.dt >= 7)) {
+      warning('Disabling weekly seasonality. ',
+              'Run prophet with `weekly.seasonality=TRUE` to override this.')
       m$weekly.seasonality <- FALSE
     } else {
       m$weekly.seasonality <- TRUE
@@ -510,6 +514,9 @@ fit.prophet <- function(m, df, ...) {
   }
   history <- df %>%
     dplyr::filter(!is.na(y))
+  if (any(is.infinite(history$y))) {
+    stop("Found infinity in column y.")
+  }
   m$history.dates <- sort(zoo::as.Date(df$ds))
 
   out <- setup_dataframe(m, history, initialize_scales = TRUE)
@@ -747,7 +754,7 @@ predict_seasonal_components <- function(m, df) {
                           upper = apply(comp, 1, stats::quantile, upper.p,
                                         na.rm = TRUE))
       }) %>%
-      tidyr::gather(stat, value, c(mean, lower, upper)) %>%
+      tidyr::gather(stat, value, mean, lower, upper) %>%
       dplyr::mutate(stat = ifelse(stat == 'mean', '', paste0('_', stat))) %>%
       tidyr::unite(component, component, stat, sep="") %>%
       tidyr::spread(component, value) %>%
