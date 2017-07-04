@@ -17,4 +17,3 @@ Dataframe with uncertainty intervals.
 \description{
 Prophet uncertainty intervals.
 }
-

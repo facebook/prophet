@@ -23,4 +23,3 @@ Dataframe that extends forward from the end of m$history for the
 \description{
 Make dataframe with future dates for forecasting.
 }
-

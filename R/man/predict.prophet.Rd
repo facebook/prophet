@@ -32,4 +32,3 @@ plot(m, forecast)
 }
 
 }
-
