@@ -539,7 +539,14 @@ class Prophet(object):
                 self.params[par] = stan_fit[par]
 
         else:
-            params = model.optimizing(dat, init=stan_init, iter=1e4, **kwargs)
+            try:
+                params = model.optimizing(
+                    dat, init=stan_init, iter=1e4, **kwargs)
+            except RuntimeError:
+                params = model.optimizing(
+                    dat, init=stan_init, iter=1e4, algorithm='Newton',
+                    **kwargs
+                )
             for par in params:
                 self.params[par] = params[par].reshape((1, -1))
 
