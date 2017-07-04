@@ -83,6 +83,7 @@ class Prophet(object):
             n_changepoints=25,
             yearly_seasonality='auto',
             weekly_seasonality='auto',
+            hourly_seasonality='auto',
             holidays=None,
             seasonality_prior_scale=10.0,
             holidays_prior_scale=10.0,
@@ -101,6 +102,7 @@ class Prophet(object):
 
         self.yearly_seasonality = yearly_seasonality
         self.weekly_seasonality = weekly_seasonality
+        self.hourly_seasonality = hourly_seasonality
 
         if holidays is not None:
             if not (
@@ -368,6 +370,14 @@ class Prophet(object):
                 'weekly',
             ))
 
+        if self.hourly_seasonality:
+            seasonal_features.append(self.make_seasonality_features(
+                df['ds'],
+                1 / 24,
+                2,
+                'hourly',
+            ))
+
         if self.holidays is not None:
             seasonal_features.append(self.make_holiday_features(df['ds']))
         return pd.concat(seasonal_features, axis=1)
@@ -378,6 +388,9 @@ class Prophet(object):
         Turns on yearly seasonality if there is >=2 years of history.
         Turns on weekly seasonality if there is >=2 weeks of history, and the
         spacing between dates in the history is <7 days.
+
+        Turns on hourly seasonality if there is >=2 hours of history, and the
+        spacing between dates in the history is <1 hour.
         """
         first = self.history['ds'].min()
         last = self.history['ds'].max()
@@ -398,6 +411,16 @@ class Prophet(object):
                             'weekly_seasonality=True to override this.')
             else:
                 self.weekly_seasonality = True
+        if self.hourly_seasonality == 'auto':
+            dt = self.history['ds'].diff()
+            min_dt = dt.iloc[dt.nonzero()[0]].min()
+            if ((last - first < pd.Timedelta(hours=2)) or
+                    (min_dt >= pd.Timedelta(hours=1))):
+                self.hourly_seasonality = False
+                print('Disabling hourly seasonality. Run prophet with '
+                      'hourly_seasonality=True to override this.')
+            else:
+                self.hourly_seasonality = True
 
     @staticmethod
     def linear_growth_init(df):
@@ -912,7 +935,7 @@ class Prophet(object):
         return fig
 
     def plot_components(self, fcst, uncertainty=True, plot_cap=True,
-                        weekly_start=0, yearly_start=0):
+                        hourly_start=0, weekly_start=0, yearly_start=0):
         """Plot the Prophet forecast components.
 
         Will plot whichever are available of: trend, holidays, weekly
@@ -958,6 +981,9 @@ class Prophet(object):
             elif plot == 'yearly':
                 self.plot_yearly(
                     ax=ax, uncertainty=uncertainty, yearly_start=yearly_start)
+            elif plot == 'hourly':
+                self.plot_hourly(
+                    ax=ax, uncertainty=uncertainty, hourly_start=hourly_start)
 
         fig.tight_layout()
         return fig
@@ -1029,6 +1055,46 @@ class Prophet(object):
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         ax.set_xlabel('ds')
         ax.set_ylabel('holidays')
+        return artists
+
+    def plot_hourly(self, ax=None, uncertainty=True, hourly_start=0):
+        """Plot the weekly component of the forecast.
+
+                Parameters
+                ----------
+                ax: Optional matplotlib Axes to plot on. One will be created if this
+                    is not provided.
+                uncertainty: Optional boolean to plot uncertainty intervals.
+                hourly_start: Optional int specifying the start hour of the hourly
+                    seasonality plot. 0 (default) starts the day at Midnight. 1 shifts
+                    by 1 hour to 01:00 (AM), and so on.
+
+                Returns
+                -------
+                a list of matplotlib artists
+                """
+        artists = []
+        if not ax:
+            fig = plt.figure(facecolor='w', figsize=(10, 6))
+            ax = fig.add_subplot(111)
+        # Compute weekly seasonality for a Sun-Sat sequence of dates.
+        hours = (pd.date_range(start='2017-01-01', periods=7) +
+                pd.Timedelta(hours=hourly_start))
+        df_w = pd.DataFrame({'ds': hours, 'cap': 1.})
+        df_w = self.setup_dataframe(df_w)
+        seas = self.predict_seasonal_components(df_w)
+        hours = hours.hours
+        artists += ax.plot(range(len(hours)), seas['weekly'], ls='-',
+                           c='#0072B2')
+        if uncertainty:
+            artists += [ax.fill_between(range(len(hours)),
+                                        seas['weekly_lower'], seas['weekly_upper'],
+                                        color='#0072B2', alpha=0.2)]
+        ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
+        ax.set_xticks(range(len(hours)))
+        ax.set_xticklabels(hours)
+        ax.set_xlabel('Hour')
+        ax.set_ylabel('hourly')
         return artists
 
     def plot_weekly(self, ax=None, uncertainty=True, weekly_start=0):
