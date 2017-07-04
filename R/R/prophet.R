@@ -1160,4 +1160,52 @@ plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0) {
   return(gg.yearly)
 }
 
+#' Return a List having posterior predictive samples
+#'
+#' @param m Prophet model object.
+#' @param future Dataframe that extends forward from the end of m$history for the
+#' requested number of periods.
+#' @return list of sim.values : posterior predictive samples,
+#'                 yhat.mean : mean of predictive samples,
+#'                 lower.value : lower bound of uncertainty interval 
+#'                 upper.value : upper bound of uncertainty interval                
+#' @export
+posterior_analysis <- function(future, m) {
+  
+  df <-  setup_dataframe(m2,future)$df
+  df$trend <- predict_trend(m2, df)
+  
+  n.iterations <- length(m$params$k)
+  samp.per.iter <- max(1, ceiling(m$uncertainty.samples / n.iterations))
+  nsamp <- n.iterations * samp.per.iter  # The actual number of samples
+  
+  seasonal.features <- make_all_seasonality_features(m, df)
+  sim.values <- list("trend" = matrix(, nrow = nrow(df), ncol = nsamp),
+                     "seasonal" = matrix(, nrow = nrow(df), ncol = nsamp),
+                     "yhat" = matrix(, nrow = nrow(df), ncol = nsamp))
+  
+  for (i in 1:n.iterations) {
+    # For each set of parameters from MCMC (or just 1 set for MAP),
+    for (j in 1:samp.per.iter) {
+      # Do a simulation with this set of parameters,
+      sim <- sample_model(m, df, seasonal.features, i)
+      # Store the results
+      for (key in c("trend", "seasonal", "yhat")) {
+        sim.values[[key]][,(i - 1) * samp.per.iter + j] <- sim[[key]]
+      }
+    }
+  }
+  
+  outs= as.data.frame(sim.values$yhat) 
+  
+  yhat.mean  =  apply(outs,1,mean)
+  lower.p <- (1 - m$interval.width)/2
+  upper.p <- (1 + m$interval.width)/2
+  
+  lower.value = apply(outs,1,quantile, lower.p);
+  upper.value = apply(outs,1,quantile, upper.p);
+  
+  return(list(sim.values= sim.values, yhat.mean = yhat.mean, lower.value = lower.value, upper.value = upper.value))
+}
+
 # fb-block 3
