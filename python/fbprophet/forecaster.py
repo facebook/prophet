@@ -179,7 +179,7 @@ class Prophet(object):
         df.reset_index(inplace=True, drop=True)
 
         if initialize_scales:
-            self.y_scale = df['y'].max()
+            self.y_scale = df['y'].abs().max()
             self.start = df['ds'].min()
             self.t_scale = df['ds'].max() - self.start
 

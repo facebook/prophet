@@ -226,7 +226,7 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
     dplyr::arrange(ds)
 
   if (initialize_scales) {
-    m$y.scale <- max(df$y)
+    m$y.scale <- max(abs(df$y))
     m$start <- min(df$ds)
     m$t.scale <- as.numeric(max(df$ds) - m$start)
   }
