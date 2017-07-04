@@ -22,7 +22,7 @@ Even though we have a lot of places where the rate can possibly change, because 
 The number of potential changepoints can be set using the argument `n_changepoints`, but this is better tuned by adjusting the regularization.
 
 ### Adjusting trend flexibility
-If the trend changes are being overfit (too much flexibility) or underfit (not enough flexiblity), you can adjust the strength of the sparse prior using the input argument `changepoint_prior_scale`. By default, this parameter is set to 0.05. Increasing it will make the trend *more* flexibile:
+If the trend changes are being overfit (too much flexibility) or underfit (not enough flexibility), you can adjust the strength of the sparse prior using the input argument `changepoint_prior_scale`. By default, this parameter is set to 0.05. Increasing it will make the trend *more* flexible:
 
 ```R
 # R
