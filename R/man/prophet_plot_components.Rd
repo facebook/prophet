@@ -36,4 +36,3 @@ Plot the components of a prophet forecast.
 Prints a ggplot2 with panels for trend, weekly and yearly seasonalities if
 present, and holidays if present.
 }
-

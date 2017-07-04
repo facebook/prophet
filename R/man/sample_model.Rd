@@ -21,4 +21,3 @@ List of trend, seasonality, and yhat, each a vector like df$t.
 \description{
 Simulate observations from the extrapolated generative model.
 }
-

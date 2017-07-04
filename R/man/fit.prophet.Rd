@@ -24,4 +24,3 @@ with the following elements:
   sigma_obs (M array): Noise level.
 Note that M=1 if MAP estimation.
 }
-
