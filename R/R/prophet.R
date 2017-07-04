@@ -226,7 +226,7 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
     dplyr::arrange(ds)
 
   if (initialize_scales) {
-    m$y.scale <- max(df$y)
+    m$y.scale <- max(abs(df$y))
     m$start <- min(df$ds)
     m$t.scale <- as.numeric(max(df$ds) - m$start)
   }
@@ -514,6 +514,9 @@ fit.prophet <- function(m, df, ...) {
   }
   history <- df %>%
     dplyr::filter(!is.na(y))
+  if (any(is.infinite(history$y))) {
+    stop("Found infinity in column y.")
+  }
   m$history.dates <- sort(zoo::as.Date(df$ds))
 
   out <- setup_dataframe(m, history, initialize_scales = TRUE)

@@ -41,4 +41,3 @@ plot(m, forecast)
 }
 
 }
-

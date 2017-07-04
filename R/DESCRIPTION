@@ -31,5 +31,5 @@ Suggests:
     readr
 License: BSD_3_clause + file LICENSE
 LazyData: true
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 VignetteBuilder: knitr

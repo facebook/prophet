@@ -12,6 +12,9 @@ from __future__ import unicode_literals
 
 from collections import defaultdict
 from datetime import timedelta
+import logging
+
+logger = logging.getLogger(__name__)
 
 from matplotlib import pyplot as plt
 from matplotlib.dates import MonthLocator, num2date
@@ -27,10 +30,12 @@ from fbprophet.models import prophet_stan_models
 try:
     import pystan
 except ImportError:
-    print('You cannot run prophet without pystan installed')
+    logger.error('You cannot run prophet without pystan installed')
     raise
 
 # fb-block 2
+
+
 
 class Prophet(object):
     """Prophet forecaster.
@@ -73,6 +78,7 @@ class Prophet(object):
         parameters, which will include uncertainty in seasonality.
     uncertainty_samples: Number of simulated draws used to estimate
         uncertainty intervals.
+    daily_seasonality: Boolean, fit daily seasonality
     """
 
     def __init__(
@@ -90,6 +96,7 @@ class Prophet(object):
             mcmc_samples=0,
             interval_width=0.80,
             uncertainty_samples=1000,
+            daily_seasonality=False,
     ):
         self.growth = growth
 
@@ -175,12 +182,14 @@ class Prophet(object):
         if 'y' in df:
             df['y'] = pd.to_numeric(df['y'])
         df['ds'] = pd.to_datetime(df['ds'])
+        if df['ds'].isnull().any():
+            raise ValueError('Found NaN in column ds.')
 
         df = df.sort_values('ds')
         df.reset_index(inplace=True, drop=True)
 
         if initialize_scales:
-            self.y_scale = df['y'].max()
+            self.y_scale = df['y'].abs().max()
             self.start = df['ds'].min()
             self.t_scale = df['ds'].max() - self.start
 
@@ -391,7 +400,7 @@ class Prophet(object):
         if self.yearly_seasonality == 'auto':
             if last - first < pd.Timedelta(days=730):
                 self.yearly_seasonality = 0
-                print('Disabling yearly seasonality. Run prophet with '
+                logger.info('Disabling yearly seasonality. Run prophet with '
                       'yearly_seasonality=True to override this.')
             else:
                 self.yearly_seasonality = 10
@@ -404,7 +413,7 @@ class Prophet(object):
             if ((last - first < pd.Timedelta(weeks=2)) or
                     (min_dt >= pd.Timedelta(weeks=1))):
                 self.weekly_seasonality = 0
-                print('Disabling weekly seasonality. Run prophet with '
+                logger.info('Disabling weekly seasonality. Run prophet with '
                       'weekly_seasonality=True to override this.')
             else:
                 self.weekly_seasonality = 3
@@ -418,7 +427,7 @@ class Prophet(object):
             min_dt = dt.iloc[dt.nonzero()[0]].min()
             if (min_dt< pd.Timedelta(days=1)):
                 self.daily_seasonality = 4
-                print('Enabling daily seasonality. Run prophet with '
+                logger.info('Enabling daily seasonality. Run prophet with '
                       'daily_seasonality=False to override this.')
             else:
                 self.daily_seasonality = 0
@@ -516,6 +525,8 @@ class Prophet(object):
             raise Exception('Prophet object can only be fit once. '
                             'Instantiate a new object.')
         history = df[df['y'].notnull()].copy()
+        if np.isinf(history['y'].values).any():
+            raise ValueError('Found infinity in column y.')
         self.history_dates = pd.to_datetime(df['ds']).sort_values()
 
         history = self.setup_dataframe(history, initialize_scales=True)
@@ -567,7 +578,14 @@ class Prophet(object):
                 self.params[par] = stan_fit[par]
 
         else:
-            params = model.optimizing(dat, init=stan_init, iter=1e4, **kwargs)
+            try:
+                params = model.optimizing(
+                    dat, init=stan_init, iter=1e4, **kwargs)
+            except RuntimeError:
+                params = model.optimizing(
+                    dat, init=stan_init, iter=1e4, algorithm='Newton',
+                    **kwargs
+                )
             for par in params:
                 self.params[par] = params[par].reshape((1, -1))
 

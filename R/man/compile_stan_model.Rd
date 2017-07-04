@@ -16,4 +16,3 @@ Stan model.
 \description{
 Compile Stan model
 }
-

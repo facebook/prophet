@@ -79,4 +79,3 @@ m <- prophet(history)
 }
 
 }
-

@@ -17,4 +17,3 @@ Turns on yearly seasonality if there is >=2 years of history.
 Turns on weekly seasonality if there is >=2 weeks of history, and the
 spacing between dates in the history is <7 days.
 }
-

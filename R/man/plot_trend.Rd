@@ -20,4 +20,3 @@ A ggplot2 plot.
 \description{
 Plot the prophet trend.
 }
-
