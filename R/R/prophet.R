@@ -219,7 +219,7 @@ compile_stan_model <- function(model) {
 
 #' Convert date vector
 #'
-#' Convert the date to POSIXct object 
+#' Convert the date to POSIXct object
 #'
 #' @param ds Date vector, can be consisted of characters
 #' @param tz string time zone
@@ -230,12 +230,12 @@ compile_stan_model <- function(model) {
 set_date <- function(ds = NULL, tz = "GMT") {
   if (length(ds) == 0) {
     return(NULL)
-  } 
-  
+  }
+
   if (is.factor(ds)) {
     ds <- as.character(ds)
   }
-  
+
   if (min(nchar(ds)) < 12) {
     ds <- as.POSIXct(ds, format = "%Y-%m-%d", tz = tz)
   } else {
@@ -950,7 +950,7 @@ sample_posterior_predictive <- function(m, df) {
     }
   }
   return(sim.values)
-}  
+}
 
 #' Sample from the posterior predictive distribution.
 #'
