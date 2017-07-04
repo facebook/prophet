@@ -996,6 +996,7 @@ predict_uncertainty <- function(m, df) {
   return(intervals)
 }
 
+
 #' Simulate observations from the extrapolated generative model.
 #'
 #' @param m Prophet object.
@@ -1449,6 +1450,21 @@ prophet_copy <- function(m, cutoff = NULL) {
     uncertainty.samples = m$uncertainty.samples,
     fit = FALSE,
   ))
+
+#' Sample from the posterior predictive distribution.
+#'
+#' @param m Prophet object.
+#' @param df Dataframe with dates for predictions (column ds), and capacity
+#'  (column cap) if logistic growth.
+#'
+#' @return A list with items "trend", "seasonal", and "yhat" containing
+#'  posterior predictive samples for that component.
+#'
+#' @export
+predictive_samples <- function(m, df) {
+    df <- setup_dataframe(m, df)$df
+    sim.values <- sample_posterior_predictive(m, df)
+    return(sim.values)
 }
 
 # fb-block 3
