@@ -174,6 +174,8 @@ class Prophet(object):
         if 'y' in df:
             df['y'] = pd.to_numeric(df['y'])
         df['ds'] = pd.to_datetime(df['ds'])
+        if df['ds'].isnull().any():
+            raise ValueError('Found NaN in column ds.')
 
         df = df.sort_values('ds')
         df.reset_index(inplace=True, drop=True)
