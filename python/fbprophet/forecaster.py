@@ -766,8 +766,8 @@ class Prophet(object):
                 {'seasonal': np.zeros(df.shape[0])})
         return component_predictions
 
-    def predict_uncertainty(self, df):
-        """Predict seasonality broken down into components.
+    def sample_posterior_predictive(self, df):
+        """Prophet posterior predictive samples.
 
         Parameters
         ----------
@@ -775,7 +775,7 @@ class Prophet(object):
 
         Returns
         -------
-        Dataframe with uncertainty intervals.
+        Dictionary with posterior predictive samples for each component.
         """
         n_iterations = self.params['k'].shape[0]
         samp_per_iter = max(1, int(np.ceil(
@@ -791,13 +791,45 @@ class Prophet(object):
                 sim = self.sample_model(df, seasonal_features, i)
                 for key in sim_values:
                     sim_values[key].append(sim[key])
+        for k, v in sim_values.items():
+            sim_values[k] = np.column_stack(v)
+        return sim_values
+
+    def predictive_samples(self, df):
+        """Sample from the posterior predictive distribution.
+
+        Parameters
+        ----------
+        df: Dataframe with dates for predictions (column ds), and capacity
+            (column cap) if logistic growth.
+
+        Returns
+        -------
+        Dictionary with keys "trend", "seasonal", and "yhat" containing
+        posterior predictive samples for that component.
+        """
+        df = self.setup_dataframe(df)
+        sim_values = self.sample_posterior_predictive(df)
+        return sim_values
+
+    def predict_uncertainty(self, df):
+        """Predict seasonality broken down into components.
+
+        Parameters
+        ----------
+        df: Prediction dataframe.
+
+        Returns
+        -------
+        Dataframe with uncertainty intervals.
+        """
+        sim_values = self.sample_posterior_predictive(df)
 
         lower_p = 100 * (1.0 - self.interval_width) / 2
         upper_p = 100 * (1.0 + self.interval_width) / 2
 
         series = {}
-        for key, value in sim_values.items():
-            mat = np.column_stack(value)
+        for key, mat in sim_values.items():
             series['{}_lower'.format(key)] = np.nanpercentile(mat, lower_p,
                                                               axis=1)
             series['{}_upper'.format(key)] = np.nanpercentile(mat, upper_p,
