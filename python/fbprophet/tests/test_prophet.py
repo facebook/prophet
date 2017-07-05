@@ -326,3 +326,13 @@ class TestProphet(TestCase):
         m = Prophet()
         m.fit(DATA)
         self.assertNotIn('daily', m.seasonalities)
+
+    def test_subdaily_holidays(self):
+        holidays = pd.DataFrame({
+            'ds': pd.to_datetime(['2017-01-02']),
+            'holiday': ['new_years'],
+        })
+        m = Prophet(holidays=holidays)
+        m.fit(DATA2)
+        fcst = m.predict()
+        self.assertEqual(sum(fcst['new_years'] == 0), 575)

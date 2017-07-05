@@ -311,7 +311,8 @@ class Prophet(object):
         # Holds columns of our future matrix.
         expanded_holidays = defaultdict(lambda: np.zeros(dates.shape[0]))
         # Makes an index so we can perform `get_loc` below.
-        row_index = pd.DatetimeIndex(dates)
+        # Strip to just dates.
+        row_index = pd.DatetimeIndex(dates.apply(lambda x:x.date()))
 
         for _ix, row in self.holidays.iterrows():
             dt = row.ds.date()
