@@ -219,38 +219,51 @@ test_that("make_future_dataframe", {
 
 test_that("auto_weekly_seasonality", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
-  # Should be True
+  # Should be enabled
   N.w <- 15
   train.w <- DATA[1:N.w, ]
   m <- prophet(train.w, fit = FALSE)
   expect_equal(m$weekly.seasonality, 'auto')
   m <- prophet:::fit.prophet(m, train.w)
-  expect_equal(m$weekly.seasonality, TRUE)
-  # Should be False due to too short history
+  expect_true('weekly' %in% names(m$seasonalities))
+  expect_equal(m$seasonalities[['weekly']], c(7, 3))
+  # Should be disabled due to too short history
   N.w <- 9
   train.w <- DATA[1:N.w, ]
   m <- prophet(train.w)
-  expect_equal(m$weekly.seasonality, FALSE)
+  expect_false('weekly' %in% names(m$seasonalities))
   m <- prophet(train.w, weekly.seasonality = TRUE)
-  expect_equal(m$weekly.seasonality, TRUE)
+  expect_true('weekly' %in% names(m$seasonalities))
   # Should be False due to weekly spacing
   train.w <- DATA[seq(1, nrow(DATA), 7), ]
   m <- prophet(train.w)
-  expect_equal(m$weekly.seasonality, FALSE)
+  expect_false('weekly' %in% names(m$seasonalities))
+  m <- prophet(DATA, weekly.seasonality=2)
+  expect_equal(m$seasonalities[['weekly']], c(7, 2))
 })
 
 test_that("auto_yearly_seasonality", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
-  # Should be True
+  # Should be enabled
   m <- prophet(DATA, fit = FALSE)
   expect_equal(m$yearly.seasonality, 'auto')
   m <- prophet:::fit.prophet(m, DATA)
-  expect_equal(m$yearly.seasonality, TRUE)
-  # Should be False due to too short history
+  expect_true('yearly' %in% names(m$seasonalities))
+  expect_equal(m$seasonalities[['yearly']], c(365.25, 10))
+  # Should be disabled due to too short history
   N.w <- 240
   train.y <- DATA[1:N.w, ]
   m <- prophet(train.y)
-  expect_equal(m$yearly.seasonality, FALSE)
+  expect_false('yearly' %in% names(m$seasonalities))
   m <- prophet(train.y, yearly.seasonality = TRUE)
-  expect_equal(m$yearly.seasonality, TRUE)
+  expect_true('yearly' %in% names(m$seasonalities))
+  m <- prophet(DATA, yearly.seasonality=7)
+  expect_equal(m$seasonalities[['yearly']], c(365.25, 7))
+})
+
+test_that("custom_seasonality", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  m <- prophet()
+  m <- add_seasonality(m, name='monthly', period=30, fourier.order=5)
+  expect_equal(m$seasonalities[['monthly']], c(30, 5))
 })

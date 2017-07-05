@@ -2,6 +2,7 @@
 
 S3method(plot,prophet)
 S3method(predict,prophet)
+export(add_seasonality)
 export(fit.prophet)
 export(make_future_dataframe)
 export(predictive_samples)

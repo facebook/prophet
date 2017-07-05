@@ -4,7 +4,7 @@
 \alias{prophet}
 \title{Prophet forecaster.}
 \usage{
-prophet(df = df, growth = "linear", changepoints = NULL,
+prophet(df = NULL, growth = "linear", changepoints = NULL,
   n.changepoints = 25, yearly.seasonality = "auto",
   weekly.seasonality = "auto", holidays = NULL,
   seasonality.prior.scale = 10, holidays.prior.scale = 10,
@@ -12,9 +12,11 @@ prophet(df = df, growth = "linear", changepoints = NULL,
   uncertainty.samples = 1000, fit = TRUE, ...)
 }
 \arguments{
-\item{df}{Dataframe containing the history. Must have columns ds (date type)
-and y, the time series. If growth is logistic, then df must also have a
-column cap that specifies the capacity at each ds.}
+\item{df}{(optional) Dataframe containing the history. Must have columns ds
+(date type) and y, the time series. If growth is logistic, then df must
+also have a column cap that specifies the capacity at each ds. If not
+provided, then the model object will be instantiated but not fit; use
+fit.prophet(m, df) to fit the model.}
 
 \item{growth}{String 'linear' or 'logistic' to specify a linear or logistic
 trend.}
@@ -28,9 +30,11 @@ if input `changepoints` is supplied. If `changepoints` is not supplied,
 then n.changepoints potential changepoints are selected uniformly from the
 first 80 percent of df$ds.}
 
-\item{yearly.seasonality}{Fit yearly seasonality; 'auto', TRUE, or FALSE.}
+\item{yearly.seasonality}{Fit yearly seasonality. Can be 'auto', TRUE,
+FALSE, or a number of Fourier terms to generate.}
 
-\item{weekly.seasonality}{Fit weekly seasonality; 'auto', TRUE, or FALSE.}
+\item{weekly.seasonality}{Fit weekly seasonality. Can be 'auto', TRUE,
+FALSE, or a number of Fourier terms to generate.}
 
 \item{holidays}{data frame with columns holiday (character) and ds (date
 type)and optionally columns lower_window and upper_window which specify a
