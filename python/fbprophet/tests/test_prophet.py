@@ -336,3 +336,8 @@ class TestProphet(TestCase):
         m.fit(DATA2)
         fcst = m.predict()
         self.assertEqual(sum(fcst['new_years'] == 0), 575)
+
+    def test_custom_seasonality(self):
+        m = Prophet()
+        m.add_seasonality(name='monthly', period=30, fourier_order=5)
+        self.assertEqual(m.seasonalities['monthly'], (30, 5))
