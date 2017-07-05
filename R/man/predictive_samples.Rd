@@ -13,7 +13,7 @@ predictive_samples(m, df)
 (column cap) if logistic growth.}
 }
 \value{
-A list with items "trend", "seasonal", and "yhat" containing 
+A list with items "trend", "seasonal", and "yhat" containing
  posterior predictive samples for that component.
 }
 \description{
