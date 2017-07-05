@@ -768,24 +768,24 @@ predict_seasonal_components <- function(m, df) {
   return(component.predictions)
 }
 
-#' Prophet uncertainty intervals.
+#' Prophet posterior predictive samples.
 #'
 #' @param m Prophet object.
 #' @param df Prediction dataframe.
 #'
-#' @return Dataframe with uncertainty intervals.
+#' @return List with posterior predictive samples for each component.
 #'
-predict_uncertainty <- function(m, df) {
+sample_posterior_predictive <- function(m, df) {
   # Sample trend, seasonality, and yhat from the extrapolation model.
   n.iterations <- length(m$params$k)
   samp.per.iter <- max(1, ceiling(m$uncertainty.samples / n.iterations))
   nsamp <- n.iterations * samp.per.iter  # The actual number of samples
-
+  
   seasonal.features <- make_all_seasonality_features(m, df)
   sim.values <- list("trend" = matrix(, nrow = nrow(df), ncol = nsamp),
                      "seasonal" = matrix(, nrow = nrow(df), ncol = nsamp),
                      "yhat" = matrix(, nrow = nrow(df), ncol = nsamp))
-
+  
   for (i in 1:n.iterations) {
     # For each set of parameters from MCMC (or just 1 set for MAP),
     for (j in 1:samp.per.iter) {
@@ -797,11 +797,22 @@ predict_uncertainty <- function(m, df) {
       }
     }
   }
-
+  return(sim.values)
+}  
+  
+#' Prophet uncertainty intervals.
+#'
+#' @param m Prophet object.
+#' @param df Prediction dataframe.
+#'
+#' @return Dataframe with uncertainty intervals.
+#'
+predict_uncertainty <- function(m, df) {
+  sim.values <- sample_posterior_predictive(m, df)
   # Add uncertainty estimates
   lower.p <- (1 - m$interval.width)/2
   upper.p <- (1 + m$interval.width)/2
-
+  
   intervals <- cbind(
     t(apply(t(sim.values$yhat), 2, stats::quantile, c(lower.p, upper.p),
             na.rm = TRUE)),
@@ -810,11 +821,12 @@ predict_uncertainty <- function(m, df) {
     t(apply(t(sim.values$seasonal), 2, stats::quantile, c(lower.p, upper.p),
             na.rm = TRUE))
   ) %>% dplyr::as_data_frame()
-
+  
   colnames(intervals) <- paste(rep(c('yhat', 'trend', 'seasonal'), each=2),
                                c('lower', 'upper'), sep = "_")
   return(intervals)
 }
+
 
 #' Simulate observations from the extrapolated generative model.
 #'
@@ -1161,6 +1173,22 @@ plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0) {
                          na.rm = TRUE)
   }
   return(gg.yearly)
+}
+
+#' Sample from the posterior predictive distribution.
+#'
+#' @param m Prophet object.
+#' @param df Dataframe with dates for predictions (column ds), and capacity
+#'  (column cap) if logistic growth.
+#'
+#' @return A list with items "trend", "seasonal", and "yhat" containing 
+#'  posterior predictive samples for that component.
+#'
+#' @export
+predictive_samples <- function(m, df) {
+    df <- setup_dataframe(m, df)$df
+    sim.values <- sample_posterior_predictive(m, df)
+    return(sim.values)
 }
 
 # fb-block 3
