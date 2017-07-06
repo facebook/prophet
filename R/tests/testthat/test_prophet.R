@@ -263,7 +263,9 @@ test_that("auto_yearly_seasonality", {
 
 test_that("custom_seasonality", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
-  m <- prophet()
+  holidays <- data.frame(ds = zoo::as.Date(c('2017-01-02')),
+                         holiday = c('special_day'))
+  m <- prophet(holidays=holidays)
   m <- add_seasonality(m, name='monthly', period=30, fourier.order=5)
   expect_equal(m$seasonalities[['monthly']], c(30, 5))
 })

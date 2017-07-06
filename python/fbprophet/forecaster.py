@@ -357,7 +357,7 @@ class Prophet(object):
         fourier_order: int number of Fourier components to use.
         """
         if self.holidays is not None:
-            if name in set(holidays['holiday']):
+            if name in set(self.holidays['holiday']):
                 raise ValueError(
                     'Name "{}" already used for holiday'.format(name))
         self.seasonalities[name] = (period, fourier_order)
