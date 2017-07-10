@@ -1037,7 +1037,7 @@ sample_predictive_trend <- function(model, df, iteration) {
 #'
 #' @param m Prophet model object.
 #' @param periods Int number of periods to forecast forward.
-#' @param freq 'sec', 'min', 'hour', day', 'week', 'month', 'quarter' or 'year'.
+#' @param freq 'day', 'week', 'month', 'quarter', 'year', 1(1 sec), 60(1 minute) or 3600(1 hour).
 #' @param include_history Boolean to include the historical dates in the data
 #'  frame for predictions.
 #'
