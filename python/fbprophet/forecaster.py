@@ -28,7 +28,7 @@ from fbprophet.models import prophet_stan_models
 # fb-block 1 end
 
 try:
-    import pystan
+    import pystan  # noqa F401
 except ImportError:
     logger.error('You cannot run prophet without pystan installed')
     raise
@@ -312,7 +312,7 @@ class Prophet(object):
         expanded_holidays = defaultdict(lambda: np.zeros(dates.shape[0]))
         # Makes an index so we can perform `get_loc` below.
         # Strip to just dates.
-        row_index = pd.DatetimeIndex(dates.apply(lambda x:x.date()))
+        row_index = pd.DatetimeIndex(dates.apply(lambda x: x.date()))
 
         for _ix, row in self.holidays.iterrows():
             dt = row.ds.date()
@@ -391,7 +391,7 @@ class Prophet(object):
 
     def parse_seasonality_args(self, name, arg, auto_disable, default_order):
         """Get number of fourier components for built-in seasonalities.
-        
+
         Parameters
         ----------
         name: string name of the seasonality component.
@@ -449,7 +449,7 @@ class Prophet(object):
 
         # Weekly seasonality
         weekly_disable = ((last - first < pd.Timedelta(weeks=2)) or
-            (min_dt >= pd.Timedelta(weeks=1)))
+                          (min_dt >= pd.Timedelta(weeks=1)))
         fourier_order = self.parse_seasonality_args(
             'weekly', self.weekly_seasonality, weekly_disable, 3)
         if fourier_order > 0:
@@ -457,7 +457,7 @@ class Prophet(object):
 
         # Daily seasonality
         daily_disable = ((last - first < pd.Timedelta(days=2)) or
-            (min_dt >= pd.Timedelta(days=1)))
+                         (min_dt >= pd.Timedelta(days=1)))
         fourier_order = self.parse_seasonality_args(
             'daily', self.daily_seasonality, daily_disable, 4)
         if fourier_order > 0:
@@ -1056,7 +1056,7 @@ class Prophet(object):
                     ax=ax, uncertainty=uncertainty, yearly_start=yearly_start)
             else:
                 self.plot_seasonality(
-                     name=plot, ax=ax, uncertainty=uncertainty)
+                    name=plot, ax=ax, uncertainty=uncertainty)
 
         fig.tight_layout()
         return fig
