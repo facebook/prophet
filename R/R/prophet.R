@@ -313,6 +313,7 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
 set_changepoints <- function(m) {
   if (!is.null(m$changepoints)) {
     if (length(m$changepoints) > 0) {
+      m$changepoints <- set_date(m$changepoints)
       if (min(m$changepoints) < min(m$history$ds)
           || max(m$changepoints) > max(m$history$ds)) {
         stop('Changepoints must fall within training data.')
@@ -331,7 +332,6 @@ set_changepoints <- function(m) {
     }
   }
   if (length(m$changepoints) > 0) {
-    m$changepoints <- set_date(m$changepoints)
     m$changepoints.t <- sort(
       time_diff(m$changepoints, m$start, "secs")) / m$t.scale
   } else {
