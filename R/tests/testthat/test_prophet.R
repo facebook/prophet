@@ -2,7 +2,7 @@ library(prophet)
 context("Prophet tests")
 
 DATA <- read.csv('data.csv')
-DATA$ds <- as.Date(DATA$ds)
+DATA$ds <- set_date(DATA$ds)
 N <- nrow(DATA)
 train <- DATA[1:floor(N / 2), ]
 future <- DATA[(ceiling(N/2) + 1):N, ]
@@ -27,9 +27,9 @@ test_that("fit_predict_no_changepoints", {
 
 test_that("fit_predict_changepoint_not_in_history", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
-  train_t <- dplyr::mutate(DATA, ds=zoo::as.Date(ds))
-  train_t <- dplyr::filter(train_t, (ds < zoo::as.Date('2013-01-01')) |
-                                (ds > zoo::as.Date('2014-01-01')))
+  train_t <- dplyr::mutate(DATA, ds=set_date(ds))
+  train_t <- dplyr::filter(train_t, (ds < set_date('2013-01-01')) |
+                                (ds > set_date('2014-01-01')))
   future <- data.frame(ds=DATA$ds)
   m <- prophet(train_t, changepoints=c('2013-06-06'))
   expect_error(predict(m, future), NA)
@@ -170,19 +170,19 @@ test_that("piecewise_logistic", {
 })
 
 test_that("holidays", {
-  holidays = data.frame(ds = zoo::as.Date(c('2016-12-25')),
+  holidays = data.frame(ds = set_date(c('2016-12-25')),
                         holiday = c('xmas'),
                         lower_window = c(-1),
                         upper_window = c(0))
   df <- data.frame(
-    ds = seq(zoo::as.Date('2016-12-20'), zoo::as.Date('2016-12-31'), by='d'))
+    ds = seq(set_date('2016-12-20'), set_date('2016-12-31'), by='d'))
   m <- prophet(train, holidays = holidays, fit = FALSE)
   feats <- prophet:::make_holiday_features(m, df$ds)
   expect_equal(nrow(feats), nrow(df))
   expect_equal(ncol(feats), 2)
   expect_equal(sum(colSums(feats) - c(1, 1)), 0)
 
-  holidays = data.frame(ds = zoo::as.Date(c('2016-12-25')),
+  holidays = data.frame(ds = set_date(c('2016-12-25')),
                         holiday = c('xmas'),
                         lower_window = c(-1),
                         upper_window = c(10))
@@ -194,7 +194,7 @@ test_that("holidays", {
 
 test_that("fit_with_holidays", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
-  holidays <- data.frame(ds = zoo::as.Date(c('2012-06-06', '2013-06-06')),
+  holidays <- data.frame(ds = set_date(c('2012-06-06', '2013-06-06')),
                          holiday = c('seans-bday', 'seans-bday'),
                          lower_window = c(0, 0),
                          upper_window = c(1, 1))
@@ -206,14 +206,14 @@ test_that("make_future_dataframe", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   train.t <- DATA[1:234, ]
   m <- prophet(train.t)
-  future <- make_future_dataframe(m, periods = 3, freq = 'd',
+  future <- make_future_dataframe(m, periods = 3, freq = 'day',
                                   include_history = FALSE)
-  correct <- as.Date(c('2013-04-26', '2013-04-27', '2013-04-28'))
+  correct <- set_date(c('2013-04-26', '2013-04-27', '2013-04-28'))
   expect_equal(future$ds, correct)
 
-  future <- make_future_dataframe(m, periods = 3, freq = 'm',
+  future <- make_future_dataframe(m, periods = 3, freq = 'month',
                                   include_history = FALSE)
-  correct <- as.Date(c('2013-05-25', '2013-06-25', '2013-07-25'))
+  correct <- set_date(c('2013-05-25', '2013-06-25', '2013-07-25'))
   expect_equal(future$ds, correct)
 })
 
@@ -263,7 +263,7 @@ test_that("auto_yearly_seasonality", {
 
 test_that("custom_seasonality", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
-  holidays <- data.frame(ds = zoo::as.Date(c('2017-01-02')),
+  holidays <- data.frame(ds = set_date(c('2017-01-02')),
                          holiday = c('special_day'))
   m <- prophet(holidays=holidays)
   m <- add_seasonality(m, name='monthly', period=30, fourier.order=5)
