@@ -180,6 +180,8 @@ class Prophet(object):
         """
         if 'y' in df:
             df['y'] = pd.to_numeric(df['y'])
+            if np.isinf(df['y'].values).any():
+                raise ValueError('Found infinity in column y.')
         df['ds'] = pd.to_datetime(df['ds'])
         if df['ds'].isnull().any():
             raise ValueError('Found NaN in column ds.')
@@ -554,8 +556,6 @@ class Prophet(object):
             raise Exception('Prophet object can only be fit once. '
                             'Instantiate a new object.')
         history = df[df['y'].notnull()].copy()
-        if np.isinf(history['y'].values).any():
-            raise ValueError('Found infinity in column y.')
         self.history_dates = pd.to_datetime(df['ds']).sort_values()
 
         history = self.setup_dataframe(history, initialize_scales=True)
