@@ -23,8 +23,7 @@ Imports:
     scales,
     stats,
     tidyr (>= 0.6.1),
-    utils,
-    zoo
+    utils
 Suggests:
     knitr,
     testthat,

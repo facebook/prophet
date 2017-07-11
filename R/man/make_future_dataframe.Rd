@@ -4,14 +4,14 @@
 \alias{make_future_dataframe}
 \title{Make dataframe with future dates for forecasting.}
 \usage{
-make_future_dataframe(m, periods, freq = "d", include_history = TRUE)
+make_future_dataframe(m, periods, freq = "day", include_history = TRUE)
 }
 \arguments{
 \item{m}{Prophet model object.}
 
 \item{periods}{Int number of periods to forecast forward.}
 
-\item{freq}{'day', 'week', 'month', 'quarter', or 'year'.}
+\item{freq}{'day', 'week', 'month', 'quarter', 'year', 1(1 sec), 60(1 minute) or 3600(1 hour).}
 
 \item{include_history}{Boolean to include the historical dates in the data
 frame for predictions.}

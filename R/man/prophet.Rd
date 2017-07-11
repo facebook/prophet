@@ -6,10 +6,11 @@
 \usage{
 prophet(df = NULL, growth = "linear", changepoints = NULL,
   n.changepoints = 25, yearly.seasonality = "auto",
-  weekly.seasonality = "auto", holidays = NULL,
-  seasonality.prior.scale = 10, holidays.prior.scale = 10,
-  changepoint.prior.scale = 0.05, mcmc.samples = 0, interval.width = 0.8,
-  uncertainty.samples = 1000, fit = TRUE, ...)
+  weekly.seasonality = "auto", daily.seasonality = "auto",
+  holidays = NULL, seasonality.prior.scale = 10,
+  holidays.prior.scale = 10, changepoint.prior.scale = 0.05,
+  mcmc.samples = 0, interval.width = 0.8, uncertainty.samples = 1000,
+  fit = TRUE, ...)
 }
 \arguments{
 \item{df}{(optional) Dataframe containing the history. Must have columns ds
@@ -34,6 +35,9 @@ first 80 percent of df$ds.}
 FALSE, or a number of Fourier terms to generate.}
 
 \item{weekly.seasonality}{Fit weekly seasonality. Can be 'auto', TRUE,
+FALSE, or a number of Fourier terms to generate.}
+
+\item{daily.seasonality}{Fit daily seasonality. Can be 'auto', TRUE,
 FALSE, or a number of Fourier terms to generate.}
 
 \item{holidays}{data frame with columns holiday (character) and ds (date

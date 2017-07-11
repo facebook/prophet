@@ -162,7 +162,8 @@ validate_inputs <- function(m) {
       if (grepl("_delim_", h)) {
         stop('Holiday name cannot contain "_delim_"')
       }
-      if (h %in% c('zeros', 'yearly', 'weekly', 'yhat', 'seasonal', 'trend')) {
+      if (h %in% c('zeros', 'yearly', 'weekly', 'daily', 'yhat', 'seasonal',
+                   'trend')) {
         stop(paste0('Holiday name "', h, '" reserved.'))
       }
     }
@@ -215,6 +216,7 @@ compile_stan_model <- function(model) {
 #' Convert the date to POSIXct object 
 #' 
 #' @param ds Date vector, can be consisted of characters
+#' @param tz string time zone
 #' 
 #' @return vector of POSIXct object converted from date
 #' 
@@ -235,20 +237,18 @@ set_date <- function(ds = NULL, tz = "GMT") {
   return(ds)
 }
 
-#' Extract hour
+#' Time difference between datetimes
 #' 
-#' Extract hour from a POSIXct object
+#' Compute time difference of two POSIXct objects
 #' 
-#' @param ds POSIXct object
+#' @param ds1 POSIXct object
+#' @param ds2 POSIXct object
+#' @param units string units of difference, e.g. 'days' or 'secs'.
 #' 
-#' @return hour of POSIXct object
+#' @return numeric time difference
 #' 
-get_hour <- function(ds) {
-  if (!("POSIXct" %in% is(ds))) {
-    stop("ds must be a POSIXct object, use function set_date() to convert first.")
-  }
-  
-  return(format(ds , "%H"))
+time_diff <- function(ds1, ds2, units = "days") {
+  return(as.numeric(difftime(ds1, ds2, units = units)))
 }
 
 #' Prepare dataframe for fitting or predicting.
@@ -269,7 +269,8 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
   }
   df$ds <- set_date(df$ds)
   if (anyNA(df$ds)) {
-    stop('Unable to parse date format in column ds. Convert to date format. Either %Y-%m-%d or %Y-%m-%d %H:%M:%S')
+    stop(paste('Unable to parse date format in column ds. Convert to date ',
+               'format. Either %Y-%m-%d or %Y-%m-%d %H:%M:%S'))
   }
 
   df <- df %>%
@@ -278,10 +279,10 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
   if (initialize_scales) {
     m$y.scale <- max(abs(df$y))
     m$start <- min(df$ds)
-    m$t.scale <- as.numeric(difftime(max(df$ds), m$start, units = "secs"))
+    m$t.scale <- time_diff(max(df$ds), m$start, "secs")
   }
 
-  df$t <- as.numeric(difftime(df$ds, m$start, units = "secs")) / m$t.scale
+  df$t <- time_diff(df$ds, m$start, "secs") / m$t.scale
   if (exists('y', where=df)) {
     df$y_scaled <- df$y / m$y.scale
   }
@@ -331,7 +332,8 @@ set_changepoints <- function(m) {
   }
   if (length(m$changepoints) > 0) {
     m$changepoints <- set_date(m$changepoints)
-    m$changepoints.t <- sort(as.numeric(difftime(m$changepoints, m$start, units = "secs"))) / m$t.scale
+    m$changepoints.t <- sort(
+      time_diff(m$changepoints, m$start, "secs")) / m$t.scale
   } else {
     m$changepoints.t <- c(0)  # dummy changepoint
   }
@@ -361,7 +363,7 @@ get_changepoint_matrix <- function(m) {
 #' @return Matrix with seasonality features.
 #'
 fourier_series <- function(dates, period, series.order) {
-  t <- as.numeric(difftime(dates, set_date('1970-01-01 00:00:00'), units = 'days')) 
+  t <- time_diff(dates, set_date('1970-01-01 00:00:00'))
   features <- matrix(0, length(t), 2 * series.order)
   for (i in 1:series.order) {
     x <- as.numeric(2 * i * pi * t / period)
@@ -396,6 +398,9 @@ make_seasonality_features <- function(dates, period, series.order, prefix) {
 #' @importFrom dplyr "%>%"
 make_holiday_features <- function(m, dates) {
   scale.ratio <- m$holidays.prior.scale / m$seasonality.prior.scale
+  # Strip dates to be just days, for joining on holidays
+  dates <- set_date(format(dates, "%Y-%m-%d"))
+
   wide <- m$holidays %>%
     dplyr::mutate(ds = set_date(ds)) %>%
     dplyr::group_by(holiday, ds) %>%
@@ -509,6 +514,8 @@ parse_seasonality_args <- function(m, name, arg, auto.disable, default.order) {
 #' Turns on yearly seasonality if there is >=2 years of history.
 #' Turns on weekly seasonality if there is >=2 weeks of history, and the
 #' spacing between dates in the history is <7 days.
+#' Turns on daily seasonality if there is >=2 days of history, and the spacing
+#' between dates in the history is <1 day.
 #'
 #' @param m Prophet object.
 #'
@@ -517,24 +524,24 @@ parse_seasonality_args <- function(m, name, arg, auto.disable, default.order) {
 set_auto_seasonalities <- function(m) {
   first <- min(m$history$ds)
   last <- max(m$history$ds)
-  dt <- diff(as.numeric(difftime(m$history$ds, m$start, units = "d")))
+  dt <- diff(time_diff(m$history$ds, m$start))
   min.dt <- min(dt[dt > 0])
 
-  yearly.disable <- as.numeric(difftime(last, first, unit = "days")) < 730
+  yearly.disable <- time_diff(last, first) < 730
   fourier.order <- parse_seasonality_args(
     m, 'yearly', m$yearly.seasonality, yearly.disable, 10)
   if (fourier.order > 0) {
     m$seasonalities[['yearly']] <- c(365.25, fourier.order)
   }
 
-  weekly.disable <- ((as.numeric(difftime(last, first, unit = "days")) < 14) || (min.dt >= 7))
+  weekly.disable <- ((time_diff(last, first) < 14) || (min.dt >= 7))
   fourier.order <- parse_seasonality_args(
     m, 'weekly', m$weekly.seasonality, weekly.disable, 3)
   if (fourier.order > 0) {
     m$seasonalities[['weekly']] <- c(7, fourier.order)
   }
 
-  daily.disable <- ((as.numeric(difftime(last, first, unit = "days")) < 2)) || (min.dt >= 1)
+  daily.disable <- ((time_diff(last, first) < 2) || (min.dt >= 1))
   fourier.order <- parse_seasonality_args(
     m, 'daily', m$daily.seasonality, daily.disable, 4)
   if (fourier.order > 0) {
@@ -1051,6 +1058,7 @@ make_future_dataframe <- function(m, periods, freq = 'day',
   dates <- dates[2:(periods + 1)]  # Drop the first, which is max(history$ds)
   if (include_history) {
     dates <- c(m$history.dates, dates)
+    attr(dates, "tzone") <- "GMT"
   }
   return(data.frame(ds = dates))
 }
@@ -1143,17 +1151,13 @@ plot.prophet <- function(x, fcst, uncertainty = TRUE, plot_cap = TRUE,
 #' @importFrom dplyr "%>%"
 prophet_plot_components <- function(
     m, fcst, uncertainty = TRUE, plot_cap = TRUE, weekly_start = 0,
-    yearly_start = 0, daily_start = 0) {
+    yearly_start = 0) {
   df <- df_for_plotting(m, fcst)
   # Plot the trend
   panels <- list(plot_trend(df, uncertainty, plot_cap))
   # Plot holiday components, if present.
   if (!is.null(m$holidays)) {
     panels[[length(panels) + 1]] <- plot_holidays(m, df, uncertainty)
-  }
-  # Plot daily seasonality, if present
-  if ("daily" %in% colnames(df)) {
-    panels[[length(panels) + 1]] <- plot_daily(m, uncertainty, daily_start)
   }
   # Plot weekly seasonality, if present
   if ("weekly" %in% colnames(df)) {
@@ -1165,7 +1169,8 @@ prophet_plot_components <- function(
   }
   # Plot other seasonalities
   for (name in names(m$seasonalities)) {
-    if (!(name %in% c('daily', 'weekly', 'yearly')) && (name %in% colnames(df))) {
+    if (!(name %in% c('weekly', 'yearly')) &&
+        (name %in% colnames(df))) {
       panels[[length(panels) + 1]] <- plot_seasonality(m, name, uncertainty)
     }
   }
@@ -1240,39 +1245,6 @@ plot_holidays <- function(m, df, uncertainty = TRUE) {
   return(gg.holidays)
 }
 
-#' Plot the daily component of the forecast.
-#'
-#' @param m Prophet model object
-#' @param uncertainty Boolean to plot uncertainty intervals.
-#' @param daily_start Integer specifying the start day of the daily
-#'  seasonality plot. 0 (default) starts the week on Sunday. 1 shifts by 1 day
-#'  to Monday, and so on.
-#'
-#' @return A ggplot2 plot.
-plot_daily <- function(m, uncertainty = TRUE, daily_start = 0) {
-  # Compute weekly seasonality for a Sun-Sat sequence of dates.
-  df.d <- data.frame(
-    ds=seq(set_date('2017-01-01 00:00:00'), length.out=24, by = "hour") +
-      daily_start, cap=1.)
-  df.d <- setup_dataframe(m, df.d)$df
-  seas <- predict_seasonal_components(m, df.d)
-  seas$hod <- factor(get_hour(df.d$ds), levels=get_hour(df.d$ds))
-  
-  gg.daily <- ggplot2::ggplot(seas, ggplot2::aes(x = hod, y = daily,
-                                                  group = 1)) +
-    ggplot2::geom_line(color = "#0072B2", na.rm = TRUE) +
-    ggplot2::labs(x = "Hour of day")
-  if (uncertainty) {
-    gg.daily <- gg.daily +
-      ggplot2::geom_ribbon(ggplot2::aes(ymin = daily_lower,
-                                        ymax = daily_upper),
-                           alpha = 0.2,
-                           fill = "#0072B2",
-                           na.rm = TRUE)
-  }
-  return(gg.daily)
-}
-
 #' Plot the weekly component of the forecast.
 #'
 #' @param m Prophet model object
@@ -1327,7 +1299,8 @@ plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0) {
   gg.yearly <- ggplot2::ggplot(seas, ggplot2::aes(x = ds, y = yearly,
                                                   group = 1)) +
     ggplot2::geom_line(color = "#0072B2", na.rm = TRUE) +
-    ggplot2::labs(x = "Day of year")
+    ggplot2::labs(x = "Day of year") +
+    ggplot2::scale_x_datetime(labels = scales::date_format('%B %d'))
   if (uncertainty) {
     gg.yearly <- gg.yearly +
     ggplot2::geom_ribbon(ggplot2::aes(ymin = yearly_lower,
@@ -1351,15 +1324,25 @@ plot_seasonality <- function(m, name, uncertainty = TRUE) {
   start <- set_date('2017-01-01')
   period <- m$seasonalities[[name]][1]
   end <- start + period * 24 * 3600
-  plot.points <- as.numeric(difftime(end, start))
+  plot.points <- 200
   df.y <- data.frame(
-    ds=seq(from=start, by='d', length.out=plot.points), cap=1.)
+    ds=seq(from=start, to=end, length.out=plot.points), cap=1.)
   df.y <- setup_dataframe(m, df.y)$df
   seas <- predict_seasonal_components(m, df.y)
   seas$ds <- df.y$ds
   gg.s <- ggplot2::ggplot(
       seas, ggplot2::aes_string(x = 'ds', y = name, group = 1)) +
     ggplot2::geom_line(color = "#0072B2", na.rm = TRUE)
+  if (period <= 2) {
+    fmt.str <- '%T'
+  }
+  else if (period < 14) {
+    fmt.str <- '%m/%d %R'
+  } else {
+    fmt.str <- '%m/%d'
+  }
+  gg.s <- gg.s +
+    ggplot2::scale_x_datetime(labels = scales::date_format(fmt.str))
   if (uncertainty) {
     gg.s <- gg.s +
     ggplot2::geom_ribbon(

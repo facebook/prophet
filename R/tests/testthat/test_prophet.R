@@ -2,10 +2,11 @@ library(prophet)
 context("Prophet tests")
 
 DATA <- read.csv('data.csv')
-DATA$ds <- set_date(DATA$ds)
 N <- nrow(DATA)
 train <- DATA[1:floor(N / 2), ]
 future <- DATA[(ceiling(N/2) + 1):N, ]
+
+DATA2 <- read.csv('data2.csv')
 
 test_that("fit_predict", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
@@ -27,9 +28,10 @@ test_that("fit_predict_no_changepoints", {
 
 test_that("fit_predict_changepoint_not_in_history", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
-  train_t <- dplyr::mutate(DATA, ds=set_date(ds))
-  train_t <- dplyr::filter(train_t, (ds < set_date('2013-01-01')) |
-                                (ds > set_date('2014-01-01')))
+  train_t <- dplyr::mutate(DATA, ds=prophet:::set_date(ds))
+  train_t <- dplyr::filter(train_t,
+    (ds < prophet:::set_date('2013-01-01')) |
+    (ds > prophet:::set_date('2014-01-01')))
   future <- data.frame(ds=DATA$ds)
   m <- prophet(train_t, changepoints=c('2013-06-06'))
   expect_error(predict(m, future), NA)
@@ -101,15 +103,15 @@ test_that("get_zero_changepoints", {
 
 test_that("fourier_series_weekly", {
   mat <- prophet:::fourier_series(DATA$ds, 7, 3)
-  true.values <- c(0.7818315, 0.6234898, 0.9749279, -0.2225209, 0.4338837,
-                   -0.9009689)
+  true.values <- c(0.9165623, 0.3998920, 0.7330519, -0.6801727, -0.3302791,
+                   -0.9438833)
   expect_equal(true.values, mat[1, ], tolerance = 1e-6)
 })
 
 test_that("fourier_series_yearly", {
   mat <- prophet:::fourier_series(DATA$ds, 365.25, 3)
-  true.values <- c(0.7006152, -0.7135393, -0.9998330, 0.01827656, 0.7262249,
-                   0.6874572)
+  true.values <- c(0.69702635, -0.71704551, -0.99959923, 0.02830854,
+                   0.73648994, 0.67644849)
   expect_equal(true.values, mat[1, ], tolerance = 1e-6)
 })
 
@@ -170,19 +172,20 @@ test_that("piecewise_logistic", {
 })
 
 test_that("holidays", {
-  holidays = data.frame(ds = set_date(c('2016-12-25')),
+  holidays = data.frame(ds = c('2016-12-25'),
                         holiday = c('xmas'),
                         lower_window = c(-1),
                         upper_window = c(0))
   df <- data.frame(
-    ds = seq(set_date('2016-12-20'), set_date('2016-12-31'), by='d'))
+    ds = seq(prophet:::set_date('2016-12-20'),
+             prophet:::set_date('2016-12-31'), by='d'))
   m <- prophet(train, holidays = holidays, fit = FALSE)
   feats <- prophet:::make_holiday_features(m, df$ds)
   expect_equal(nrow(feats), nrow(df))
   expect_equal(ncol(feats), 2)
   expect_equal(sum(colSums(feats) - c(1, 1)), 0)
 
-  holidays = data.frame(ds = set_date(c('2016-12-25')),
+  holidays = data.frame(ds = c('2016-12-25'),
                         holiday = c('xmas'),
                         lower_window = c(-1),
                         upper_window = c(10))
@@ -194,7 +197,7 @@ test_that("holidays", {
 
 test_that("fit_with_holidays", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
-  holidays <- data.frame(ds = set_date(c('2012-06-06', '2013-06-06')),
+  holidays <- data.frame(ds = c('2012-06-06', '2013-06-06'),
                          holiday = c('seans-bday', 'seans-bday'),
                          lower_window = c(0, 0),
                          upper_window = c(1, 1))
@@ -208,12 +211,12 @@ test_that("make_future_dataframe", {
   m <- prophet(train.t)
   future <- make_future_dataframe(m, periods = 3, freq = 'day',
                                   include_history = FALSE)
-  correct <- set_date(c('2013-04-26', '2013-04-27', '2013-04-28'))
+  correct <- prophet:::set_date(c('2013-04-26', '2013-04-27', '2013-04-28'))
   expect_equal(future$ds, correct)
 
   future <- make_future_dataframe(m, periods = 3, freq = 'month',
                                   include_history = FALSE)
-  correct <- set_date(c('2013-05-25', '2013-06-25', '2013-07-25'))
+  correct <- prophet:::set_date(c('2013-05-25', '2013-06-25', '2013-07-25'))
   expect_equal(future$ds, correct)
 })
 
@@ -261,9 +264,39 @@ test_that("auto_yearly_seasonality", {
   expect_equal(m$seasonalities[['yearly']], c(365.25, 7))
 })
 
+test_that("auto_daily_seasonality", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  # Should be enabled
+  m <- prophet(DATA2, fit = FALSE)
+  expect_equal(m$daily.seasonality, 'auto')
+  m <- prophet:::fit.prophet(m, DATA2)
+  expect_true('daily' %in% names(m$seasonalities))
+  expect_equal(m$seasonalities[['daily']], c(1, 4))
+  # Should be disabled due to too short history
+  N.d <- 430
+  train.y <- DATA2[1:N.d, ]
+  m <- prophet(train.y)
+  expect_false('daily' %in% names(m$seasonalities))
+  m <- prophet(train.y, daily.seasonality = TRUE)
+  expect_true('daily' %in% names(m$seasonalities))
+  m <- prophet(DATA2, daily.seasonality=7)
+  expect_equal(m$seasonalities[['daily']], c(1, 7))
+  m <- prophet(DATA)
+  expect_false('daily' %in% names(m$seasonalities))
+})
+
+test_that("test_subdaily_holidays", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  holidays <- data.frame(ds = c('2017-01-02'),
+                         holiday = c('special_day'))
+  m <- prophet(DATA2, holidays=holidays)
+  fcst <- predict(m)
+  expect_equal(sum(fcst$special_day == 0), 575)
+})
+
 test_that("custom_seasonality", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
-  holidays <- data.frame(ds = set_date(c('2017-01-02')),
+  holidays <- data.frame(ds = c('2017-01-02'),
                          holiday = c('special_day'))
   m <- prophet(holidays=holidays)
   m <- add_seasonality(m, name='monthly', period=30, fourier.order=5)

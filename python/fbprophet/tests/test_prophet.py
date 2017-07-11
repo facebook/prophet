@@ -307,7 +307,7 @@ class TestProphet(TestCase):
     def test_auto_daily_seasonality(self):
         # Should be enabled
         m = Prophet()
-        self.assertEqual(m.yearly_seasonality, 'auto')
+        self.assertEqual(m.daily_seasonality, 'auto')
         m.fit(DATA2)
         self.assertIn('daily', m.seasonalities)
         self.assertEqual(m.seasonalities['daily'], (1, 4))
