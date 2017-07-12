@@ -1054,6 +1054,10 @@ sample_predictive_trend <- function(model, df, iteration) {
 #' @export
 make_future_dataframe <- function(m, periods, freq = 'day',
                                   include_history = TRUE) {
+  # For backwards compatability with previous zoo date type,
+  if (freq == 'm') {
+    freq <- 'month'
+  }
   dates <- seq(max(m$history.dates), length.out = periods + 1, by = freq)
   dates <- dates[2:(periods + 1)]  # Drop the first, which is max(history$ds)
   if (include_history) {
