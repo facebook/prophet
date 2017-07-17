@@ -600,7 +600,7 @@ logistic_growth_init <- function(df) {
   # Initialize the offset
   m <- L0 * T / (L0 - L1)
   # And the rate
-  k <- L0 / m
+  k <- (L0 - L1) / T
   return(c(k, m))
 }
 
