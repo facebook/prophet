@@ -345,3 +345,79 @@ class TestProphet(TestCase):
         m = Prophet(holidays=holidays)
         m.add_seasonality(name='monthly', period=30, fourier_order=5)
         self.assertEqual(m.seasonalities['monthly'], (30, 5))
+        with self.assertRaises(ValueError):
+            m.add_seasonality(name='special_day', period=30, fourier_order=5)
+        with self.assertRaises(ValueError):
+            m.add_seasonality(name='trend', period=30, fourier_order=5)
+        m.add_seasonality(name='weekly', period=30, fourier_order=5)
+
+    def test_added_regressors(self):
+        m = Prophet()
+        m.add_regressor('binary_feature', prior_scale=0.2)
+        m.add_regressor('numeric_feature', prior_scale=0.5)
+        m.add_regressor('binary_feature2', standardize=True)
+        df = DATA.copy()
+        df['binary_feature'] = [0] * 255 + [1] * 255
+        df['numeric_feature'] = range(510)
+        with self.assertRaises(ValueError):
+            # Require all regressors in df
+            m.fit(df)
+        df['binary_feature2'] = [1] * 100 + [0] * 410
+        m.fit(df)
+        # Check that standardizations are correctly set
+        self.assertEqual(
+            m.extra_regressors['binary_feature'],
+            {'prior_scale': 0.2, 'mu': 0, 'std': 1, 'standardize': 'auto'},
+        )
+        self.assertEqual(
+            m.extra_regressors['numeric_feature']['prior_scale'], 0.5)
+        self.assertEqual(
+            m.extra_regressors['numeric_feature']['mu'], 254.5)
+        self.assertAlmostEqual(
+            m.extra_regressors['numeric_feature']['std'], 147.368585, places=5)
+        self.assertEqual(
+            m.extra_regressors['binary_feature2']['prior_scale'], 10.)
+        self.assertAlmostEqual(
+            m.extra_regressors['binary_feature2']['mu'], 0.1960784, places=5)
+        self.assertAlmostEqual(
+            m.extra_regressors['binary_feature2']['std'], 0.3974183, places=5)
+        # Check that standardization is done correctly
+        df2 = m.setup_dataframe(df.copy())
+        self.assertEqual(df2['binary_feature'][0], 0)
+        self.assertAlmostEqual(df2['numeric_feature'][0], -1.726962, places=4)
+        self.assertAlmostEqual(df2['binary_feature2'][0], 2.022859, places=4)
+        # Check that feature matrix and prior scales are correctly constructed
+        seasonal_features, prior_scales = m.make_all_seasonality_features(df2)
+        self.assertIn('binary_feature', seasonal_features)
+        self.assertIn('numeric_feature', seasonal_features)
+        self.assertIn('binary_feature2', seasonal_features)
+        self.assertEqual(seasonal_features.shape[1], 29)
+        self.assertEqual(set(prior_scales[26:]), set([0.2, 0.5, 10.]))
+        # Check that forecast components are reasonable
+        future = pd.DataFrame({
+            'ds': ['2014-06-01'],
+            'binary_feature': [0],
+            'numeric_feature': [10],
+        })
+        with self.assertRaises(ValueError):
+            m.predict(future)
+        future['binary_feature2'] = 0
+        fcst = m.predict(future)
+        self.assertEqual(fcst.shape[1], 31)
+        self.assertEqual(fcst['binary_feature'][0], 0)
+        self.assertEqual(
+            fcst['extra_regressors'][0],
+            fcst['numeric_feature'][0] + fcst['binary_feature2'][0],
+        )
+        self.assertEqual(
+            fcst['seasonalities'][0],
+            fcst['yearly'][0] + fcst['weekly'][0],
+        )
+        self.assertEqual(
+            fcst['seasonal'][0],
+            fcst['seasonalities'][0] + fcst['extra_regressors'][0],
+        )
+        self.assertEqual(
+            fcst['yhat'][0],
+            fcst['trend'][0] + fcst['seasonal'][0],
+        )
