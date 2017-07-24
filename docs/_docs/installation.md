@@ -33,6 +33,15 @@ $ pip install fbprophet
 
 The major dependency that Prophet has is `pystan`.   PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html).
 
+Those using the Anaconda distribution should use:
+
+```
+# bash
+$ conda install -c conda-forge fbprophet
+```
+
+This will also takes care of installing PyStan.
+
 After installation, you can [get started!](quick_start.html#python-api)
 
 ### Windows
