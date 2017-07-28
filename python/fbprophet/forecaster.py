@@ -794,7 +794,7 @@ class Prophet(object):
 
         Returns
         -------
-        A pd.DataFrame with the forecast errors
+        A pd.DataFrame with the forecast errors (error = y - yhat)
         """
         df = self.history.copy().reset_index(drop=True)
         size_history = len(df)
@@ -814,10 +814,10 @@ class Prophet(object):
                 interval_width=self.interval_width,
                 uncertainty_samples=self.uncertainty_samples
             )
-            # Evaluate
+            # Train model
             size_train = size_history - periods - horizon + 1 + i
             model.fit(df.head(size_train))
-            # Last one should be used for a rolling forecast origin
+            # Calculate yhat
             df_future = pd.DataFrame({'ds': df.iloc[[size_train+horizon-1]].ds}).reset_index(drop=True)
             predicts.append(model.predict(df_future))
 
@@ -827,6 +827,7 @@ class Prophet(object):
             df.tail(periods).reset_index(drop=True)['y']
         ], axis=1)
         result.reset_index(drop=True)
+        result['error'] = result.y - result.yhat
         return result
 
     @staticmethod

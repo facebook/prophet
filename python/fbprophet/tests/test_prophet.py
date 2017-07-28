@@ -291,13 +291,16 @@ class TestProphet(TestCase):
         self.assertEqual(m.yearly_seasonality, True)
 
     def test_cv(self):
+        # Use DATA as a sample data
         df = DATA.head(100)
         m = Prophet()
         m.fit(df)
         for periods in [5, 10]:
             for horizon in [1, 3]:
                 df_result = m.cv(periods=periods, horizon=horizon)
+                # The size of output should be equal to 'periods'
                 self.assertEqual(len(df_result), periods)
+                # All data should be equal
                 self.assertTrue(np.all(df_result.y == df.tail(periods).reset_index(drop=True).y))
 
 DATA = pd.read_csv(StringIO("""
