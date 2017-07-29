@@ -30,6 +30,8 @@ After installation, you can [get started!](https://facebookincubator.github.io/p
 
 On Windows, R requires a compiler so you'll need to [follow the instructions](https://github.com/stan-dev/rstan/wiki/Installing-RStan-on-Windows) provided by `rstan`.  The key step is installing [Rtools](http://cran.r-project.org/bin/windows/Rtools/) before attempting to install the package.
 
+If you have custom Stan compiler settings, install from source rather than the CRAN binary.
+
 ## Installation in Python
 
 Prophet is on PyPI, so you can use pip to install it:
@@ -46,6 +48,14 @@ After installation, you can [get started!](https://facebookincubator.github.io/p
 ### Windows
 
 On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html).  The key step is installing a recent [C++ compiler](http://landinghub.visualstudio.com/visual-cpp-build-tools).
+
+### Linux
+
+Make sure compilers (gcc, g++) and Python development tools (python-dev) are installed. If you are using a VM, be aware that you will need at least 2GB of memory to run PyStan.
+
+### Anaconda
+
+Use `conda install gcc` to set up gcc. The easiest way to install Prophet is through conda-forge: `conda install -c conda-forge fbprophet`.
 
 ## Changelog
 
