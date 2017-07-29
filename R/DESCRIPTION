@@ -22,8 +22,7 @@ Imports:
     rstan (>= 2.14.0),
     scales,
     stats,
-    tidyr (>= 0.6.1),
-    utils
+    tidyr (>= 0.6.1)
 Suggests:
     knitr,
     testthat,
