@@ -133,6 +133,7 @@ prophet <- function(df = NULL,
 #'
 #' @param m Prophet object.
 #'
+#' @keywords internal
 validate_inputs <- function(m) {
   if (!(m$growth %in% c('linear', 'logistic'))) {
     stop("Parameter 'growth' should be 'linear' or 'logistic'.")
@@ -176,6 +177,8 @@ validate_inputs <- function(m) {
 #'  trend.
 #'
 #' @return Stan model.
+#'
+#' @keywords internal
 get_prophet_stan_model <- function(model) {
   fn <- paste('prophet', model, 'growth.RData', sep = '_')
   ## If the cached model doesn't work, just compile a new one.
@@ -201,6 +204,8 @@ get_prophet_stan_model <- function(model) {
 #'  trend.
 #'
 #' @return Stan model.
+#'
+#' @keywords internal
 compile_stan_model <- function(model) {
   fn <- paste('stan/prophet', model, 'growth.stan', sep = '_')
 
@@ -212,14 +217,15 @@ compile_stan_model <- function(model) {
 }
 
 #' Convert date vector
-#' 
+#'
 #' Convert the date to POSIXct object 
-#' 
+#'
 #' @param ds Date vector, can be consisted of characters
 #' @param tz string time zone
-#' 
+#'
 #' @return vector of POSIXct object converted from date
-#' 
+#'
+#' @keywords internal
 set_date <- function(ds = NULL, tz = "GMT") {
   if (length(ds) == 0) {
     return(NULL)
@@ -238,15 +244,16 @@ set_date <- function(ds = NULL, tz = "GMT") {
 }
 
 #' Time difference between datetimes
-#' 
+#'
 #' Compute time difference of two POSIXct objects
-#' 
+#'
 #' @param ds1 POSIXct object
 #' @param ds2 POSIXct object
 #' @param units string units of difference, e.g. 'days' or 'secs'.
-#' 
+#'
 #' @return numeric time difference
-#' 
+#'
+#' @keywords internal
 time_diff <- function(ds1, ds2, units = "days") {
   return(as.numeric(difftime(ds1, ds2, units = units)))
 }
@@ -263,6 +270,7 @@ time_diff <- function(ds1, ds2, units = "days") {
 #'
 #' @return list with items 'df' and 'm'.
 #'
+#' @keywords internal
 setup_dataframe <- function(m, df, initialize_scales = FALSE) {
   if (exists('y', where=df)) {
     df$y <- as.numeric(df$y)
@@ -310,6 +318,7 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
 #'
 #' @return m with changepoints set.
 #'
+#' @keywords internal
 set_changepoints <- function(m) {
   if (!is.null(m$changepoints)) {
     if (length(m$changepoints) > 0) {
@@ -346,6 +355,7 @@ set_changepoints <- function(m) {
 #'
 #' @return array of indexes.
 #'
+#' @keywords internal
 get_changepoint_matrix <- function(m) {
   A <- matrix(0, nrow(m$history), length(m$changepoints.t))
   for (i in 1:length(m$changepoints.t)) {
@@ -362,6 +372,7 @@ get_changepoint_matrix <- function(m) {
 #'
 #' @return Matrix with seasonality features.
 #'
+#' @keywords internal
 fourier_series <- function(dates, period, series.order) {
   t <- time_diff(dates, set_date('1970-01-01 00:00:00'))
   features <- matrix(0, length(t), 2 * series.order)
@@ -382,6 +393,7 @@ fourier_series <- function(dates, period, series.order) {
 #'
 #' @return Dataframe with seasonality.
 #'
+#' @keywords internal
 make_seasonality_features <- function(dates, period, series.order, prefix) {
   features <- fourier_series(dates, period, series.order)
   colnames(features) <- paste(prefix, 1:ncol(features), sep = '_delim_')
@@ -396,6 +408,7 @@ make_seasonality_features <- function(dates, period, series.order, prefix) {
 #' @return A dataframe with a column for each holiday.
 #'
 #' @importFrom dplyr "%>%"
+#' @keywords internal
 make_holiday_features <- function(m, dates) {
   scale.ratio <- m$holidays.prior.scale / m$seasonality.prior.scale
   # Strip dates to be just days, for joining on holidays
@@ -459,6 +472,7 @@ add_seasonality <- function(m, name, period, fourier.order) {
 #'
 #' @return Dataframe with seasonality.
 #'
+#' @keywords internal
 make_all_seasonality_features <- function(m, df) {
   seasonal.features <- data.frame(zeros = rep(0, nrow(df)))
   for (name in names(m$seasonalities)) {
@@ -487,6 +501,7 @@ make_all_seasonality_features <- function(m, df) {
 #'
 #' @return Number of Fourier components, or 0 for disabled.
 #'
+#' @keywords internal
 parse_seasonality_args <- function(m, name, arg, auto.disable, default.order) {
   if (arg == 'auto') {
     fourier.order <- 0
@@ -521,6 +536,7 @@ parse_seasonality_args <- function(m, name, arg, auto.disable, default.order) {
 #'
 #' @return The prophet model with seasonalities set.
 #'
+#' @keywords internal
 set_auto_seasonalities <- function(m) {
   first <- min(m$history$ds)
   last <- max(m$history$ds)
@@ -562,6 +578,7 @@ set_auto_seasonalities <- function(m) {
 #' @return A vector (k, m) with the rate (k) and offset (m) of the linear
 #'  growth function.
 #'
+#' @keywords internal
 linear_growth_init <- function(df) {
   i0 <- which.min(df$ds)
   i1 <- which.max(df$ds)
@@ -585,6 +602,7 @@ linear_growth_init <- function(df) {
 #' @return A vector (k, m) with the rate (k) and offset (m) of the logistic
 #'  growth function.
 #'
+#' @keywords internal
 logistic_growth_init <- function(df) {
   i0 <- which.min(df$ds)
   i1 <- which.max(df$ds)
@@ -767,6 +785,7 @@ predict.prophet <- function(object, df = NULL, ...) {
 #'
 #' @return Vector y(t).
 #'
+#' @keywords internal
 piecewise_linear <- function(t, deltas, k, m, changepoint.ts) {
   # Intercept changes
   gammas <- -changepoint.ts * deltas
@@ -793,6 +812,7 @@ piecewise_linear <- function(t, deltas, k, m, changepoint.ts) {
 #'
 #' @return Vector y(t).
 #'
+#' @keywords internal
 piecewise_logistic <- function(t, cap, deltas, k, m, changepoint.ts) {
   # Compute offset changes
   k.cum <- c(k, cumsum(deltas) + k)
@@ -820,6 +840,7 @@ piecewise_logistic <- function(t, cap, deltas, k, m, changepoint.ts) {
 #'
 #' @return Vector with trend on prediction dates.
 #'
+#' @keywords internal
 predict_trend <- function(model, df) {
   k <- mean(model$params$k, na.rm = TRUE)
   param.m <- mean(model$params$m, na.rm = TRUE)
@@ -843,6 +864,7 @@ predict_trend <- function(model, df) {
 #'
 #' @return Dataframe with seasonal components.
 #'
+#' @keywords internal
 predict_seasonal_components <- function(m, df) {
   seasonal.features <- make_all_seasonality_features(m, df)
   lower.p <- (1 - m$interval.width)/2
@@ -888,6 +910,7 @@ predict_seasonal_components <- function(m, df) {
 #'
 #' @return List with posterior predictive samples for each component.
 #'
+#' @keywords internal
 sample_posterior_predictive <- function(m, df) {
   # Sample trend, seasonality, and yhat from the extrapolation model.
   n.iterations <- length(m$params$k)
@@ -936,6 +959,7 @@ predictive_samples <- function(m, df) {
 #'
 #' @return Dataframe with uncertainty intervals.
 #'
+#' @keywords internal
 predict_uncertainty <- function(m, df) {
   sim.values <- sample_posterior_predictive(m, df)
   # Add uncertainty estimates
@@ -965,6 +989,7 @@ predict_uncertainty <- function(m, df) {
 #'
 #' @return List of trend, seasonality, and yhat, each a vector like df$t.
 #'
+#' @keywords internal
 sample_model <- function(m, df, seasonal.features, iteration) {
   trend <- sample_predictive_trend(m, df, iteration)
 
@@ -987,6 +1012,7 @@ sample_model <- function(m, df, seasonal.features, iteration) {
 #'
 #' @return Vector of simulated trend over df$t.
 #'
+#' @keywords internal
 sample_predictive_trend <- function(model, df, iteration) {
   k <- model$params$k[iteration]
   param.m <- model$params$m[iteration]
@@ -1073,6 +1099,7 @@ make_future_dataframe <- function(m, periods, freq = 'day',
 #' @param fcst Data frame returned by prophet predict.
 #'
 #' @importFrom dplyr "%>%"
+#' @keywords internal
 df_for_plotting <- function(m, fcst) {
   # Make sure there is no y in fcst
   fcst$y <- NULL
@@ -1198,6 +1225,8 @@ prophet_plot_components <- function(
 #'  figure, if available.
 #'
 #' @return A ggplot2 plot.
+#'
+#' @keywords internal
 plot_trend <- function(df, uncertainty = TRUE, plot_cap = TRUE) {
   df.t <- df[!is.na(df$trend),]
   gg.trend <- ggplot2::ggplot(df.t, ggplot2::aes(x = ds, y = trend)) +
@@ -1225,6 +1254,8 @@ plot_trend <- function(df, uncertainty = TRUE, plot_cap = TRUE) {
 #' @param uncertainty Boolean to plot uncertainty intervals.
 #'
 #' @return A ggplot2 plot.
+#'
+#' @keywords internal
 plot_holidays <- function(m, df, uncertainty = TRUE) {
   holiday.comps <- unique(m$holidays$holiday) %>% as.character()
   df.s <- data.frame(ds = df$ds,
@@ -1258,6 +1289,8 @@ plot_holidays <- function(m, df, uncertainty = TRUE) {
 #'  to Monday, and so on.
 #'
 #' @return A ggplot2 plot.
+#'
+#' @keywords internal
 plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0) {
   # Compute weekly seasonality for a Sun-Sat sequence of dates.
   df.w <- data.frame(
@@ -1291,6 +1324,8 @@ plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0) {
 #'  to Jan 2, and so on.
 #'
 #' @return A ggplot2 plot.
+#'
+#' @keywords internal
 plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0) {
   # Compute yearly seasonality for a Jan 1 - Dec 31 sequence of dates.
   df.y <- data.frame(
@@ -1323,6 +1358,8 @@ plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0) {
 #' @param uncertainty Boolean to plot uncertainty intervals.
 #'
 #' @return A ggplot2 plot.
+#'
+#' @keywords internal
 plot_seasonality <- function(m, name, uncertainty = TRUE) {
   # Compute seasonality from Jan 1 through a single period.
   start <- set_date('2017-01-01')

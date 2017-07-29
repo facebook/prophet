@@ -21,3 +21,4 @@ Adds a time index and scales y. Creates auxillary columns 't', 't_ix',
 'y_scaled', and 'cap_scaled'. These columns are used during both fitting
 and predicting.
 }
+\keyword{internal}

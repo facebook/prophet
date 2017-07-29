@@ -21,3 +21,4 @@ Dataframe with seasonality.
 \description{
 Data frame with seasonality features.
 }
+\keyword{internal}

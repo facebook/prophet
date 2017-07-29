@@ -19,3 +19,4 @@ spacing between dates in the history is <7 days.
 Turns on daily seasonality if there is >=2 days of history, and the spacing
 between dates in the history is <1 day.
 }
+\keyword{internal}

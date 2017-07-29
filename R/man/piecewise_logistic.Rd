@@ -25,3 +25,4 @@ Vector y(t).
 \description{
 Evaluate the piecewise logistic function.
 }
+\keyword{internal}

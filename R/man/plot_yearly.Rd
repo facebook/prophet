@@ -21,3 +21,4 @@ A ggplot2 plot.
 \description{
 Plot the yearly component of the forecast.
 }
+\keyword{internal}

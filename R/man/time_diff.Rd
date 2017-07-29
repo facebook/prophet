@@ -19,3 +19,4 @@ numeric time difference
 \description{
 Compute time difference of two POSIXct objects
 }
+\keyword{internal}

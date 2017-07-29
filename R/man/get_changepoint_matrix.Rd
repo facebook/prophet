@@ -15,3 +15,4 @@ array of indexes.
 \description{
 Gets changepoint matrix for history dataframe.
 }
+\keyword{internal}

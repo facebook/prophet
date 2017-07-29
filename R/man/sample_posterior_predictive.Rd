@@ -17,3 +17,4 @@ List with posterior predictive samples for each component.
 \description{
 Prophet posterior predictive samples.
 }
+\keyword{internal}

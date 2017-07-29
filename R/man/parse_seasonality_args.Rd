@@ -24,3 +24,4 @@ Number of Fourier components, or 0 for disabled.
 \description{
 Get number of Fourier components for built-in seasonalities.
 }
+\keyword{internal}

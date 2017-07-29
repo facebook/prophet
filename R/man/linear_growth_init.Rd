@@ -19,3 +19,4 @@ Provides a strong initialization for linear growth by calculating the
 growth and offset parameters that pass the function through the first and
 last points in the time series.
 }
+\keyword{internal}

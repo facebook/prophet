@@ -17,3 +17,4 @@ Dataframe with seasonal components.
 \description{
 Predict seasonality broken down into components.
 }
+\keyword{internal}
