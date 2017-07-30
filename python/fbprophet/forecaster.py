@@ -97,6 +97,7 @@ class Prophet(object):
             mcmc_samples=0,
             interval_width=0.80,
             uncertainty_samples=1000,
+            seasonality_type='additive',
     ):
         self.growth = growth
 
@@ -108,6 +109,7 @@ class Prophet(object):
             self.n_changepoints = n_changepoints
             self.specified_changepoints = False
 
+        self.seasonality_type = seasonality_type
         self.yearly_seasonality = yearly_seasonality
         self.weekly_seasonality = weekly_seasonality
         self.daily_seasonality = daily_seasonality
@@ -150,6 +152,10 @@ class Prophet(object):
         if self.growth not in ('linear', 'logistic'):
             raise ValueError(
                 "Parameter 'growth' should be 'linear' or 'logistic'.")
+        if self.seasonality_type not in ['additive', 'multiplicative']:
+            raise ValueError(
+                "Seasonality type must be either 'additive' or 'multiplicative'."
+            )
         if self.holidays is not None:
             has_lower = 'lower_window' in self.holidays
             has_upper = 'upper_window' in self.holidays
@@ -801,7 +807,7 @@ class Prophet(object):
             dat['cap'] = history['cap_scaled']
             kinit = self.logistic_growth_init(history)
 
-        model = prophet_stan_models[self.growth]
+        model = prophet_stan_models[(self.growth, self.seasonality_type)]
 
         def stan_init():
             return {
@@ -881,7 +887,12 @@ class Prophet(object):
             cols.append('floor')
         # Add in forecast components
         df2 = pd.concat((df[cols], intervals, seasonal_components), axis=1)
-        df2['yhat'] = df2['trend'] + df2['seasonal']
+        if self.seasonality_type == 'multiplicative':
+            df2['yhat'] = df2['trend'] * df2['seasonal']
+            df2['yhat'] = df2['yhat'].clip(lower=0)
+        else:
+            df2['yhat'] = df2['trend'] + df2['seasonal']
+
         return df2
 
     @staticmethod
@@ -968,7 +979,12 @@ class Prophet(object):
             trend = self.piecewise_logistic(
                 t, cap, deltas, k, m, self.changepoints_t)
 
-        return trend * self.y_scale + df['floor']
+        scaled_trend = trend * self.y_scale + df['floor']
+
+        if self.seasonality_type == 'multiplicative':
+            scaled_trend = np.clip(scaled_trend, 0, None)
+
+        return scaled_trend
 
     def predict_seasonal_components(self, df):
         """Predict seasonality components, holidays, and added regressors.
@@ -1020,7 +1036,11 @@ class Prophet(object):
                                                             axis=1)
             data[component + '_upper'] = np.nanpercentile(comp, upper_p,
                                                             axis=1)
-        return pd.DataFrame(data)
+
+        if self.seasonality_type == 'multiplicative':
+            return pd.DataFrame(data) + 1
+        else:
+            return pd.DataFrame(data)
 
     def add_group_component(self, components, name, group):
         """Adds a component with given name that contains all of the components
@@ -1111,7 +1131,15 @@ class Prophet(object):
             series['{}_upper'.format(key)] = np.nanpercentile(
                 sim_values[key], upper_p, axis=1)
 
-        return pd.DataFrame(series)
+        uncertainties = pd.DataFrame(series)
+
+        if self.seasonality_type == 'multiplicative':
+            clip_cols = [col for col in uncertainties.columns
+                         if (col.endswith('_lower') or col.endswith('_upper'))]
+            for col in clip_cols:
+                uncertainties[col] = uncertainties[col].clip(lower=0)
+
+        return uncertainties
 
     def sample_model(self, df, seasonal_features, iteration):
         """Simulate observations from the extrapolated generative model.
@@ -1134,8 +1162,13 @@ class Prophet(object):
         sigma = self.params['sigma_obs'][iteration]
         noise = np.random.normal(0, sigma, df.shape[0]) * self.y_scale
 
+        if self.seasonality_type == 'multiplicative':
+            yhat = trend * (seasonal + 1) + noise
+        else:
+            yhat = trend + seasonal + noise
+
         return pd.DataFrame({
-            'yhat': trend + seasonal + noise,
+            'yhat': yhat,
             'trend': trend,
             'seasonal': seasonal,
         })

@@ -18,13 +18,13 @@ import pkg_resources
 # fb-block 2
 
 
-def get_prophet_stan_model(model):
+def get_prophet_stan_model(model, seasonality):
     """Load compiled Stan model"""
     # fb-block 3
     # fb-block 4 start
     model_file = pkg_resources.resource_filename(
         'fbprophet',
-        'stan_models/{}_growth.pkl'.format(model),
+        'stan_models/{}_{}_growth.pkl'.format(model, seasonality),
     )
     # fb-block 4 end
     with open(model_file, 'rb') as f:
@@ -32,6 +32,8 @@ def get_prophet_stan_model(model):
 
 
 prophet_stan_models = {
-    'linear': get_prophet_stan_model('linear'),
-    'logistic': get_prophet_stan_model('logistic'),
+    ('linear', 'additive'): get_prophet_stan_model('linear', 'additive'),
+    ('linear', 'multiplicative'): get_prophet_stan_model('linear', 'multiplicative'),
+    ('logistic', 'additive'): get_prophet_stan_model('logistic', 'additive'),
+    ('logistic', 'multiplicative'): get_prophet_stan_model('logistic', 'multiplicative'),
 }
