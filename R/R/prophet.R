@@ -444,7 +444,8 @@ make_holiday_features <- function(m, dates) {
 #' components.
 #'
 #' Increasing the number of Fourier components allows the seasonality to change
-#' more quickly (at risk of overfitting).
+#' more quickly (at risk of overfitting). Default values for yearly and weekly
+#' seasonalities are 10 and 3 respectively.
 #'
 #' @param m Prophet object.
 #' @param name String name of the seasonality component.

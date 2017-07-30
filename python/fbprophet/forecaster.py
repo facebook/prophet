@@ -443,7 +443,8 @@ class Prophet(object):
         components.
 
         Increasing the number of Fourier components allows the seasonality to
-        change more quickly (at risk of overfitting).
+        change more quickly (at risk of overfitting). Default values for yearly
+        and weekly seasonalities are 10 and 3 respectively.
 
         Parameters
         ----------
