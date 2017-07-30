@@ -333,8 +333,7 @@ set_changepoints <- function(m) {
       # Place potential changepoints evenly through the first 80 pcnt of
       # the history.
       cp.indexes <- round(seq.int(1, floor(nrow(m$history) * .8),
-                          length.out = (m$n.changepoints + 1))) %>%
-                    utils::tail(-1)
+                          length.out = (m$n.changepoints + 1))[-1])
       m$changepoints <- m$history$ds[cp.indexes]
     } else {
       m$changepoints <- c()
