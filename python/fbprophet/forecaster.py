@@ -98,6 +98,7 @@ class Prophet(object):
             interval_width=0.80,
             uncertainty_samples=1000,
             seasonality_type='additive',
+            clip_at_zero=False,
     ):
         self.growth = growth
 
@@ -113,6 +114,8 @@ class Prophet(object):
         self.yearly_seasonality = yearly_seasonality
         self.weekly_seasonality = weekly_seasonality
         self.daily_seasonality = daily_seasonality
+
+        self.clip_at_zero = clip_at_zero
 
         if holidays is not None:
             if not (
@@ -889,9 +892,11 @@ class Prophet(object):
         df2 = pd.concat((df[cols], intervals, seasonal_components), axis=1)
         if self.seasonality_type == 'multiplicative':
             df2['yhat'] = df2['trend'] * df2['seasonal']
-            df2['yhat'] = df2['yhat'].clip(lower=0)
         else:
             df2['yhat'] = df2['trend'] + df2['seasonal']
+
+        if self.clip_at_zero:
+            df2['yhat'] = df2['yhat'].clip(lower=0)
 
         return df2
 
@@ -981,7 +986,7 @@ class Prophet(object):
 
         scaled_trend = trend * self.y_scale + df['floor']
 
-        if self.seasonality_type == 'multiplicative':
+        if self.clip_at_zero:
             scaled_trend = np.clip(scaled_trend, 0, None)
 
         return scaled_trend
@@ -1037,10 +1042,18 @@ class Prophet(object):
             data[component + '_upper'] = np.nanpercentile(comp, upper_p,
                                                             axis=1)
 
+        component_predictions = pd.DataFrame(data)
+
         if self.seasonality_type == 'multiplicative':
-            return pd.DataFrame(data) + 1
-        else:
-            return pd.DataFrame(data)
+            component_predictions = component_predictions + 1
+
+        if self.clip_at_zero:
+            clip_cols = [col for col in component_predictions.columns
+                         if (col.endswith('_lower') or col.endswith('_upper'))]
+            for col in clip_cols:
+                component_predictions[col] = component_predictions[col].clip(lower=0)
+
+        return component_predictions
 
     def add_group_component(self, components, name, group):
         """Adds a component with given name that contains all of the components
@@ -1133,7 +1146,7 @@ class Prophet(object):
 
         uncertainties = pd.DataFrame(series)
 
-        if self.seasonality_type == 'multiplicative':
+        if self.clip_at_zero:
             clip_cols = [col for col in uncertainties.columns
                          if (col.endswith('_lower') or col.endswith('_upper'))]
             for col in clip_cols:
