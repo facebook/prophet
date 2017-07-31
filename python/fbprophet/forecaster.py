@@ -91,6 +91,7 @@ class Prophet(object):
             interval_width=0.80,
             uncertainty_samples=1000,
             seasonality_type='additive',
+            clip_at_zero=False,
     ):
         self.growth = growth
 
@@ -103,6 +104,8 @@ class Prophet(object):
         self.seasonality_type = seasonality_type
         self.yearly_seasonality = yearly_seasonality
         self.weekly_seasonality = weekly_seasonality
+
+        self.clip_at_zero = clip_at_zero
 
         if holidays is not None:
             if not (
@@ -595,9 +598,11 @@ class Prophet(object):
 
         if self.seasonality_type == 'multiplicative':
             df2['yhat'] = df2['trend'] * df2['seasonal']
-            df2['yhat'] = df2['yhat'].clip(lower=0)
         else:
             df2['yhat'] = df2['trend'] + df2['seasonal']
+
+        if self.clip_at_zero:
+            df2['yhat'] = df2['yhat'].clip(lower=0)
 
         return df2
 
@@ -687,7 +692,7 @@ class Prophet(object):
 
         scaled_trend = trend * self.y_scale
 
-        if self.seasonality_type == 'multiplicative':
+        if self.clip_at_zero:
             scaled_trend = np.clip(scaled_trend, 0, None)
 
         return scaled_trend
@@ -740,6 +745,8 @@ class Prophet(object):
 
         if self.seasonality_type == 'multiplicative':
             component_predictions = component_predictions + 1
+
+        if self.clip_at_zero:
             clip_cols = [col for col in component_predictions.columns
                          if (col.endswith('_lower') or col.endswith('_upper'))]
             for col in clip_cols:
@@ -786,7 +793,7 @@ class Prophet(object):
 
         uncertainties = pd.DataFrame(series)
 
-        if self.seasonality_type == 'multiplicative':
+        if self.clip_at_zero:
             clip_cols = [col for col in uncertainties.columns
                          if (col.endswith('_lower') or col.endswith('_upper'))]
             for col in clip_cols:
