@@ -10,6 +10,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 import numpy as np
 import pandas as pd
 
@@ -22,7 +23,7 @@ class TestDiagnostics(TestCase):
 
     def test_cv(self):
         # Use frist 100 record in data.csv
-        df = pd.read_csv('fbprophet/tests/data.csv', parse_dates=['ds']).head(100)
+        df = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data.csv'), parse_dates = ['ds']).head(100)
         m = Prophet()
         m.fit(df)
         for periods in [5, 10]:
