@@ -22,7 +22,6 @@ from matplotlib.ticker import FuncFormatter
 
 import numpy as np
 import pandas as pd
-from functools import reduce
 
 # fb-block 1 start
 from fbprophet.models import prophet_stan_models
@@ -35,7 +34,6 @@ except ImportError:
     raise
 
 # fb-block 2
-
 
 
 class Prophet(object):
@@ -782,53 +780,6 @@ class Prophet(object):
         df2 = pd.concat((df[cols], intervals, seasonal_components), axis=1)
         df2['yhat'] = df2['trend'] + df2['seasonal']
         return df2
-
-    def cv(self, periods, horizon=1):
-        """Computes the forecast errors obtained by applying predict function to subsets of
-        the time series y using a rolling forecast origin.
-
-        Parameters
-        ----------
-        periods: Int number of test periods of a rolling forecast origin.
-        horizon: Forecast horizon
-
-        Returns
-        -------
-        A pd.DataFrame with the forecast errors (error = y - yhat)
-        """
-        df = self.history.copy().reset_index(drop=True)
-        size_history = len(df)
-        predicts = []
-        for i in range(periods):
-            # Generate new object with copying fitting options
-            model = Prophet(
-                growth=self.growth,
-                n_changepoints=self.n_changepoints,
-                yearly_seasonality=self.yearly_seasonality,
-                weekly_seasonality=self.weekly_seasonality,
-                holidays=self.holidays,
-                seasonality_prior_scale=self.seasonality_prior_scale,
-                changepoint_prior_scale=self.changepoint_prior_scale,
-                holidays_prior_scale=self.holidays_prior_scale,
-                mcmc_samples=self.mcmc_samples,
-                interval_width=self.interval_width,
-                uncertainty_samples=self.uncertainty_samples
-            )
-            # Train model
-            size_train = size_history - periods - horizon + 1 + i
-            model.fit(df.head(size_train))
-            # Calculate yhat
-            df_future = pd.DataFrame({'ds': df.iloc[[size_train+horizon-1]].ds}).reset_index(drop=True)
-            predicts.append(model.predict(df_future))
-
-        # Merge yhat(predicts) and y(df, original data)
-        result = pd.concat([
-            reduce(lambda x, y: x.append(y), predicts).reset_index(drop=True),
-            df.tail(periods).reset_index(drop=True)['y']
-        ], axis=1)
-        result.reset_index(drop=True)
-        result['error'] = result.y - result.yhat
-        return result
 
     @staticmethod
     def piecewise_linear(t, deltas, k, m, changepoint_ts):
