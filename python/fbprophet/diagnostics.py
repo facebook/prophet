@@ -19,7 +19,19 @@ import pandas as pd
 from functools import reduce
 from fbprophet import Prophet
 
+
 def _copy(model):
+    """Copy Prophet object
+
+    Parameters
+    ----------
+    model: Prophet class object.
+
+    Returns
+    -------
+    Prophet class object with the same parameter with model variable
+    """
+
     result = Prophet(
         growth=model.growth,
         n_changepoints=model.n_changepoints,
@@ -36,20 +48,20 @@ def _copy(model):
     return result
 
 
-def _cutoff_points(te, horizon, period, k):
-    return [te - horizon - period * i for i in reversed(range(k))]
-
-
-def shf(model, horizon, k, period=None):
+def simulated_historical_forecasts(model, horizon, k, period=None):
     """Simulated Historical Forecasts.
+        If you would like to know it in detail, read the original paper
+        https://facebookincubator.github.io/prophet/static/prophet_paper_20170113.pdf
 
     Parameters
     ----------
-    model: Prophet class object. Fitted Prophet model
+    model: Prophet class object.
+        Fitted Prophet model
     horizon: string which has pd.Timedelta compatible style.
-        Forecast horizon
-    k: Int number. The number of forecasts point.
-    period: string which has pd.Timedelta compatible style or None, default None
+        Forecast horizon ('5 days', '3 hours', '10 seconds' etc)
+    k: Int number.
+        The number of forecasts point.
+    period: string which has pd.Timedelta compatible style or None, default None.
         Simulated Forecast will be done at every this period.
         0.5 * horizon is used when it is None.
 
@@ -57,12 +69,10 @@ def shf(model, horizon, k, period=None):
     -------
     A pd.DataFrame with the forecast, actual value and cutoff.
     """
-    pd.to_timedelta
     df = model.history.copy().reset_index(drop=True)
     horizon = pd.Timedelta(horizon)
     period = 0.5 * horizon if period is None else pd.Timedelta(period)
-    cutoffs = _cutoff_points(df['ds'].max(), horizon, period, k)
-
+    cutoffs = [df['ds'].max() - horizon - period * i for i in reversed(range(k))]
     predicts = []
     for cutoff in cutoffs:
         # Generate new object with copying fitting options
@@ -74,7 +84,7 @@ def shf(model, horizon, k, period=None):
         yhat = m.predict(df[index_predicted][['ds']])
         # Merge yhat(predicts), y(df, original data) and cutoff
         predicts.append(pd.concat([
-            yhat,
+            yhat[['ds', 'yhat', 'yhat_lower', 'yhat_upper']],
             df[index_predicted][['y']].reset_index(drop=True),
             pd.DataFrame({'cutoff': [cutoff] * len(yhat)})
         ], axis=1))
@@ -83,19 +93,19 @@ def shf(model, horizon, k, period=None):
     return reduce(lambda x, y: x.append(y), predicts).reset_index(drop=True)
 
 
-def cv(model, horizon, period, initial=None):
+def cross_validation(model, horizon, period, initial=None):
     """Cross-Validation for time-series.
+        This function is the same with Time series cross-validation described in https://robjhyndman.com/hyndsight/tscv/
+        when the value of period is equal to the time interval of data.
 
     Parameters
     ----------
     model: Prophet class object. Fitted Prophet model
     horizon: string which has pd.Timedelta compatible style.
-        Forecast horizon
+        Forecast horizon ('5 days', '3 hours', '10 seconds' etc)
     period: string which has pd.Timedelta compatible style.
         Simulated Forecast will be done at every this period.
-        This function is the same with Time series cross-validation described in https://robjhyndman.com/hyndsight/tscv/
-        when the value of period is equal to the time interval of data.
-    initial: string which has pd.Timedelta compatible style or None, default None
+    initial: string which has pd.Timedelta compatible style or None, default None.
         First training period.
         3 * horizon is used when it is None.
 
@@ -109,4 +119,4 @@ def cv(model, horizon, period, initial=None):
     period = pd.Timedelta(period)
     initial = 3 * horizon if initial is None else pd.Timedelta(initial)
     k = int(np.floor(((te - horizon) - (ts + initial)) / period))
-    return shf(model, horizon, k, period)
+    return simulated_historical_forecasts(model, horizon, k, period)
