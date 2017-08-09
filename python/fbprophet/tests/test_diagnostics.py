@@ -21,16 +21,56 @@ from fbprophet import diagnostics
 
 class TestDiagnostics(TestCase):
 
-    def test_cv(self):
-        # Use frist 100 record in data.csv
-        df = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data.csv'), parse_dates = ['ds']).head(100)
-        m = Prophet()
-        m.fit(df)
-        for periods in [5, 10]:
-            for horizon in [1, 3]:
-                df_result = diagnostics.cv(m, periods=periods, horizon=horizon)
-                # The size of output should be equal to 'periods'
-                self.assertEqual(len(df_result), periods)
-                # All data should be equal
-                self.assertTrue(np.all(df_result.y == df.tail(periods).reset_index(drop=True).y))
+    def __init__(self, *args, **kwargs):
+        super(TestDiagnostics, self).__init__(*args, **kwargs)
+        # Use first 100 record in data.csv
+        self.__df = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data.csv'), parse_dates=['ds']).head(100)
 
+    def test_simulated_historical_forecasts(self):
+        m = Prophet()
+        m.fit(self.__df)
+        k = 3
+        for p in [1, 10]:
+            for h in [1, 3]:
+                period = '{} days'.format(p)
+                horizon = '{} days'.format(h)
+                df_shf = diagnostics.simulated_historical_forecasts(m, horizon=horizon, k=k, period=period)
+                # All cutoff dates should be less than ds dates
+                self.assertTrue((df_shf['cutoff'] < df_shf['ds']).all())
+                # The unique size of output cutoff should be equal to 'k'
+                self.assertEqual(len(np.unique(df_shf['cutoff'])), k)
+                # Each y in df_shf and self.__df with same ds should be equal
+                df_merged = pd.merge(df_shf, self.__df, 'left', on='ds')
+                self.assertAlmostEqual(np.sum((df_merged['y_x'] - df_merged['y_y']) ** 2), 0.0)
+
+    def test_simulated_historical_forecasts_default_value_check(self):
+        m = Prophet()
+        m.fit(self.__df)
+        # Default value of period should be equal to 0.5 * horizon
+        df_shf1 = diagnostics.simulated_historical_forecasts(m, horizon='10 days', k=1)
+        df_shf2 = diagnostics.simulated_historical_forecasts(m, horizon='10 days', k=1, period='5 days')
+        print(df_shf1)
+        print(df_shf2)
+        self.assertAlmostEqual(((df_shf1 - df_shf2)**2)[['y', 'yhat']].sum().sum(), 0.0)
+
+    def test_cross_validation(self):
+        m = Prophet()
+        m.fit(self.__df)
+        # Calculate the number of cutoff points(k)
+        te = self.__df['ds'].max()
+        ts = self.__df['ds'].min()
+        horizon = pd.Timedelta('4 days')
+        period = pd.Timedelta('1 days')
+        initial = pd.Timedelta('90 days')
+        k = int(np.floor(((te - horizon) - (ts + initial)) / period))
+        df_cv = diagnostics.cross_validation(m, horizon=horizon, period=period, initial=initial)
+        # The unique size of output cutoff should be equal to 'k'
+        self.assertEqual(len(np.unique(df_cv['cutoff'])), k)
+
+    def test_cross_validation_default_value_check(self):
+        m = Prophet()
+        m.fit(self.__df)
+        # Default value of initial should be equal to 3 * horizon
+        df_cv1 = diagnostics.cross_validation(m, horizon='32 days', period='1 days')
+        df_cv2 = diagnostics.cross_validation(m, horizon='32 days', period='1 days', initial='96 days')
+        self.assertAlmostEqual(((df_cv1 - df_cv2)**2)[['y', 'yhat']].sum().sum(), 0.0)

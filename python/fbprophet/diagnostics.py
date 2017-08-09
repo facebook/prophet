@@ -32,6 +32,7 @@ def _copy(model):
     Prophet class object with the same parameter with model variable
     """
 
+    # TODO(@teramonagi) this function should be moved into Prophet class as a method.
     result = Prophet(
         growth=model.growth,
         n_changepoints=model.n_changepoints,
@@ -46,6 +47,42 @@ def _copy(model):
         uncertainty_samples=model.uncertainty_samples
     )
     return result
+
+
+def _cutoffs(df, horizon, k, period):
+    """Generate cutoff dates
+
+    Parameters
+    ----------
+    df: pd.DataFrame with historical data
+    horizon: pd.Timedelta.
+        Forecast horizon
+    k: Int number.
+        The number of forecasts point.
+    period: pd.Timedelta.
+        Simulated Forecast will be done at every this period.
+
+    Returns
+    -------
+    list of pd.Timestamp
+    """
+    # Allocate memory for result list
+    result = [None] * k
+    # Last cutoff is 'latest date in data - horizon' date
+    cutoff = df['ds'].max() - horizon
+    result[0] = cutoff
+
+    for i in range(1, k):
+        cutoff -= period
+        # If data does not exist in data range (cutoff, cutoff + horizon]
+        if not (((df['ds'] > cutoff) & (df['ds'] <= cutoff + horizon)).any()):
+            # Next cutoff point is 'closest date before cutoff in data - horizon'
+            closest_date = df[df['ds'] <= cutoff].max()['ds']
+            cutoff = closest_date - horizon
+        result[i] = cutoff
+
+    # Sort lines in ascending order
+    return reversed(result)
 
 
 def simulated_historical_forecasts(model, horizon, k, period=None):
@@ -72,7 +109,7 @@ def simulated_historical_forecasts(model, horizon, k, period=None):
     df = model.history.copy().reset_index(drop=True)
     horizon = pd.Timedelta(horizon)
     period = 0.5 * horizon if period is None else pd.Timedelta(period)
-    cutoffs = [df['ds'].max() - horizon - period * i for i in reversed(range(k))]
+    cutoffs = _cutoffs(df, horizon, k, period)
     predicts = []
     for cutoff in cutoffs:
         # Generate new object with copying fitting options
@@ -80,7 +117,7 @@ def simulated_historical_forecasts(model, horizon, k, period=None):
         # Train model
         m.fit(df[df['ds'] <= cutoff])
         # Calculate yhat
-        index_predicted = (df['ds'] >= cutoff) & (df['ds'] <= cutoff + horizon)
+        index_predicted = (df['ds'] > cutoff) & (df['ds'] <= cutoff + horizon)
         yhat = m.predict(df[index_predicted][['ds']])
         # Merge yhat(predicts), y(df, original data) and cutoff
         predicts.append(pd.concat([
