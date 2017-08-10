@@ -36,7 +36,6 @@ except ImportError:
 # fb-block 2
 
 
-
 class Prophet(object):
     """Prophet forecaster.
 
@@ -1395,3 +1394,39 @@ class Prophet(object):
         ax.set_xlabel('ds')
         ax.set_ylabel(name)
         return artists
+
+    def copy(self, cutoff=None):
+        """Copy Prophet object
+
+        Parameters
+        ----------
+        cutoff: pd.Timestamp or None, default None.
+            cuttoff Timestamp for changepoints member variable.
+            changepoints are only remained if 'changepoints <= cutoff'
+
+        Returns
+        -------
+        Prophet class object with the same parameter with model variable
+        """
+        if self.changepoints is not None and cutoff is not None:
+            # Filter change points '<= cutoff'
+            self.changepoints = self.changepoints[self.changepoints <= cutoff]
+            self.n_changepoints = len(self.changepoints)
+
+        return Prophet(
+            growth=self.growth,
+            n_changepoints=self.n_changepoints,
+            changepoints=self.changepoints,
+            yearly_seasonality=self.yearly_seasonality,
+            weekly_seasonality=self.weekly_seasonality,
+            daily_seasonality=self.daily_seasonality,
+            holidays=self.holidays,
+            seasonality_prior_scale=self.seasonality_prior_scale,
+            changepoint_prior_scale=self.changepoint_prior_scale,
+            holidays_prior_scale=self.holidays_prior_scale,
+            mcmc_samples=self.mcmc_samples,
+            interval_width=self.interval_width,
+            uncertainty_samples=self.uncertainty_samples
+        )
+
+
