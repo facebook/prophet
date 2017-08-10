@@ -17,36 +17,6 @@ logger = logging.getLogger(__name__)
 import numpy as np
 import pandas as pd
 from functools import reduce
-from fbprophet import Prophet
-
-
-def _copy(model):
-    """Copy Prophet object
-
-    Parameters
-    ----------
-    model: Prophet class object.
-
-    Returns
-    -------
-    Prophet class object with the same parameter with model variable
-    """
-
-    # TODO(@teramonagi) this function should be moved into Prophet class as a method.
-    result = Prophet(
-        growth=model.growth,
-        n_changepoints=model.n_changepoints,
-        yearly_seasonality=model.yearly_seasonality,
-        weekly_seasonality=model.weekly_seasonality,
-        holidays=model.holidays,
-        seasonality_prior_scale=model.seasonality_prior_scale,
-        changepoint_prior_scale=model.changepoint_prior_scale,
-        holidays_prior_scale=model.holidays_prior_scale,
-        mcmc_samples=model.mcmc_samples,
-        interval_width=model.interval_width,
-        uncertainty_samples=model.uncertainty_samples
-    )
-    return result
 
 
 def _cutoffs(df, horizon, k, period):
@@ -66,11 +36,9 @@ def _cutoffs(df, horizon, k, period):
     -------
     list of pd.Timestamp
     """
-    # Allocate memory for result list
-    result = [None] * k
     # Last cutoff is 'latest date in data - horizon' date
     cutoff = df['ds'].max() - horizon
-    result[0] = cutoff
+    result = [cutoff]
 
     for i in range(1, k):
         cutoff -= period
@@ -79,7 +47,10 @@ def _cutoffs(df, horizon, k, period):
             # Next cutoff point is 'closest date before cutoff in data - horizon'
             closest_date = df[df['ds'] <= cutoff].max()['ds']
             cutoff = closest_date - horizon
-        result[i] = cutoff
+        if cutoff < df['ds'].min():
+            logger.warning('Not enough data for requested number of cutoffs! Using {}.'.format(k))
+            break
+        result.append(cutoff)
 
     # Sort lines in ascending order
     return reversed(result)
@@ -113,12 +84,13 @@ def simulated_historical_forecasts(model, horizon, k, period=None):
     predicts = []
     for cutoff in cutoffs:
         # Generate new object with copying fitting options
-        m = _copy(model)
+        m = model.copy(cutoff)
         # Train model
         m.fit(df[df['ds'] <= cutoff])
         # Calculate yhat
         index_predicted = (df['ds'] > cutoff) & (df['ds'] <= cutoff + horizon)
-        yhat = m.predict(df[index_predicted][['ds']])
+        columns = ['ds'] + (['cap'] if m.growth == 'logistic' else [])
+        yhat = m.predict(df[index_predicted][columns])
         # Merge yhat(predicts), y(df, original data) and cutoff
         predicts.append(pd.concat([
             yhat[['ds', 'yhat', 'yhat_lower', 'yhat_upper']],

@@ -15,6 +15,7 @@ import pandas as pd
 
 # fb-block 1 start
 import os
+import itertools
 from unittest import TestCase
 from fbprophet import Prophet
 
@@ -421,3 +422,49 @@ class TestProphet(TestCase):
             fcst['yhat'][0],
             fcst['trend'][0] + fcst['seasonal'][0],
         )
+
+    def test_copy(self):
+        # These values are created except for its default values
+        products = itertools.product(
+            ['linear', 'logistic'],  # growth
+            [None, pd.to_datetime(['2016-12-25'])],  # changepoints
+            [3],  # n_changepoints
+            [True, False],  # yearly_seasonality
+            [True, False],  # weekly_seasonality
+            [True, False],  # daily_seasonality
+            [None, pd.DataFrame({'ds': pd.to_datetime(['2016-12-25']), 'holiday': ['x']})],  # holidays
+            [1.1],  # seasonality_prior_scale
+            [1.1],  # holidays_prior_scale
+            [0.1],  # changepoint_prior_scale
+            [100],  # mcmc_samples
+            [0.9],  # interval_width
+            [200]  # uncertainty_samples
+        )
+        # Values should be copied correctly
+        for product in products:
+            m1 = Prophet(*product)
+            m2 = m1.copy()
+            self.assertEqual(m1.growth, m2.growth)
+            self.assertEqual(m1.n_changepoints, m2.n_changepoints)
+            self.assertEqual(m1.changepoints, m2.changepoints)
+            self.assertEqual(m1.yearly_seasonality, m2.yearly_seasonality)
+            self.assertEqual(m1.weekly_seasonality, m2.weekly_seasonality)
+            self.assertEqual(m1.daily_seasonality, m2.daily_seasonality)
+            if m1.holidays is None:
+                self.assertEqual(m1.holidays, m2.holidays)
+            else:
+                self.assertTrue((m1.holidays == m2.holidays).values.all())
+            self.assertEqual(m1.seasonality_prior_scale, m2.seasonality_prior_scale)
+            self.assertEqual(m1.changepoint_prior_scale, m2.changepoint_prior_scale)
+            self.assertEqual(m1.holidays_prior_scale, m2.holidays_prior_scale)
+            self.assertEqual(m1.mcmc_samples, m2.mcmc_samples)
+            self.assertEqual(m1.interval_width, m2.interval_width)
+            self.assertEqual(m1.uncertainty_samples, m2.uncertainty_samples)
+
+        # Check for cutoff
+        changepoints = pd.date_range('2016-12-15', '2017-01-15')
+        cutoff = pd.Timestamp('2016-12-25')
+        m1 = Prophet(changepoints=changepoints)
+        m2 = m1.copy(cutoff=cutoff)
+        changepoints = changepoints[changepoints <= cutoff]
+        self.assertTrue((changepoints == m2.changepoints).all())

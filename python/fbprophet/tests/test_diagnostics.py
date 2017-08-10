@@ -43,14 +43,26 @@ class TestDiagnostics(TestCase):
                 df_merged = pd.merge(df_shf, self.__df, 'left', on='ds')
                 self.assertAlmostEqual(np.sum((df_merged['y_x'] - df_merged['y_y']) ** 2), 0.0)
 
+    def test_simulated_historical_forecasts_logistic(self):
+        m = Prophet(growth='logistic')
+        df = self.__df.copy()
+        df['cap'] = 40
+        m.fit(df)
+        df_shf = diagnostics.simulated_historical_forecasts(m, horizon='3 days', k=2, period='3 days')
+        # All cutoff dates should be less than ds dates
+        self.assertTrue((df_shf['cutoff'] < df_shf['ds']).all())
+        # The unique size of output cutoff should be equal to 'k'
+        self.assertEqual(len(np.unique(df_shf['cutoff'])), 2)
+        # Each y in df_shf and self.__df with same ds should be equal
+        df_merged = pd.merge(df_shf, df, 'left', on='ds')
+        self.assertAlmostEqual(np.sum((df_merged['y_x'] - df_merged['y_y']) ** 2), 0.0)
+
     def test_simulated_historical_forecasts_default_value_check(self):
         m = Prophet()
         m.fit(self.__df)
         # Default value of period should be equal to 0.5 * horizon
         df_shf1 = diagnostics.simulated_historical_forecasts(m, horizon='10 days', k=1)
         df_shf2 = diagnostics.simulated_historical_forecasts(m, horizon='10 days', k=1, period='5 days')
-        print(df_shf1)
-        print(df_shf2)
         self.assertAlmostEqual(((df_shf1 - df_shf2)**2)[['y', 'yhat']].sum().sum(), 0.0)
 
     def test_cross_validation(self):
