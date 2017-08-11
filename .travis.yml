@@ -6,6 +6,8 @@ python:
 install:
   - pip install --upgrade pip
   - pip install -U -r python/requirements.txt
+  - pip install -U -r python/fbprophet-plot/requirements.txt
 
 script:
-  - cd python && python setup.py develop test && python setup-plot.py develop
+  - cd python && python setup.py develop test
+  - cd python && python setup-plot.py develop
