@@ -110,6 +110,9 @@ setup(
         'pandas>=0.18.1',
         'pystan>=2.14',
     ],
+    extras_require = {
+        'plot': ["matplotlib"],
+    },
     zip_safe=False,
     include_package_data=True,
     cmdclass={

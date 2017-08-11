@@ -16,10 +16,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from matplotlib import pyplot as plt
-from matplotlib.dates import MonthLocator, num2date
-from matplotlib.ticker import FuncFormatter
-
 import numpy as np
 import pandas as pd
 
@@ -892,6 +888,10 @@ class Prophet(object):
         -------
         A matplotlib figure.
         """
+        from matplotlib import pyplot as plt
+        from matplotlib.dates import MonthLocator, num2date
+        from matplotlib.ticker import FuncFormatter
+
         if ax is None:
             fig = plt.figure(facecolor='w', figsize=(10, 6))
             ax = fig.add_subplot(111)
@@ -935,6 +935,10 @@ class Prophet(object):
         -------
         A matplotlib figure.
         """
+        from matplotlib import pyplot as plt
+        from matplotlib.dates import MonthLocator, num2date
+        from matplotlib.ticker import FuncFormatter
+
         # Identify components to be plotted
         components = [('trend', True),
                       ('holidays', self.holidays is not None),
@@ -977,6 +981,9 @@ class Prophet(object):
         -------
         a list of matplotlib artists
         """
+        from matplotlib import pyplot as plt
+        from matplotlib.dates import MonthLocator, num2date
+        from matplotlib.ticker import FuncFormatter
 
         artists = []
         if not ax:
@@ -1009,6 +1016,10 @@ class Prophet(object):
         -------
         a list of matplotlib artists
         """
+        from matplotlib import pyplot as plt
+        from matplotlib.dates import MonthLocator, num2date
+        from matplotlib.ticker import FuncFormatter
+
         artists = []
         if not ax:
             fig = plt.figure(facecolor='w', figsize=(10, 6))
@@ -1047,6 +1058,10 @@ class Prophet(object):
         -------
         a list of matplotlib artists
         """
+        from matplotlib import pyplot as plt
+        from matplotlib.dates import MonthLocator, num2date
+        from matplotlib.ticker import FuncFormatter
+
         artists = []
         if not ax:
             fig = plt.figure(facecolor='w', figsize=(10, 6))
@@ -1087,6 +1102,10 @@ class Prophet(object):
         -------
         a list of matplotlib artists
         """
+        from matplotlib import pyplot as plt
+        from matplotlib.dates import MonthLocator, num2date
+        from matplotlib.ticker import FuncFormatter
+
         artists = []
         if not ax:
             fig = plt.figure(facecolor='w', figsize=(10, 6))
