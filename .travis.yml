@@ -8,4 +8,4 @@ install:
   - pip install -U -r python/requirements.txt
 
 script:
-  - cd python && python setup.py develop test
+  - cd python && python setup.py develop test && python setup-plot.py develop
