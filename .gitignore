@@ -1,6 +1,9 @@
 # Compiled python modules.
 *.pyc
 
+# Pyenv version
+.python-version
+
 # Persisted models.
 *.pkl
 
@@ -15,3 +18,4 @@ build/
 .ipynb_checkpoints
 
 *.*~
+.DS_Store
