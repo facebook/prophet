@@ -2,4 +2,3 @@ Cython>=0.22
 pystan>=2.14
 numpy>=1.10.0
 pandas>=0.18.1
-matplotlib>=2.0.0
