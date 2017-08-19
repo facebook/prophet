@@ -46,6 +46,19 @@ test_that("fit_predict_duplicates", {
   expect_error(predict(m, future), NA)
 })
 
+test_that("fit_predict_constant_history", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  train2 <- train
+  train2$y <- 20
+  m <- prophet(train2)
+  fcst <- predict(m, future)
+  expect_equal(tail(fcst$yhat, 1), 20)
+  train2$y <- 0
+  m <- prophet(train2)
+  fcst <- predict(m, future)
+  expect_equal(tail(fcst$yhat, 1), 0)
+})
+
 test_that("setup_dataframe", {
   history <- train
   m <- prophet(history, fit = FALSE)

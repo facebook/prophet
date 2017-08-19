@@ -79,6 +79,22 @@ class TestProphet(TestCase):
         forecaster.fit(train)
         forecaster.predict(future)
 
+    def test_fit_predict_constant_history(self):
+        N = DATA.shape[0]
+        train = DATA.head(N // 2).copy()
+        train['y'] = 20
+        future = pd.DataFrame({'ds': DATA['ds'].tail(N // 2)})
+        m = Prophet()
+        m.fit(train)
+        fcst = m.predict(future)
+        self.assertEqual(fcst['yhat'].values[-1], 20)
+        train['y'] = 0
+        future = pd.DataFrame({'ds': DATA['ds'].tail(N // 2)})
+        m = Prophet()
+        m.fit(train)
+        fcst = m.predict(future)
+        self.assertEqual(fcst['yhat'].values[-1], 0)
+
     def test_setup_dataframe(self):
         m = Prophet()
         N = DATA.shape[0]

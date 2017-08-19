@@ -227,6 +227,8 @@ class Prophet(object):
 
         if initialize_scales:
             self.y_scale = df['y'].abs().max()
+            if self.y_scale == 0:
+                self.y_scale = 1
             self.start = df['ds'].min()
             self.t_scale = df['ds'].max() - self.start
             for name, props in self.extra_regressors.items():
@@ -726,7 +728,13 @@ class Prophet(object):
                 'sigma_obs': 1,
             }
 
-        if self.mcmc_samples > 0:
+        if history['y'].min() == history['y'].max():
+            # Nothing to fit.
+            self.params = stan_init()
+            self.params['sigma_obs'] = 0.
+            for par in self.params:
+                self.params[par] = np.array([self.params[par]])
+        elif self.mcmc_samples > 0:
             stan_fit = model.sampling(
                 dat,
                 init=stan_init,

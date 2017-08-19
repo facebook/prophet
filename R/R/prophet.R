@@ -286,6 +286,9 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
 
   if (initialize_scales) {
     m$y.scale <- max(abs(df$y))
+    if (m$y.scale == 0) {
+      m$y.scale <- 1
+    }
     m$start <- min(df$ds)
     m$t.scale <- time_diff(max(df$ds), m$start, "secs")
   }
@@ -703,7 +706,12 @@ fit.prophet <- function(m, df, ...) {
     )
   }
 
-  if (m$mcmc.samples > 0) {
+  if (min(history$y) == max(history$y)) {
+    # Nothing to fit.
+    m$params <- stan_init()
+    m$params$sigma_obs <- 0.
+    n.iteration <- 1.
+  } else if (m$mcmc.samples > 0) {
     stan.fit <- rstan::sampling(
       model,
       data = dat,
