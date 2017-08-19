@@ -101,6 +101,21 @@ test_that("get_zero_changepoints", {
   expect_equal(ncol(mat), 1)
 })
 
+test_that("override_n_changepoints", {
+  history <- train[1:20,]
+  m <- prophet(history, fit = FALSE)
+
+  out <- prophet:::setup_dataframe(m, history, initialize_scales = TRUE)
+  m <- out$m
+  history <- out$df
+  m$history <- history
+
+  m <- prophet:::set_changepoints(m)
+  expect_equal(m$n.changepoints, 15)
+  cp <- m$changepoints.t
+  expect_equal(length(cp), 15)
+})
+
 test_that("fourier_series_weekly", {
   mat <- prophet:::fourier_series(DATA$ds, 7, 3)
   true.values <- c(0.9165623, 0.3998920, 0.7330519, -0.6801727, -0.3302791,

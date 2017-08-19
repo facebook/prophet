@@ -329,10 +329,16 @@ set_changepoints <- function(m) {
       }
     }
   } else {
+    # Place potential changepoints evenly through the first 80 pcnt of
+    # the history.
+    hist.size <- floor(nrow(m$history) * .8)
+    if (m$n.changepoints + 1 > hist.size) {
+      m$n.changepoints <- hist.size - 1
+      warning('n.changepoints greater than number of observations. Using ',
+              m$n.changepoints)
+    }
     if (m$n.changepoints > 0) {
-      # Place potential changepoints evenly through the first 80 pcnt of
-      # the history.
-      cp.indexes <- round(seq.int(1, floor(nrow(m$history) * .8),
+      cp.indexes <- round(seq.int(1, hist.size,
                           length.out = (m$n.changepoints + 1))[-1])
       m$changepoints <- m$history$ds[cp.indexes]
     } else {

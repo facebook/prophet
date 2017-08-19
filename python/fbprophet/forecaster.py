@@ -277,19 +277,27 @@ class Prophet(object):
                 too_low = min(self.changepoints) < self.history['ds'].min()
                 too_high = max(self.changepoints) > self.history['ds'].max()
                 if too_low or too_high:
-                    raise ValueError('Changepoints must fall within training data.')
-        elif self.n_changepoints > 0:
-            # Place potential changepoints evenly through first 80% of history
-            max_ix = np.floor(self.history.shape[0] * 0.8)
-            cp_indexes = (
-                np.linspace(0, max_ix, self.n_changepoints + 1)
-                .round()
-                .astype(np.int)
-            )
-            self.changepoints = self.history.ix[cp_indexes]['ds'].tail(-1)
+                    raise ValueError(
+                        'Changepoints must fall within training data.')
         else:
-            # set empty changepoints
-            self.changepoints = []
+            # Place potential changepoints evenly through first 80% of history
+            hist_size = np.floor(self.history.shape[0] * 0.8)
+            if self.n_changepoints + 1 > hist_size:
+                self.n_changepoints = hist_size - 1
+                logger.info(
+                    'n_changepoints greater than number of observations.'
+                    'Using {}.'.format(self.n_changepoints)
+                )
+            if self.n_changepoints > 0:
+                cp_indexes = (
+                    np.linspace(0, hist_size, self.n_changepoints + 1)
+                    .round()
+                    .astype(np.int)
+                )
+                self.changepoints = self.history.ix[cp_indexes]['ds'].tail(-1)
+            else:
+                # set empty changepoints
+                self.changepoints = []
         if len(self.changepoints) > 0:
             self.changepoints_t = np.sort(np.array(
                 (self.changepoints - self.start) / self.t_scale))

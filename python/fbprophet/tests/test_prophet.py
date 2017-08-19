@@ -130,6 +130,18 @@ class TestProphet(TestCase):
         self.assertEqual(mat.shape[0], N // 2)
         self.assertEqual(mat.shape[1], 1)
 
+    def test_override_n_changepoints(self):
+        m = Prophet()
+        history = DATA.head(20).copy()
+
+        history = m.setup_dataframe(history, initialize_scales=True)
+        m.history = history
+
+        m.set_changepoints()
+        self.assertEqual(m.n_changepoints, 15)
+        cp = m.changepoints_t
+        self.assertEqual(cp.shape[0], 15)
+
     def test_fourier_series_weekly(self):
         mat = Prophet.fourier_series(DATA['ds'], 7, 3)
         # These are from the R forecast package directly.
