@@ -296,7 +296,9 @@ class Prophet(object):
                     .round()
                     .astype(np.int)
                 )
-                self.changepoints = self.history.ix[cp_indexes]['ds'].tail(-1)
+                self.changepoints = (
+                    self.history.iloc[cp_indexes]['ds'].tail(-1)
+                )
             else:
                 # set empty changepoints
                 self.changepoints = []
@@ -615,9 +617,9 @@ class Prophet(object):
         function.
         """
         i0, i1 = df['ds'].idxmin(), df['ds'].idxmax()
-        T = df['t'].ix[i1] - df['t'].ix[i0]
-        k = (df['y_scaled'].ix[i1] - df['y_scaled'].ix[i0]) / T
-        m = df['y_scaled'].ix[i0] - k * df['t'].ix[i0]
+        T = df['t'].iloc[i1] - df['t'].iloc[i0]
+        k = (df['y_scaled'].iloc[i1] - df['y_scaled'].iloc[i0]) / T
+        m = df['y_scaled'].iloc[i0] - k * df['t'].iloc[i0]
         return (k, m)
 
     @staticmethod
@@ -639,11 +641,11 @@ class Prophet(object):
         function.
         """
         i0, i1 = df['ds'].idxmin(), df['ds'].idxmax()
-        T = df['t'].ix[i1] - df['t'].ix[i0]
+        T = df['t'].iloc[i1] - df['t'].iloc[i0]
 
         # Force valid values, in case y > cap.
-        r0 = max(1.01, df['cap_scaled'].ix[i0] / df['y_scaled'].ix[i0])
-        r1 = max(1.01, df['cap_scaled'].ix[i1] / df['y_scaled'].ix[i1])
+        r0 = max(1.01, df['cap_scaled'].iloc[i0] / df['y_scaled'].iloc[i0])
+        r1 = max(1.01, df['cap_scaled'].iloc[i1] / df['y_scaled'].iloc[i1])
 
         if abs(r0 - r1) <= 0.01:
             r0 = 1.05 * r0
