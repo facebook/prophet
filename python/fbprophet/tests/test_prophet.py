@@ -490,9 +490,10 @@ class TestProphet(TestCase):
             self.assertEqual(m1.uncertainty_samples, m2.uncertainty_samples)
 
         # Check for cutoff
-        changepoints = pd.date_range('2016-12-15', '2017-01-15')
-        cutoff = pd.Timestamp('2016-12-25')
+        changepoints = pd.date_range('2012-06-15', '2012-09-15')
+        cutoff = pd.Timestamp('2012-07-25')
         m1 = Prophet(changepoints=changepoints)
+        m1.fit(DATA)
         m2 = m1.copy(cutoff=cutoff)
         changepoints = changepoints[changepoints <= cutoff]
         self.assertTrue((changepoints == m2.changepoints).all())

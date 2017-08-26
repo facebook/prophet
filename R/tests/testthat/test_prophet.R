@@ -330,3 +330,57 @@ test_that("custom_seasonality", {
   m <- add_seasonality(m, name='monthly', period=30, fourier.order=5)
   expect_equal(m$seasonalities[['monthly']], c(30, 5))
 })
+
+test_that("copy", {
+  inputs <- list(
+    growth = c('linear', 'logistic'),
+    changepoints = c(NULL, c('2016-12-25')),
+    n.changepoints = c(3),
+    yearly.seasonality = c(TRUE, FALSE),
+    weekly.seasonality = c(TRUE, FALSE),
+    daily.seasonality = c(TRUE, FALSE),
+    holidays = c(NULL, 'insert_dataframe'),
+    seasonality.prior.scale = c(1.1),
+    holidays.prior.scale = c(1.1),
+    changepoints.prior.scale = c(0.1),
+    mcmc.samples = c(100),
+    interval.width = c(0.9),
+    uncertainty.samples = c(200)
+  )
+  products <- expand.grid(inputs)
+  for (i in 1:length(products)) {
+    if (products$holidays[i] == 'insert_dataframe') {
+      holidays <- data.frame(ds=c('2016-12-25'), holiday=c('x'))
+    } else {
+      holidays <- NULL
+    }
+    m1 <- prophet(
+      growth = products$growth[i],
+      changepoints = products$changepoints[i],
+      n.changepoints = products$n.changepoints[i],
+      yearly.seasonality = products$yearly.seasonality[i],
+      weekly.seasonality = products$weekly.seasonality[i],
+      daily.seasonality = products$daily.seasonality[i],
+      holidays = holidays,
+      seasonality.prior.scale = products$seasonality.prior.scale[i],
+      holidays.prior.scale = products$holidays.prior.scale[i],
+      changepoints.prior.scale = products$changepoints.prior.scale[i],
+      mcmc.samples = products$mcmc.samples[i],
+      interval.width = products$interval.width[i],
+      uncertainty.samples = products$uncertainty.samples[i],
+      fit = FALSE
+    )
+    m2 <- prophet:::prophet_copy(m1)
+    # Values should be copied correctly
+    for (arg in names(inputs)) {
+      expect_equal(m1[[arg]], m2[[arg]])
+    }
+  }
+  # Check for cutoff
+  changepoints <- seq.Date(as.Date('2012-06-15'), as.Date('2012-09-15'), by='d')
+  cutoff <- as.Date('2012-07-25')
+  m1 <- prophet(DATA, changepoints = changepoints)
+  m2 <- prophet:::prophet_copy(m1, cutoff)
+  changepoints <- changepoints[changepoints <= cutoff]
+  expect_equal(prophet:::set_date(changepoints), m2$changepoints)
+})

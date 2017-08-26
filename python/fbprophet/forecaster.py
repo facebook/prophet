@@ -100,8 +100,10 @@ class Prophet(object):
         self.changepoints = pd.to_datetime(changepoints)
         if self.changepoints is not None:
             self.n_changepoints = len(self.changepoints)
+            self.specified_changepoints = True
         else:
             self.n_changepoints = n_changepoints
+            self.specified_changepoints = False
 
         self.yearly_seasonality = yearly_seasonality
         self.weekly_seasonality = weekly_seasonality
@@ -1420,21 +1422,24 @@ class Prophet(object):
         ----------
         cutoff: pd.Timestamp or None, default None.
             cuttoff Timestamp for changepoints member variable.
-            changepoints are only remained if 'changepoints <= cutoff'
+            changepoints are only retained if 'changepoints <= cutoff'
 
         Returns
         -------
         Prophet class object with the same parameter with model variable
         """
-        if self.changepoints is not None and cutoff is not None:
-            # Filter change points '<= cutoff'
-            self.changepoints = self.changepoints[self.changepoints <= cutoff]
-            self.n_changepoints = len(self.changepoints)
+        if self.specified_changepoints:
+            changepoints = self.changepoints
+            if cutoff is not None:
+                # Filter change points '<= cutoff'
+                changepoints = changepoints[changepoints <= cutoff]
+        else:
+            changepoints = None
 
         return Prophet(
             growth=self.growth,
             n_changepoints=self.n_changepoints,
-            changepoints=self.changepoints,
+            changepoints=changepoints,
             yearly_seasonality=self.yearly_seasonality,
             weekly_seasonality=self.weekly_seasonality,
             daily_seasonality=self.daily_seasonality,
@@ -1446,5 +1451,3 @@ class Prophet(object):
             interval_width=self.interval_width,
             uncertainty_samples=self.uncertainty_samples
         )
-
-

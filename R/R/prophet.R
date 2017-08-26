@@ -109,6 +109,7 @@ prophet <- function(df = NULL,
     mcmc.samples = mcmc.samples,
     interval.width = interval.width,
     uncertainty.samples = uncertainty.samples,
+    specified.changepoints = !is.null(changepoints),
     start = NULL,  # This and following attributes are set during fitting
     y.scale = NULL,
     t.scale = NULL,
@@ -240,6 +241,7 @@ set_date <- function(ds = NULL, tz = "GMT") {
   } else {
     ds <- as.POSIXct(ds, format = "%Y-%m-%d %H:%M:%S", tz = tz)
   }
+  attr(ds, "tzone") <- tz
   return(ds)
 }
 
@@ -1409,6 +1411,44 @@ plot_seasonality <- function(m, name, uncertainty = TRUE) {
       na.rm = TRUE)
   }
   return(gg.s)
+}
+
+#' Copy Prophet object.
+#'
+#' @param m Prophet model object.
+#' @param cutoff Date, possibly as string. Changepoints are only retained if
+#'  changepoints <= cutoff.
+#'
+#' @return An unfitted Prophet model object with the same parameters as the
+#'  input model.
+#'
+#' @keywords internal
+prophet_copy <- function(m, cutoff = NULL) {
+  if (m$specified.changepoints) {
+    changepoints <- m$changepoints
+    if (!is.null(cutoff)) {
+      cutoff <- set_date(cutoff)
+      changepoints <- changepoints[changepoints <= cutoff]
+    }
+  } else {
+    changepoints <- NULL
+  }
+  return(prophet(
+    growth = m$growth,
+    changepoints = changepoints,
+    n.changepoints = m$n.changepoints,
+    yearly.seasonality = m$yearly.seasonality,
+    weekly.seasonality = m$weekly.seasonality,
+    daily.seasonality = m$daily.seasonality,
+    holidays = m$holidays,
+    seasonality.prior.scale = m$seasonality.prior.scale,
+    changepoint.prior.scale = m$changepoint.prior.scale,
+    holidays.prior.scale = m$holidays.prior.scale,
+    mcmc.samples = m$mcmc.samples,
+    interval.width = m$interval.width,
+    uncertainty.samples = m$uncertainty.samples,
+    fit = FALSE,
+  ))
 }
 
 # fb-block 3

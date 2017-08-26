@@ -77,9 +77,9 @@ class TestDiagnostics(TestCase):
         ts = self.__df['ds'].min()
         horizon = pd.Timedelta('4 days')
         period = pd.Timedelta('10 days')
-        initial = pd.Timedelta('90 days')
-        k = int(np.floor(((te - horizon) - (ts + initial)) / period))
-        df_cv = diagnostics.cross_validation(m, horizon=horizon, period=period, initial=initial)
+        k = 5
+        df_cv = diagnostics.cross_validation(
+            m, horizon='4 days', period='10 days', initial='90 days')
         # The unique size of output cutoff should be equal to 'k'
         self.assertEqual(len(np.unique(df_cv['cutoff'])), k)
         self.assertEqual(max(df_cv['ds'] - df_cv['cutoff']), horizon)

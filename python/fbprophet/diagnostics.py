@@ -38,6 +38,8 @@ def _cutoffs(df, horizon, k, period):
     """
     # Last cutoff is 'latest date in data - horizon' date
     cutoff = df['ds'].max() - horizon
+    if cutoff < df['ds'].min():
+        raise ValueError('Less data than horizon.')
     result = [cutoff]
 
     for i in range(1, k):
@@ -48,7 +50,7 @@ def _cutoffs(df, horizon, k, period):
             closest_date = df[df['ds'] <= cutoff].max()['ds']
             cutoff = closest_date - horizon
         if cutoff < df['ds'].min():
-            logger.warning('Not enough data for requested number of cutoffs! Using {}.'.format(k))
+            logger.warning('Not enough data for requested number of cutoffs! Using {}.'.format(i))
             break
         result.append(cutoff)
 
@@ -127,5 +129,7 @@ def cross_validation(model, horizon, period, initial=None):
     horizon = pd.Timedelta(horizon)
     period = pd.Timedelta(period)
     initial = 3 * horizon if initial is None else pd.Timedelta(initial)
-    k = int(np.floor(((te - horizon) - (ts + initial)) / period))
+    k = int(np.ceil(((te - horizon) - (ts + initial)) / period))
+    if k < 1:
+        raise ValueError('Not enough data for specified horizon and initial.')
     return simulated_historical_forecasts(model, horizon, k, period)
