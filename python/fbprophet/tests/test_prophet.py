@@ -278,7 +278,7 @@ class TestProphet(TestCase):
         })
         holidays2 = pd.concat((holidays, holidays2))
         feats, priors = Prophet(holidays=holidays2).make_holiday_features(df['ds'])
-        self.assertEqual(sum(priors), 26)
+        self.assertEqual(priors, [8., 8., 5., 5.])
         # Check incompatible priors
         holidays = pd.DataFrame({
             'ds': pd.to_datetime(['2016-12-25', '2017-12-25']),
@@ -327,7 +327,8 @@ class TestProphet(TestCase):
         self.assertEqual(m.weekly_seasonality, 'auto')
         m.fit(train)
         self.assertIn('weekly', m.seasonalities)
-        self.assertEqual(m.seasonalities['weekly'], (7, 3))
+        self.assertEqual(m.seasonalities['weekly'],
+                         {'period': 7, 'fourier_order': 3, 'prior_scale': 10.})
         # Should be disabled due to too short history
         N = 9
         train = DATA.head(N)
@@ -342,9 +343,10 @@ class TestProphet(TestCase):
         m = Prophet()
         m.fit(train)
         self.assertNotIn('weekly', m.seasonalities)
-        m = Prophet(weekly_seasonality=2)
+        m = Prophet(weekly_seasonality=2, seasonality_prior_scale=3.)
         m.fit(DATA)
-        self.assertEqual(m.seasonalities['weekly'], (7, 2))
+        self.assertEqual(m.seasonalities['weekly'],
+                         {'period': 7, 'fourier_order': 2, 'prior_scale': 3.})
 
     def test_auto_yearly_seasonality(self):
         # Should be enabled
@@ -352,7 +354,10 @@ class TestProphet(TestCase):
         self.assertEqual(m.yearly_seasonality, 'auto')
         m.fit(DATA)
         self.assertIn('yearly', m.seasonalities)
-        self.assertEqual(m.seasonalities['yearly'], (365.25, 10))
+        self.assertEqual(
+            m.seasonalities['yearly'],
+            {'period': 365.25, 'fourier_order': 10, 'prior_scale': 10.},
+        )
         # Should be disabled due to too short history
         N = 240
         train = DATA.head(N)
@@ -362,9 +367,12 @@ class TestProphet(TestCase):
         m = Prophet(yearly_seasonality=True)
         m.fit(train)
         self.assertIn('yearly', m.seasonalities)
-        m = Prophet(yearly_seasonality=7)
+        m = Prophet(yearly_seasonality=7, seasonality_prior_scale=3.)
         m.fit(DATA)
-        self.assertEqual(m.seasonalities['yearly'], (365.25, 7))
+        self.assertEqual(
+            m.seasonalities['yearly'],
+            {'period': 365.25, 'fourier_order': 7, 'prior_scale': 3.},
+        )
 
     def test_auto_daily_seasonality(self):
         # Should be enabled
@@ -372,7 +380,8 @@ class TestProphet(TestCase):
         self.assertEqual(m.daily_seasonality, 'auto')
         m.fit(DATA2)
         self.assertIn('daily', m.seasonalities)
-        self.assertEqual(m.seasonalities['daily'], (1, 4))
+        self.assertEqual(m.seasonalities['daily'],
+                         {'period': 1, 'fourier_order': 4, 'prior_scale': 10.})
         # Should be disabled due to too short history
         N = 430
         train = DATA2.head(N)
@@ -382,9 +391,10 @@ class TestProphet(TestCase):
         m = Prophet(daily_seasonality=True)
         m.fit(train)
         self.assertIn('daily', m.seasonalities)
-        m = Prophet(daily_seasonality=7)
+        m = Prophet(daily_seasonality=7, seasonality_prior_scale=3.)
         m.fit(DATA2)
-        self.assertEqual(m.seasonalities['daily'], (1, 7))
+        self.assertEqual(m.seasonalities['daily'],
+                         {'period': 1, 'fourier_order': 7, 'prior_scale': 3.})
         m = Prophet()
         m.fit(DATA)
         self.assertNotIn('daily', m.seasonalities)
@@ -403,15 +413,26 @@ class TestProphet(TestCase):
         holidays = pd.DataFrame({
             'ds': pd.to_datetime(['2017-01-02']),
             'holiday': ['special_day'],
+            'prior_scale': [4.],
         })
         m = Prophet(holidays=holidays)
-        m.add_seasonality(name='monthly', period=30, fourier_order=5)
-        self.assertEqual(m.seasonalities['monthly'], (30, 5))
+        m.add_seasonality(name='monthly', period=30, fourier_order=5,
+                          prior_scale=2.)
+        self.assertEqual(m.seasonalities['monthly'],
+                         {'period': 30, 'fourier_order': 5, 'prior_scale': 2.})
         with self.assertRaises(ValueError):
             m.add_seasonality(name='special_day', period=30, fourier_order=5)
         with self.assertRaises(ValueError):
             m.add_seasonality(name='trend', period=30, fourier_order=5)
         m.add_seasonality(name='weekly', period=30, fourier_order=5)
+        # Test priors
+        m = Prophet(holidays=holidays, yearly_seasonality=False)
+        m.add_seasonality(name='monthly', period=30, fourier_order=5,
+                          prior_scale=2.)
+        m.fit(DATA.copy())
+        seasonal_features, prior_scales = m.make_all_seasonality_features(
+            m.history)
+        self.assertEqual(prior_scales, [2.] * 10 + [10.] * 6 + [4.])
 
     def test_added_regressors(self):
         m = Prophet()

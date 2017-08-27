@@ -63,7 +63,8 @@ class Prophet(object):
         that holiday.
     seasonality_prior_scale: Parameter modulating the strength of the
         seasonality model. Larger values allow the model to fit larger seasonal
-        fluctuations, smaller values dampen the seasonality.
+        fluctuations, smaller values dampen the seasonality. Can be specified
+        for individual seasonalities using add_seasonality.
     holidays_prior_scale: Parameter modulating the strength of the holiday
         components model, unless overriden in the holidays input.
     changepoint_prior_scale: Parameter modulating the flexibility of the
@@ -406,6 +407,8 @@ class Prophet(object):
                 raise ValueError(
                     'Holiday {} does not have consistent prior scale '
                     'specification.'.format(row.holiday))
+            if ps <= 0:
+                raise ValueError('Prior scale must be > 0')
             prior_scales[row.holiday] = ps
                 
             for offset in range(lw, uw + 1):
@@ -470,19 +473,25 @@ class Prophet(object):
         }
         return self
 
-    def add_seasonality(self, name, period, fourier_order):
-        """Add a seasonal component with specified period and number of Fourier
-        components.
+    def add_seasonality(self, name, period, fourier_order, prior_scale=None):
+        """Add a seasonal component with specified period, number of Fourier
+        components, and prior scale.
 
         Increasing the number of Fourier components allows the seasonality to
         change more quickly (at risk of overfitting). Default values for yearly
         and weekly seasonalities are 10 and 3 respectively.
+
+        Increasing prior scale will allow this seasonality component more
+        flexibility, decreasing will dampen it. If not provided, will use the
+        seasonality_prior_scale provided on Prophet initialization (defaults
+        to 10).
 
         Parameters
         ----------
         name: string name of the seasonality component.
         period: float number of days in one period.
         fourier_order: int number of Fourier components to use.
+        prior_scale: float prior scale for this component.
 
         Returns
         -------
@@ -494,7 +503,17 @@ class Prophet(object):
         if name not in ['daily', 'weekly', 'yearly']:
             # Allow overwriting built-in seasonalities
             self.validate_column_name(name, check_seasonalities=False)
-        self.seasonalities[name] = (period, fourier_order)
+        if prior_scale is None:
+            ps = self.seasonality_prior_scale
+        else:
+            ps = float(prior_scale)
+        if ps <= 0:
+            raise ValueError('Prior scale must be > 0')
+        self.seasonalities[name] = {
+            'period': period,
+            'fourier_order': fourier_order,
+            'prior_scale': ps,
+        }
         return self
 
     def make_all_seasonality_features(self, df):
@@ -516,16 +535,16 @@ class Prophet(object):
         prior_scales = []
 
         # Seasonality features
-        for name, (period, series_order) in self.seasonalities.items():
+        for name, props in self.seasonalities.items():
             features = self.make_seasonality_features(
                 df['ds'],
-                period,
-                series_order,
+                props['period'],
+                props['fourier_order'],
                 name,
             )
             seasonal_features.append(features)
             prior_scales.extend(
-                [self.seasonality_prior_scale] * features.shape[1])
+                [props['prior_scale']] * features.shape[1])
 
         # Holiday features
         if self.holidays is not None:
@@ -600,7 +619,11 @@ class Prophet(object):
         fourier_order = self.parse_seasonality_args(
             'yearly', self.yearly_seasonality, yearly_disable, 10)
         if fourier_order > 0:
-            self.seasonalities['yearly'] = (365.25, fourier_order)
+            self.seasonalities['yearly'] = {
+                'period': 365.25,
+                'fourier_order': fourier_order,
+                'prior_scale': self.seasonality_prior_scale,
+            }
 
         # Weekly seasonality
         weekly_disable = ((last - first < pd.Timedelta(weeks=2)) or
@@ -608,7 +631,11 @@ class Prophet(object):
         fourier_order = self.parse_seasonality_args(
             'weekly', self.weekly_seasonality, weekly_disable, 3)
         if fourier_order > 0:
-            self.seasonalities['weekly'] = (7, fourier_order)
+            self.seasonalities['weekly'] = {
+                'period': 7,
+                'fourier_order': fourier_order,
+                'prior_scale': self.seasonality_prior_scale,
+            }
 
         # Daily seasonality
         daily_disable = ((last - first < pd.Timedelta(days=2)) or
@@ -616,7 +643,11 @@ class Prophet(object):
         fourier_order = self.parse_seasonality_args(
             'daily', self.daily_seasonality, daily_disable, 4)
         if fourier_order > 0:
-            self.seasonalities['daily'] = (1, fourier_order)
+            self.seasonalities['daily'] = {
+                'period': 1,
+                'fourier_order': fourier_order,
+                'prior_scale': self.seasonality_prior_scale,
+            }
 
     @staticmethod
     def linear_growth_init(df):
@@ -1407,7 +1438,7 @@ class Prophet(object):
             ax = fig.add_subplot(111)
         # Compute seasonality from Jan 1 through a single period.
         start = pd.to_datetime('2017-01-01 0000')
-        period = self.seasonalities[name][0]
+        period = self.seasonalities[name]['period']
         end = start + pd.Timedelta(days=period)
         plot_points = 200
         days = pd.to_datetime(np.linspace(start.value, end.value, plot_points))
