@@ -58,12 +58,14 @@ class Prophet(object):
     holidays: pd.DataFrame with columns holiday (string) and ds (date type)
         and optionally columns lower_window and upper_window which specify a
         range of days around the date to be included as holidays.
-        lower_window=-2 will include 2 days prior to the date as holidays.
+        lower_window=-2 will include 2 days prior to the date as holidays. Also
+        optionally can have a column prior_scale specifying the prior scale for
+        that holiday.
     seasonality_prior_scale: Parameter modulating the strength of the
         seasonality model. Larger values allow the model to fit larger seasonal
         fluctuations, smaller values dampen the seasonality.
     holidays_prior_scale: Parameter modulating the strength of the holiday
-        components model.
+        components model, unless overriden in the holidays input.
     changepoint_prior_scale: Parameter modulating the flexibility of the
         automatic changepoint selection. Large values will allow many
         changepoints, small values will allow few changepoints.
@@ -376,10 +378,12 @@ class Prophet(object):
 
         Returns
         -------
-        pd.DataFrame with a column for each holiday.
+        holiday_features: pd.DataFrame with a column for each holiday.
+        prior_scale_list: List of prior scales for each holiday column.
         """
         # Holds columns of our future matrix.
         expanded_holidays = defaultdict(lambda: np.zeros(dates.shape[0]))
+        prior_scales = {}
         # Makes an index so we can perform `get_loc` below.
         # Strip to just dates.
         row_index = pd.DatetimeIndex(dates.apply(lambda x: x.date()))
@@ -392,6 +396,18 @@ class Prophet(object):
             except ValueError:
                 lw = 0
                 uw = 0
+            try:
+                ps = float(row.get('prior_scale', self.holidays_prior_scale))
+            except ValueError:
+                ps = float(self.holidays_prior_scale)
+            if (
+                row.holiday in prior_scales and prior_scales[row.holiday] != ps
+            ):
+                raise ValueError(
+                    'Holiday {} does not have consistent prior scale '
+                    'specification.'.format(row.holiday))
+            prior_scales[row.holiday] = ps
+                
             for offset in range(lw, uw + 1):
                 occurrence = dt + timedelta(days=offset)
                 try:
@@ -409,9 +425,12 @@ class Prophet(object):
                 else:
                     # Access key to generate value
                     expanded_holidays[key]
-
-        # This relies pretty importantly on pandas keeping the columns in order.
-        return pd.DataFrame(expanded_holidays)
+        holiday_features = pd.DataFrame(expanded_holidays)
+        prior_scale_list = [
+            prior_scales[h.split('_delim_')[0]]
+            for h in holiday_features.columns
+        ]
+        return holiday_features, prior_scale_list
 
     def add_regressor(self, name, prior_scale=None, standardize='auto'):
         """Add an additional regressor to be used for fitting and predicting.
@@ -510,10 +529,9 @@ class Prophet(object):
 
         # Holiday features
         if self.holidays is not None:
-            features = self.make_holiday_features(df['ds'])
+            features, holiday_priors = self.make_holiday_features(df['ds'])
             seasonal_features.append(features)
-            prior_scales.extend(
-                [self.holidays_prior_scale] * features.shape[1])
+            prior_scales.extend(holiday_priors)
 
         # Additional regressors
         for name, props in self.extra_regressors.items():
