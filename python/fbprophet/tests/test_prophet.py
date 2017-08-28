@@ -521,15 +521,15 @@ class TestProphet(TestCase):
             fcst['extra_regressors'][0],
             fcst['numeric_feature'][0] + fcst['binary_feature2'][0],
         )
-        self.assertEqual(
+        self.assertAlmostEqual(
             fcst['seasonalities'][0],
             fcst['yearly'][0] + fcst['weekly'][0],
         )
-        self.assertEqual(
+        self.assertAlmostEqual(
             fcst['seasonal'][0],
             fcst['seasonalities'][0] + fcst['extra_regressors'][0],
         )
-        self.assertEqual(
+        self.assertAlmostEqual(
             fcst['yhat'][0],
             fcst['trend'][0] + fcst['seasonal'][0],
         )
