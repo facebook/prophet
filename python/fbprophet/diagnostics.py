@@ -91,7 +91,11 @@ def simulated_historical_forecasts(model, horizon, k, period=None):
         m.fit(df[df['ds'] <= cutoff])
         # Calculate yhat
         index_predicted = (df['ds'] > cutoff) & (df['ds'] <= cutoff + horizon)
-        columns = ['ds'] + (['cap'] if m.growth == 'logistic' else [])
+        columns = ['ds']
+        if m.growth == 'logistic':
+            columns.append('cap')
+            if m.logistic_floor:
+                columns.append('floor')
         yhat = m.predict(df[index_predicted][columns])
         # Merge yhat(predicts), y(df, original data) and cutoff
         predicts.append(pd.concat([

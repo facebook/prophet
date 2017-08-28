@@ -109,6 +109,35 @@ class TestProphet(TestCase):
         self.assertTrue('y_scaled' in history)
         self.assertEqual(history['y_scaled'].max(), 1.0)
 
+    def test_logistic_floor(self):
+        m = Prophet(growth='logistic')
+        N = DATA.shape[0]
+        history = DATA.head(N // 2).copy()
+        history['floor'] = 10.
+        history['cap'] = 80.
+        future = DATA.tail(N // 2).copy()
+        future['cap'] = 80.
+        future['floor'] = 10.
+        m.fit(history)
+        self.assertTrue(m.logistic_floor)
+        self.assertTrue('floor' in m.history)
+        self.assertAlmostEqual(m.history['y_scaled'][0], 1.)
+        fcst1 = m.predict(future)
+
+        m2 = Prophet(growth='logistic')
+        history2 = history.copy()
+        history2['y'] += 10.
+        history2['floor'] += 10.
+        history2['cap'] += 10.
+        future['cap'] += 10.
+        future['floor'] += 10.
+        m2.fit(history2)
+        self.assertAlmostEqual(m2.history['y_scaled'][0], 1.)
+        fcst2 = m2.predict(future)
+        fcst2['yhat'] -= 10.
+        # Check for approximate shift invariance
+        self.assertTrue((np.abs(fcst1['yhat'] - fcst2['yhat']) < 1).all())
+
     def test_get_changepoints(self):
         m = Prophet()
         N = DATA.shape[0]

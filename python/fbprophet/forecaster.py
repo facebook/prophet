@@ -134,6 +134,7 @@ class Prophet(object):
         # Set during fitting
         self.start = None
         self.y_scale = None
+        self.logistic_floor = False
         self.t_scale = None
         self.changepoints_t = None
         self.seasonalities = {}
@@ -184,7 +185,8 @@ class Prophet(object):
         rn_u = [n + '_upper' for n in reserved_names]
         reserved_names.extend(rn_l)
         reserved_names.extend(rn_u)
-        reserved_names.extend(['ds', 'y'])
+        reserved_names.extend([
+            'ds', 'y', 'cap', 'floor', 'y_scaled', 'cap_scaled'])
         if name in reserved_names:
             raise ValueError('Name "{}" is reserved.'.format(name))
         if (check_holidays and self.holidays is not None and
@@ -231,7 +233,12 @@ class Prophet(object):
         df.reset_index(inplace=True, drop=True)
 
         if initialize_scales:
-            self.y_scale = df['y'].abs().max()
+            if self.growth == 'logistic' and 'floor' in df:
+                self.logistic_floor = True
+                floor = df['floor']
+            else:
+                floor = 0.
+            self.y_scale = (df['y'] - floor).abs().max()
             if self.y_scale == 0:
                 self.y_scale = 1
             self.start = df['ds'].min()
@@ -252,13 +259,18 @@ class Prophet(object):
                     self.extra_regressors[name]['mu'] = mu
                     self.extra_regressors[name]['std'] = std
 
-        df['t'] = (df['ds'] - self.start) / self.t_scale
-        if 'y' in df:
-            df['y_scaled'] = df['y'] / self.y_scale
-
+        if self.logistic_floor:
+            if 'floor' not in df:
+                raise ValueError("Expected column 'floor'.")
+        else:
+            df['floor'] = 0
         if self.growth == 'logistic':
             assert 'cap' in df
-            df['cap_scaled'] = df['cap'] / self.y_scale
+            df['cap_scaled'] = (df['cap'] - df['floor']) / self.y_scale
+
+        df['t'] = (df['ds'] - self.start) / self.t_scale
+        if 'y' in df:
+            df['y_scaled'] = (df['y'] - df['floor']) / self.y_scale
 
         for name, props in self.extra_regressors.items():
             df[name] = pd.to_numeric(df[name])
@@ -694,9 +706,14 @@ class Prophet(object):
         i0, i1 = df['ds'].idxmin(), df['ds'].idxmax()
         T = df['t'].iloc[i1] - df['t'].iloc[i0]
 
-        # Force valid values, in case y > cap.
-        r0 = max(1.01, df['cap_scaled'].iloc[i0] / df['y_scaled'].iloc[i0])
-        r1 = max(1.01, df['cap_scaled'].iloc[i1] / df['y_scaled'].iloc[i1])
+        # Force valid values, in case y > cap or y < 0
+        C0 = df['cap_scaled'].iloc[i0]
+        C1 = df['cap_scaled'].iloc[i1]
+        y0 = max(0.01 * C0, min(0.99 * C0, df['y_scaled'].iloc[i0]))
+        y1 = max(0.01 * C1, min(0.99 * C1, df['y_scaled'].iloc[i1]))
+
+        r0 = C0 / y0
+        r1 = C1 / y1
 
         if abs(r0 - r1) <= 0.01:
             r0 = 1.05 * r0
@@ -840,11 +857,12 @@ class Prophet(object):
         seasonal_components = self.predict_seasonal_components(df)
         intervals = self.predict_uncertainty(df)
 
-        # Drop columns except ds, cap, and trend
+        # Drop columns except ds, cap, floor, and trend
+        cols = ['ds', 'trend']
         if 'cap' in df:
-            cols = ['ds', 'cap', 'trend']
-        else:
-            cols = ['ds', 'trend']
+            cols.append('cap')
+        if self.logistic_floor:
+            cols.append('floor')
         # Add in forecast components
         df2 = pd.concat((df[cols], intervals, seasonal_components), axis=1)
         df2['yhat'] = df2['trend'] + df2['seasonal']
@@ -934,7 +952,7 @@ class Prophet(object):
             trend = self.piecewise_logistic(
                 t, cap, deltas, k, m, self.changepoints_t)
 
-        return trend * self.y_scale
+        return trend * self.y_scale + df['floor']
 
     def predict_seasonal_components(self, df):
         """Predict seasonality components, holidays, and added regressors.
@@ -1162,7 +1180,7 @@ class Prophet(object):
             trend = self.piecewise_logistic(t, cap, deltas, k, m,
                                             changepoint_ts)
 
-        return trend * self.y_scale
+        return trend * self.y_scale + df['floor']
 
     def make_future_dataframe(self, periods, freq='D', include_history=True):
         """Simulate the trend using the extrapolated generative model.
@@ -1219,6 +1237,8 @@ class Prophet(object):
         ax.plot(fcst['ds'].values, fcst['yhat'], ls='-', c='#0072B2')
         if 'cap' in fcst and plot_cap:
             ax.plot(fcst['ds'].values, fcst['cap'], ls='--', c='k')
+        if self.logistic_floor and 'floor' in fcst and plot_cap :
+            ax.plot(fcst['ds'].values, fcst['floor'], ls='--', c='k')
         if uncertainty:
             ax.fill_between(fcst['ds'].values, fcst['yhat_lower'],
                             fcst['yhat_upper'], color='#0072B2',
@@ -1313,6 +1333,8 @@ class Prophet(object):
         artists += ax.plot(fcst['ds'].values, fcst[name], ls='-', c='#0072B2')
         if 'cap' in fcst and plot_cap:
             artists += ax.plot(fcst['ds'].values, fcst['cap'], ls='--', c='k')
+        if self.logistic_floor and 'floor' in fcst and plot_cap :
+            ax.plot(fcst['ds'].values, fcst['floor'], ls='--', c='k')
         if uncertainty:
             artists += [ax.fill_between(
                 fcst['ds'].values, fcst[name + '_lower'],
