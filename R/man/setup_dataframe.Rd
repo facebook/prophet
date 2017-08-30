@@ -9,7 +9,8 @@ setup_dataframe(m, df, initialize_scales = FALSE)
 \arguments{
 \item{m}{Prophet object.}
 
-\item{df}{Data frame with columns ds, y, and cap if logistic growth.}
+\item{df}{Data frame with columns ds, y, and cap if logistic growth. Any
+specified additional regressors must also be present.}
 
 \item{initialize_scales}{Boolean set scaling factors in m from df.}
 }

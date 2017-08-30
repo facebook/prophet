@@ -14,7 +14,8 @@ predictive_samples(m, df)
 }
 \value{
 A list with items "trend", "seasonal", and "yhat" containing
- posterior predictive samples for that component.
+ posterior predictive samples for that component. "seasonal" is the sum
+ of seasonalities, holidays, and added regressors.
 }
 \description{
 Sample from the posterior predictive distribution.
