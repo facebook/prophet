@@ -8,7 +8,7 @@ data {
   matrix[T, S] A;                   // Split indicators
   real t_change[S];                 // Index of changepoints
   matrix[T,K] X;                    // season vectors
-  real<lower=0> sigma;              // scale on seasonality prior
+  vector[K] sigmas;               // scale on seasonality prior
   real<lower=0> tau;                  // scale on changepoints prior
 }
 
@@ -45,7 +45,7 @@ model {
   m ~ normal(0, 5);
   delta ~ double_exponential(0, tau);
   sigma_obs ~ normal(0, 0.1);
-  beta ~ normal(0, sigma);
+  beta ~ normal(0, sigmas);
 
   // Likelihood
   y ~ normal(cap ./ (1 + exp(-(k + A * delta) .* (t - (m + A * gamma)))) + X * beta, sigma_obs);
