@@ -310,8 +310,8 @@ class TestProphet(TestCase):
         self.assertEqual(priors, [8., 8., 5., 5.])
         # Check incompatible priors
         holidays = pd.DataFrame({
-            'ds': pd.to_datetime(['2016-12-25', '2017-12-25']),
-            'holiday': ['xmas', 'xmas'],
+            'ds': pd.to_datetime(['2016-12-25', '2016-12-27']),
+            'holiday': ['xmasish', 'xmasish'],
             'lower_window': [-1, -1],
             'upper_window': [0, 0],
             'prior_scale': [5., 6.],

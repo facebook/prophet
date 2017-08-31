@@ -208,19 +208,60 @@ test_that("holidays", {
     ds = seq(prophet:::set_date('2016-12-20'),
              prophet:::set_date('2016-12-31'), by='d'))
   m <- prophet(train, holidays = holidays, fit = FALSE)
-  feats <- prophet:::make_holiday_features(m, df$ds)
+  out <- prophet:::make_holiday_features(m, df$ds)
+  feats <- out$holiday.features
+  priors <- out$prior.scales
   expect_equal(nrow(feats), nrow(df))
   expect_equal(ncol(feats), 2)
   expect_equal(sum(colSums(feats) - c(1, 1)), 0)
+  expect_true(all(priors == c(10., 10.)))
 
   holidays = data.frame(ds = c('2016-12-25'),
                         holiday = c('xmas'),
                         lower_window = c(-1),
                         upper_window = c(10))
   m <- prophet(train, holidays = holidays, fit = FALSE)
-  feats <- prophet:::make_holiday_features(m, df$ds)
+  out <- prophet:::make_holiday_features(m, df$ds)
+  feats <- out$holiday.features
+  priors <- out$prior.scales
   expect_equal(nrow(feats), nrow(df))
   expect_equal(ncol(feats), 12)
+  expect_true(all(priors == rep(10, 12)))
+  # Check prior specifications
+  holidays <- data.frame(
+    ds = prophet:::set_date(c('2016-12-25', '2017-12-25')),
+    holiday = c('xmas', 'xmas'),
+    lower_window = c(-1, -1),
+    upper_window = c(0, 0),
+    prior_scale = c(5., 5.)
+  )
+  m <- prophet(holidays = holidays, fit = FALSE)
+  out <- prophet:::make_holiday_features(m, df$ds)
+  priors <- out$prior.scales
+  expect_true(all(priors == c(5., 5.)))
+  # 2 different priors
+  holidays2 <- data.frame(
+    ds = prophet:::set_date(c('2012-06-06', '2013-06-06')),
+    holiday = c('seans-bday', 'seans-bday'),
+    lower_window = c(0, 0),
+    upper_window = c(1, 1),
+    prior_scale = c(8, 8)
+  )
+  holiday2 <- rbind(holidays, holidays2)
+  m <- prophet(holidays = holidays2, fit = FALSE)
+  out <- prophet:::make_holiday_features(m, df$ds)
+  priors <- out$prior.scales
+  expect_true(all(priors == c(8,8, 5, 5)))
+  # Check incompatible priors
+  holidays <- data.frame(
+    ds = prophet:::set_date(c('2016-12-25', '2016-12-27')),
+    holiday = c('xmasish', 'xmasish'),
+    lower_window = c(-1, -1),
+    upper_window = c(0, 0),
+    prior_scale = c(5., 6.)
+  )
+  m <- prophet(holidays = holidays, fit = FALSE)
+  expect_error(prophet:::make_holiday_features(m, df$ds))
 })
 
 test_that("fit_with_holidays", {
