@@ -625,8 +625,8 @@ make_all_seasonality_features <- function(m, df) {
 
   # Additional regressors
   for (name in names(m$extra_regressors)) {
-    seasonal.features <- cbind(seasonal.features, df[[name]])
-    prior.scales <- cbind(prior.scales, m$extra_regressors[[name]]$prior.scale)
+    seasonal.features[[name]] <- df[[name]]
+    prior.scales <- c(prior.scales, m$extra_regressors[[name]]$prior.scale)
   }
 
   if (ncol(seasonal.features) == 0) {
