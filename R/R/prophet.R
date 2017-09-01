@@ -752,40 +752,6 @@ parse_seasonality_args <- function(m, name, arg, auto.disable, default.order) {
   return(fourier.order)
 }
 
-#' Get number of Fourier components for built-in seasonalities.
-#'
-#' @param m Prophet object.
-#' @param name String name of the seasonality component.
-#' @param arg 'auto', TRUE, FALSE, or number of Fourier components as
-#'  provided.
-#' @param auto.disable Bool if seasonality should be disabled when 'auto'.
-#' @param default.order Int default Fourier order.
-#'
-#' @return Number of Fourier components, or 0 for disabled.
-#'
-#' @keywords internal
-parse_seasonality_args <- function(m, name, arg, auto.disable, default.order) {
-  if (arg == 'auto') {
-    fourier.order <- 0
-    if (name %in% names(m$seasonalities)) {
-      warning('Found custom seasonality named "', name,
-              '", disabling built-in ', name, ' seasonality.')
-    } else if (auto.disable) {
-      warning('Disabling ', name, ' seasonality. Run prophet with ', name,
-              '.seasonality=TRUE to override this.')
-    } else {
-      fourier.order <- default.order
-    }
-  } else if (arg == TRUE) {
-    fourier.order <- default.order
-  } else if (arg == FALSE) {
-    fourier.order <- 0
-  } else {
-    fourier.order <- arg
-  }
-  return(fourier.order)
-}
-
 #' Set seasonalities that were left on auto.
 #'
 #' Turns on yearly seasonality if there is >=2 years of history.
