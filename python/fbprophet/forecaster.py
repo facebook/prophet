@@ -413,9 +413,8 @@ class Prophet(object):
             except ValueError:
                 lw = 0
                 uw = 0
-            try:
-                ps = float(row.get('prior_scale', self.holidays_prior_scale))
-            except ValueError:
+            ps = float(row.get('prior_scale', self.holidays_prior_scale))
+            if np.isnan(ps):
                 ps = float(self.holidays_prior_scale)
             if (
                 row.holiday in prior_scales and prior_scales[row.holiday] != ps

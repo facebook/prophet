@@ -43,14 +43,16 @@ FALSE, or a number of Fourier terms to generate.}
 \item{holidays}{data frame with columns holiday (character) and ds (date
 type)and optionally columns lower_window and upper_window which specify a
 range of days around the date to be included as holidays. lower_window=-2
-will include 2 days prior to the date as holidays.}
+will include 2 days prior to the date as holidays. Also optionally can have
+a column prior_scale specifying the prior scale for each holiday.}
 
 \item{seasonality.prior.scale}{Parameter modulating the strength of the
 seasonality model. Larger values allow the model to fit larger seasonal
-fluctuations, smaller values dampen the seasonality.}
+fluctuations, smaller values dampen the seasonality. Can be specified for
+individual seasonalities using add_seasonality.}
 
 \item{holidays.prior.scale}{Parameter modulating the strength of the holiday
-components model.}
+components model, unless overridden in the holidays input.}
 
 \item{changepoint.prior.scale}{Parameter modulating the flexibility of the
 automatic changepoint selection. Large values will allow many changepoints,

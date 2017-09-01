@@ -2,10 +2,10 @@
 % Please edit documentation in R/prophet.R
 \name{add_seasonality}
 \alias{add_seasonality}
-\title{Add a seasonal component with specified period and number of Fourier
-components.}
+\title{Add a seasonal component with specified period, number of Fourier
+components, and prior scale.}
 \usage{
-add_seasonality(m, name, period, fourier.order)
+add_seasonality(m, name, period, fourier.order, prior.scale = NULL)
 }
 \arguments{
 \item{m}{Prophet object.}
@@ -15,6 +15,8 @@ add_seasonality(m, name, period, fourier.order)
 \item{period}{Float number of days in one period.}
 
 \item{fourier.order}{Int number of Fourier components to use.}
+
+\item{prior.scale}{Float prior scale for this component.}
 }
 \value{
 The prophet model with the seasonality added.
@@ -23,4 +25,9 @@ The prophet model with the seasonality added.
 Increasing the number of Fourier components allows the seasonality to change
 more quickly (at risk of overfitting). Default values for yearly and weekly
 seasonalities are 10 and 3 respectively.
+}
+\details{
+Increasing prior scale will allow this seasonality component more
+flexibility, decreasing will dampen it. If not provided, will use the
+seasonality.prior.scale provided on Prophet initialization (defaults to 10).
 }

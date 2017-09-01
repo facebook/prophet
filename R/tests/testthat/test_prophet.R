@@ -247,11 +247,22 @@ test_that("holidays", {
     upper_window = c(1, 1),
     prior_scale = c(8, 8)
   )
-  holiday2 <- rbind(holidays, holidays2)
+  holidays2 <- rbind(holidays, holidays2)
   m <- prophet(holidays = holidays2, fit = FALSE)
   out <- prophet:::make_holiday_features(m, df$ds)
   priors <- out$prior.scales
-  expect_true(all(priors == c(8,8, 5, 5)))
+  expect_true(all(priors == c(8, 8, 5, 5)))
+  holidays2 <- data.frame(
+    ds = prophet:::set_date(c('2012-06-06', '2013-06-06')),
+    holiday = c('seans-bday', 'seans-bday'),
+    lower_window = c(0, 0),
+    upper_window = c(1, 1)
+  )
+  holidays2 <- dplyr::bind_rows(holidays, holidays2)
+  m <- prophet(holidays = holidays2, fit = FALSE, holidays.prior.scale = 4)
+  out <- prophet:::make_holiday_features(m, df$ds)
+  priors <- out$prior.scales
+  expect_true(all(priors == c(4, 4, 5, 5)))
   # Check incompatible priors
   holidays <- data.frame(
     ds = prophet:::set_date(c('2016-12-25', '2016-12-27')),
@@ -296,9 +307,12 @@ test_that("auto_weekly_seasonality", {
   train.w <- DATA[1:N.w, ]
   m <- prophet(train.w, fit = FALSE)
   expect_equal(m$weekly.seasonality, 'auto')
-  m <- prophet:::fit.prophet(m, train.w)
+  m <- fit.prophet(m, train.w)
   expect_true('weekly' %in% names(m$seasonalities))
-  expect_equal(m$seasonalities[['weekly']], c(7, 3))
+  true <- list(period = 7, fourier.order = 3, prior.scale = 10)
+  for (name in names(true)) {
+    expect_equal(m$seasonalities$weekly[[name]], true[[name]])
+  }
   # Should be disabled due to too short history
   N.w <- 9
   train.w <- DATA[1:N.w, ]
@@ -310,8 +324,11 @@ test_that("auto_weekly_seasonality", {
   train.w <- DATA[seq(1, nrow(DATA), 7), ]
   m <- prophet(train.w)
   expect_false('weekly' %in% names(m$seasonalities))
-  m <- prophet(DATA, weekly.seasonality=2)
-  expect_equal(m$seasonalities[['weekly']], c(7, 2))
+  m <- prophet(DATA, weekly.seasonality = 2, seasonality.prior.scale = 3)
+  true <- list(period = 7, fourier.order = 2, prior.scale = 3)
+  for (name in names(true)) {
+    expect_equal(m$seasonalities$weekly[[name]], true[[name]])
+  }
 })
 
 test_that("auto_yearly_seasonality", {
@@ -319,9 +336,12 @@ test_that("auto_yearly_seasonality", {
   # Should be enabled
   m <- prophet(DATA, fit = FALSE)
   expect_equal(m$yearly.seasonality, 'auto')
-  m <- prophet:::fit.prophet(m, DATA)
+  m <- fit.prophet(m, DATA)
   expect_true('yearly' %in% names(m$seasonalities))
-  expect_equal(m$seasonalities[['yearly']], c(365.25, 10))
+  true <- list(period = 365.25, fourier.order = 10, prior.scale = 10)
+  for (name in names(true)) {
+    expect_equal(m$seasonalities$yearly[[name]], true[[name]])
+  }
   # Should be disabled due to too short history
   N.w <- 240
   train.y <- DATA[1:N.w, ]
@@ -329,8 +349,11 @@ test_that("auto_yearly_seasonality", {
   expect_false('yearly' %in% names(m$seasonalities))
   m <- prophet(train.y, yearly.seasonality = TRUE)
   expect_true('yearly' %in% names(m$seasonalities))
-  m <- prophet(DATA, yearly.seasonality=7)
-  expect_equal(m$seasonalities[['yearly']], c(365.25, 7))
+  m <- prophet(DATA, yearly.seasonality = 7, seasonality.prior.scale = 3)
+  true <- list(period = 365.25, fourier.order = 7, prior.scale = 3)
+  for (name in names(true)) {
+    expect_equal(m$seasonalities$yearly[[name]], true[[name]])
+  }
 })
 
 test_that("auto_daily_seasonality", {
@@ -338,9 +361,12 @@ test_that("auto_daily_seasonality", {
   # Should be enabled
   m <- prophet(DATA2, fit = FALSE)
   expect_equal(m$daily.seasonality, 'auto')
-  m <- prophet:::fit.prophet(m, DATA2)
+  m <- fit.prophet(m, DATA2)
   expect_true('daily' %in% names(m$seasonalities))
-  expect_equal(m$seasonalities[['daily']], c(1, 4))
+  true <- list(period = 1, fourier.order = 4, prior.scale = 10)
+  for (name in names(true)) {
+    expect_equal(m$seasonalities$daily[[name]], true[[name]])
+  }
   # Should be disabled due to too short history
   N.d <- 430
   train.y <- DATA2[1:N.d, ]
@@ -348,8 +374,11 @@ test_that("auto_daily_seasonality", {
   expect_false('daily' %in% names(m$seasonalities))
   m <- prophet(train.y, daily.seasonality = TRUE)
   expect_true('daily' %in% names(m$seasonalities))
-  m <- prophet(DATA2, daily.seasonality=7)
-  expect_equal(m$seasonalities[['daily']], c(1, 7))
+  m <- prophet(DATA2, daily.seasonality = 7, seasonality.prior.scale = 3)
+  true <- list(period = 1, fourier.order = 7, prior.scale = 3)
+  for (name in names(true)) {
+    expect_equal(m$seasonalities$daily[[name]], true[[name]])
+  }
   m <- prophet(DATA)
   expect_false('daily' %in% names(m$seasonalities))
 })
@@ -366,10 +395,14 @@ test_that("test_subdaily_holidays", {
 test_that("custom_seasonality", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   holidays <- data.frame(ds = c('2017-01-02'),
-                         holiday = c('special_day'))
+                         holiday = c('special_day'),
+                         prior_scale = c(4))
   m <- prophet(holidays=holidays)
   m <- add_seasonality(m, name='monthly', period=30, fourier.order=5)
-  expect_equal(m$seasonalities[['monthly']], c(30, 5))
+  true <- list(period = 30, fourier.order = 5, prior.scale = 10)
+  for (name in names(true)) {
+    expect_equal(m$seasonalities$monthly[[name]], true[[name]])
+  }
   expect_error(
     add_seasonality(m, name='special_day', period=30, fourier_order=5)
   )
@@ -377,6 +410,14 @@ test_that("custom_seasonality", {
     add_seasonality(m, name='trend', period=30, fourier_order=5)
   )
   m <- add_seasonality(m, name='weekly', period=30, fourier.order=5)
+  # Test priors
+  m <- prophet(holidays = holidays, yearly.seasonality = FALSE)
+  m <- add_seasonality(
+    m, name='monthly', period=30, fourier.order=5, prior.scale = 2)
+  m <- fit.prophet(m, DATA)
+  prior.scales <- prophet:::make_all_seasonality_features(
+    m, m$history)$prior.scales
+  expect_true(all(prior.scales == c(rep(2, 10), rep(10, 6), 4)))
 })
 
 test_that("added_regressors", {

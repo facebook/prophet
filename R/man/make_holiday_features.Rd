@@ -12,7 +12,9 @@ make_holiday_features(m, dates)
 \item{dates}{Vector with dates used for computing seasonality.}
 }
 \value{
-A dataframe with a column for each holiday.
+A list with entries
+ holiday.features: dataframe with a column for each holiday.
+ prior.scales: array of prior scales for each holiday column.
 }
 \description{
 Construct a matrix of holiday features.

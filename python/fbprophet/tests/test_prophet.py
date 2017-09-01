@@ -308,6 +308,17 @@ class TestProphet(TestCase):
         holidays2 = pd.concat((holidays, holidays2))
         feats, priors = Prophet(holidays=holidays2).make_holiday_features(df['ds'])
         self.assertEqual(priors, [8., 8., 5., 5.])
+        holidays2 = pd.DataFrame({
+            'ds': pd.to_datetime(['2012-06-06', '2013-06-06']),
+            'holiday': ['seans-bday'] * 2,
+            'lower_window': [0] * 2,
+            'upper_window': [1] * 2,
+        })
+        holidays2 = pd.concat((holidays, holidays2))
+        feats, priors = Prophet(
+            holidays=holidays2, holidays_prior_scale=4
+        ).make_holiday_features(df['ds'])
+        self.assertEqual(priors, [4., 4., 5., 5.])
         # Check incompatible priors
         holidays = pd.DataFrame({
             'ds': pd.to_datetime(['2016-12-25', '2016-12-27']),

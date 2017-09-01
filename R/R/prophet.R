@@ -42,7 +42,8 @@ globalVariables(c(
 #'  a column prior_scale specifying the prior scale for each holiday.
 #' @param seasonality.prior.scale Parameter modulating the strength of the
 #'  seasonality model. Larger values allow the model to fit larger seasonal
-#'  fluctuations, smaller values dampen the seasonality.
+#'  fluctuations, smaller values dampen the seasonality. Can be specified for
+#'  individual seasonalities using add_seasonality.
 #' @param holidays.prior.scale Parameter modulating the strength of the holiday
 #'  components model, unless overridden in the holidays input.
 #' @param changepoint.prior.scale Parameter modulating the flexibility of the
@@ -508,37 +509,44 @@ make_holiday_features <- function(m, dates) {
       } else {
         offsets <- c(0)
       }
-      if (exists('prior_scale', where = .) && !is.na(.$prior_scale)) {
-        ps <- .$prior_scale
-      } else {
-        ps <- m$holidays.prior.scale
-      }
       names <- paste(.$holiday, '_delim_', ifelse(offsets < 0, '-', '+'),
                      abs(offsets), sep = '')
-      dplyr::data_frame(ds = .$ds + offsets * 24 * 3600, holiday = names,
-                        prior_scale = ps)
+      dplyr::data_frame(ds = .$ds + offsets * 24 * 3600, holiday = names)
     }) %>%
     dplyr::mutate(x = 1.) %>%
     tidyr::spread(holiday, x, fill = 0)
 
   holiday.features <- data.frame(ds = set_date(dates)) %>%
-    dplyr::left_join(wide, by = 'ds')
+    dplyr::left_join(wide, by = 'ds') %>%
+    dplyr::select(-ds)
 
-  prior.scales.all <- holiday.features$prior_scale
-  prior.scales <- c()
-
-  holiday.features <- dplyr::select(holiday.features, -ds, -prior_scale)
   holiday.features[is.na(holiday.features)] <- 0
 
-  for (name in colnames(holiday.features)) {
-    rows <- !is.na(holiday.features[[name]]) & (holiday.features[[name]] == 1)
-    ps <- unique(prior.scales.all[rows])
+  # Prior scales
+  if (!('prior_scale' %in% colnames(m$holidays))) {
+    m$holidays$prior_scale <- m$holidays.prior.scale
+  }
+  prior.scales.list <- list()
+  for (name in unique(m$holidays$holiday)) {
+    df.h <- m$holidays[m$holidays$holiday == name, ]
+    ps <- unique(df.h$prior_scale)
     if (length(ps) > 1) {
-      sn <- strsplit(name, '_delim_', fixed = TRUE)[[1]][1]
-      stop('Holiday ', sn, ' does not have a consistent prior scale ',
+      stop('Holiday ', name, ' does not have a consistent prior scale ',
            'specification')
     }
-    prior.scales <- c(prior.scales, ps)
+    if (is.na(ps)) {
+      ps <- m$holidays.prior.scale
+    }
+    if (ps <= 0) {
+      stop('Prior scale must be > 0.')
+    }
+    prior.scales.list[[name]] <- ps
+  }
+
+  prior.scales <- c()
+  for (name in colnames(holiday.features)) {
+    sn <- strsplit(name, '_delim_', fixed = TRUE)[[1]][1]
+    prior.scales <- c(prior.scales, prior.scales.list[[sn]])
   }
   return(list(holiday.features = holiday.features,
               prior.scales = prior.scales))
@@ -584,23 +592,28 @@ add_regressor <- function(m, name, prior.scale = NULL, standardize = 'auto'){
   return(m)
 }
 
-#' Add a seasonal component with specified period and number of Fourier
-#' components.
+#' Add a seasonal component with specified period, number of Fourier
+#' components, and prior scale.
 #'
 #' Increasing the number of Fourier components allows the seasonality to change
 #' more quickly (at risk of overfitting). Default values for yearly and weekly
 #' seasonalities are 10 and 3 respectively.
 #'
+#' Increasing prior scale will allow this seasonality component more
+#' flexibility, decreasing will dampen it. If not provided, will use the
+#' seasonality.prior.scale provided on Prophet initialization (defaults to 10).
+#'
 #' @param m Prophet object.
 #' @param name String name of the seasonality component.
 #' @param period Float number of days in one period.
 #' @param fourier.order Int number of Fourier components to use.
+#' @param prior.scale Float prior scale for this component.
 #'
 #' @return The prophet model with the seasonality added.
 #'
 #' @importFrom dplyr "%>%"
 #' @export
-add_seasonality <- function(m, name, period, fourier.order) {
+add_seasonality <- function(m, name, period, fourier.order, prior.scale = NULL) {
   if (!is.null(m$history)) {
     stop("Seasonality must be added prior to model fitting.")
   }
@@ -608,7 +621,19 @@ add_seasonality <- function(m, name, period, fourier.order) {
     # Allow overriding built-in seasonalities
     validate_column_name(m, name, check_seasonalities = FALSE)
   }
-  m$seasonalities[[name]] <- c(period, fourier.order)
+  if (is.null(prior.scale)) {
+    ps <- m$seasonality.prior.scale
+  } else {
+    ps <- prior.scale
+  }
+  if (ps <= 0) {
+    stop('Prior scale must be > 0')
+  }
+  m$seasonalities[[name]] <- list(
+    period = period,
+    fourier.order = fourier.order,
+    prior.scale = ps
+  )
   return(m)
 }
 
@@ -631,12 +656,12 @@ make_all_seasonality_features <- function(m, df) {
 
   # Seasonality features
   for (name in names(m$seasonalities)) {
-    period <- m$seasonalities[[name]][1]
-    series.order <- m$seasonalities[[name]][2]
-    features <- make_seasonality_features(df$ds, period, series.order, name)
+    props <- m$seasonalities[[name]]
+    features <- make_seasonality_features(
+      df$ds, props$period, props$fourier.order, name)
     seasonal.features <- cbind(seasonal.features, features)
     prior.scales <- c(prior.scales,
-                      m$seasonality.prior.scale * rep(1, ncol(features)))
+                      props$prior.scale * rep(1, ncol(features)))
   }
 
   # Holiday features
@@ -751,21 +776,33 @@ set_auto_seasonalities <- function(m) {
   fourier.order <- parse_seasonality_args(
     m, 'yearly', m$yearly.seasonality, yearly.disable, 10)
   if (fourier.order > 0) {
-    m$seasonalities[['yearly']] <- c(365.25, fourier.order)
+    m$seasonalities[['yearly']] <- list(
+      period = 365.25,
+      fourier.order = fourier.order,
+      prior.scale = m$seasonality.prior.scale
+    )
   }
 
   weekly.disable <- ((time_diff(last, first) < 14) || (min.dt >= 7))
   fourier.order <- parse_seasonality_args(
     m, 'weekly', m$weekly.seasonality, weekly.disable, 3)
   if (fourier.order > 0) {
-    m$seasonalities[['weekly']] <- c(7, fourier.order)
+    m$seasonalities[['weekly']] <- list(
+      period = 7,
+      fourier.order = fourier.order,
+      prior.scale = m$seasonality.prior.scale
+    )
   }
 
   daily.disable <- ((time_diff(last, first) < 2) || (min.dt >= 1))
   fourier.order <- parse_seasonality_args(
     m, 'daily', m$daily.seasonality, daily.disable, 4)
   if (fourier.order > 0) {
-    m$seasonalities[['daily']] <- c(1, fourier.order)
+    m$seasonalities[['daily']] <- list(
+      period = 1,
+      fourier.order = fourier.order,
+      prior.scale = m$seasonality.prior.scale
+    )
   }
   return(m)
 }
@@ -1598,7 +1635,7 @@ plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0) {
 plot_seasonality <- function(m, name, uncertainty = TRUE) {
   # Compute seasonality from Jan 1 through a single period.
   start <- set_date('2017-01-01')
-  period <- m$seasonalities[[name]][1]
+  period <- m$seasonalities[[name]]$period
   end <- start + period * 24 * 3600
   plot.points <- 200
   days <- seq(from=start, to=end, length.out=plot.points)
