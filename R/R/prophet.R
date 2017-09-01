@@ -446,7 +446,7 @@ set_changepoints <- function(m) {
     hist.size <- floor(nrow(m$history) * .8)
     if (m$n.changepoints + 1 > hist.size) {
       m$n.changepoints <- hist.size - 1
-      warning('n.changepoints greater than number of observations. Using ',
+      message('n.changepoints greater than number of observations. Using ',
               m$n.changepoints)
     }
     if (m$n.changepoints > 0) {
@@ -734,10 +734,10 @@ parse_seasonality_args <- function(m, name, arg, auto.disable, default.order) {
   if (arg == 'auto') {
     fourier.order <- 0
     if (name %in% names(m$seasonalities)) {
-      warning('Found custom seasonality named "', name,
+      message('Found custom seasonality named "', name,
               '", disabling built-in ', name, ' seasonality.')
     } else if (auto.disable) {
-      warning('Disabling ', name, ' seasonality. Run prophet with ', name,
+      message('Disabling ', name, ' seasonality. Run prophet with ', name,
               '.seasonality=TRUE to override this.')
     } else {
       fourier.order <- default.order
