@@ -1661,7 +1661,7 @@ plot_seasonality <- function(m, name, uncertainty = TRUE) {
   end <- start + period * 24 * 3600
   plot.points <- 200
   days <- seq(from=start, to=end, length.out=plot.points)
-  df.y <- seasonality_plot_df(days)
+  df.y <- seasonality_plot_df(m, days)
   seas <- predict_seasonal_components(m, df.y)
   seas$ds <- df.y$ds
   gg.s <- ggplot2::ggplot(
