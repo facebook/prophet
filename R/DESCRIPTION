@@ -1,6 +1,6 @@
 Package: prophet
 Title: Automatic Forecasting Procedure
-Version: 0.1.1
+Version: 0.2
 Date: 2017-04-17
 Authors@R: c(
   person("Sean", "Taylor", email = "sjt@fb.com", role = c("cre", "aut")),
