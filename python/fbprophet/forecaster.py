@@ -1312,7 +1312,7 @@ class Prophet(object):
         return fig
 
     def plot_forecast_component(
-            self, fcst, name, ax=None, uncertainty=True, plot_cap=True):
+            self, fcst, name, ax=None, uncertainty=True, plot_cap=False):
         """Plot a particular component of the forecast.
 
         Parameters

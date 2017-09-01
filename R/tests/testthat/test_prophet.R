@@ -74,6 +74,36 @@ test_that("setup_dataframe", {
   expect_equal(max(history$y_scaled), 1)
 })
 
+test_that("logistic_floor", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  m <- prophet(growth = 'logistic')
+  history <- train
+  history$floor <- 10.
+  history$cap <- 80.
+  future1 <- future
+  future1$cap <- 80.
+  future1$floor <- 10.
+  m <- fit.prophet(m, history)
+  expect_true(m$logistic.floor)
+  expect_true('floor' %in% colnames(m$history))
+  expect_equal(m$history$y_scaled[1], 1., tolerance = 1e-6)
+  fcst1 <- predict(m, future1)
+
+  m2 <- prophet(growth = 'logistic')
+  history2 <- history
+  history2$y <- history2$y + 10.
+  history2$floor <- history2$floor + 10.
+  history2$cap <- history2$cap + 10.
+  future1$cap <- future1$cap + 10.
+  future1$floor <- future1$floor + 10.
+  m2 <- fit.prophet(m2, history2)
+  expect_equal(m2$history$y_scaled[1], 1., tolerance = 1e-6)
+  fcst2 <- predict(m, future1)
+  fcst2$yhat <- fcst2$yhat - 10.
+  # Check for approximate shift invariance
+  expect_true(all(abs(fcst1$yhat - fcst2$yhat) < 1))
+})
+
 test_that("get_changepoints", {
   history <- train
   m <- prophet(history, fit = FALSE)
@@ -481,6 +511,7 @@ test_that("added_regressors", {
 })
 
 test_that("copy", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   inputs <- list(
     growth = c('linear', 'logistic'),
     changepoints = c(NULL, c('2016-12-25')),
