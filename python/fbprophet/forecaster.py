@@ -769,6 +769,8 @@ class Prophet(object):
             raise Exception('Prophet object can only be fit once. '
                             'Instantiate a new object.')
         history = df[df['y'].notnull()].copy()
+        if history.shape[0] < 2:
+            raise ValueError('Dataframe has less than 2 non-NaN rows.')
         self.history_dates = pd.to_datetime(df['ds']).sort_values()
 
         history = self.setup_dataframe(history, initialize_scales=True)
@@ -863,6 +865,8 @@ class Prophet(object):
         if df is None:
             df = self.history.copy()
         else:
+            if df.shape[0] == 0:
+                raise ValueError('Dataframe has no rows.')
             df = self.setup_dataframe(df.copy())
 
         df['trend'] = self.predict_trend(df)

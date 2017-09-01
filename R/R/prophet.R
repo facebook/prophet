@@ -926,6 +926,9 @@ fit.prophet <- function(m, df, ...) {
   }
   history <- df %>%
     dplyr::filter(!is.na(y))
+  if (nrow(history) < 2) {
+    stop("Dataframe has less than 2 non-NA rows.")
+  }
   m$history.dates <- sort(set_date(df$ds))
 
   out <- setup_dataframe(m, history, initialize_scales = TRUE)
@@ -1047,6 +1050,9 @@ predict.prophet <- function(object, df = NULL, ...) {
   if (is.null(df)) {
     df <- object$history
   } else {
+    if (nrow(df) == 0) {
+      stop("Dataframe has no rows.")
+    }
     out <- setup_dataframe(object, df)
     df <- out$df
   }
