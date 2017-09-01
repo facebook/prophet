@@ -472,7 +472,11 @@ class TestProphet(TestCase):
         m.fit(DATA.copy())
         seasonal_features, prior_scales = m.make_all_seasonality_features(
             m.history)
-        self.assertEqual(prior_scales, [2.] * 10 + [10.] * 6 + [4.])
+        if seasonal_features.columns[0] == 'monthly_delim_1':
+            true = [2.] * 10 + [10.] * 6 + [4.]
+        else:
+            true = [10.] * 6 + [2.] * 10 + [4.]
+        self.assertEqual(prior_scales, true)
 
     def test_added_regressors(self):
         m = Prophet()

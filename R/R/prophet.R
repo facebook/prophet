@@ -333,40 +333,7 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
   df <- df %>%
     dplyr::arrange(ds)
 
-  if (initialize_scales) {
-    if ((m$growth == 'logistic') && ('floor' %in% colnames(df))) {
-      m$logistic.floor <- TRUE
-      floor <- df$floor
-    } else {
-      floor <- 0
-    }
-    m$y.scale <- max(abs(df$y - floor))
-    if (m$y.scale == 0) {
-      m$y.scale <- 1
-    }
-    m$start <- min(df$ds)
-    m$t.scale <- time_diff(max(df$ds), m$start, "secs")
-    for (name in names(m$extra_regressors)) {
-      standardize <- m$extra_regressors[[name]]$standardize
-      if (standardize == 'auto') {
-        if (all(sort(unique(df[[name]])) == c(0, 1))) {
-          # Don't standardize binary variables
-          standardize <- FALSE
-        } else {
-          standardize <- TRUE
-        }
-      }
-      if (standardize) {
-        mu <- mean(df[[name]])
-        std <- stats::sd(df[[name]])
-        if (std == 0) {
-          std <- mu
-        }
-        m$extra_regressors[[name]]$mu <- mu
-        m$extra_regressors[[name]]$std <- std
-      }
-    }
-  }
+  m <- initialize_scales_fn(m, initialize_scales, df)
 
   if (m$logistic.floor) {
     if (!('floor' %in% colnames(df))) {
@@ -398,6 +365,56 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
     }
   }
   return(list("m" = m, "df" = df))
+}
+
+#' Initialize model scales.
+#'
+#' Sets model scaling factors using df.
+#'
+#' @param m Prophet object.
+#' @param initialize_scales Boolean set the scales or not.
+#' @param df Dataframe for setting scales.
+#'
+#' @return Prophet object with scales set.
+#'
+#' @keywords internal
+initialize_scales_fn <- function(m, initialize_scales, df) {
+  if (!initialize_scales) {
+    return(m)
+  }
+  if ((m$growth == 'logistic') && ('floor' %in% colnames(df))) {
+    m$logistic.floor <- TRUE
+    floor <- df$floor
+  } else {
+    floor <- 0
+  }
+  m$y.scale <- max(abs(df$y - floor))
+  if (m$y.scale == 0) {
+    m$y.scale <- 1
+  }
+  m$start <- min(df$ds)
+  m$t.scale <- time_diff(max(df$ds), m$start, "secs")
+  for (name in names(m$extra_regressors)) {
+    standardize <- m$extra_regressors[[name]]$standardize
+    if (standardize == 'auto') {
+      if (all(sort(unique(df[[name]])) == c(0, 1))) {
+        # Don't standardize binary variables
+        standardize <- FALSE
+      } else {
+        standardize <- TRUE
+      }
+    }
+    if (standardize) {
+      mu <- mean(df[[name]])
+      std <- stats::sd(df[[name]])
+      if (std == 0) {
+        std <- mu
+      }
+      m$extra_regressors[[name]]$mu <- mu
+      m$extra_regressors[[name]]$std <- std
+    }
+  }
+  return(m)
 }
 
 #' Set changepoints

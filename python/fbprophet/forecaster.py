@@ -255,6 +255,15 @@ class Prophet(object):
         return df
 
     def initialize_scales(self, initialize_scales, df):
+        """Initialize model scales.
+
+        Sets model scaling factors using df.
+
+        Parameters
+        ----------
+        initialize_scales: Boolean set the scales or not.
+        df: pd.DataFrame for setting scales.
+        """
         if not initialize_scales:
             return
         if self.growth == 'logistic' and 'floor' in df:
