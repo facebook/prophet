@@ -14,6 +14,7 @@ Prophet is [open source software](https://code.facebook.com/projects/) released 
 - Prophet R package: https://cran.r-project.org/package=prophet
 - Prophet Python package: https://pypi.python.org/pypi/fbprophet/
 - Release blogpost: https://research.fb.com/prophet-forecasting-at-scale/
+- Prophet paper, "Forecasting at Scale": https://peerj.com/preprints/3190.pdf
 
 ## Installation in R
 
@@ -58,6 +59,16 @@ Make sure compilers (gcc, g++) and Python development tools (python-dev) are ins
 Use `conda install gcc` to set up gcc. The easiest way to install Prophet is through conda-forge: `conda install -c conda-forge fbprophet`.
 
 ## Changelog
+
+### Version 0.2 (2017.09.02)
+
+- Forecasting with sub-daily data
+- Daily seasonality, and custom seasonalities
+- Extra regressors
+- Access to posterior predictive samples
+- Cross-validation function
+- Saturating minimums
+- Bugfixes
 
 ### Version 0.1.1 (2017.04.17)
 

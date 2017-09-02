@@ -532,7 +532,7 @@ class TestProphet(TestCase):
         fcst = m.predict(future)
         self.assertEqual(fcst.shape[1], 31)
         self.assertEqual(fcst['binary_feature'][0], 0)
-        self.assertEqual(
+        self.assertAlmostEqual(
             fcst['extra_regressors'][0],
             fcst['numeric_feature'][0] + fcst['binary_feature2'][0],
         )
