@@ -2,13 +2,9 @@
 % Please edit documentation in R/diagnostics.R
 \name{cross_validation}
 \alias{cross_validation}
-\title{Cross-validation for time series.
-Computes forecast error with cutoffs at the specified period. When the
-period is the time interval of the data, is the procedure described in
-https://robjhyndman.com/hyndsight/tscv/. Beginning from end-horizon, makes
-a cutoff every "period" amount of time, going back to "initial".}
+\title{Cross-validation for time series.}
 \usage{
-cross_validation(model, horizon, units, period, initial = NULL)
+cross_validation(model, horizon, units, period = NULL, initial = NULL)
 }
 \arguments{
 \item{model}{Fitted Prophet model.}
@@ -18,7 +14,7 @@ cross_validation(model, horizon, units, period, initial = NULL)
 \item{units}{String unit of the horizon, e.g., "days", "secs".}
 
 \item{period}{Integer amount of time between cutoff dates. Same units as
-horizon.}
+horizon. If not provided, 0.5 * horizon is used.}
 
 \item{initial}{Integer size of the first training period. If not provided,
 3 * horizon is used. Same units as horizon.}
@@ -27,9 +23,10 @@ horizon.}
 A dataframe with the forecast, actual value, and cutoff date.
 }
 \description{
-Cross-validation for time series.
-Computes forecast error with cutoffs at the specified period. When the
-period is the time interval of the data, is the procedure described in
-https://robjhyndman.com/hyndsight/tscv/. Beginning from end-horizon, makes
-a cutoff every "period" amount of time, going back to "initial".
+Computes forecasts from historical cutoff points. Beginning from initial,
+makes cutoffs with a spacing of period up to (end - horizon).
+}
+\details{
+When period is equal to the time interval of the data, this is the
+technique described in https://robjhyndman.com/hyndsight/tscv/ .
 }

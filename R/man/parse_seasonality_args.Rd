@@ -2,11 +2,8 @@
 % Please edit documentation in R/prophet.R
 \name{parse_seasonality_args}
 \alias{parse_seasonality_args}
-\alias{parse_seasonality_args}
 \title{Get number of Fourier components for built-in seasonalities.}
 \usage{
-parse_seasonality_args(m, name, arg, auto.disable, default.order)
-
 parse_seasonality_args(m, name, arg, auto.disable, default.order)
 }
 \arguments{
@@ -20,26 +17,11 @@ provided.}
 \item{auto.disable}{Bool if seasonality should be disabled when 'auto'.}
 
 \item{default.order}{Int default Fourier order.}
-
-\item{m}{Prophet object.}
-
-\item{name}{String name of the seasonality component.}
-
-\item{arg}{'auto', TRUE, FALSE, or number of Fourier components as
-provided.}
-
-\item{auto.disable}{Bool if seasonality should be disabled when 'auto'.}
-
-\item{default.order}{Int default Fourier order.}
 }
 \value{
 Number of Fourier components, or 0 for disabled.
-
-Number of Fourier components, or 0 for disabled.
 }
 \description{
-Get number of Fourier components for built-in seasonalities.
-
 Get number of Fourier components for built-in seasonalities.
 }
 \keyword{internal}

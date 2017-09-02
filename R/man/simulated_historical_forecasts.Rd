@@ -2,9 +2,7 @@
 % Please edit documentation in R/diagnostics.R
 \name{simulated_historical_forecasts}
 \alias{simulated_historical_forecasts}
-\title{Simulated historical forecasts.
-Make forecasts from k historical cutoff dates, and compare forecast values
-to actual values.}
+\title{Simulated historical forecasts.}
 \usage{
 simulated_historical_forecasts(model, horizon, units, k, period = NULL)
 }
@@ -24,7 +22,6 @@ horizon. If not provided, will use 0.5 * horizon.}
 A dataframe with the forecast, actual value, and cutoff date.
 }
 \description{
-Simulated historical forecasts.
-Make forecasts from k historical cutoff dates, and compare forecast values
-to actual values.
+Make forecasts from k historical cutoff points, working backwards from
+(end - horizon) with a spacing of period between each cutoff.
 }

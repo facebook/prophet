@@ -46,11 +46,13 @@ def _cutoffs(df, horizon, k, period):
         cutoff -= period
         # If data does not exist in data range (cutoff, cutoff + horizon]
         if not (((df['ds'] > cutoff) & (df['ds'] <= cutoff + horizon)).any()):
-            # Next cutoff point is 'closest date before cutoff in data - horizon'
+            # Next cutoff point is 'last date before cutoff in data - horizon'
             closest_date = df[df['ds'] <= cutoff].max()['ds']
             cutoff = closest_date - horizon
         if cutoff < df['ds'].min():
-            logger.warning('Not enough data for requested number of cutoffs! Using {}.'.format(i))
+            logger.warning(
+                'Not enough data for requested number of cutoffs! '
+                'Using {}.'.format(i))
             break
         result.append(cutoff)
 
@@ -60,20 +62,20 @@ def _cutoffs(df, horizon, k, period):
 
 def simulated_historical_forecasts(model, horizon, k, period=None):
     """Simulated Historical Forecasts.
-        If you would like to know it in detail, read the original paper
-        https://facebookincubator.github.io/prophet/static/prophet_paper_20170113.pdf
+
+    Make forecasts from k historical cutoff points, working backwards from
+    (end - horizon) with a spacing of period between each cutoff.
 
     Parameters
     ----------
     model: Prophet class object.
         Fitted Prophet model
-    horizon: string which has pd.Timedelta compatible style.
-        Forecast horizon ('5 days', '3 hours', '10 seconds' etc)
-    k: Int number.
-        The number of forecasts point.
-    period: string which has pd.Timedelta compatible style or None, default None.
-        Simulated Forecast will be done at every this period.
-        0.5 * horizon is used when it is None.
+    horizon: string with pd.Timedelta compatible style, e.g., '5 days',
+        '3 hours', '10 seconds'.
+    k: Int number of forecasts point.
+    period: Optional string with pd.Timedelta compatible style. Simulated
+        forecast will be done at every this period. If not provided,
+        0.5 * horizon is used.
 
     Returns
     -------
@@ -108,21 +110,24 @@ def simulated_historical_forecasts(model, horizon, k, period=None):
     return reduce(lambda x, y: x.append(y), predicts).reset_index(drop=True)
 
 
-def cross_validation(model, horizon, period, initial=None):
-    """Cross-Validation for time-series.
-        This function is the same with Time series cross-validation described in https://robjhyndman.com/hyndsight/tscv/
-        when the value of period is equal to the time interval of data.
+def cross_validation(model, horizon, period=None, initial=None):
+    """Cross-Validation for time series.
+
+    Computes forecasts from historical cutoff points. Beginning from initial,
+    makes cutoffs with a spacing of period up to (end - horizon).
+
+    When period is equal to the time interval of the data, this is the
+    technique described in https://robjhyndman.com/hyndsight/tscv/ .
 
     Parameters
     ----------
     model: Prophet class object. Fitted Prophet model
-    horizon: string which has pd.Timedelta compatible style.
-        Forecast horizon ('5 days', '3 hours', '10 seconds' etc)
-    period: string which has pd.Timedelta compatible style.
-        Simulated Forecast will be done at every this period.
-    initial: string which has pd.Timedelta compatible style or None, default None.
-        First training period.
-        3 * horizon is used when it is None.
+    horizon: string with pd.Timedelta compatible style, e.g., '5 days',
+        '3 hours', '10 seconds'.
+    period: string with pd.Timedelta compatible style. Simulated forecast will
+        be done at every this period. If not provided, 0.5 * horizon is used.
+    initial: string with pd.Timedelta compatible style. The first training
+        period will begin here. If not provided, 3 * horizon is used.
 
     Returns
     -------
@@ -131,9 +136,10 @@ def cross_validation(model, horizon, period, initial=None):
     te = model.history['ds'].max()
     ts = model.history['ds'].min()
     horizon = pd.Timedelta(horizon)
-    period = pd.Timedelta(period)
+    period = 0.5 * horizon if period is None else pd.Timedelta(period)
     initial = 3 * horizon if initial is None else pd.Timedelta(initial)
     k = int(np.ceil(((te - horizon) - (ts + initial)) / period))
     if k < 1:
-        raise ValueError('Not enough data for specified horizon and initial.')
+        raise ValueError(
+            'Not enough data for specified horizon, period, and initial.')
     return simulated_historical_forecasts(model, horizon, k, period)

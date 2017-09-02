@@ -27,19 +27,21 @@ generate_cutoffs <- function(df, horizon, k, period) {
   }
   tzone <- attr(cutoff, "tzone")  # Timezone is wiped by putting in array
   result <- c(cutoff)
-  for (i in 2:k) {
-    cutoff <- cutoff - period
-    # If data does not exist in data range (cutoff, cutoff + horizon]
-    if (!any((df$ds > cutoff) & (df$ds <= cutoff + horizon))) {
-      # Next cutoff point is 'closest date before cutoff in data - horizon'
-      closest.date <- max(df$ds[df$ds <= cutoff])
-      cutoff <- closest.date - horizon
+  if (k > 1) {
+    for (i in 2:k) {
+      cutoff <- cutoff - period
+      # If data does not exist in data range (cutoff, cutoff + horizon]
+      if (!any((df$ds > cutoff) & (df$ds <= cutoff + horizon))) {
+        # Next cutoff point is 'closest date before cutoff in data - horizon'
+        closest.date <- max(df$ds[df$ds <= cutoff])
+        cutoff <- closest.date - horizon
+      }
+      if (cutoff < min(df$ds)) {
+        warning('Not enough data for requested number of cutoffs! Using ', i)
+        break
+      }
+      result <- c(result, cutoff)
     }
-    if (cutoff < min(df$ds)) {
-      warning('Not enough data for requested number of cutoffs! Using ', i)
-      break
-    }
-    result <- c(result, cutoff)
   }
   # Reset timezones
   attr(result, "tzone") <- tzone
@@ -47,8 +49,9 @@ generate_cutoffs <- function(df, horizon, k, period) {
 }
 
 #' Simulated historical forecasts.
-#' Make forecasts from k historical cutoff dates, and compare forecast values
-#' to actual values.
+#'
+#' Make forecasts from k historical cutoff points, working backwards from
+#' (end - horizon) with a spacing of period between each cutoff.
 #'
 #' @param model Fitted Prophet model.
 #' @param horizon Integer size of the horizon
@@ -99,25 +102,31 @@ simulated_historical_forecasts <- function(model, horizon, units, k,
 }
 
 #' Cross-validation for time series.
-#' Computes forecast error with cutoffs at the specified period. When the
-#' period is the time interval of the data, is the procedure described in
-#' https://robjhyndman.com/hyndsight/tscv/. Beginning from end-horizon, makes
-#' a cutoff every "period" amount of time, going back to "initial".
+#'
+#' Computes forecasts from historical cutoff points. Beginning from initial,
+#' makes cutoffs with a spacing of period up to (end - horizon).
+#'
+#' When period is equal to the time interval of the data, this is the
+#' technique described in https://robjhyndman.com/hyndsight/tscv/ .
 #'
 #' @param model Fitted Prophet model.
 #' @param horizon Integer size of the horizon
 #' @param units String unit of the horizon, e.g., "days", "secs".
 #' @param period Integer amount of time between cutoff dates. Same units as
-#'  horizon.
+#'  horizon. If not provided, 0.5 * horizon is used.
 #' @param initial Integer size of the first training period. If not provided,
 #'  3 * horizon is used. Same units as horizon.
 #'
 #' @return A dataframe with the forecast, actual value, and cutoff date.
 #'
 #' @export
-cross_validation <- function(model, horizon, units, period, initial = NULL) {
+cross_validation <- function(
+    model, horizon, units, period = NULL, initial = NULL) {
   te <- max(model$history$ds)
   ts <- min(model$history$ds)
+  if (is.null(period)) {
+    period <- 0.5 * horizon
+  }
   if (is.null(initial)) {
     initial <- 3 * horizon
   }
@@ -129,7 +138,7 @@ cross_validation <- function(model, horizon, units, period, initial = NULL) {
     as.double(period.dt, units = 'secs')
   )
   if (k < 1) {
-    stop('Not enough data for specified horizon and initial.')
+    stop('Not enough data for specified horizon, period, and initial.')
   }
   return(simulated_historical_forecasts(model, horizon, units, k, period))
 }
