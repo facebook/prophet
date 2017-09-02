@@ -31,12 +31,12 @@ By default Prophet will only return uncertainty in the trend and observation noi
 
 ```python
 # Python
-m = Prophet(mcmc_samples=500)
+m = Prophet(mcmc_samples=300)
 forecast = m.fit(df).predict(future)
 ```
 ```R
 # R
-m <- prophet(df, mcmc.samples = 500)
+m <- prophet(df, mcmc.samples = 300)
 forecast <- predict(m, future)
 ```
 This replaces the typical MAP estimation with MCMC sampling, and takes much longer - think 10 minutes instead of 10 seconds. If you do full sampling, then you will see the uncertainty in seasonal components when you plot them:
@@ -52,5 +52,7 @@ prophet_plot_components(m, forecast);
  
 ![png](/prophet/static/uncertainty_intervals_files/uncertainty_intervals_10_0.png) 
 
+
+You can access the raw posterior predictive samples in Python using the method `m.predictive_samples(future)`, or in R using the function `predictive_samples(m, future)`.
 
 There are upstream issues in PyStan for Windows which make MCMC sampling extremely slow. The best choice for MCMC sampling in Windows is to use R, or Python in a Linux VM.

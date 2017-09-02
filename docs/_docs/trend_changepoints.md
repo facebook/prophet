@@ -64,7 +64,7 @@ If you wish, rather than using automatic changepoint detection you can manually 
 
 ```R
 # R
-m <- prophet(df, changepoints = c(as.Date('2014-01-01')))
+m <- prophet(df, changepoints = c('2014-01-01'))
 forecast <- predict(m, future)
 plot(m, forecast);
 ```
