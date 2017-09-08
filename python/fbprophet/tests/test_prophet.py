@@ -118,7 +118,7 @@ class TestProphet(TestCase):
         future = DATA.tail(N // 2).copy()
         future['cap'] = 80.
         future['floor'] = 10.
-        m.fit(history)
+        m.fit(history, algorithm='Newton')
         self.assertTrue(m.logistic_floor)
         self.assertTrue('floor' in m.history)
         self.assertAlmostEqual(m.history['y_scaled'][0], 1.)
@@ -131,7 +131,7 @@ class TestProphet(TestCase):
         history2['cap'] += 10.
         future['cap'] += 10.
         future['floor'] += 10.
-        m2.fit(history2)
+        m2.fit(history2, algorithm='Newton')
         self.assertAlmostEqual(m2.history['y_scaled'][0], 1.)
         fcst2 = m2.predict(future)
         fcst2['yhat'] -= 10.
