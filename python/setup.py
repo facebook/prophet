@@ -113,6 +113,8 @@ setup(
     ],
     zip_safe=False,
     include_package_data=True,
+    # For Python 3, Will enforce that tests are run after a build.
+    use_2to3=True,
     cmdclass={
         'build_py': BuildPyCommand,
         'develop': DevelopCommand,
