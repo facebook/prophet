@@ -8,6 +8,9 @@ future <- DATA[(ceiling(N/2) + 1):N, ]
 
 DATA2 <- read.csv('data2.csv')
 
+DATA$ds <- prophet:::set_date(DATA$ds)
+DATA2$ds <- prophet:::set_date(DATA2$ds)
+
 test_that("fit_predict", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   m <- prophet(train)
@@ -160,17 +163,17 @@ test_that("override_n_changepoints", {
 })
 
 test_that("fourier_series_weekly", {
+  true.values <- c(0.7818315, 0.6234898, 0.9749279, -0.2225209, 0.4338837,
+                   -0.9009689)
   mat <- prophet:::fourier_series(DATA$ds, 7, 3)
-  true.values <- c(0.9165623, 0.3998920, 0.7330519, -0.6801727, -0.3302791,
-                   -0.9438833)
-  expect_equal(true.values, mat[1, ], tolerance = 1e-6)
+    expect_equal(true.values, mat[1, ], tolerance = 1e-6)
 })
 
 test_that("fourier_series_yearly", {
+  true.values <- c(0.7006152, -0.7135393, -0.9998330, 0.01827656, 0.7262249,
+                   0.6874572)
   mat <- prophet:::fourier_series(DATA$ds, 365.25, 3)
-  true.values <- c(0.69702635, -0.71704551, -0.99959923, 0.02830854,
-                   0.73648994, 0.67644849)
-  expect_equal(true.values, mat[1, ], tolerance = 1e-6)
+    expect_equal(true.values, mat[1, ], tolerance = 1e-6)
 })
 
 test_that("growth_init", {
