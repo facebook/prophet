@@ -1,16 +1,16 @@
 Package: prophet
 Title: Automatic Forecasting Procedure
-Version: 0.1.1
-Date: 2017-04-17
+Version: 0.2
+Date: 2017-09-02
 Authors@R: c(
   person("Sean", "Taylor", email = "sjt@fb.com", role = c("cre", "aut")),
   person("Ben", "Letham", email = "bletham@fb.com", role = "aut")
   )
 Description: Implements a procedure for forecasting time series data based on
-  an additive model where non-linear trends are fit with yearly and weekly
-  seasonality, plus holidays.  It works best with daily periodicity data with
-  at least one year of historical data.  Prophet is robust to missing data,
-  shifts in the trend, and large outliers.
+    an additive model where non-linear trends are fit with yearly and weekly
+    seasonality, plus holidays.  It works best with daily periodicity data with
+    at least one year of historical data.  Prophet is robust to missing data,
+    shifts in the trend, and large outliers.
 Depends:
     R (>= 3.2.3),
     Rcpp (>= 0.12.0)
@@ -22,9 +22,7 @@ Imports:
     rstan (>= 2.14.0),
     scales,
     stats,
-    tidyr (>= 0.6.1),
-    utils,
-    zoo
+    tidyr (>= 0.6.1)
 Suggests:
     knitr,
     testthat,
@@ -33,3 +31,4 @@ License: BSD_3_clause + file LICENSE
 LazyData: true
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
+SystemRequirements: C++11

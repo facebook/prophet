@@ -22,6 +22,8 @@ After installation, you can [get started!](quick_start.html#r-api)
 
 On Windows, R requires a compiler so you'll need to [follow the instructions](https://github.com/stan-dev/rstan/wiki/Installing-RStan-on-Windows) provided by `rstan`.  The key step is installing [Rtools](http://cran.r-project.org/bin/windows/Rtools/) before attempting to install the package.
 
+If you have custom Stan compiler settings, install from source rather than the CRAN binary.
+
 ## Installation in Python
 
 Prophet is on PyPI, so you can use pip to install it:

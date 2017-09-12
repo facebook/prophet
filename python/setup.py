@@ -94,9 +94,10 @@ class TestCommand(test_command):
             sys.modules.update(old_modules)
             working_set.__init__()
 
+
 setup(
     name='fbprophet',
-    version='0.1.1',
+    version='0.2',
     description='Automatic Forecasting Procedure',
     url='https://facebookincubator.github.io/prophet/',
     author='Sean J. Taylor <sjt@fb.com>, Ben Letham <bletham@fb.com>',
@@ -112,12 +113,14 @@ setup(
     ],
     zip_safe=False,
     include_package_data=True,
+    # For Python 3, Will enforce that tests are run after a build.
+    use_2to3=True,
     cmdclass={
         'build_py': BuildPyCommand,
         'develop': DevelopCommand,
         'test': TestCommand,
     },
-    test_suite='fbprophet.tests.test_prophet',
+    test_suite='fbprophet.tests',
     long_description="""
 Implements a procedure for forecasting time series data based on an additive model where non-linear trends are fit with yearly and weekly seasonality, plus holidays.  It works best with daily periodicity data with at least one year of historical data.  Prophet is robust to missing data, shifts in the trend, and large outliers.
 """

@@ -2,7 +2,7 @@
 % Please edit documentation in R/prophet.R
 \name{predict_seasonal_components}
 \alias{predict_seasonal_components}
-\title{Predict seasonality broken down into components.}
+\title{Predict seasonality components, holidays, and added regressors.}
 \usage{
 predict_seasonal_components(m, df)
 }
@@ -15,5 +15,6 @@ predict_seasonal_components(m, df)
 Dataframe with seasonal components.
 }
 \description{
-Predict seasonality broken down into components.
+Predict seasonality components, holidays, and added regressors.
 }
+\keyword{internal}

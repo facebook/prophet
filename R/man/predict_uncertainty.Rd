@@ -2,7 +2,7 @@
 % Please edit documentation in R/prophet.R
 \name{predict_uncertainty}
 \alias{predict_uncertainty}
-\title{Prophet uncertainty intervals.}
+\title{Prophet uncertainty intervals for yhat and trend}
 \usage{
 predict_uncertainty(m, df)
 }
@@ -15,5 +15,6 @@ predict_uncertainty(m, df)
 Dataframe with uncertainty intervals.
 }
 \description{
-Prophet uncertainty intervals.
+Prophet uncertainty intervals for yhat and trend
 }
+\keyword{internal}

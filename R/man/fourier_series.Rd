@@ -19,3 +19,4 @@ Matrix with seasonality features.
 \description{
 Provides Fourier series components with the specified frequency and order.
 }
+\keyword{internal}

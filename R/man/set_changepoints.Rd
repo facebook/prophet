@@ -20,3 +20,4 @@ Sets m$changepoints to the dates of changepoints. Either:
 2) We are generating a grid of them.
 3) The user prefers no changepoints be used.
 }
+\keyword{internal}

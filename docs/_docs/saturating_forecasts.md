@@ -1,9 +1,11 @@
 ---
 layout: docs
-docid: "forecasting_growth"
-title: "Forecasting Growth"
-permalink: /docs/forecasting_growth.html
+docid: "saturating_forecasts"
+title: "Saturating Forecasts"
+permalink: /docs/saturating_forecasts.html
 ---
+### Forecasting Growth
+
 By default, Prophet uses a linear model for its forecast. When forecasting growth, there is usually some maximum achievable point: total market size, total population size, etc. This is called the carrying capacity, and the forecast should saturate at this point.
 
 Prophet allows you to make forecasts using a [logistic growth](https://en.wikipedia.org/wiki/Logistic_function) trend model, with a specified carrying capacity. We illustrate this with the log number of page visits to the [R (programming language)](https://en.wikipedia.org/wiki/R_%28programming_language%29) page on Wikipedia:
@@ -44,13 +46,6 @@ m <- prophet(df, growth = 'logistic')
 ```
 We make a dataframe for future predictions as before, except we must also specify the capacity in the future. Here we keep capacity constant at the same value as in the history, and forecast 3 years into the future:
 
-```python
-# Python
-future = m.make_future_dataframe(periods=1826)
-future['cap'] = 8.5
-fcst = m.predict(future)
-m.plot(fcst);
-```
 ```R
 # R
 future <- make_future_dataframe(m, periods = 1826)
@@ -58,6 +53,44 @@ future$cap <- 8.5
 fcst <- predict(m, future)
 plot(m, fcst);
 ```
+```python
+# Python
+future = m.make_future_dataframe(periods=1826)
+future['cap'] = 8.5
+fcst = m.predict(future)
+m.plot(fcst);
+```
  
-![png](/prophet/static/forecasting_growth_files/forecasting_growth_13_0.png) 
+![png](/prophet/static/saturating_forecasts_files/saturating_forecasts_13_0.png) 
+
+
+### Saturating Minimum
+
+The logistic growth model can also handle a saturating minimum, which is specified with a column `floor` in the same way as the `cap` column specifies the maximum:
+
+```R
+# R
+df$y <- 10 - df$y
+df$cap <- 6
+df$floor <- 1.5
+future$cap <- 6
+future$floor <- 1.5
+m <- prophet(df, growth = 'logistic')
+fcst <- predict(m, future)
+plot(m, fcst)
+```
+```python
+# Python
+df['y'] = 10 - df['y']
+df['cap'] = 6
+df['floor'] = 1.5
+future['cap'] = 6
+future['floor'] = 1.5
+m = Prophet(growth='logistic')
+m.fit(df)
+fcst = m.predict(future)
+m.plot(fcst);
+```
+ 
+![png](/prophet/static/saturating_forecasts_files/saturating_forecasts_16_0.png) 
 

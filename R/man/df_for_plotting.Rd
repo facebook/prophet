@@ -14,3 +14,4 @@ df_for_plotting(m, fcst)
 \description{
 Merge history and forecast for plotting.
 }
+\keyword{internal}

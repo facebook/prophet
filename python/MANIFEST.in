@@ -4,3 +4,6 @@ include LICENSE
 
 # Ensure in-place built models do not get included in the source dist.
 prune fbprophet/stan_models
+
+# Necessary for tests to run
+include fbprophet/tests/*.csv

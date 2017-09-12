@@ -14,6 +14,7 @@ Prophet is [open source software](https://code.facebook.com/projects/) released 
 - Prophet R package: https://cran.r-project.org/package=prophet
 - Prophet Python package: https://pypi.python.org/pypi/fbprophet/
 - Release blogpost: https://research.fb.com/prophet-forecasting-at-scale/
+- Prophet paper, "Forecasting at Scale": https://peerj.com/preprints/3190.pdf
 
 ## Installation in R
 
@@ -29,6 +30,8 @@ After installation, you can [get started!](https://facebookincubator.github.io/p
 ### Windows
 
 On Windows, R requires a compiler so you'll need to [follow the instructions](https://github.com/stan-dev/rstan/wiki/Installing-RStan-on-Windows) provided by `rstan`.  The key step is installing [Rtools](http://cran.r-project.org/bin/windows/Rtools/) before attempting to install the package.
+
+If you have custom Stan compiler settings, install from source rather than the CRAN binary.
 
 ## Installation in Python
 
@@ -47,7 +50,25 @@ After installation, you can [get started!](https://facebookincubator.github.io/p
 
 On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html).  The key step is installing a recent [C++ compiler](http://landinghub.visualstudio.com/visual-cpp-build-tools).
 
+### Linux
+
+Make sure compilers (gcc, g++) and Python development tools (python-dev) are installed. If you are using a VM, be aware that you will need at least 2GB of memory to run PyStan.
+
+### Anaconda
+
+Use `conda install gcc` to set up gcc. The easiest way to install Prophet is through conda-forge: `conda install -c conda-forge fbprophet`.
+
 ## Changelog
+
+### Version 0.2 (2017.09.02)
+
+- Forecasting with sub-daily data
+- Daily seasonality, and custom seasonalities
+- Extra regressors
+- Access to posterior predictive samples
+- Cross-validation function
+- Saturating minimums
+- Bugfixes
 
 ### Version 0.1.1 (2017.04.17)
 

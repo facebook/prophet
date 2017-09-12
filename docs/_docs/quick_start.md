@@ -147,37 +147,37 @@ forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail()
     <tr>
       <th>3265</th>
       <td>2017-01-15</td>
-      <td>8.205065</td>
-      <td>7.488507</td>
-      <td>8.887731</td>
+      <td>8.206753</td>
+      <td>7.485107</td>
+      <td>8.920149</td>
     </tr>
     <tr>
       <th>3266</th>
       <td>2017-01-16</td>
-      <td>8.530088</td>
-      <td>7.862778</td>
-      <td>9.223688</td>
+      <td>8.531766</td>
+      <td>7.779331</td>
+      <td>9.284859</td>
     </tr>
     <tr>
       <th>3267</th>
       <td>2017-01-17</td>
-      <td>8.317468</td>
-      <td>7.644606</td>
-      <td>9.021893</td>
+      <td>8.319156</td>
+      <td>7.610545</td>
+      <td>8.986889</td>
     </tr>
     <tr>
       <th>3268</th>
       <td>2017-01-18</td>
-      <td>8.150081</td>
-      <td>7.462394</td>
-      <td>8.889095</td>
+      <td>8.151772</td>
+      <td>7.415802</td>
+      <td>8.875191</td>
     </tr>
     <tr>
       <th>3269</th>
       <td>2017-01-19</td>
-      <td>8.162015</td>
-      <td>7.438503</td>
-      <td>8.877361</td>
+      <td>8.163690</td>
+      <td>7.427153</td>
+      <td>8.884826</td>
     </tr>
   </tbody>
 </table>
@@ -204,6 +204,8 @@ m.plot_components(forecast);
  
 ![png](/prophet/static/quick_start_files/quick_start_14_0.png) 
 
+
+More details about the options available for each method are available in the docstrings, for example, via `help(Prophet)` or `help(Prophet.fit)`.
 
 ## R API
 
@@ -254,12 +256,12 @@ tail(forecast[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
 ```
 
                  ds     yhat yhat_lower yhat_upper
-    3265 2017-01-14 7.832396   7.140713   8.533132
-    3266 2017-01-15 8.214232   7.460897   8.918678
-    3267 2017-01-16 8.539239   7.788240   9.262142
-    3268 2017-01-17 8.326654   7.615613   9.003147
-    3269 2017-01-18 8.159337   7.382162   8.889958
-    3270 2017-01-19 8.171276   7.354854   8.922918
+    3265 2017-01-14 7.825609   7.183818   8.488012
+    3266 2017-01-15 8.207400   7.478778   8.951113
+    3267 2017-01-16 8.532394   7.826360   9.240482
+    3268 2017-01-17 8.319785   7.596815   9.042505
+    3269 2017-01-18 8.152424   7.440858   8.874581
+    3270 2017-01-19 8.164327   7.419148   8.882906
 
 
 
@@ -270,7 +272,7 @@ You can use the generic `plot` function to plot the forecast, by passing in the 
 plot(m, forecast)
 ```
  
-![png](/prophet/static/quick_start_files/quick_start_26_0.png) 
+![png](/prophet/static/quick_start_files/quick_start_27_0.png) 
 
 
 You can use the `prophet_plot_components` function to see the forecast broken down into trend, weekly seasonality, and yearly seasonality.
@@ -280,5 +282,7 @@ You can use the `prophet_plot_components` function to see the forecast broken do
 prophet_plot_components(m, forecast)
 ```
  
-![png](/prophet/static/quick_start_files/quick_start_28_0.png) 
+![png](/prophet/static/quick_start_files/quick_start_29_0.png) 
 
+
+More details about the options available for each method are available in the docstrings, for example, via `?prophet` or `?fit.prophet`. This documentation is also available in the [reference manual](https://cran.r-project.org/web/packages/prophet/prophet.pdf) on CRAN.
