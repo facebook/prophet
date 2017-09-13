@@ -48,7 +48,9 @@ class Prophet(object):
     n_changepoints: Number of potential changepoints to include. Not used
         if input `changepoints` is supplied. If `changepoints` is not supplied,
         then n_changepoints potential changepoints are selected uniformly from
-        the first 80 percent of the history.
+        the first `changepoint_threshold` percent of the history.
+    changepoint_threshold: Parameter controling where to select the changepoints.
+    Not used if input `changepoints` is supplied.
     yearly_seasonality: Fit yearly seasonality.
         Can be 'auto', True, False, or a number of Fourier terms to generate.
     weekly_seasonality: Fit weekly seasonality.
@@ -87,6 +89,7 @@ class Prophet(object):
             growth='linear',
             changepoints=None,
             n_changepoints=25,
+            changepoint_threshold=0.8,
             yearly_seasonality='auto',
             weekly_seasonality='auto',
             daily_seasonality='auto',
@@ -108,6 +111,7 @@ class Prophet(object):
             self.n_changepoints = n_changepoints
             self.specified_changepoints = False
 
+        self.changepoint_threshold = changepoint_threshold
         self.yearly_seasonality = yearly_seasonality
         self.weekly_seasonality = weekly_seasonality
         self.daily_seasonality = daily_seasonality
@@ -312,8 +316,15 @@ class Prophet(object):
                     raise ValueError(
                         'Changepoints must fall within training data.')
         else:
-            # Place potential changepoints evenly through first 80% of history
-            hist_size = np.floor(self.history.shape[0] * 0.8)
+            # Place potential changepoints evenly through first changepoint_threshold
+            # of history
+            if (self.changepoint_threshold > 1 or self.changepoint_threshold <= 0):
+                self.changepoint_threshold = 0.8
+                logger.info(
+                    'changepoint_threshold greater than 1 or less than equal to 0.'
+                    'Using {}.'.format(self.changepoint_threshold)
+                )
+            hist_size = np.floor(self.history.shape[0] * self.changepoint_threshold)
             if self.n_changepoints + 1 > hist_size:
                 self.n_changepoints = hist_size - 1
                 logger.info(
