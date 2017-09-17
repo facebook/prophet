@@ -327,7 +327,7 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
     }
   }
 
-  df <- df[order(df[["ds"]]), ]
+  df <- df[order(df[["ds"]]), , drop = FALSE]
   
   m <- initialize_scales_fn(m, initialize_scales, df)
 
@@ -554,7 +554,7 @@ make_holiday_features <- function(m, dates) {
   }
   
   f <- function(nm) {
-    df.h <- m$holidays[m$holidays$holiday == nm, ]
+    df.h <- m$holidays[m$holidays$holiday == nm, , drop = FALSE]
     ps <- unique(df.h$prior_scale)
     if (length(ps) > 1) {
       stop('Holiday ', nm, ' does not have a consistent prior scale ',
@@ -885,7 +885,7 @@ fit.prophet <- function(m, df, ...) {
   if (!is.null(m$history)) {
     stop("Prophet object can only be fit once. Instantiate a new object.")
   }
-  history <- df[!is.na(df[["y"]]), ]
+  history <- df[!is.na(df[["y"]]), , drop = FALSE]
   if (nrow(history) < 2) {
     stop("Dataframe has less than 2 non-NA rows.")
   }
@@ -1085,7 +1085,6 @@ piecewise_logistic <- function(t, cap, deltas, k, m, changepoint.ts) {
   gammas.prod <- apply(bigger.than.chgpt, 2, `*`, gammas)
   k_t <- colSums(deltas.prod) + k
   m_t <- colSums(gammas.prod) + m
-  
   y <- cap / (1 + exp(-k_t * (t - m_t)))
   return(y)
 }
@@ -1146,7 +1145,7 @@ predict_seasonal_components <- function(m, df) {
   components <- add_group_component(
     components, 'extra_regressors', names(m$extra_regressors))
   # Remove the placeholder
-  components <- components[components[["component"]] != 'zeros', ]
+  components <- components[components[["component"]] != 'zeros', , drop = FALSE]
   component.predictions <- components %>%
     dplyr::group_by(component) %>% dplyr::do({
       comp <- (as.matrix(seasonal.features[, .$col])
@@ -1178,7 +1177,7 @@ predict_seasonal_components <- function(m, df) {
 #'
 #' @keywords internal
 add_group_component <- function(components, name, group) {
-  new_comp <- components[components$component %in% group, ]
+  new_comp <- components[components$component %in% group, , drop = FALSE]
   if (nrow(new_comp) > 0) {
     new_comp$component <- name
     components <- dplyr::bind_rows(components, new_comp)
