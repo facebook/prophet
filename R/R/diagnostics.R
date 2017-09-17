@@ -5,10 +5,6 @@
 ## LICENSE file in the root directory of this source tree. An additional grant
 ## of patent rights can be found in the PATENTS file in the same directory.
 
-## Makes R CMD CHECK happy due to dplyr syntax below
-globalVariables(c(
-  "ds", "y", "cap", "yhat", "yhat_lower", "yhat_upper"))
-
 #' Generate cutoff dates
 #'
 #' @param df Dataframe with historical data
@@ -26,12 +22,12 @@ generate_cutoffs <- function(df, horizon, k, period) {
     stop('Less data than horizon.')
   }
   tzone <- attr(cutoff, "tzone")  # Timezone is wiped by putting in array
-  result <- c(cutoff)
+  result <- cutoff
   if (k > 1) {
     for (i in 2:k) {
       cutoff <- cutoff - period
       # If data does not exist in data range (cutoff, cutoff + horizon]
-      if (!any((df$ds > cutoff) & (df$ds <= cutoff + horizon))) {
+      if (!any((df$ds > cutoff) && (df$ds <= cutoff + horizon))) {
         # Next cutoff point is 'closest date before cutoff in data - horizon'
         closest.date <- max(df$ds[df$ds <= cutoff])
         cutoff <- closest.date - horizon
@@ -74,16 +70,16 @@ simulated_historical_forecasts <- function(model, horizon, units, k,
   }
   cutoffs <- generate_cutoffs(df, horizon, k, period)
   predicts <- data.frame()
-  for (i in 1:length(cutoffs)) {
+  for (i in seq_along(cutoffs)) {
     cutoff <- cutoffs[i]
     # Copy the model
     m <- prophet_copy(model, cutoff)
     # Train model
-    history.c <- dplyr::filter(df, ds <= cutoff)
+    history.c <- df[df[["ds"]] <= cutoff, ]
     m <- fit.prophet(m, history.c)
     # Calculate yhat
-    df.predict <- dplyr::filter(df, ds > cutoff, ds <= cutoff + horizon)
-    columns <- c('ds')
+    df.predict <- df[(df[["ds"]] > cutoff) & (df[["ds"]] <= cutoff + horizon), ]
+    columns <- 'ds'
     if (m$growth == 'logistic') {
       columns <- c(columns, 'cap')
       if (m$logistic.floor) {
@@ -94,7 +90,7 @@ simulated_historical_forecasts <- function(model, horizon, units, k,
     yhat <- stats::predict(m, future)
     # Merge yhat, y, and cutoff.
     df.c <- dplyr::inner_join(df.predict, yhat, by = "ds")
-    df.c <- dplyr::select(df.c, ds, y, yhat, yhat_lower, yhat_upper)
+    df.c <- df.c[c("ds", "y", "yhat", "yhat_lower", "yhat_upper")]
     df.c$cutoff <- cutoff
     predicts <- rbind(predicts, df.c)
   }
