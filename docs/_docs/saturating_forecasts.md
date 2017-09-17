@@ -64,6 +64,8 @@ m.plot(fcst);
 ![png](/prophet/static/saturating_forecasts_files/saturating_forecasts_13_0.png) 
 
 
+The logistic function has an implicit minimum of 0, and will saturate at 0 the same way that it saturates at the capacity. It is possible to also specify a different saturating minimum.
+
 ### Saturating Minimum
 
 The logistic growth model can also handle a saturating minimum, which is specified with a column `floor` in the same way as the `cap` column specifies the maximum:
@@ -94,3 +96,5 @@ m.plot(fcst);
  
 ![png](/prophet/static/saturating_forecasts_files/saturating_forecasts_16_0.png) 
 
+
+To use a logistic growth trend with a saturating minimum, a maximum capacity must also be specified.
