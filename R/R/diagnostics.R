@@ -75,10 +75,10 @@ simulated_historical_forecasts <- function(model, horizon, units, k,
     # Copy the model
     m <- prophet_copy(model, cutoff)
     # Train model
-    history.c <- df[df[["ds"]] <= cutoff, ]
+    history.c <- df[df[["ds"]] <= cutoff, , drop = FALSE]
     m <- fit.prophet(m, history.c)
     # Calculate yhat
-    df.predict <- df[(df[["ds"]] > cutoff) & (df[["ds"]] <= cutoff + horizon), ]
+    df.predict <- df[(df[["ds"]] > cutoff) & (df[["ds"]] <= cutoff + horizon), , drop = FALSE]
     columns <- 'ds'
     if (m$growth == 'logistic') {
       columns <- c(columns, 'cap')
