@@ -815,7 +815,7 @@ class Prophet(object):
         if history['y'].min() == history['y'].max():
             # Nothing to fit.
             self.params = stan_init()
-            self.params['sigma_obs'] = 0.
+            self.params['sigma_obs'] = 1e-9
             for par in self.params:
                 self.params[par] = np.array([self.params[par]])
         elif self.mcmc_samples > 0:
