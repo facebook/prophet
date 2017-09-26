@@ -10,12 +10,12 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import itertools
 import numpy as np
 import pandas as pd
 
 # fb-block 1 start
 import os
-import itertools
 from unittest import TestCase
 from fbprophet import Prophet
 
@@ -551,6 +551,8 @@ class TestProphet(TestCase):
 
     def test_copy(self):
         # These values are created except for its default values
+        holiday = pd.DataFrame(
+            {'ds': pd.to_datetime(['2016-12-25']), 'holiday': ['x']})
         products = itertools.product(
             ['linear', 'logistic'],  # growth
             [None, pd.to_datetime(['2016-12-25'])],  # changepoints
@@ -558,7 +560,7 @@ class TestProphet(TestCase):
             [True, False],  # yearly_seasonality
             [True, False],  # weekly_seasonality
             [True, False],  # daily_seasonality
-            [None, pd.DataFrame({'ds': pd.to_datetime(['2016-12-25']), 'holiday': ['x']})],  # holidays
+            [None, holiday],  # holidays
             [1.1],  # seasonality_prior_scale
             [1.1],  # holidays_prior_scale
             [0.1],  # changepoint_prior_scale
