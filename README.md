@@ -7,10 +7,10 @@ Prophet is [open source software](https://code.facebook.com/projects/) released 
 ## Important links
 
 
-- Homepage: https://facebookincubator.github.io/prophet/
-- HTML documentation: https://facebookincubator.github.io/prophet/docs/quick_start.html
-- Issue tracker: https://github.com/facebookincubator/prophet/issues
-- Source code repository: https://github.com/facebookincubator/prophet
+- Homepage: https://facebook.github.io/prophet/
+- HTML documentation: https://facebook.github.io/prophet/docs/quick_start.html
+- Issue tracker: https://github.com/facebook/prophet/issues
+- Source code repository: https://github.com/facebook/prophet
 - Prophet R package: https://cran.r-project.org/package=prophet
 - Prophet Python package: https://pypi.python.org/pypi/fbprophet/
 - Release blogpost: https://research.fb.com/prophet-forecasting-at-scale/
@@ -25,7 +25,7 @@ Prophet is a [CRAN package](https://cran.r-project.org/package=prophet) so you c
 > install.packages('prophet')
 ```
 
-After installation, you can [get started!](https://facebookincubator.github.io/prophet/docs/quick_start.html#r-api)
+After installation, you can [get started!](https://facebook.github.io/prophet/docs/quick_start.html#r-api)
 
 ### Windows
 
@@ -44,7 +44,7 @@ $ pip install fbprophet
 
 The major dependency that Prophet has is `pystan`.   PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html).
 
-After installation, you can [get started!](https://facebookincubator.github.io/prophet/docs/quick_start.html#python-api)
+After installation, you can [get started!](https://facebook.github.io/prophet/docs/quick_start.html#python-api)
 
 ### Windows
 

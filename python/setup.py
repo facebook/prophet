@@ -99,7 +99,7 @@ setup(
     name='fbprophet',
     version='0.2',
     description='Automatic Forecasting Procedure',
-    url='https://facebookincubator.github.io/prophet/',
+    url='https://facebook.github.io/prophet/',
     author='Sean J. Taylor <sjt@fb.com>, Ben Letham <bletham@fb.com>',
     author_email='sjt@fb.com',
     license='BSD',

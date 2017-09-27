@@ -10,7 +10,7 @@ Prophet follows the `sklearn` model API.  We create an instance of the `Prophet`
 
 The input to Prophet is always a dataframe with two columns: `ds` and `y`.  The `ds` (datestamp) column must contain a date or datetime (either is fine). The `y` column must be numeric, and represents the measurement we wish to forecast.
 
-As an example, let's look at a time series of daily page views for the Wikipedia page for [Peyton Manning](https://en.wikipedia.org/wiki/Peyton_Manning).  We scraped this data using the [Wikipediatrend](https://cran.r-project.org/web/packages/wikipediatrend/vignettes/using-wikipediatrend.html) package in R.  Peyton Manning provides a nice example because it illustrates some of Prophet's features, like multiple seasonality, changing growth rates, and the ability to model special days (such as Manning's playoff and superbowl appearances). The CSV is available [here](https://github.com/facebookincubator/prophet/blob/master/examples/example_wp_peyton_manning.csv).
+As an example, let's look at a time series of daily page views for the Wikipedia page for [Peyton Manning](https://en.wikipedia.org/wiki/Peyton_Manning).  We scraped this data using the [Wikipediatrend](https://cran.r-project.org/web/packages/wikipediatrend/vignettes/using-wikipediatrend.html) package in R.  Peyton Manning provides a nice example because it illustrates some of Prophet's features, like multiple seasonality, changing growth rates, and the ability to model special days (such as Manning's playoff and superbowl appearances). The CSV is available [here](https://github.com/facebook/prophet/blob/master/examples/example_wp_peyton_manning.csv).
 
 First we'll import the data and log-transform the y variable.
 
@@ -216,7 +216,7 @@ In R, we use the normal model fitting API.  We provide a `prophet` function that
 library(prophet)
 library(dplyr)
 ```
-First we read in the data and create the outcome variable. As in the Python API, this is a dataframe with columns `ds` and `y`, containing the date and numeric value respectively. As above, we use here the log number of views to Petyon Manning's Wikipedia page, available [here](https://github.com/facebookincubator/prophet/blob/master/examples/example_wp_peyton_manning.csv).
+First we read in the data and create the outcome variable. As in the Python API, this is a dataframe with columns `ds` and `y`, containing the date and numeric value respectively. As above, we use here the log number of views to Petyon Manning's Wikipedia page, available [here](https://github.com/facebook/prophet/blob/master/examples/example_wp_peyton_manning.csv).
 
 ```R
 # R

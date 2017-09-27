@@ -8,7 +8,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for details on how to add or modify con
 
 ## Jupyter Notebooks
 
-Most of the `doc` pages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebookincubator/prophet/tree/master/notebooks) directory at the base of the source tree.  Please make changes there and then rebuild the docs:
+Most of the `doc` pages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebook/prophet/tree/master/notebooks) directory at the base of the source tree.  Please make changes there and then rebuild the docs:
 
 ```
 $ cd docs

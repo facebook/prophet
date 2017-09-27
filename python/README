@@ -5,14 +5,14 @@ Prophet is a procedure for forecasting time series data.  It is based on an addi
 
 Prophet is `open source software <https://code.facebook.com/projects/>`_ released by Facebook's `Core Data Science team <https://research.fb.com/category/data-science/>`_.
 
-Full documentation and examples available at the homepage: https://facebookincubator.github.io/prophet/
+Full documentation and examples available at the homepage: https://facebook.github.io/prophet/
 
 Important links
 ---------------
 
-- HTML documentation: https://facebookincubator.github.io/prophet/docs/quick_start.html
-- Issue tracker: https://github.com/facebookincubator/prophet/issues
-- Source code repository: https://github.com/facebookincubator/prophet
+- HTML documentation: https://facebook.github.io/prophet/docs/quick_start.html
+- Issue tracker: https://github.com/facebook/prophet/issues
+- Source code repository: https://github.com/facebook/prophet
 - Implementation of Prophet in R: https://cran.r-project.org/package=prophet
 
 
