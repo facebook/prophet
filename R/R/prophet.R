@@ -570,7 +570,7 @@ make_holiday_features <- function(m, dates) {
     
   }
   
-  nms <- setNames(unique(m$holidays$holiday), unique(m$holidays$holiday))
+  nms <- stats::setNames(unique(m$holidays$holiday), unique(m$holidays$holiday))
   prior.scales.list <- lapply(nms, f)
   
   prior.scales <- vapply(colnames(holiday.features),

@@ -5,6 +5,10 @@
 ## LICENSE file in the root directory of this source tree. An additional grant
 ## of patent rights can be found in the PATENTS file in the same directory.
 
+## Makes R CMD CHECK happy due to dplyr syntax below
+globalVariables(c(
+  "ds", "y", "cap", "yhat", "yhat_lower", "yhat_upper"))
+
 #' Generate cutoff dates
 #'
 #' @param df Dataframe with historical data
