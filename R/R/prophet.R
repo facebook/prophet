@@ -1569,7 +1569,7 @@ plot_forecast_component <- function(
 #'
 #' @keywords internal
 seasonality_plot_df <- function(m, ds) {
-  df_list <- list(ds = ds, cap = 1)
+  df_list <- list(ds = ds, cap = 1, floor = 0)
   for (name in names(m$extra_regressors)) {
     df_list[[name]] <- 0
   }

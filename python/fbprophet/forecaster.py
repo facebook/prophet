@@ -1370,7 +1370,7 @@ class Prophet(object):
         -------
         A dataframe with seasonal components on ds.
         """
-        df_dict = {'ds': ds, 'cap': 1.}
+        df_dict = {'ds': ds, 'cap': 1., 'floor': 0.}
         for name in self.extra_regressors:
             df_dict[name] = 0.
         df = pd.DataFrame(df_dict)
