@@ -445,7 +445,7 @@ set_changepoints <- function(m) {
               m$n.changepoints)
     }
     if (m$n.changepoints > 0) {
-      cp.indexes <- round(seq.int(1, hist.size,
+      cp.indexes <- round(seq(1, hist.size,
                                   length.out = (m$n.changepoints + 1))[-1])
       m$changepoints <- m$history$ds[cp.indexes]
     } else {
@@ -469,7 +469,7 @@ set_changepoints <- function(m) {
 #'
 #' @keywords internal
 get_changepoint_matrix <- function(m) {
-  vapply(seq_len(m$changepoints.t),
+  vapply(seq_along(m$changepoints.t),
          function(c) as.numeric(m$history$t >= m$changepoints.t[c]),
          numeric(nrow(m$history)))
 }
@@ -531,7 +531,7 @@ make_holiday_features <- function(m, dates) {
     dplyr::do({
       if (exists('lower_window', where = .) && !is.na(.$lower_window)
           && !is.na(.$upper_window)) {
-        offsets <- seq.int(.$lower_window, .$upper_window)
+        offsets <- seq(.$lower_window, .$upper_window)
       } else {
         offsets <- 0
       }
@@ -554,7 +554,7 @@ make_holiday_features <- function(m, dates) {
   }
   
   f <- function(nm) {
-    df.h <- m$holidays[m$holidays$holiday == nm, , drop = FALSE]
+    df.h <- m$holidays[m$holidays$holiday == nm, ]
     ps <- unique(df.h$prior_scale)
     if (length(ps) > 1) {
       stop('Holiday ', nm, ' does not have a consistent prior scale ',
@@ -573,9 +573,15 @@ make_holiday_features <- function(m, dates) {
   nms <- stats::setNames(unique(m$holidays$holiday), unique(m$holidays$holiday))
   prior.scales.list <- lapply(nms, f)
   
-  prior.scales <- vapply(colnames(holiday.features),
-                         function(nm) prior.scales.list[[strsplit(nm, '_delim_', fixed = TRUE)[[1]][1]]],
-                         character(1))
+  #prior.scales <- vapply(colnames(holiday.features),
+  #                       function(nm) prior.scales.list[[strsplit(nm, '_delim_', fixed = TRUE)[[1]][1]]],
+  #                       character(1))
+  
+  prior.scales <- c()
+  for (name in colnames(holiday.features)) {
+    sn <- strsplit(name, '_delim_', fixed = TRUE)[[1]][1]
+    prior.scales <- c(prior.scales, prior.scales.list[[sn]])
+  }
   
   return(list(holiday.features = holiday.features,
               prior.scales = prior.scales))
@@ -687,15 +693,15 @@ make_all_seasonality_features <- function(m, df) {
   for (name in names(m$seasonalities)) {
     props <- m$seasonalities[[name]]
     features <- make_seasonality_features(df$ds, props$period, props$fourier.order, name)
-    seasonal.features <- dplyr::bind_cols(seasonal.features, features)
+    seasonal.features <- cbind(seasonal.features, features)
     prior.scales <- c(prior.scales,
-                      props$prior.scale * rep.int(1, ncol(features)))
+                      props$prior.scale * rep(1, ncol(features)))
   }
 
   # Holiday features
   if (!is.null(m$holidays)) {
     hf <- make_holiday_features(m, df$ds)
-    seasonal.features <- dplyr::bind_cols(seasonal.features, hf$holiday.features)
+    seasonal.features <- cbind(seasonal.features, hf$holiday.features)
     prior.scales <- c(prior.scales, hf$prior.scales)
   }
 
@@ -706,7 +712,7 @@ make_all_seasonality_features <- function(m, df) {
   }
 
   if (ncol(seasonal.features) == 0) {
-    seasonal.features <- data.frame(zeros = rep.int(0, nrow(df)))
+    seasonal.features <- data.frame(zeros = rep(0, nrow(df)))
     prior.scales <- 1
   }
   return(list(seasonal.features = seasonal.features,
@@ -737,9 +743,9 @@ parse_seasonality_args <- function(m, name, arg, auto.disable, default.order) {
     } else {
       fourier.order <- default.order
     }
-  } else if (isTRUE(arg)) {
+  } else if (arg) {
     fourier.order <- default.order
-  } else if (! isTRUE(arg)) {
+  } else if (! arg) {
     fourier.order <- 0
   } else {
     fourier.order <- arg
@@ -777,7 +783,7 @@ set_auto_seasonalities <- function(m) {
     )
   }
 
-  weekly.disable <- time_diff(last, first) < 14 || min.dt >= 7
+  weekly.disable <- ((time_diff(last, first) < 14) || (min.dt >= 7))
   fourier.order <- parse_seasonality_args(
     m, 'weekly', m$weekly.seasonality, weekly.disable, 3)
   if (fourier.order > 0) {
@@ -788,7 +794,7 @@ set_auto_seasonalities <- function(m) {
     )
   }
 
-  daily.disable <- time_diff(last, first) < 2 || min.dt >= 1
+  daily.disable <- ((time_diff(last, first) < 2) || (min.dt >= 1))
   fourier.order <- parse_seasonality_args(
     m, 'daily', m$daily.seasonality, daily.disable, 4)
   if (fourier.order > 0) {
@@ -1136,7 +1142,7 @@ predict_seasonal_components <- function(m, df) {
                     extra = "merge", fill = "right") %>%
     dplyr::select(col, component)
   # Add total for all regression components
-  components <- dplyr::bind_rows(
+  components <- rbind(
     components,
     data.frame(col = seq_len(ncol(seasonal.features)), component = 'seasonal'))
   # Add totals for seasonality, holiday, and extra regressors
@@ -1150,6 +1156,7 @@ predict_seasonal_components <- function(m, df) {
     components, 'extra_regressors', names(m$extra_regressors))
   # Remove the placeholder
   components <- components[components[["component"]] != 'zeros', , drop = FALSE]
+  
   component.predictions <- components %>%
     dplyr::group_by(component) %>% dplyr::do({
       comp <- (as.matrix(seasonal.features[, .$col])
@@ -1184,7 +1191,7 @@ add_group_component <- function(components, name, group) {
   new_comp <- components[components$component %in% group, , drop = FALSE]
   if (nrow(new_comp) > 0) {
     new_comp$component <- name
-    components <- dplyr::bind_rows(components, new_comp)
+    components <- rbind(components, new_comp)
   }
   return(components)
 }
@@ -1651,7 +1658,7 @@ plot_seasonality <- function(m, name, uncertainty = TRUE) {
   period <- m$seasonalities[[name]]$period
   end <- start + period * 24 * 3600
   plot.points <- 200
-  days <- seq.int(from=start, to=end, length.out=plot.points)
+  days <- seq(from=start, to=end, length.out=plot.points)
   df.y <- seasonality_plot_df(m, days)
   seas <- predict_seasonal_components(m, df.y)
   seas$ds <- df.y$ds
