@@ -1050,11 +1050,13 @@ piecewise_linear <- function(t, deltas, k, m, changepoint.ts) {
   # Intercept changes
   gammas <- -changepoint.ts * deltas
   # Get cumulative slope and intercept at each t
-  bigger.than.chgpt <- vapply(t, `>=`, logical(length(changepoint.ts)), changepoint.ts)
-  deltas.prod <- apply(bigger.than.chgpt, 2, `*`, deltas)
-  gammas.prod <- apply(bigger.than.chgpt, 2, `*`, gammas)
-  k_t <- colSums(deltas.prod) + k
-  m_t <- colSums(gammas.prod) + m
+  k_t <- rep(k, length(t))
+  m_t <- rep(m, length(t))
+  for (s in seq_along(changepoint.ts)) {
+    indx <- t >= changepoint.ts[s]
+    k_t[indx] <- k_t[indx] + deltas[s]
+    m_t[indx] <- m_t[indx] + gammas[s]
+  }
   y <- k_t * t + m_t
   return(y)
 }
@@ -1074,17 +1076,19 @@ piecewise_linear <- function(t, deltas, k, m, changepoint.ts) {
 piecewise_logistic <- function(t, cap, deltas, k, m, changepoint.ts) {
   # Compute offset changes
   k.cum <- c(k, cumsum(deltas) + k)
-  gammas <- numeric(length(changepoint.ts))
+  gammas <- rep(0, length(changepoint.ts))
   for (i in seq_along(changepoint.ts)) {
     gammas[i] <- ((changepoint.ts[i] - m - sum(gammas))
                   * (1 - k.cum[i] / k.cum[i + 1]))
   }
   # Get cumulative rate and offset at each t
-  bigger.than.chgpt <- vapply(t, `>=`, logical(length(changepoint.ts)), changepoint.ts)
-  deltas.prod <- apply(bigger.than.chgpt, 2, `*`, deltas)
-  gammas.prod <- apply(bigger.than.chgpt, 2, `*`, gammas)
-  k_t <- colSums(deltas.prod) + k
-  m_t <- colSums(gammas.prod) + m
+  k_t <- rep(k, length(t))
+  m_t <- rep(m, length(t))
+  for (s in seq_along(changepoint.ts)) {
+    indx <- t >= changepoint.ts[s]
+    k_t[indx] <- k_t[indx] + deltas[s]
+    m_t[indx] <- m_t[indx] + gammas[s]
+  }
   y <- cap / (1 + exp(-k_t * (t - m_t)))
   return(y)
 }
