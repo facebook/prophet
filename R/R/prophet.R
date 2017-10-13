@@ -445,7 +445,7 @@ set_changepoints <- function(m) {
               m$n.changepoints)
     }
     if (m$n.changepoints > 0) {
-      cp.indexes <- round(seq(1, hist.size,
+      cp.indexes <- round(seq.int(1, hist.size,
                                   length.out = (m$n.changepoints + 1))[-1])
       m$changepoints <- m$history$ds[cp.indexes]
     } else {
@@ -573,16 +573,11 @@ make_holiday_features <- function(m, dates) {
   nms <- stats::setNames(unique(m$holidays$holiday), unique(m$holidays$holiday))
   prior.scales.list <- lapply(nms, f)
   
-  #prior.scales <- vapply(colnames(holiday.features),
-  #                       function(nm) prior.scales.list[[strsplit(nm, '_delim_', fixed = TRUE)[[1]][1]]],
-  #                       character(1))
-  
   prior.scales <- c()
   for (name in colnames(holiday.features)) {
     sn <- strsplit(name, '_delim_', fixed = TRUE)[[1]][1]
     prior.scales <- c(prior.scales, prior.scales.list[[sn]])
   }
-  
   return(list(holiday.features = holiday.features,
               prior.scales = prior.scales))
 }
@@ -692,6 +687,8 @@ make_all_seasonality_features <- function(m, df) {
   # Seasonality features
   for (name in names(m$seasonalities)) {
     props <- m$seasonalities[[name]]
+    features <- make_seasonality_features(
+      df$ds, props$period, props$fourier.order, name)
     features <- make_seasonality_features(df$ds, props$period, props$fourier.order, name)
     seasonal.features <- cbind(seasonal.features, features)
     prior.scales <- c(prior.scales,
@@ -1188,7 +1185,7 @@ predict_seasonal_components <- function(m, df) {
 #'
 #' @keywords internal
 add_group_component <- function(components, name, group) {
-  new_comp <- components[components$component %in% group, , drop = FALSE]
+  new_comp <- components[(components$component %in% group), ]
   if (nrow(new_comp) > 0) {
     new_comp$component <- name
     components <- rbind(components, new_comp)
