@@ -79,10 +79,10 @@ simulated_historical_forecasts <- function(model, horizon, units, k,
     # Copy the model
     m <- prophet_copy(model, cutoff)
     # Train model
-    history.c <- df[df[["ds"]] <= cutoff, , drop = FALSE]
+    history.c <- dplyr::filter(df, ds <= cutoff)
     m <- fit.prophet(m, history.c)
     # Calculate yhat
-    df.predict <- df[(df[["ds"]] > cutoff) & (df[["ds"]] <= cutoff + horizon), , drop = FALSE]
+    df.predict <- dplyr::filter(df, ds > cutoff, ds <= cutoff + horizon)
     columns <- 'ds'
     if (m$growth == 'logistic') {
       columns <- c(columns, 'cap')
@@ -94,7 +94,7 @@ simulated_historical_forecasts <- function(model, horizon, units, k,
     yhat <- stats::predict(m, future)
     # Merge yhat, y, and cutoff.
     df.c <- dplyr::inner_join(df.predict, yhat, by = "ds")
-    df.c <- df.c[c("ds", "y", "yhat", "yhat_lower", "yhat_upper")]
+    df.c <- dplyr::select(df.c, ds, y, yhat, yhat_lower, yhat_upper)
     df.c$cutoff <- cutoff
     predicts <- rbind(predicts, df.c)
   }

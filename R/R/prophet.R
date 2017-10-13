@@ -327,7 +327,8 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
     }
   }
 
-  df <- df[order(df[["ds"]]), , drop = FALSE]
+  df <- df %>%
+    dplyr::arrange(ds)
   
   m <- initialize_scales_fn(m, initialize_scales, df)
 
@@ -343,7 +344,8 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
     if (!(exists('cap', where=df))) {
       stop('Capacities must be supplied for logistic growth.')
     }
-    df[["cap_scaled"]] <- (df[["cap"]] - df[["floor"]]) / m$y.scale
+    df <- df %>%
+      dplyr::mutate(cap_scaled = (cap - floor) / m$y.scale)
   }
 
   df$t <- time_diff(df$ds, m$start, "secs") / m$t.scale
@@ -469,9 +471,11 @@ set_changepoints <- function(m) {
 #'
 #' @keywords internal
 get_changepoint_matrix <- function(m) {
-  vapply(seq_along(m$changepoints.t),
-         function(c) as.numeric(m$history$t >= m$changepoints.t[c]),
-         numeric(nrow(m$history)))
+  A <- matrix(0, nrow(m$history), length(m$changepoints.t))
+  for (i in seq_along(m$changepoints.t)) {
+    A[m$history$t >= m$changepoints.t[i], i] <- 1
+  }
+  return(A)
 }
 
 #' Provides Fourier series components with the specified frequency and order.
@@ -689,7 +693,6 @@ make_all_seasonality_features <- function(m, df) {
     props <- m$seasonalities[[name]]
     features <- make_seasonality_features(
       df$ds, props$period, props$fourier.order, name)
-    features <- make_seasonality_features(df$ds, props$period, props$fourier.order, name)
     seasonal.features <- cbind(seasonal.features, features)
     prior.scales <- c(prior.scales,
                       props$prior.scale * rep(1, ncol(features)))
@@ -888,7 +891,8 @@ fit.prophet <- function(m, df, ...) {
   if (!is.null(m$history)) {
     stop("Prophet object can only be fit once. Instantiate a new object.")
   }
-  history <- df[!is.na(df[["y"]]), , drop = FALSE]
+  history <- df %>%
+    dplyr::filter(!is.na(y))
   if (nrow(history) < 2) {
     stop("Dataframe has less than 2 non-NA rows.")
   }
@@ -1152,8 +1156,8 @@ predict_seasonal_components <- function(m, df) {
   components <- add_group_component(
     components, 'extra_regressors', names(m$extra_regressors))
   # Remove the placeholder
-  components <- components[components[["component"]] != 'zeros', , drop = FALSE]
-  
+  components <- dplyr::filter(components, component != 'zeros')
+
   component.predictions <- components %>%
     dplyr::group_by(component) %>% dplyr::do({
       comp <- (as.matrix(seasonal.features[, .$col])
