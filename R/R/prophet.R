@@ -556,7 +556,6 @@ make_holiday_features <- function(m, dates) {
   if (!('prior_scale' %in% colnames(m$holidays))) {
     m$holidays$prior_scale <- m$holidays.prior.scale
   }
-  
   prior.scales.list <- list()
   for (name in unique(m$holidays$holiday)) {
     df.h <- m$holidays[m$holidays$holiday == name, ]
@@ -573,7 +572,7 @@ make_holiday_features <- function(m, dates) {
     }
     prior.scales.list[[name]] <- ps
   }
-
+  
   prior.scales <- c()
   for (name in colnames(holiday.features)) {
     sn <- strsplit(name, '_delim_', fixed = TRUE)[[1]][1]
@@ -740,9 +739,9 @@ parse_seasonality_args <- function(m, name, arg, auto.disable, default.order) {
     } else {
       fourier.order <- default.order
     }
-  } else if (arg) {
+  } else if (arg == TRUE) {
     fourier.order <- default.order
-  } else if (! arg) {
+  } else if (arg == FALSE) {
     fourier.order <- 0
   } else {
     fourier.order <- arg
