@@ -6,7 +6,7 @@
 ## of patent rights can be found in the PATENTS file in the same directory.
 
 ## Makes R CMD CHECK happy due to dplyr syntax below
-globalVariables(c(
+utils::globalVariables(c(
   "ds", "y", "cap", ".",
   "component", "dow", "doy", "holiday", "holidays", "holidays_lower", "holidays_upper", "ix",
   "lower", "n", "stat", "trend", "row_number", "extra_regressors", "col",
@@ -572,7 +572,7 @@ make_holiday_features <- function(m, dates) {
     }
     prior.scales.list[[name]] <- ps
   }
-  
+
   prior.scales <- c()
   for (name in colnames(holiday.features)) {
     sn <- strsplit(name, '_delim_', fixed = TRUE)[[1]][1]
