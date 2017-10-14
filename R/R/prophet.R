@@ -557,11 +557,12 @@ make_holiday_features <- function(m, dates) {
     m$holidays$prior_scale <- m$holidays.prior.scale
   }
   
-  f <- function(nm) {
-    df.h <- m$holidays[m$holidays$holiday == nm, ]
+  prior.scales.list <- list()
+  for (name in unique(m$holidays$holiday)) {
+    df.h <- m$holidays[m$holidays$holiday == name, ]
     ps <- unique(df.h$prior_scale)
     if (length(ps) > 1) {
-      stop('Holiday ', nm, ' does not have a consistent prior scale ',
+      stop('Holiday ', name, ' does not have a consistent prior scale ',
            'specification')
     }
     if (is.na(ps)) {
@@ -570,12 +571,8 @@ make_holiday_features <- function(m, dates) {
     if (ps <= 0) {
       stop('Prior scale must be > 0.')
     }
-    ps
-    
+    prior.scales.list[[name]] <- ps
   }
-  
-  nms <- stats::setNames(unique(m$holidays$holiday), unique(m$holidays$holiday))
-  prior.scales.list <- lapply(nms, f)
   
   prior.scales <- c()
   for (name in colnames(holiday.features)) {
