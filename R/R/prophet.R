@@ -572,7 +572,7 @@ make_holiday_features <- function(m, dates) {
     }
     prior.scales.list[[name]] <- ps
   }
-  
+
   prior.scales <- c()
   for (name in colnames(holiday.features)) {
     sn <- strsplit(name, '_delim_', fixed = TRUE)[[1]][1]
