@@ -31,7 +31,7 @@ generate_cutoffs <- function(df, horizon, k, period) {
     for (i in 2:k) {
       cutoff <- cutoff - period
       # If data does not exist in data range (cutoff, cutoff + horizon]
-      if (!any((df$ds > cutoff) && (df$ds <= cutoff + horizon))) {
+      if (!any((df$ds > cutoff) & (df$ds <= cutoff + horizon))) {
         # Next cutoff point is 'closest date before cutoff in data - horizon'
         closest.date <- max(df$ds[df$ds <= cutoff])
         cutoff <- closest.date - horizon

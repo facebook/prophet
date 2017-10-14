@@ -329,7 +329,7 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
 
   df <- df %>%
     dplyr::arrange(ds)
-  
+
   m <- initialize_scales_fn(m, initialize_scales, df)
 
   if (m$logistic.floor) {
@@ -573,7 +573,7 @@ make_holiday_features <- function(m, dates) {
     }
     prior.scales.list[[name]] <- ps
   }
-  
+
   prior.scales <- c()
   for (name in colnames(holiday.features)) {
     sn <- strsplit(name, '_delim_', fixed = TRUE)[[1]][1]
@@ -984,7 +984,7 @@ fit.prophet <- function(m, df, ...) {
   if (m$n.changepoints == 0) {
     # Fold delta into the base rate k
     m$params$k <- m$params$k + m$params$delta[, 1]
-    m$params$delta <- matrix(0, nrow = n.iteration, ncol = length(m$params$delta))
+    m$params$delta <- matrix(rep(0, length(m$params$delta)), nrow = n.iteration)
   }
   return(m)
 }
