@@ -1132,7 +1132,8 @@ class Prophet(object):
         seasonal = np.matmul(seasonal_features.as_matrix(), beta) * self.y_scale
 
         sigma = self.params['sigma_obs'][iteration]
-        noise = np.random.normal(0, sigma, df.shape[0]) * self.y_scale
+        noise = np.random.normal(0, sigma, df.shape[0]) * self.y_scale \
+            if sigma != 0 else np.zeros(df.shape[0])
 
         return pd.DataFrame({
             'yhat': trend + seasonal + noise,
