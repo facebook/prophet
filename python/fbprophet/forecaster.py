@@ -23,10 +23,6 @@ from matplotlib.ticker import FuncFormatter
 import numpy as np
 import pandas as pd
 
-# fb-block 1 start
-from fbprophet.models import prophet_stan_models
-# fb-block 1 end
-
 try:
     import pystan  # noqa F401
 except ImportError:
@@ -80,6 +76,8 @@ class Prophet(object):
         parameters, which will include uncertainty in seasonality.
     uncertainty_samples: Number of simulated draws used to estimate
         uncertainty intervals.
+    model: Optional pystan model to use. If not specified, will use built-in
+        models tied to specific growth type.
     """
 
     def __init__(
@@ -97,6 +95,7 @@ class Prophet(object):
             mcmc_samples=0,
             interval_width=0.80,
             uncertainty_samples=1000,
+            model=None,
     ):
         self.growth = growth
 
@@ -130,6 +129,14 @@ class Prophet(object):
         self.mcmc_samples = mcmc_samples
         self.interval_width = interval_width
         self.uncertainty_samples = uncertainty_samples
+
+        # Select appropriate stan model
+        if model is not None:
+            self.model = model
+        else:
+            # If using built-in models, load them into memory
+            from fbprophet.models import prophet_stan_models
+            self.model = prophet_stan_models[self.growth]
 
         # Set during fitting
         self.start = None
@@ -801,8 +808,6 @@ class Prophet(object):
             dat['cap'] = history['cap_scaled']
             kinit = self.logistic_growth_init(history)
 
-        model = prophet_stan_models[self.growth]
-
         def stan_init():
             return {
                 'k': kinit[0],
@@ -819,7 +824,7 @@ class Prophet(object):
             for par in self.params:
                 self.params[par] = np.array([self.params[par]])
         elif self.mcmc_samples > 0:
-            stan_fit = model.sampling(
+            stan_fit = self.model.sampling(
                 dat,
                 init=stan_init,
                 iter=self.mcmc_samples,
@@ -830,10 +835,10 @@ class Prophet(object):
 
         else:
             try:
-                params = model.optimizing(
+                params = self.model.optimizing(
                     dat, init=stan_init, iter=1e4, **kwargs)
             except RuntimeError:
-                params = model.optimizing(
+                params = self.model.optimizing(
                     dat, init=stan_init, iter=1e4, algorithm='Newton',
                     **kwargs
                 )
