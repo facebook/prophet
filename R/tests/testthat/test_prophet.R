@@ -511,6 +511,11 @@ test_that("added_regressors", {
   expect_equal(fcst$seasonal[1],
                fcst$seasonalities[1] + fcst$extra_regressors[1])
   expect_equal(fcst$yhat[1], fcst$trend[1] + fcst$seasonal[1])
+  # Check fails if constant extra regressor
+  df$constant_feature <- 5
+  m <- prophet()
+  m <- add_regressor(m, 'constant_feature')
+  expect_error(fit.prophet(m, df))
 })
 
 test_that("copy", {

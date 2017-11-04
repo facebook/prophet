@@ -278,6 +278,9 @@ class Prophet(object):
         self.t_scale = df['ds'].max() - self.start
         for name, props in self.extra_regressors.items():
             standardize = props['standardize']
+            n_vals = len(df[name].unique())
+            if n_vals < 2:
+                raise ValueError('Regressor {} is constant.'.format(name))
             if standardize == 'auto':
                 if set(df[name].unique()) == set([1, 0]):
                     # Don't standardize binary variables.
@@ -287,8 +290,6 @@ class Prophet(object):
             if standardize:
                 mu = df[name].mean()
                 std = df[name].std()
-                if std == 0:
-                    std = mu
                 self.extra_regressors[name]['mu'] = mu
                 self.extra_regressors[name]['std'] = std
 

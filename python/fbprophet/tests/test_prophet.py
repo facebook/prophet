@@ -548,6 +548,12 @@ class TestProphet(TestCase):
             fcst['yhat'][0],
             fcst['trend'][0] + fcst['seasonal'][0],
         )
+        # Check fails if constant extra regressor
+        df['constant_feature'] = 5
+        m = Prophet()
+        m.add_regressor('constant_feature')
+        with self.assertRaises(ValueError):
+            m.fit(df.copy())
 
     def test_copy(self):
         # These values are created except for its default values
