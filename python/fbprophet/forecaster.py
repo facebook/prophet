@@ -11,6 +11,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import defaultdict
+from copy import deepcopy
 from datetime import timedelta
 import logging
 
@@ -1515,6 +1516,9 @@ class Prophet(object):
         -------
         Prophet class object with the same parameter with model variable
         """
+        if self.history is None:
+            raise Exception('This is for copying a fitted Prophet object.')
+
         if self.specified_changepoints:
             changepoints = self.changepoints
             if cutoff is not None:
@@ -1523,18 +1527,23 @@ class Prophet(object):
         else:
             changepoints = None
 
-        return Prophet(
+        # Auto seasonalities are set to False because they are already set in
+        # self.seasonalities.
+        m = Prophet(
             growth=self.growth,
             n_changepoints=self.n_changepoints,
             changepoints=changepoints,
-            yearly_seasonality=self.yearly_seasonality,
-            weekly_seasonality=self.weekly_seasonality,
-            daily_seasonality=self.daily_seasonality,
+            yearly_seasonality=False,
+            weekly_seasonality=False,
+            daily_seasonality=False,
             holidays=self.holidays,
             seasonality_prior_scale=self.seasonality_prior_scale,
             changepoint_prior_scale=self.changepoint_prior_scale,
             holidays_prior_scale=self.holidays_prior_scale,
             mcmc_samples=self.mcmc_samples,
             interval_width=self.interval_width,
-            uncertainty_samples=self.uncertainty_samples
+            uncertainty_samples=self.uncertainty_samples,
         )
+        m.extra_regressors = deepcopy(self.extra_regressors)
+        m.seasonalities = deepcopy(self.seasonalities)
+        return m
