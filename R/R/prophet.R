@@ -1592,7 +1592,8 @@ seasonality_plot_df <- function(m, ds) {
 #' @keywords internal
 plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0) {
   # Compute weekly seasonality for a Sun-Sat sequence of dates.
-  days <- seq(set_date('2017-01-01'), by='d', length.out=7) + weekly_start
+  days <- seq(set_date('2017-01-01'), by='d', length.out=7) + as.difftime(
+    weekly_start, units = "days")
   df.w <- seasonality_plot_df(m, days)
   seas <- predict_seasonal_components(m, df.w)
   seas$dow <- factor(weekdays(df.w$ds), levels=weekdays(df.w$ds))
@@ -1625,7 +1626,8 @@ plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0) {
 #' @keywords internal
 plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0) {
   # Compute yearly seasonality for a Jan 1 - Dec 31 sequence of dates.
-  days <- seq(set_date('2017-01-01'), by='d', length.out=365) + yearly_start
+  days <- seq(set_date('2017-01-01'), by='d', length.out=365) + as.difftime(
+    yearly_start, units = "days")
   df.y <- seasonality_plot_df(m, days)
   seas <- predict_seasonal_components(m, df.y)
   seas$ds <- df.y$ds
