@@ -1701,6 +1701,10 @@ plot_seasonality <- function(m, name, uncertainty = TRUE) {
 #'
 #' @keywords internal
 prophet_copy <- function(m, cutoff = NULL) {
+  if (is.null(m$history)) {
+    stop("This is for copying a fitted Prophet object.")
+  }
+
   if (m$specified.changepoints) {
     changepoints <- m$changepoints
     if (!is.null(cutoff)) {
@@ -1710,13 +1714,15 @@ prophet_copy <- function(m, cutoff = NULL) {
   } else {
     changepoints <- NULL
   }
-  return(prophet(
+  # Auto seasonalities are set to FALSE because they are already set in
+  # m$seasonalities.
+  m2 <- prophet(
     growth = m$growth,
     changepoints = changepoints,
     n.changepoints = m$n.changepoints,
-    yearly.seasonality = m$yearly.seasonality,
-    weekly.seasonality = m$weekly.seasonality,
-    daily.seasonality = m$daily.seasonality,
+    yearly.seasonality = FALSE,
+    weekly.seasonality = FALSE,
+    daily.seasonality = FALSE,
     holidays = m$holidays,
     seasonality.prior.scale = m$seasonality.prior.scale,
     changepoint.prior.scale = m$changepoint.prior.scale,
@@ -1724,8 +1730,11 @@ prophet_copy <- function(m, cutoff = NULL) {
     mcmc.samples = m$mcmc.samples,
     interval.width = m$interval.width,
     uncertainty.samples = m$uncertainty.samples,
-    fit = FALSE,
-  ))
+    fit = FALSE
+  )
+  m2$extra_regressors <- m$extra_regressors
+  m2$seasonalities <- m$seasonalities
+  return(m2)
 }
 
 # fb-block 3
