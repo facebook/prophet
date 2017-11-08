@@ -84,7 +84,9 @@ class TestDiagnostics(TestCase):
         df_shf2 = diagnostics.simulated_historical_forecasts(
             m, horizon='10 days', k=1, period='5 days')
         self.assertAlmostEqual(
-            ((df_shf1 - df_shf2)**2)[['y', 'yhat']].sum().sum(), 0.0)
+            ((df_shf1['y'] - df_shf2['y']) ** 2).sum(), 0.0)
+        self.assertAlmostEqual(
+            ((df_shf1['yhat'] - df_shf2['yhat']) ** 2).sum(), 0.0)
 
     def test_cross_validation(self):
         m = Prophet()
@@ -111,4 +113,6 @@ class TestDiagnostics(TestCase):
         df_cv2 = diagnostics.cross_validation(
             m, horizon='32 days', period='10 days', initial='96 days')
         self.assertAlmostEqual(
-            ((df_cv1 - df_cv2)**2)[['y', 'yhat']].sum().sum(), 0.0)
+            ((df_cv1['y'] - df_cv2['y']) ** 2).sum(), 0.0)
+        self.assertAlmostEqual(
+            ((df_cv1['yhat'] - df_cv2['yhat']) ** 2).sum(), 0.0)

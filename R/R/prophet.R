@@ -392,9 +392,13 @@ initialize_scales_fn <- function(m, initialize_scales, df) {
   m$start <- min(df$ds)
   m$t.scale <- time_diff(max(df$ds), m$start, "secs")
   for (name in names(m$extra_regressors)) {
+    n.vals <- length(unique(df[[name]]))
+    if (n.vals < 2) {
+      stop('Regressor ', name, ' is constant.')
+    }
     standardize <- m$extra_regressors[[name]]$standardize
     if (standardize == 'auto') {
-      if (all(sort(unique(df[[name]])) == c(0, 1))) {
+      if (n.vals == 2 && all(sort(unique(df[[name]])) == c(0, 1))) {
         # Don't standardize binary variables
         standardize <- FALSE
       } else {
@@ -404,9 +408,6 @@ initialize_scales_fn <- function(m, initialize_scales, df) {
     if (standardize) {
       mu <- mean(df[[name]])
       std <- stats::sd(df[[name]])
-      if (std == 0) {
-        std <- mu
-      }
       m$extra_regressors[[name]]$mu <- mu
       m$extra_regressors[[name]]$std <- std
     }
@@ -1586,7 +1587,8 @@ seasonality_plot_df <- function(m, ds) {
 #' @keywords internal
 plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0) {
   # Compute weekly seasonality for a Sun-Sat sequence of dates.
-  days <- seq(set_date('2017-01-01'), by='d', length.out=7) + weekly_start
+  days <- seq(set_date('2017-01-01'), by='d', length.out=7) + as.difftime(
+    weekly_start, units = "days")
   df.w <- seasonality_plot_df(m, days)
   seas <- predict_seasonal_components(m, df.w)
   seas$dow <- factor(weekdays(df.w$ds), levels=weekdays(df.w$ds))
@@ -1619,7 +1621,8 @@ plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0) {
 #' @keywords internal
 plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0) {
   # Compute yearly seasonality for a Jan 1 - Dec 31 sequence of dates.
-  days <- seq(set_date('2017-01-01'), by='d', length.out=365) + yearly_start
+  days <- seq(set_date('2017-01-01'), by='d', length.out=365) + as.difftime(
+    yearly_start, units = "days")
   df.y <- seasonality_plot_df(m, days)
   seas <- predict_seasonal_components(m, df.y)
   seas$ds <- df.y$ds
@@ -1695,6 +1698,10 @@ plot_seasonality <- function(m, name, uncertainty = TRUE) {
 #'
 #' @keywords internal
 prophet_copy <- function(m, cutoff = NULL) {
+  if (is.null(m$history)) {
+    stop("This is for copying a fitted Prophet object.")
+  }
+
   if (m$specified.changepoints) {
     changepoints <- m$changepoints
     if (!is.null(cutoff)) {
@@ -1704,13 +1711,15 @@ prophet_copy <- function(m, cutoff = NULL) {
   } else {
     changepoints <- NULL
   }
-  return(prophet(
+  # Auto seasonalities are set to FALSE because they are already set in
+  # m$seasonalities.
+  m2 <- prophet(
     growth = m$growth,
     changepoints = changepoints,
     n.changepoints = m$n.changepoints,
-    yearly.seasonality = m$yearly.seasonality,
-    weekly.seasonality = m$weekly.seasonality,
-    daily.seasonality = m$daily.seasonality,
+    yearly.seasonality = FALSE,
+    weekly.seasonality = FALSE,
+    daily.seasonality = FALSE,
     holidays = m$holidays,
     seasonality.prior.scale = m$seasonality.prior.scale,
     changepoint.prior.scale = m$changepoint.prior.scale,
@@ -1718,8 +1727,11 @@ prophet_copy <- function(m, cutoff = NULL) {
     mcmc.samples = m$mcmc.samples,
     interval.width = m$interval.width,
     uncertainty.samples = m$uncertainty.samples,
-    fit = FALSE,
-  ))
+    fit = FALSE
+  )
+  m2$extra_regressors <- m$extra_regressors
+  m2$seasonalities <- m$seasonalities
+  return(m2)
 }
 
 # fb-block 3

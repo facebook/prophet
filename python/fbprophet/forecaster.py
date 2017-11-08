@@ -11,6 +11,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import defaultdict
+from copy import deepcopy
 from datetime import timedelta
 import logging
 
@@ -278,6 +279,9 @@ class Prophet(object):
         self.t_scale = df['ds'].max() - self.start
         for name, props in self.extra_regressors.items():
             standardize = props['standardize']
+            n_vals = len(df[name].unique())
+            if n_vals < 2:
+                raise ValueError('Regressor {} is constant.'.format(name))
             if standardize == 'auto':
                 if set(df[name].unique()) == set([1, 0]):
                     # Don't standardize binary variables.
@@ -287,8 +291,6 @@ class Prophet(object):
             if standardize:
                 mu = df[name].mean()
                 std = df[name].std()
-                if std == 0:
-                    std = mu
                 self.extra_regressors[name]['mu'] = mu
                 self.extra_regressors[name]['std'] = std
 
@@ -1248,16 +1250,16 @@ class Prophet(object):
             ax = fig.add_subplot(111)
         else:
             fig = ax.get_figure()
-        ax.plot(self.history['ds'].values, self.history['y'], 'k.')
-        ax.plot(fcst['ds'].values, fcst['yhat'], ls='-', c='#0072B2')
+        fcst_t = fcst['ds'].dt.to_pydatetime()
+        ax.plot(self.history['ds'].dt.to_pydatetime(), self.history['y'], 'k.')
+        ax.plot(fcst_t, fcst['yhat'], ls='-', c='#0072B2')
         if 'cap' in fcst and plot_cap:
-            ax.plot(fcst['ds'].values, fcst['cap'], ls='--', c='k')
+            ax.plot(fcst_t, fcst['cap'], ls='--', c='k')
         if self.logistic_floor and 'floor' in fcst and plot_cap:
-            ax.plot(fcst['ds'].values, fcst['floor'], ls='--', c='k')
+            ax.plot(fcst_t, fcst['floor'], ls='--', c='k')
         if uncertainty:
-            ax.fill_between(fcst['ds'].values, fcst['yhat_lower'],
-                            fcst['yhat_upper'], color='#0072B2',
-                            alpha=0.2)
+            ax.fill_between(fcst_t, fcst['yhat_lower'], fcst['yhat_upper'],
+                            color='#0072B2', alpha=0.2)
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
@@ -1345,15 +1347,16 @@ class Prophet(object):
         if not ax:
             fig = plt.figure(facecolor='w', figsize=(10, 6))
             ax = fig.add_subplot(111)
-        artists += ax.plot(fcst['ds'].values, fcst[name], ls='-', c='#0072B2')
+        fcst_t = fcst['ds'].dt.to_pydatetime()
+        artists += ax.plot(fcst_t, fcst[name], ls='-', c='#0072B2')
         if 'cap' in fcst and plot_cap:
-            artists += ax.plot(fcst['ds'].values, fcst['cap'], ls='--', c='k')
+            artists += ax.plot(fcst_t, fcst['cap'], ls='--', c='k')
         if self.logistic_floor and 'floor' in fcst and plot_cap:
-            ax.plot(fcst['ds'].values, fcst['floor'], ls='--', c='k')
+            ax.plot(fcst_t, fcst['floor'], ls='--', c='k')
         if uncertainty:
             artists += [ax.fill_between(
-                fcst['ds'].values, fcst[name + '_lower'],
-                fcst[name + '_upper'], color='#0072B2', alpha=0.2)]
+                fcst_t, fcst[name + '_lower'], fcst[name + '_upper'],
+                color='#0072B2', alpha=0.2)]
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         ax.set_xlabel('ds')
         ax.set_ylabel(name)
@@ -1441,11 +1444,11 @@ class Prophet(object):
                 pd.Timedelta(days=yearly_start))
         df_y = self.seasonality_plot_df(days)
         seas = self.predict_seasonal_components(df_y)
-        artists += ax.plot(df_y['ds'], seas['yearly'], ls='-',
-                           c='#0072B2')
+        artists += ax.plot(
+            df_y['ds'].dt.to_pydatetime(), seas['yearly'], ls='-', c='#0072B2')
         if uncertainty:
             artists += [ax.fill_between(
-                df_y['ds'].values, seas['yearly_lower'],
+                df_y['ds'].dt.to_pydatetime(), seas['yearly_lower'],
                 seas['yearly_upper'], color='#0072B2', alpha=0.2)]
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
         months = MonthLocator(range(1, 13), bymonthday=1, interval=2)
@@ -1481,14 +1484,16 @@ class Prophet(object):
         days = pd.to_datetime(np.linspace(start.value, end.value, plot_points))
         df_y = self.seasonality_plot_df(days)
         seas = self.predict_seasonal_components(df_y)
-        artists += ax.plot(df_y['ds'], seas[name], ls='-',
+        artists += ax.plot(df_y['ds'].dt.to_pydatetime(), seas[name], ls='-',
                             c='#0072B2')
         if uncertainty:
             artists += [ax.fill_between(
-                df_y['ds'].values, seas[name + '_lower'],
+                df_y['ds'].dt.to_pydatetime(), seas[name + '_lower'],
                 seas[name + '_upper'], color='#0072B2', alpha=0.2)]
         ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
-        ax.set_xticks(pd.to_datetime(np.linspace(start.value, end.value, 7)))
+        xticks = pd.to_datetime(np.linspace(start.value, end.value, 7)
+            ).to_pydatetime()
+        ax.set_xticks(xticks)
         if period <= 2:
             fmt_str = '{dt:%T}'
         elif period < 14:
@@ -1514,6 +1519,9 @@ class Prophet(object):
         -------
         Prophet class object with the same parameter with model variable
         """
+        if self.history is None:
+            raise Exception('This is for copying a fitted Prophet object.')
+
         if self.specified_changepoints:
             changepoints = self.changepoints
             if cutoff is not None:
@@ -1522,18 +1530,23 @@ class Prophet(object):
         else:
             changepoints = None
 
-        return Prophet(
+        # Auto seasonalities are set to False because they are already set in
+        # self.seasonalities.
+        m = Prophet(
             growth=self.growth,
             n_changepoints=self.n_changepoints,
             changepoints=changepoints,
-            yearly_seasonality=self.yearly_seasonality,
-            weekly_seasonality=self.weekly_seasonality,
-            daily_seasonality=self.daily_seasonality,
+            yearly_seasonality=False,
+            weekly_seasonality=False,
+            daily_seasonality=False,
             holidays=self.holidays,
             seasonality_prior_scale=self.seasonality_prior_scale,
             changepoint_prior_scale=self.changepoint_prior_scale,
             holidays_prior_scale=self.holidays_prior_scale,
             mcmc_samples=self.mcmc_samples,
             interval_width=self.interval_width,
-            uncertainty_samples=self.uncertainty_samples
+            uncertainty_samples=self.uncertainty_samples,
         )
+        m.extra_regressors = deepcopy(self.extra_regressors)
+        m.seasonalities = deepcopy(self.seasonalities)
+        return m
