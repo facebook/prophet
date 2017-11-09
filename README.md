@@ -60,6 +60,10 @@ Use `conda install gcc` to set up gcc. The easiest way to install Prophet is thr
 
 ## Changelog
 
+### Version 0.2.1 (2017.11.08)
+
+- Bugfixes
+
 ### Version 0.2 (2017.09.02)
 
 - Forecasting with sub-daily data
