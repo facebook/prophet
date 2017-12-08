@@ -1387,5 +1387,42 @@ make_future_dataframe <- function(m, periods, freq = 'day',
   return(data.frame(ds = dates))
 }
 
+#' Copy Prophet object.
+#'
+#' @param m Prophet model object.
+#' @param cutoff Date, possibly as string. Changepoints are only retained if
+#'  changepoints <= cutoff.
+#'
+#' @return An unfitted Prophet model object with the same parameters as the
+#'  input model.
+#'
+#' @keywords internal
+prophet_copy <- function(m, cutoff = NULL) {
+  if (m$specified.changepoints) {
+    changepoints <- m$changepoints
+    if (!is.null(cutoff)) {
+      cutoff <- set_date(cutoff)
+      changepoints <- changepoints[changepoints <= cutoff]
+    }
+  } else {
+    changepoints <- NULL
+  }
+  return(prophet(
+    growth = m$growth,
+    changepoints = changepoints,
+    n.changepoints = m$n.changepoints,
+    yearly.seasonality = m$yearly.seasonality,
+    weekly.seasonality = m$weekly.seasonality,
+    daily.seasonality = m$daily.seasonality,
+    holidays = m$holidays,
+    seasonality.prior.scale = m$seasonality.prior.scale,
+    changepoint.prior.scale = m$changepoint.prior.scale,
+    holidays.prior.scale = m$holidays.prior.scale,
+    mcmc.samples = m$mcmc.samples,
+    interval.width = m$interval.width,
+    uncertainty.samples = m$uncertainty.samples,
+    fit = FALSE,
+  ))
+}
 
 # fb-block 3
