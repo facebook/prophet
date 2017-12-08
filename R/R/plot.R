@@ -301,44 +301,6 @@ plot_seasonality <- function(m, name, uncertainty = TRUE) {
   return(gg.s)
 }
 
-#' Copy Prophet object.
-#'
-#' @param m Prophet model object.
-#' @param cutoff Date, possibly as string. Changepoints are only retained if
-#'  changepoints <= cutoff.
-#'
-#' @return An unfitted Prophet model object with the same parameters as the
-#'  input model.
-#'
-#' @keywords internal
-prophet_copy <- function(m, cutoff = NULL) {
-  if (m$specified.changepoints) {
-    changepoints <- m$changepoints
-    if (!is.null(cutoff)) {
-      cutoff <- set_date(cutoff)
-      changepoints <- changepoints[changepoints <= cutoff]
-    }
-  } else {
-    changepoints <- NULL
-  }
-  return(prophet(
-    growth = m$growth,
-    changepoints = changepoints,
-    n.changepoints = m$n.changepoints,
-    yearly.seasonality = m$yearly.seasonality,
-    weekly.seasonality = m$weekly.seasonality,
-    daily.seasonality = m$daily.seasonality,
-    holidays = m$holidays,
-    seasonality.prior.scale = m$seasonality.prior.scale,
-    changepoint.prior.scale = m$changepoint.prior.scale,
-    holidays.prior.scale = m$holidays.prior.scale,
-    mcmc.samples = m$mcmc.samples,
-    interval.width = m$interval.width,
-    uncertainty.samples = m$uncertainty.samples,
-    fit = FALSE,
-  ))
-}
-
 #' Plot the prophet forecast.
 #'
 #' @param x Prophet object.
@@ -378,20 +340,19 @@ dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
     colsToKeep <- c('y', 'yhat')
     forecastCols <- c('yhat')
   }
-  
   # convert to xts for easier date handling by dygraph
-  # haven't dealt with cap yet
-  dfTS <- xts(dplyr::select_(df, .dots=colsToKeep), order.by=df$ds)
+  dfTS <- xts::xts(df %>% dplyr::select_(.dots=colsToKeep), order.by = df$ds)
+
   # base plot
   dyBase <- dygraphs::dygraph(dfTS)
   
   presAnnotation <- function(dygraph, x, text) {
     dygraph %>%
-      dyAnnotation(x, text, text, attachAtBottom = TRUE)
+      dygraphs::dyAnnotation(x, text, text, attachAtBottom = TRUE)
   }
   
   dyBase <- dyBase %>% 
-    dyOptions(colors = RColorBrewer::brewer.pal(3, "Set1")) %>%
+    dygraphs::dyOptions(colors = RColorBrewer::brewer.pal(3, "Set1")) %>%
     # plot actual values
     dygraphs::dySeries('y', label=actual.label) %>% 
     # plot forecast and ribbon
@@ -399,12 +360,12 @@ dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
     # allow zooming
     dygraphs::dyRangeSelector() %>% 
     # make unzoom button
-    dygraphs::dyUnzoom() %>% 
+    dygraphs::dyUnzoom()
   if (!is.null(x$holidays)) {
     for (i in 1:nrow(x$holidays)) {
       # make a gray line
-      dyBase <- dyBase %>% dyEvent(x$holidays$ds[i],color = "rgb(200,200,200)", strokePattern = "solid")
-      dyBase <- dyBase %>% dyAnnotation(x$holidays$ds[i], x$holidays$holiday[i], x$holidays$holiday[i], attachAtBottom = TRUE)
+      dyBase <- dyBase %>% dygraphs::dyEvent(x$holidays$ds[i],color = "rgb(200,200,200)", strokePattern = "solid")
+      dyBase <- dyBase %>% dygraphs::dyAnnotation(x$holidays$ds[i], x$holidays$holiday[i], x$holidays$holiday[i], attachAtBottom = TRUE)
     }
   }
   return(dyBase)
