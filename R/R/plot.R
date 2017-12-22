@@ -1,4 +1,3 @@
-#
 #' Merge history and forecast for plotting.
 #'
 #' @param m Prophet object.
@@ -97,7 +96,7 @@ prophet_plot_components <- function(
   # Plot the trend
   panels <- list(plot_forecast_component(fcst, 'trend', uncertainty, plot_cap))
   # Plot holiday components, if present.
-  if (!is.null(m$holidays) & ('holidays' %in% colnames(fcst))) {
+  if (!is.null(m$holidays) && ('holidays' %in% colnames(fcst))) {
     panels[[length(panels) + 1]] <- plot_forecast_component(
       fcst, 'holidays', uncertainty, FALSE)
   }
@@ -127,7 +126,7 @@ prophet_plot_components <- function(
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(layout = grid::grid.layout(length(panels),
                                                                1)))
-  for (i in 1:length(panels)) {
+  for (i in seq_along(panels)) {
     print(panels[[i]], vp = grid::viewport(layout.pos.row = i,
                                            layout.pos.col = 1))
   }
@@ -181,7 +180,7 @@ plot_forecast_component <- function(
 #'
 #' @keywords internal
 seasonality_plot_df <- function(m, ds) {
-  df_list <- list(ds = ds, cap = 1)
+  df_list <- list(ds = ds, cap = 1, floor = 0)
   for (name in names(m$extra_regressors)) {
     df_list[[name]] <- 0
   }
@@ -203,7 +202,8 @@ seasonality_plot_df <- function(m, ds) {
 #' @keywords internal
 plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0) {
   # Compute weekly seasonality for a Sun-Sat sequence of dates.
-  days <- seq(set_date('2017-01-01'), by='d', length.out=7) + weekly_start
+  days <- seq(set_date('2017-01-01'), by='d', length.out=7) + as.difftime(
+    weekly_start, units = "days")
   df.w <- seasonality_plot_df(m, days)
   seas <- predict_seasonal_components(m, df.w)
   seas$dow <- factor(weekdays(df.w$ds), levels=weekdays(df.w$ds))
@@ -236,7 +236,8 @@ plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0) {
 #' @keywords internal
 plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0) {
   # Compute yearly seasonality for a Jan 1 - Dec 31 sequence of dates.
-  days <- seq(set_date('2017-01-01'), by='d', length.out=365) + yearly_start
+  days <- seq(set_date('2017-01-01'), by='d', length.out=365) + as.difftime(
+    yearly_start, units = "days")
   df.y <- seasonality_plot_df(m, days)
   seas <- predict_seasonal_components(m, df.y)
   seas$ds <- df.y$ds
