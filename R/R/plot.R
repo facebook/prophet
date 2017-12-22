@@ -309,7 +309,7 @@ plot_seasonality <- function(m, name, uncertainty = TRUE) {
 #' @param uncertainty Boolean indicating if the uncertainty interval for yhat
 #'  should be plotted. Must be present in fcst as yhat_lower and yhat_upper.
 #' @param ... additional arguments
-#' @importFrom magrittr "%>%"
+#' @importFrom dplyr "%>%"
 #' @return A dygraph plot.
 #'
 #' @examples
