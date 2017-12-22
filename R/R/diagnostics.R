@@ -26,7 +26,7 @@ generate_cutoffs <- function(df, horizon, k, period) {
     stop('Less data than horizon.')
   }
   tzone <- attr(cutoff, "tzone")  # Timezone is wiped by putting in array
-  result <- c(cutoff)
+  result <- cutoff
   if (k > 1) {
     for (i in 2:k) {
       cutoff <- cutoff - period
@@ -74,7 +74,7 @@ simulated_historical_forecasts <- function(model, horizon, units, k,
   }
   cutoffs <- generate_cutoffs(df, horizon, k, period)
   predicts <- data.frame()
-  for (i in 1:length(cutoffs)) {
+  for (i in seq_along(cutoffs)) {
     cutoff <- cutoffs[i]
     # Copy the model
     m <- prophet_copy(model, cutoff)
@@ -83,7 +83,7 @@ simulated_historical_forecasts <- function(model, horizon, units, k,
     m <- fit.prophet(m, history.c)
     # Calculate yhat
     df.predict <- dplyr::filter(df, ds > cutoff, ds <= cutoff + horizon)
-    columns <- c('ds')
+    columns <- 'ds'
     if (m$growth == 'logistic') {
       columns <- c(columns, 'cap')
       if (m$logistic.floor) {

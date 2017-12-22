@@ -6,7 +6,7 @@
 ## of patent rights can be found in the PATENTS file in the same directory.
 
 ## Makes R CMD CHECK happy due to dplyr syntax below
-globalVariables(c(
+utils::globalVariables(c(
   "ds", "y", "cap", ".",
   "component", "dow", "doy", "holiday", "holidays", "holidays_lower", "holidays_upper", "ix",
   "lower", "n", "stat", "trend", "row_number", "extra_regressors", "col",
@@ -190,21 +190,21 @@ validate_column_name <- function(
     'trend', 'seasonal', 'seasonalities', 'daily', 'weekly', 'yearly',
     'holidays', 'zeros', 'extra_regressors', 'yhat'
   )
-  rn_l = paste(reserved_names,"_lower",sep="")
-  rn_u = paste(reserved_names,"_upper",sep="")
+  rn_l = paste0(reserved_names,"_lower")
+  rn_u = paste0(reserved_names,"_upper")
   reserved_names = c(reserved_names, rn_l, rn_u,
     c("ds", "y", "cap", "floor", "y_scaled", "cap_scaled"))
   if(name %in% reserved_names){
     stop("Name ", name, " is reserved.")
   }
-  if(check_holidays & !is.null(m$holidays) &
+  if(check_holidays && !is.null(m$holidays) &&
      (name %in% unique(m$holidays$holiday))){
     stop("Name ", name, " already used for a holiday.")
   }
-  if(check_seasonalities & (!is.null(m$seasonalities[[name]]))){
+  if(check_seasonalities && (!is.null(m$seasonalities[[name]]))){
     stop("Name ", name, " already used for a seasonality.")
   }
-  if(check_regressors & (!is.null(m$seasonalities[[name]]))){
+  if(check_regressors && (!is.null(m$seasonalities[[name]]))){
     stop("Name ", name, " already used for an added regressor.")
   }
 }
@@ -274,11 +274,8 @@ set_date <- function(ds = NULL, tz = "GMT") {
     ds <- as.character(ds)
   }
 
-  if (min(nchar(ds)) < 12) {
-    ds <- as.POSIXct(ds, format = "%Y-%m-%d", tz = tz)
-  } else {
-    ds <- as.POSIXct(ds, format = "%Y-%m-%d %H:%M:%S", tz = tz)
-  }
+  fmt <- if (min(nchar(ds)) < 12) "%Y-%m-%d" else "%Y-%m-%d %H:%M:%S"
+  ds <- as.POSIXct(ds, format = fmt, tz = tz)
   attr(ds, "tzone") <- tz
   return(ds)
 }
@@ -395,9 +392,13 @@ initialize_scales_fn <- function(m, initialize_scales, df) {
   m$start <- min(df$ds)
   m$t.scale <- time_diff(max(df$ds), m$start, "secs")
   for (name in names(m$extra_regressors)) {
+    n.vals <- length(unique(df[[name]]))
+    if (n.vals < 2) {
+      stop('Regressor ', name, ' is constant.')
+    }
     standardize <- m$extra_regressors[[name]]$standardize
     if (standardize == 'auto') {
-      if (all(sort(unique(df[[name]])) == c(0, 1))) {
+      if (n.vals == 2 && all(sort(unique(df[[name]])) == c(0, 1))) {
         # Don't standardize binary variables
         standardize <- FALSE
       } else {
@@ -407,9 +408,6 @@ initialize_scales_fn <- function(m, initialize_scales, df) {
     if (standardize) {
       mu <- mean(df[[name]])
       std <- stats::sd(df[[name]])
-      if (std == 0) {
-        std <- mu
-      }
       m$extra_regressors[[name]]$mu <- mu
       m$extra_regressors[[name]]$std <- std
     }
@@ -461,7 +459,7 @@ set_changepoints <- function(m) {
     m$changepoints.t <- sort(
       time_diff(m$changepoints, m$start, "secs")) / m$t.scale
   } else {
-    m$changepoints.t <- c(0)  # dummy changepoint
+    m$changepoints.t <- 0  # dummy changepoint
   }
   return(m)
 }
@@ -475,7 +473,7 @@ set_changepoints <- function(m) {
 #' @keywords internal
 get_changepoint_matrix <- function(m) {
   A <- matrix(0, nrow(m$history), length(m$changepoints.t))
-  for (i in 1:length(m$changepoints.t)) {
+  for (i in seq_along(m$changepoints.t)) {
     A[m$history$t >= m$changepoints.t[i], i] <- 1
   }
   return(A)
@@ -493,7 +491,7 @@ get_changepoint_matrix <- function(m) {
 fourier_series <- function(dates, period, series.order) {
   t <- time_diff(dates, set_date('1970-01-01 00:00:00'))
   features <- matrix(0, length(t), 2 * series.order)
-  for (i in 1:series.order) {
+  for (i in seq_len(series.order)) {
     x <- as.numeric(2 * i * pi * t / period)
     features[, i * 2 - 1] <- sin(x)
     features[, i * 2] <- cos(x)
@@ -513,7 +511,7 @@ fourier_series <- function(dates, period, series.order) {
 #' @keywords internal
 make_seasonality_features <- function(dates, period, series.order, prefix) {
   features <- fourier_series(dates, period, series.order)
-  colnames(features) <- paste(prefix, 1:ncol(features), sep = '_delim_')
+  colnames(features) <- paste(prefix, seq_len(ncol(features)), sep = '_delim_')
   return(data.frame(features))
 }
 
@@ -540,13 +538,13 @@ make_holiday_features <- function(m, dates) {
           && !is.na(.$upper_window)) {
         offsets <- seq(.$lower_window, .$upper_window)
       } else {
-        offsets <- c(0)
+        offsets <- 0
       }
       names <- paste(.$holiday, '_delim_', ifelse(offsets < 0, '-', '+'),
                      abs(offsets), sep = '')
       dplyr::data_frame(ds = .$ds + offsets * 24 * 3600, holiday = names)
     }) %>%
-    dplyr::mutate(x = 1.) %>%
+    dplyr::mutate(x = 1) %>%
     tidyr::spread(holiday, x, fill = 0)
 
   holiday.features <- data.frame(ds = set_date(dates)) %>%
@@ -684,7 +682,7 @@ add_seasonality <- function(m, name, period, fourier.order, prior.scale = NULL) 
 #'
 #' @keywords internal
 make_all_seasonality_features <- function(m, df) {
-  seasonal.features <- data.frame(row.names = 1:nrow(df))
+  seasonal.features <- data.frame(row.names = seq_len(nrow(df)))
   prior.scales <- c()
 
   # Seasonality features
@@ -712,7 +710,7 @@ make_all_seasonality_features <- function(m, df) {
 
   if (ncol(seasonal.features) == 0) {
     seasonal.features <- data.frame(zeros = rep(0, nrow(df)))
-    prior.scales <- c(1.)
+    prior.scales <- 1
   }
   return(list(seasonal.features = seasonal.features,
               prior.scales = prior.scales))
@@ -1036,9 +1034,7 @@ predict.prophet <- function(object, df = NULL, ...) {
     cols <- c(cols, 'floor')
   }
   df <- df[cols]
-  df <- df %>%
-    dplyr::bind_cols(seasonal.components) %>%
-    dplyr::bind_cols(intervals)
+  df <- dplyr::bind_cols(df, seasonal.components, intervals)
   df$yhat <- df$trend + df$seasonal
   return(df)
 }
@@ -1060,7 +1056,7 @@ piecewise_linear <- function(t, deltas, k, m, changepoint.ts) {
   # Get cumulative slope and intercept at each t
   k_t <- rep(k, length(t))
   m_t <- rep(m, length(t))
-  for (s in 1:length(changepoint.ts)) {
+  for (s in seq_along(changepoint.ts)) {
     indx <- t >= changepoint.ts[s]
     k_t[indx] <- k_t[indx] + deltas[s]
     m_t[indx] <- m_t[indx] + gammas[s]
@@ -1085,14 +1081,14 @@ piecewise_logistic <- function(t, cap, deltas, k, m, changepoint.ts) {
   # Compute offset changes
   k.cum <- c(k, cumsum(deltas) + k)
   gammas <- rep(0, length(changepoint.ts))
-  for (i in 1:length(changepoint.ts)) {
+  for (i in seq_along(changepoint.ts)) {
     gammas[i] <- ((changepoint.ts[i] - m - sum(gammas))
                   * (1 - k.cum[i] / k.cum[i + 1]))
   }
   # Get cumulative rate and offset at each t
   k_t <- rep(k, length(t))
   m_t <- rep(m, length(t))
-  for (s in 1:length(changepoint.ts)) {
+  for (s in seq_along(changepoint.ts)) {
     indx <- t >= changepoint.ts[s]
     k_t[indx] <- k_t[indx] + deltas[s]
     m_t[indx] <- m_t[indx] + gammas[s]
@@ -1139,14 +1135,14 @@ predict_seasonal_components <- function(m, df) {
   upper.p <- (1 + m$interval.width)/2
 
   components <- dplyr::data_frame(component = colnames(seasonal.features)) %>%
-    dplyr::mutate(col = 1:n()) %>%
+    dplyr::mutate(col = seq_len(n())) %>%
     tidyr::separate(component, c('component', 'part'), sep = "_delim_",
                     extra = "merge", fill = "right") %>%
     dplyr::select(col, component)
   # Add total for all regression components
   components <- rbind(
     components,
-    data.frame(col = 1:ncol(seasonal.features), component = 'seasonal'))
+    data.frame(col = seq_len(ncol(seasonal.features)), component = 'seasonal'))
   # Add totals for seasonality, holiday, and extra regressors
   components <- add_group_component(
     components, 'seasonalities', names(m$seasonalities))
@@ -1163,7 +1159,7 @@ predict_seasonal_components <- function(m, df) {
     dplyr::group_by(component) %>% dplyr::do({
       comp <- (as.matrix(seasonal.features[, .$col])
                %*% t(m$params$beta[, .$col, drop = FALSE])) * m$y.scale
-      dplyr::data_frame(ix = 1:nrow(seasonal.features),
+      dplyr::data_frame(ix = seq_len(nrow(seasonal.features)),
                         mean = rowMeans(comp, na.rm = TRUE),
                         lower = apply(comp, 1, stats::quantile, lower.p,
                                       na.rm = TRUE),
@@ -1217,9 +1213,9 @@ sample_posterior_predictive <- function(m, df) {
                      "seasonal" = matrix(, nrow = nrow(df), ncol = nsamp),
                      "yhat" = matrix(, nrow = nrow(df), ncol = nsamp))
 
-  for (i in 1:n.iterations) {
+  for (i in seq_len(n.iterations)) {
     # For each set of parameters from MCMC (or just 1 set for MAP),
-    for (j in 1:samp.per.iter) {
+    for (j in seq_len(samp.per.iter)) {
       # Do a simulation with this set of parameters,
       sim <- sample_model(m, df, seasonal.features, i)
       # Store the results
@@ -1398,6 +1394,10 @@ make_future_dataframe <- function(m, periods, freq = 'day',
 #'
 #' @keywords internal
 prophet_copy <- function(m, cutoff = NULL) {
+  if (is.null(m$history)) {
+    stop("This is for copying a fitted Prophet object.")
+  }
+
   if (m$specified.changepoints) {
     changepoints <- m$changepoints
     if (!is.null(cutoff)) {
@@ -1407,13 +1407,15 @@ prophet_copy <- function(m, cutoff = NULL) {
   } else {
     changepoints <- NULL
   }
-  return(prophet(
+  # Auto seasonalities are set to FALSE because they are already set in
+  # m$seasonalities.
+  m2 <- prophet(
     growth = m$growth,
     changepoints = changepoints,
     n.changepoints = m$n.changepoints,
-    yearly.seasonality = m$yearly.seasonality,
-    weekly.seasonality = m$weekly.seasonality,
-    daily.seasonality = m$daily.seasonality,
+    yearly.seasonality = FALSE,
+    weekly.seasonality = FALSE,
+    daily.seasonality = FALSE,
     holidays = m$holidays,
     seasonality.prior.scale = m$seasonality.prior.scale,
     changepoint.prior.scale = m$changepoint.prior.scale,
@@ -1421,8 +1423,11 @@ prophet_copy <- function(m, cutoff = NULL) {
     mcmc.samples = m$mcmc.samples,
     interval.width = m$interval.width,
     uncertainty.samples = m$uncertainty.samples,
-    fit = FALSE,
-  ))
+    fit = FALSE
+  )
+  m2$extra_regressors <- m$extra_regressors
+  m2$seasonalities <- m$seasonalities
+  return(m2)
 }
 
 # fb-block 3

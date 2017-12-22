@@ -1,6 +1,6 @@
 Package: prophet
 Title: Automatic Forecasting Procedure
-Version: 0.2
+Version: 0.2.0.9000
 Date: 2017-09-02
 Authors@R: c(
   person("Sean", "Taylor", email = "sjt@fb.com", role = c("cre", "aut")),
@@ -24,6 +24,7 @@ Imports:
     scales,
     stats,
     tidyr (>= 0.6.1),
+    utils,
     xts
 Suggests:
     knitr,
