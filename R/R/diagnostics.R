@@ -83,6 +83,7 @@ simulated_historical_forecasts <- function(model, horizon, units, k,
     m <- fit.prophet(m, history.c)
     # Calculate yhat
     df.predict <- dplyr::filter(df, ds > cutoff, ds <= cutoff + horizon)
+    # Get the columns for the future dataframe
     columns <- 'ds'
     if (m$growth == 'logistic') {
       columns <- c(columns, 'cap')
@@ -90,6 +91,7 @@ simulated_historical_forecasts <- function(model, horizon, units, k,
         columns <- c(columns, 'floor')
       }
     }
+    columns <- c(columns, names(m$extra_regressors))
     future <- df[columns]
     yhat <- stats::predict(m, future)
     # Merge yhat, y, and cutoff.

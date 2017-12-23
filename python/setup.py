@@ -97,7 +97,7 @@ class TestCommand(test_command):
 
 setup(
     name='fbprophet',
-    version='0.2',
+    version='0.2.1',
     description='Automatic Forecasting Procedure',
     url='https://facebook.github.io/prophet/',
     author='Sean J. Taylor <sjt@fb.com>, Ben Letham <bletham@fb.com>',

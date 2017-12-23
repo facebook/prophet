@@ -47,6 +47,25 @@ test_that("simulated_historical_forecasts_logistic", {
   expect_equal(sum((df.merged$y.x - df.merged$y.y) ** 2), 0)
 })
 
+test_that("simulated_historical_forecasts_extra_regressors", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  df <- DATA
+  df$extra <- seq(0, nrow(df) - 1)
+  m <- prophet()
+  m <- add_seasonality(m, name = 'monthly', period = 30.5, fourier.order = 5)
+  m <- add_regressor(m, 'extra')
+  m <- fit.prophet(m, df)
+  df.shf <- simulated_historical_forecasts(
+    m, horizon = 3, units = 'days', k = 2, period = 3)
+  # All cutoff dates should be less than ds dates
+  expect_true(all(df.shf$cutoff < df.shf$ds))
+  # The unique size of output cutoff should be equal to 'k'
+  expect_equal(length(unique(df.shf$cutoff)), 2)
+  # Each y in df_shf and DATA with same ds should be equal
+  df.merged <- dplyr::left_join(df.shf, m$history, by="ds")
+  expect_equal(sum((df.merged$y.x - df.merged$y.y) ** 2), 0)
+})
+
 test_that("simulated_historical_forecasts_default_value_check", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   m <- prophet(DATA)
