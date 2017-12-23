@@ -8,28 +8,31 @@
 \alias{mae}
 \alias{mpe}
 \alias{mape}
+\alias{all_metrics}
 \title{Metrics for Time Series Forecasts}
 \usage{
-me(m)
+me(fcst)
 
-mse(m)
+mse(fcst)
 
-rmse(m)
+rmse(fcst)
 
-mae(m)
+mae(fcst)
 
-mpe(m)
+mpe(fcst)
 
-mape(m)
+mape(fcst)
+
+all_metrics(fcst)
 }
 \arguments{
-\item{m}{Prophet object.}
+\item{fcst}{Dataframe output of `predict`.}
 }
 \value{
 metrics value (numeric)
 }
 \description{
-A time-series forecast requires making a quantitative prediction of future values. 
+A time-series forecast requires making a quantitative prediction of future values.
 After forecast, we also have to provide accurracy of forecasts to check wether the forecast serves our need.
 Metrics for time series forecasts are so useful in telling you how your model is good and helping you determine which particular forecasting models work best.
 }
@@ -44,12 +47,12 @@ The Mean Error (ME)  is defined by the formula:
 Mean Squared Error (MSE, \code{mse})
 
 The Mean Squared Error (MSE)  is defined by the formula:
-\deqn{ \frac{1}{n} \sum_{t=1}^{n} (y_{t}-yhat_{t})^2 .} 
+\deqn{ \frac{1}{n} \sum_{t=1}^{n} (y_{t}-yhat_{t})^2 .}
 
 Root Mean Square Error (RMSE, \code{rmse})
 
 Root Mean Square Error (RMSE) is define by the formula:
-\deqn{ \sqrt{\frac{1}{n} \sum_{t=1}^{n} (y_{t}-yhat_{t})^2} .} 
+\deqn{ \sqrt{\frac{1}{n} \sum_{t=1}^{n} (y_{t}-yhat_{t})^2} .}
 
 Mean Absolute Error (MAE, \code{mae})
 
@@ -64,7 +67,7 @@ and is defined by the formula:
 
 Mean Absolute Percentage Error (MAPE, \code{mape})
 
-The Mean absolute Percentage Error (MAPE), also known as Mean Absolute Percentage Deviation (MAPD), is usually expressed as a percentage, 
+The Mean absolute Percentage Error (MAPE), also known as Mean Absolute Percentage Deviation (MAPD), is usually expressed as a percentage,
 and is defined by the formula:
 \deqn{ \frac{100}{n} \sum_{t=1}^{n} | \frac {y_{t}-yhat_{t}}{y_{t}}| .}
 }

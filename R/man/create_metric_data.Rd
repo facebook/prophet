@@ -4,10 +4,10 @@
 \alias{create_metric_data}
 \title{Prepare dataframe for metrics calculation.}
 \usage{
-create_metric_data(m)
+create_metric_data(fcst)
 }
 \arguments{
-\item{m}{Prophet object.}
+\item{fcst}{Dataframe output of `predict`.}
 }
 \value{
 A dataframe only with y and yhat as a column.

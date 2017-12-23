@@ -3,6 +3,7 @@
 S3method(predict,prophet)
 export(add_regressor)
 export(add_seasonality)
+export(all_metrics)
 export(cross_validation)
 export(fit.prophet)
 export(layer_changepoints)
