@@ -1,5 +1,7 @@
 # Prophet: Automatic Forecasting Procedure
 
+[![Build Status](https://travis-ci.org/facebook/prophet.svg?branch=master)](https://travis-ci.org/facebook/prophet)
+
 Prophet is a procedure for forecasting time series data.  It is based on an additive model where non-linear trends are fit with yearly and weekly seasonality, plus holidays. It works best with daily periodicity data with at least one year of historical data. Prophet is robust to missing data, shifts in the trend, and large outliers.
 
 Prophet is [open source software](https://code.facebook.com/projects/) released by Facebook's [Core Data Science team](https://research.fb.com/category/data-science/).  It is available for download on [CRAN](https://cran.r-project.org/package=prophet) and [PyPI](https://pypi.python.org/pypi/fbprophet/).
@@ -59,6 +61,10 @@ Make sure compilers (gcc, g++) and Python development tools (python-dev) are ins
 Use `conda install gcc` to set up gcc. The easiest way to install Prophet is through conda-forge: `conda install -c conda-forge fbprophet`.
 
 ## Changelog
+
+### Version 0.2.1 (2017.11.08)
+
+- Bugfixes
 
 ### Version 0.2 (2017.09.02)
 

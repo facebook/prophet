@@ -1,7 +1,7 @@
 Package: prophet
 Title: Automatic Forecasting Procedure
-Version: 0.2.0.9000
-Date: 2017-09-02
+Version: 0.2.1.9000
+Date: 2017-11-08
 Authors@R: c(
   person("Sean", "Taylor", email = "sjt@fb.com", role = c("cre", "aut")),
   person("Ben", "Letham", email = "bletham@fb.com", role = "aut")
@@ -16,6 +16,7 @@ Depends:
     Rcpp (>= 0.12.0)
 Imports:
     dplyr (>= 0.5.0),
+    dygraphs,
     extraDistr,
     ggplot2,
     grid,
@@ -25,7 +26,8 @@ Imports:
     tidyr (>= 0.6.1),
     utils,
     purrr,
-    rlang
+    rlang,
+    xts
 Suggests:
     knitr,
     testthat,
