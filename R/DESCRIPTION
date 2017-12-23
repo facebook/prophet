@@ -16,16 +16,13 @@ Depends:
     Rcpp (>= 0.12.0)
 Imports:
     dplyr (>= 0.5.0),
-    dygraphs,
     extraDistr,
     ggplot2,
     grid,
     rstan (>= 2.14.0),
     scales,
     stats,
-    tidyr (>= 0.6.1),
-    utils,
-    xts
+    tidyr (>= 0.6.1)
 Suggests:
     knitr,
     testthat,

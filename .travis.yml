@@ -1,18 +1,11 @@
-matrix:
-  include:
-    - language: python
-      python:
-        - "2.7"
-        - "3.6"
-      
-      install:
-        - pip install --upgrade pip
-        - pip install -U -r python/requirements.txt
-      
-      script:
-        - cd python && python setup.py develop test
-    - language: R
-      sudo: false
-      cache: packages
-      before_install:
-        - cd R
+language: python
+python:
+  - "2.7"
+  - "3.6"
+
+install:
+  - pip install --upgrade pip
+  - pip install -U -r python/requirements.txt
+
+script:
+  - cd python && python setup.py develop test
