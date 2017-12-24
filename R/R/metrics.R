@@ -121,11 +121,10 @@ mape <- function(fcst)
 all_metrics <- function(fcst)
 {
   # Define all metrics functions as a character
-  metrics <- c("me", "mse", "rmse", "mae", "mpe", "mape")
-  # Convert character to function and evalate each metrics
-  result <- purrr::map(metrics, ~ rlang::eval_tidy(rlang::sym(.x))(fcst))
-  # return data.frame with each metrics name
-  return(setNames(data.frame(result), metrics))
+  metrics <- rlang::set_names(c("me", "mse", "rmse", "mae", "mpe", "mape"))
+  # Convert character to function and evalate each metrics in invoke_map_df
+  # The result is data.frame with each metrics name
+  purrr::invoke_map_df(metrics, list(list(fcst)))
 }
 
 #' Prepare dataframe for metrics calculation.
