@@ -75,6 +75,25 @@ class TestDiagnostics(TestCase):
         self.assertAlmostEqual(
             np.sum((df_merged['y_x'] - df_merged['y_y']) ** 2), 0.0)
 
+    def test_simulated_historical_forecasts_extra_regressors(self):
+        m = Prophet()
+        m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
+        m.add_regressor('extra')
+        df = self.__df.copy()
+        df['cap'] = 40
+        df['extra'] = range(df.shape[0])
+        m.fit(df)
+        df_shf = diagnostics.simulated_historical_forecasts(
+            m, horizon='3 days', k=2, period='3 days')
+        # All cutoff dates should be less than ds dates
+        self.assertTrue((df_shf['cutoff'] < df_shf['ds']).all())
+        # The unique size of output cutoff should be equal to 'k'
+        self.assertEqual(len(np.unique(df_shf['cutoff'])), 2)
+        # Each y in df_shf and self.__df with same ds should be equal
+        df_merged = pd.merge(df_shf, df, 'left', on='ds')
+        self.assertAlmostEqual(
+            np.sum((df_merged['y_x'] - df_merged['y_y']) ** 2), 0.0)
+
     def test_simulated_historical_forecasts_default_value_check(self):
         m = Prophet()
         m.fit(self.__df)
