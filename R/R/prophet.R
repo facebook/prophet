@@ -995,7 +995,6 @@ fit.prophet <- function(m, df, ...) {
 #' @param df Dataframe with dates for predictions (column ds), and capacity
 #'  (column cap) if logistic growth. If not provided, predictions are made on
 #'  the history.
-#' @param include_history Boolean to include the historical data (y) in the result data frame.
 #' @param ... additional arguments.
 #'
 #' @return A dataframe with the forecast components.
@@ -1011,7 +1010,7 @@ fit.prophet <- function(m, df, ...) {
 #' }
 #'
 #' @export
-predict.prophet <- function(object, df = NULL, include_history = TRUE, ...) {
+predict.prophet <- function(object, df = NULL, ...) {
   if (is.null(df)) {
     df <- object$history
   } else {
@@ -1037,10 +1036,6 @@ predict.prophet <- function(object, df = NULL, include_history = TRUE, ...) {
   df <- df[cols]
   df <- dplyr::bind_cols(df, seasonal.components, intervals)
   df$yhat <- df$trend + df$seasonal
-  # Join with historical data
-  if(include_history){
-    df <- dplyr::left_join(df, dplyr::select(object$history, ds, y), by="ds")
-  }
   return(df)
 }
 

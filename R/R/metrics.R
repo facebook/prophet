@@ -47,7 +47,7 @@
 #' and is defined by the formula:
 #' \deqn{ \frac{100}{n} \sum_{t=1}^{n} | \frac {y_{t}-yhat_{t}}{y_{t}}| .}
 #'
-#' @param fcst Dataframe output of `predict`.
+#' @param df A dataframe which is output of `predict`, `simulated_historical_forecasts ` or ``
 #'
 #' @return metrics value (numeric)
 #'
@@ -71,70 +71,81 @@ NULL
 
 #' @rdname metrics
 #' @export
-me <- function(fcst)
+me <- function(obj)
 {
-  df <- create_metric_data(fcst)
+  df <- create_metric_data(obj)
   mean(df$y-df$yhat)
 }
 
 #' @rdname metrics
 #' @export
-mse <- function(fcst)
+mse <- function(obj)
 {
-  df <- create_metric_data(fcst)
+  df <- create_metric_data(obj)
   mean((df$y-df$yhat)^2)
 }
 
 #' @rdname metrics
 #' @export
-rmse <- function(fcst)
+rmse <- function(obj)
 {
-  sqrt(mse(fcst))
+  sqrt(mse(obj))
 }
 
 #' @rdname metrics
 #' @export
-mae <- function(fcst)
+mae <- function(obj)
 {
-  df <- create_metric_data(fcst)
+  df <- create_metric_data(obj)
   mean(abs(df$y-df$yhat))
 }
 
 #' @rdname metrics
 #' @export
-mpe <- function(fcst)
+mpe <- function(obj)
 {
-  df <- create_metric_data(fcst)
+  df <- create_metric_data(obj)
   100*mean((df$y-df$yhat)/df$y)
 }
 
 #' @rdname metrics
 #' @export
-mape <- function(fcst)
+mape <- function(obj)
 {
-  df <- create_metric_data(fcst)
+  df <- create_metric_data(obj)
   100*mean(abs(df$y-df$yhat)/df$y)
 }
 
 #' @rdname metrics
 #' @export
-all_metrics <- function(fcst)
+all_metrics <- function(obj)
 {
   # Define all metrics functions as a character
   metrics <- rlang::set_names(c("me", "mse", "rmse", "mae", "mpe", "mape"))
   # Convert character to function and evalate each metrics in invoke_map_df
   # The result is data.frame with each metrics name
-  purrr::invoke_map_df(metrics, list(list(fcst)))
+  purrr::invoke_map_df(metrics, list(list(obj)))
 }
 
 #' Prepare dataframe for metrics calculation.
 #'
-#' @param fcst Dataframe output of `predict`.
+#' @param obj a Prophet object or a data.frame resulting from simulated_historical_forecasts() or cross_validation()
 #'
 #' @return A dataframe only with y and yhat as a column.
 #'
 #' @keywords internal
-create_metric_data <- function(fcst)
+create_metric_data <- function(obj)
 {
-    na.omit(dplyr::select(fcst, y, yhat))
+  # Judge as a data.frame resulting from simulated_historical_forecasts() or cross_validation()
+  data <- if(is.data.frame(obj) & all(c("y", "yhat") %in% names(obj))){
+    obj
+  } else if("prophet" %in% class(obj)) {
+    forecast <- predict(obj, NULL)
+    dplyr::inner_join(obj$history, forecast, by="ds")
+  } else{
+    stop("obj argument must be Prophet object or a data.frame resulting from simulated_historical_forecasts() or cross_validation()")
+  }
+
+  dplyr::select(data, y, yhat) %>%
+    na.omit()
 }
