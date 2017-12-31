@@ -93,7 +93,7 @@ simulated_historical_forecasts <- function(model, horizon, units, k,
     }
     columns <- c(columns, names(m$extra_regressors))
     future <- df[columns]
-    yhat <- stats::predict(m, future, include_history=FALSE)
+    yhat <- stats::predict(m, future)
     # Merge yhat, y, and cutoff.
     df.c <- dplyr::inner_join(df.predict, yhat, by = "ds")
     df.c <- dplyr::select(df.c, ds, y, yhat, yhat_lower, yhat_upper)
