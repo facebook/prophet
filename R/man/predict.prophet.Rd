@@ -4,7 +4,7 @@
 \alias{predict.prophet}
 \title{Predict using the prophet model.}
 \usage{
-\method{predict}{prophet}(object, df = NULL, include_history = TRUE, ...)
+\method{predict}{prophet}(object, df = NULL, ...)
 }
 \arguments{
 \item{object}{Prophet object.}
@@ -12,8 +12,6 @@
 \item{df}{Dataframe with dates for predictions (column ds), and capacity
 (column cap) if logistic growth. If not provided, predictions are made on
 the history.}
-
-\item{include_history}{Boolean to include the historical data (y) in the result data frame.}
 
 \item{...}{additional arguments.}
 }
