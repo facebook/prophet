@@ -47,7 +47,8 @@
 #' and is defined by the formula:
 #' \deqn{ \frac{100}{n} \sum_{t=1}^{n} | \frac {y_{t}-yhat_{t}}{y_{t}}| .}
 #'
-#' @param df A dataframe which is output of `predict`, `simulated_historical_forecasts ` or ``
+#' @param m Prophet object. Default NULL
+#' @param df A dataframe which is output of `simulated_historical_forecasts` or `cross_validation` Default NULL
 #'
 #' @return metrics value (numeric)
 #'
@@ -69,83 +70,81 @@
 #' @name metrics
 NULL
 
-#' @rdname metrics
-#' @export
-me <- function(obj)
+#' Prepare dataframe for metrics calculation.
+#'
+#' @param m Prophet object. Default NULL
+#' @param df A dataframe which is output of `simulated_historical_forecasts` or `cross_validation` Default NULL
+#'
+#' @return A dataframe only with y and yhat as a column.
+#'
+#' @keywords internal
+create_metric_data <- function(m=NULL, df=NULL)
 {
-  df <- create_metric_data(obj)
-  mean(df$y-df$yhat)
+  if(is.null(m) && is.null(df))
+  {
+    stop("You have to specify one of `m` and `df` at least.")
+  }
+  if(!is.null(m) && !is.null(df))
+  {
+    warning("You specify both of `m` and `df`. `df` is used for metrics calclation.")
+  }
+
+  data <- if(!is.null(df)){
+    df
+  } else if("prophet" %in% class(m)) {
+    dplyr::inner_join(m$history, predict(m, NULL), by="ds")
+  }
+
+  dplyr::select(data, y, yhat) %>% na.omit()
+}
+
+#' Meta function to make the function which evaluate metrics.
+#'
+#' @param metrics metrics function
+#'
+#' @return A function using for metrics evaluation.
+#'
+#' @keywords internal
+make_metrics_function <- function(metrics)
+{
+  function(m=NULL, df=NULL)
+  {
+    data <- create_metric_data(m, df)
+    metrics(data$y, data$yhat)
+  }
 }
 
 #' @rdname metrics
 #' @export
-mse <- function(obj)
-{
-  df <- create_metric_data(obj)
-  mean((df$y-df$yhat)^2)
-}
+me <- make_metrics_function(function(y, yhat){mean(y - yhat)})
 
 #' @rdname metrics
 #' @export
-rmse <- function(obj)
-{
-  sqrt(mse(obj))
-}
+mse <- make_metrics_function(function(y, yhat){mean((y - yhat)^2)})
 
 #' @rdname metrics
 #' @export
-mae <- function(obj)
-{
-  df <- create_metric_data(obj)
-  mean(abs(df$y-df$yhat))
-}
+rmse <- make_metrics_function(function(y, yhat){sqrt(mean((y - yhat)^2))})
 
 #' @rdname metrics
 #' @export
-mpe <- function(obj)
-{
-  df <- create_metric_data(obj)
-  100*mean((df$y-df$yhat)/df$y)
-}
+mae <- make_metrics_function(function(y, yhat){mean(abs(y - yhat))})
 
 #' @rdname metrics
 #' @export
-mape <- function(obj)
-{
-  df <- create_metric_data(obj)
-  100*mean(abs(df$y-df$yhat)/df$y)
-}
+mpe <- make_metrics_function(function(y, yhat){100*mean((y - yhat)/y)})
 
 #' @rdname metrics
 #' @export
-all_metrics <- function(obj)
+mape <- make_metrics_function(function(y, yhat){100*mean(abs((y - yhat)/y))})
+
+#' @rdname metrics
+#' @export
+all_metrics <- function(m=NULL, df=NULL)
 {
   # Define all metrics functions as a character
   metrics <- rlang::set_names(c("me", "mse", "rmse", "mae", "mpe", "mape"))
   # Convert character to function and evalate each metrics in invoke_map_df
   # The result is data.frame with each metrics name
-  purrr::invoke_map_df(metrics, list(list(obj)))
-}
-
-#' Prepare dataframe for metrics calculation.
-#'
-#' @param obj a Prophet object or a data.frame resulting from simulated_historical_forecasts() or cross_validation()
-#'
-#' @return A dataframe only with y and yhat as a column.
-#'
-#' @keywords internal
-create_metric_data <- function(obj)
-{
-  # Judge as a data.frame resulting from simulated_historical_forecasts() or cross_validation()
-  data <- if(is.data.frame(obj) & all(c("y", "yhat") %in% names(obj))){
-    obj
-  } else if("prophet" %in% class(obj)) {
-    forecast <- predict(obj, NULL)
-    dplyr::inner_join(obj$history, forecast, by="ds")
-  } else{
-    stop("obj argument must be Prophet object or a data.frame resulting from simulated_historical_forecasts() or cross_validation()")
-  }
-
-  dplyr::select(data, y, yhat) %>%
-    na.omit()
+  purrr::invoke_map_df(metrics, list(list(m, df)))
 }

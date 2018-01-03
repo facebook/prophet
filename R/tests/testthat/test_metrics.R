@@ -42,19 +42,19 @@ test_that("metrics_tests_using_simulated_historical_forecast", {
   # Check all metrics wether it is equal to its definition
   y <- df$y
   yhat <- df$yhat
-  expect_equal(me(df), mean(y-yhat))
-  expect_equal(mse(df), mean((y-yhat)^2))
-  expect_equal(rmse(df), sqrt(mean((y-yhat)^2)))
-  expect_equal(mae(df), mean(abs(y-yhat)))
-  expect_equal(mpe(df), 100*mean((y-yhat)/y))
-  expect_equal(mape(df), 100*mean(abs((y-yhat)/y)))
+  expect_equal(me(df=df), mean(y-yhat))
+  expect_equal(mse(df=df), mean((y-yhat)^2))
+  expect_equal(rmse(df=df), sqrt(mean((y-yhat)^2)))
+  expect_equal(mae(df=df), mean(abs(y-yhat)))
+  expect_equal(mpe(df=df), 100*mean((y-yhat)/y))
+  expect_equal(mape(df=df), 100*mean(abs((y-yhat)/y)))
   answer <- data.frame(
-    me=me(df),
-    mse=mse(df),
-    rmse=rmse(df),
-    mae=mae(df),
-    mpe=mpe(df),
-    mape=mape(df)
+    me=me(df=df),
+    mse=mse(df=df),
+    rmse=rmse(df=df),
+    mae=mae(df=df),
+    mpe=mpe(df=df),
+    mape=mape(df=df)
   )
-  expect_equal(all_metrics(df), answer)
+  expect_equal(all_metrics(df=df), answer)
 })
