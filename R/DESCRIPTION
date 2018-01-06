@@ -25,6 +25,8 @@ Imports:
     stats,
     tidyr (>= 0.6.1),
     utils,
+    purrr,
+    rlang,
     xts
 Suggests:
     knitr,
