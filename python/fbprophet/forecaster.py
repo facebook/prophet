@@ -1464,6 +1464,7 @@ class Prophet(object):
 
         Parameters
         ----------
+        name: Seasonality name, like 'daily', 'weekly'.
         ax: Optional matplotlib Axes to plot on. One will be created if
             this is not provided.
         uncertainty: Optional boolean to plot uncertainty intervals.
