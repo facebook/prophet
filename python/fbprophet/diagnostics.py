@@ -179,4 +179,4 @@ def all_metrics(df):
     mpe = (df['yhat'] - df['y']).div(df['y']).sum()*(1/len(df))
     mape = (df['yhat'] - df['y']).div(df['y']).abs().sum()*(1/len(df))
 
-    return {'ME':me, 'MSE':mse, 'RMSE': rmse, 'MAE': mae, 'MPE': mpe, 'MAPE': mape}
+    return {'ME':me, 'MSE':mse, 'RMSE': rmse, 'MAE': mae, 'MPE': mpe, 'MAPE': mape}    
