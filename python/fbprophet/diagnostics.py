@@ -146,7 +146,20 @@ def cross_validation(model, horizon, period=None, initial=None):
             'Not enough data for specified horizon, period, and initial.')
     return simulated_historical_forecasts(model, horizon, k, period)
 
-def all_metrics(df):
+def me(df):
+    return((df['yhat'] - df['y']).sum()/len(df['yhat']))
+def mse(df):
+    return((df['yhat'] - df['y']).pow(2).sum()/len(df))
+def rmse(df):
+    return(np.sqrt((df['yhat'] - df['y']).pow(2).sum()/len(df)))
+def mae(df):
+    return((df['yhat'] - df['y']).abs().sum()/len(df))
+def mpe(df):
+    return((df['yhat'] - df['y']).div(df['y']).sum()*(1/len(df)))
+def mape(df):
+    return((df['yhat'] - df['y']).div(df['y']).abs().sum()*(1/len(df)))
+
+def all_metrics(model, df_cv = None):
     """Compute model fit metrics for time series.
 
     Computes the following metrics about each time series that has been through 
@@ -168,15 +181,32 @@ def all_metrics(df):
     A dictionary where the key = the error type, and value is the value of the error
     """
 
+    
+
+    df = []
+
+    if df_cv is not None:
+        df = df_cv
+    else:
+        # run a forecast on your own data with period = 0 so that it is in-sample data onlyl
+        #df = model.predict(model.make_future_dataframe(periods=0))[['y', 'yhat']]
+        df = (model
+                .history[['ds', 'y']]
+                .merge(
+                    model.predict(model.make_future_dataframe(periods=0))[['ds', 'yhat']], 
+                    how='inner', on='ds'
+                    )
+                )
+
     if 'yhat' not in df.columns:
         raise ValueError(
             'Please run Cross-Validation first before computing quality metrics.')
 
-    me = (df['yhat'] - df['y']).sum()/len(df['yhat'])
-    mse = (df['yhat'] - df['y']).pow(2).sum()/len(df)
-    rmse = np.sqrt((df['yhat'] - df['y']).pow(2).sum()/len(df))
-    mae = (df['yhat'] - df['y']).abs().sum()/len(df)
-    mpe = (df['yhat'] - df['y']).div(df['y']).sum()*(1/len(df))
-    mape = (df['yhat'] - df['y']).div(df['y']).abs().sum()*(1/len(df))
-
-    return {'ME':me, 'MSE':mse, 'RMSE': rmse, 'MAE': mae, 'MPE': mpe, 'MAPE': mape}    
+    return {
+            'ME':me(df),
+            'MSE':mse(df), 
+            'RMSE': rmse(df), 
+            'MAE': mae(df), 
+            'MPE': mpe(df), 
+            'MAPE': mape(df)
+            }
