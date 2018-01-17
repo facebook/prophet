@@ -90,6 +90,9 @@ def simulated_historical_forecasts(model, horizon, k, period=None):
         # Generate new object with copying fitting options
         m = model.copy(cutoff)
         # Train model
+        subset = df[df['ds'] <= cutoff]
+        if subset.shape[0] < 2:
+            continue
         m.fit(df[df['ds'] <= cutoff])
         # Calculate yhat
         index_predicted = (df['ds'] > cutoff) & (df['ds'] <= cutoff + horizon)

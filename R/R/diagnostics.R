@@ -80,6 +80,9 @@ simulated_historical_forecasts <- function(model, horizon, units, k,
     m <- prophet_copy(model, cutoff)
     # Train model
     history.c <- dplyr::filter(df, ds <= cutoff)
+    # Instead of exiting the program with an error when we do not have two data points within the horizon,
+    # we will simply not make a prediction and advance to the next data point. 
+    if(nrow(history.c)<2) next
     m <- fit.prophet(m, history.c)
     # Calculate yhat
     df.predict <- dplyr::filter(df, ds > cutoff, ds <= cutoff + horizon)
