@@ -1302,6 +1302,8 @@ class Prophet(object):
 
         fig, axes = plt.subplots(npanel, 1, facecolor='w',
                                  figsize=(9, 3 * npanel))
+        if npanel == 1:
+            axes = [axes]
 
         for ax, plot in zip(axes, components):
             if plot == 'trend':
