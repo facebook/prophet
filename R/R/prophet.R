@@ -274,7 +274,7 @@ set_date <- function(ds = NULL, tz = "GMT") {
     ds <- as.character(ds)
   }
 
-  if (min(nchar(ds)) < 12) {
+  if (min(nchar(ds), na.rm=TRUE) < 12) {
     ds <- as.POSIXct(ds, format = "%Y-%m-%d", tz = tz)
   } else {
     ds <- as.POSIXct(ds, format = "%Y-%m-%d %H:%M:%S", tz = tz)
@@ -321,8 +321,9 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
   }
   df$ds <- set_date(df$ds)
   if (anyNA(df$ds)) {
-    stop(paste('Unable to parse date format in column ds. Convert to date ',
-               'format. Either %Y-%m-%d or %Y-%m-%d %H:%M:%S'))
+    stop(paste('Unable to parse date format in column ds. Convert to date',
+               'format (%Y-%m-%d or %Y-%m-%d %H:%M:%S) and check that there',
+               'are no NAs.'))
   }
   for (name in names(m$extra_regressors)) {
     if (!(name %in% colnames(df))) {
