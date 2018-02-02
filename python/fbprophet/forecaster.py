@@ -158,9 +158,9 @@ class Prophet(object):
                 raise ValueError('Holidays must have both lower_window and ' +
                                  'upper_window, or neither')
             if has_lower:
-                if max(self.holidays['lower_window']) > 0:
+                if self.holidays['lower_window'].max() > 0:
                     raise ValueError('Holiday lower_window should be <= 0')
-                if min(self.holidays['upper_window']) < 0:
+                if self.holidays['upper_window'].min() < 0:
                     raise ValueError('Holiday upper_window should be >= 0')
             for h in self.holidays['holiday'].unique():
                 self.validate_column_name(h, check_holidays=False)
