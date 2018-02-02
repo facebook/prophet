@@ -1214,6 +1214,8 @@ class Prophet(object):
         pd.Dataframe that extends forward from the end of self.history for the
         requested number of periods.
         """
+        if self.history_dates is None:
+            raise Exception('Model must be fit before this can be used.')
         last_date = self.history_dates.max()
         dates = pd.date_range(
             start=last_date,

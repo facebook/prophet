@@ -1379,6 +1379,9 @@ make_future_dataframe <- function(m, periods, freq = 'day',
   if (freq == 'm') {
     freq <- 'month'
   }
+  if (is.null(m$history.dates)) {
+    stop('Model must be fit before this can be used.')
+  }
   dates <- seq(max(m$history.dates), length.out = periods + 1, by = freq)
   dates <- dates[2:(periods + 1)]  # Drop the first, which is max(history$ds)
   if (include_history) {
