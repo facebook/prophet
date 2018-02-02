@@ -2,6 +2,7 @@ import os.path
 import pickle
 import platform
 import sys
+from itertools import product
 
 from pkg_resources import (
     normalize_path,
@@ -26,9 +27,11 @@ MODELS_TARGET_DIR = os.path.join('fbprophet', 'stan_models')
 
 def build_stan_models(target_dir, models_dir=MODELS_DIR):
     from pystan import StanModel
-    for model_type in ['linear', 'logistic']:
-        model_name = 'prophet_{}_growth.stan'.format(model_type)
-        target_name = '{}_growth.pkl'.format(model_type)
+    model_types = ['linear', 'logistic']
+    seasonality_types = ['additive', 'multiplicative']
+    for model_type, seasonality_type in product(model_types, seasonality_types):
+        model_name = 'prophet_{}_{}_growth.stan'.format(model_type, seasonality_type)
+        target_name = '{}_{}_growth.pkl'.format(model_type, seasonality_type)
         with open(os.path.join(models_dir, model_name)) as f:
             model_code = f.read()
         sm = StanModel(model_code=model_code)
