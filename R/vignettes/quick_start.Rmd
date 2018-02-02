@@ -23,7 +23,7 @@ First we read in the data and create the outcome variable.
 
 ```{r, results= "hide"}
 library(readr)
-df <- read_csv('../tests/testthat/data.csv')
+df <- read_csv('https://raw.githubusercontent.com/facebook/prophet/master/R/tests/testthat/data.csv')
 ```
 
 We call the `prophet` function to fit the model.  The first argument is the historical dataframe.  Additional arguments control how Prophet fits the data.
