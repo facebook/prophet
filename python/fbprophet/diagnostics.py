@@ -145,3 +145,68 @@ def cross_validation(model, horizon, period=None, initial=None):
         raise ValueError(
             'Not enough data for specified horizon, period, and initial.')
     return simulated_historical_forecasts(model, horizon, k, period)
+
+def me(df):
+    return((df['yhat'] - df['y']).sum()/len(df['yhat']))
+def mse(df):
+    return((df['yhat'] - df['y']).pow(2).sum()/len(df))
+def rmse(df):
+    return(np.sqrt((df['yhat'] - df['y']).pow(2).sum()/len(df)))
+def mae(df):
+    return((df['yhat'] - df['y']).abs().sum()/len(df))
+def mpe(df):
+    return((df['yhat'] - df['y']).div(df['y']).sum()*(1/len(df)))
+def mape(df):
+    return((df['yhat'] - df['y']).div(df['y']).abs().sum()*(1/len(df)))
+
+def all_metrics(model, df_cv = None):
+    """Compute model fit metrics for time series.
+
+    Computes the following metrics about each time series that has been through 
+    Cross Validation;
+
+    Mean Error (ME)
+    Mean Squared Error (MSE)
+    Root Mean Square Error (RMSE,
+    Mean Absolute Error (MAE)
+    Mean Percentage Error (MPE)
+    Mean Absolute Percentage Error (MAPE)
+
+    Parameters
+    ----------
+    df: A pandas dataframe. Contains y and yhat produced by cross-validation
+
+    Returns
+    -------
+    A dictionary where the key = the error type, and value is the value of the error
+    """
+
+    
+
+    df = []
+
+    if df_cv is not None:
+        df = df_cv
+    else:
+        # run a forecast on your own data with period = 0 so that it is in-sample data onlyl
+        #df = model.predict(model.make_future_dataframe(periods=0))[['y', 'yhat']]
+        df = (model
+                .history[['ds', 'y']]
+                .merge(
+                    model.predict(model.make_future_dataframe(periods=0))[['ds', 'yhat']], 
+                    how='inner', on='ds'
+                    )
+                )
+
+    if 'yhat' not in df.columns:
+        raise ValueError(
+            'Please run Cross-Validation first before computing quality metrics.')
+
+    return {
+            'ME':me(df),
+            'MSE':mse(df), 
+            'RMSE': rmse(df), 
+            'MAE': mae(df), 
+            'MPE': mpe(df), 
+            'MAPE': mape(df)
+            }
