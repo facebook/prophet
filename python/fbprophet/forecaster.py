@@ -15,11 +15,15 @@ from copy import deepcopy
 from datetime import timedelta
 import logging
 
+logging.basicConfig()
 logger = logging.getLogger(__name__)
 
-from matplotlib import pyplot as plt
-from matplotlib.dates import MonthLocator, num2date
-from matplotlib.ticker import FuncFormatter
+try:
+    from matplotlib import pyplot as plt
+    from matplotlib.dates import MonthLocator, num2date
+    from matplotlib.ticker import FuncFormatter
+except ImportError:
+    logger.exception('Importing matplotlib failed. Plotting will not work.')
 
 import numpy as np
 import pandas as pd

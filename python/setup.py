@@ -94,6 +94,8 @@ class TestCommand(test_command):
             sys.modules.update(old_modules)
             working_set.__init__()
 
+with open('requirements.txt', 'r') as f:
+    install_requires = f.read().splitlines()
 
 setup(
     name='fbprophet',
@@ -106,11 +108,7 @@ setup(
     packages=['fbprophet', 'fbprophet.tests'],
     setup_requires=[
     ],
-    install_requires=[
-        'matplotlib',
-        'pandas>=0.18.1',
-        'pystan>=2.14',
-    ],
+    install_requires=install_requires,
     zip_safe=False,
     include_package_data=True,
     # For Python 3, Will enforce that tests are run after a build.
