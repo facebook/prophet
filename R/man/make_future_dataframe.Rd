@@ -4,7 +4,8 @@
 \alias{make_future_dataframe}
 \title{Make dataframe with future dates for forecasting.}
 \usage{
-make_future_dataframe(m, periods, freq = "day", include_history = TRUE)
+make_future_dataframe(m, periods, freq = "day", include_history = TRUE,
+  include_extra_regressors = TRUE)
 }
 \arguments{
 \item{m}{Prophet model object.}
@@ -15,6 +16,8 @@ make_future_dataframe(m, periods, freq = "day", include_history = TRUE)
 
 \item{include_history}{Boolean to include the historical dates in the data
 frame for predictions.}
+
+\item{include_extra_regressors}{Add extra regressors to dataframe.}
 }
 \value{
 Dataframe that extends forward from the end of m$history for the
