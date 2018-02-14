@@ -1369,13 +1369,15 @@ sample_predictive_trend <- function(model, df, iteration) {
 #' @param freq 'day', 'week', 'month', 'quarter', 'year', 1(1 sec), 60(1 minute) or 3600(1 hour).
 #' @param include_history Boolean to include the historical dates in the data
 #'  frame for predictions.
+#' @param include_extra_regressors Add extra regressors to dataframe.
 #'
 #' @return Dataframe that extends forward from the end of m$history for the
 #'  requested number of periods.
 #'
 #' @export
 make_future_dataframe <- function(m, periods, freq = 'day',
-                                  include_history = TRUE) {
+                                  include_history = TRUE,
+                                  include_extra_regressors = TRUE) {
   # For backwards compatability with previous zoo date type,
   if (freq == 'm') {
     freq <- 'month'
@@ -1389,7 +1391,19 @@ make_future_dataframe <- function(m, periods, freq = 'day',
     dates <- c(m$history.dates, dates)
     attr(dates, "tzone") <- "GMT"
   }
-  return(data.frame(ds = dates))
+  future_df <- data.frame(ds = dates)
+  extra_regs <- names(m$extra_regressors)
+  if (include_extra_regressors && (length(extra_regs) > 0)) {
+      for (name in extra_regs) {
+          future_df <- dplyr::left_join(future_df, dplyr::select(m$history, ds, name), by=c('ds'='ds'))
+          # Replace NAs with zeros
+          if (anyNA(future_df[[name]])) {
+              warning("NAs detected in joined extra regressor '", name, "' and auto-replaced with zeros")
+              future_df[[name]] <- tidyr::replace_na(future_df[[name]], 0)
+          }
+      }
+  }
+  return(future_df)
 }
 
 #' Merge history and forecast for plotting.
