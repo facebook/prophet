@@ -388,12 +388,14 @@ test_that("make_future_dataframe_extra_regressor", {
         expect_named(future, c('ds', 'extra'))
         correct <- prophet:::set_date(c(train.t.days, '2013-04-26', '2013-04-27', '2013-04-28'))
         expect_equal(future$ds, correct)
+        expect_equal(sum(future$extra), sum(m$history$extra), tolerance=0.001)
     })
     expect_warning({
         future <- make_future_dataframe(m, periods = 3, freq = 'month')
         expect_named(future, c('ds', 'extra'))
         correct <- prophet:::set_date(c(train.t.days, '2013-05-25', '2013-06-25', '2013-07-25'))
         expect_equal(future$ds, correct)
+        expect_equal(sum(future$extra), sum(m$history$extra), tolerance=0.001)
     })
     
 })
