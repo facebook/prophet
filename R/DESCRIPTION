@@ -32,3 +32,4 @@ LazyData: true
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
 SystemRequirements: C++11
+Encoding: UTF-8
