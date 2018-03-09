@@ -52,7 +52,7 @@ On Windows, PyStan requires a compiler so you'll need to [follow the instruction
 
 ### Linux
 
-Make sure compilers (gcc, g++) and Python development tools (python-dev) are installed. If you are using a VM, be aware that you will need at least 4GB of memory to install fbprophet, and at least 2GB of memory to use fbprophet.
+Make sure compilers (gcc, g++, build-essential) and Python development tools (python-dev, python3-dev) are installed. If you are using a VM, be aware that you will need at least 4GB of memory to install fbprophet, and at least 2GB of memory to use fbprophet.
 
 ### Anaconda
 
