@@ -38,9 +38,9 @@ Example usage
 
 ::
 
-  >>> from fbprophet import Prophet
-  >>> m = Prophet()
-  >>> m.fit(df)  # df is a pandas.DataFrame with 'y' and 'ds' columns
-  >>> future = m.make_future_dataframe(periods=365)
-  >>> m.predict(future)
+  > from fbprophet import Prophet
+  > m = Prophet()
+  > m.fit(df)  # df is a pandas.DataFrame with 'y' and 'ds' columns
+  > future = m.make_future_dataframe(periods=365)
+  > m.predict(future)
 
