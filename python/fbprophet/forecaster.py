@@ -17,9 +17,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from matplotlib import pyplot as plt
-from matplotlib.dates import MonthLocator, num2date
-from matplotlib.ticker import FuncFormatter
+try:
+    from matplotlib import pyplot as plt
+    from matplotlib.dates import MonthLocator, num2date
+    from matplotlib.ticker import FuncFormatter
+except:
+    logger.warning('matplotlib unavailable : continuing')
+
 
 import numpy as np
 import pandas as pd
