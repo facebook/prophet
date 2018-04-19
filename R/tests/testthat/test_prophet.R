@@ -25,8 +25,11 @@ test_that("fit_predict_no_seasons", {
 
 test_that("fit_predict_no_changepoints", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
-  m <- prophet(train, n.changepoints = 0)
-  expect_error(predict(m, future), NA)
+  expect_warning({
+    # warning from prophet(), error from predict()
+    m <- prophet(train, n.changepoints = 0)
+    expect_error(predict(m, future), NA)
+  })
 })
 
 test_that("fit_predict_changepoint_not_in_history", {
@@ -36,8 +39,11 @@ test_that("fit_predict_changepoint_not_in_history", {
     (ds < prophet:::set_date('2013-01-01')) |
     (ds > prophet:::set_date('2014-01-01')))
   future <- data.frame(ds=DATA$ds)
-  m <- prophet(train_t, changepoints=c('2013-06-06'))
-  expect_error(predict(m, future), NA)
+  expect_warning({
+    # warning from prophet(), error from predict()
+    m <- prophet(train_t, changepoints=c('2013-06-06'))
+    expect_error(predict(m, future), NA)
+  })
 })
 
 test_that("fit_predict_duplicates", {
@@ -291,7 +297,12 @@ test_that("holidays", {
     lower_window = c(0, 0),
     upper_window = c(1, 1)
   )
+  # manual coercions to avoid below bind_rows() warning
+  holidays$holiday <- as.character(holidays$holiday)
+  holidays2$holiday <- as.character(holidays2$holiday)
   holidays2 <- dplyr::bind_rows(holidays, holidays2)
+  # manual factorizing to avoid above bind_rows() warning
+  holidays2$holiday <- factor(holidays2$holiday)
   m <- prophet(holidays = holidays2, fit = FALSE, holidays.prior.scale = 4)
   out <- prophet:::make_holiday_features(m, df$ds)
   priors <- out$prior.scales
@@ -351,8 +362,11 @@ test_that("auto_weekly_seasonality", {
   train.w <- DATA[1:N.w, ]
   m <- prophet(train.w)
   expect_false('weekly' %in% names(m$seasonalities))
-  m <- prophet(train.w, weekly.seasonality = TRUE)
-  expect_true('weekly' %in% names(m$seasonalities))
+  expect_warning({
+    # prophet warning: non-zero return code in optimizing
+    m <- prophet(train.w, weekly.seasonality = TRUE)
+    expect_true('weekly' %in% names(m$seasonalities))
+  })
   # Should be False due to weekly spacing
   train.w <- DATA[seq(1, nrow(DATA), 7), ]
   m <- prophet(train.w)
