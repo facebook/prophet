@@ -7,3 +7,5 @@ prune fbprophet/stan_models
 
 # Necessary for tests to run
 include fbprophet/tests/*.csv
+
+include requirements.txt
