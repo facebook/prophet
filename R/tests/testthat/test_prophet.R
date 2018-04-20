@@ -121,11 +121,7 @@ test_that("get_changepoints", {
   cp <- m$changepoints.t
   expect_equal(length(cp), m$n.changepoints)
   expect_true(min(cp) > 0)
-  expect_true(max(cp) < N)
-
-  mat <- prophet:::get_changepoint_matrix(m)
-  expect_equal(nrow(mat), floor(N / 2))
-  expect_equal(ncol(mat), m$n.changepoints)
+  expect_true(max(cp) < 1)
 })
 
 test_that("get_zero_changepoints", {
@@ -141,10 +137,6 @@ test_that("get_zero_changepoints", {
   cp <- m$changepoints.t
   expect_equal(length(cp), 1)
   expect_equal(cp[1], 0)
-
-  mat <- prophet:::get_changepoint_matrix(m)
-  expect_equal(nrow(mat), floor(N / 2))
-  expect_equal(ncol(mat), 1)
 })
 
 test_that("override_n_changepoints", {

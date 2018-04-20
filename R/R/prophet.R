@@ -464,21 +464,6 @@ set_changepoints <- function(m) {
   return(m)
 }
 
-#' Gets changepoint matrix for history dataframe.
-#'
-#' @param m Prophet object.
-#'
-#' @return array of indexes.
-#'
-#' @keywords internal
-get_changepoint_matrix <- function(m) {
-  A <- matrix(0, nrow(m$history), length(m$changepoints.t))
-  for (i in seq_along(m$changepoints.t)) {
-    A[m$history$t >= m$changepoints.t[i], i] <- 1
-  }
-  return(A)
-}
-
 #' Provides Fourier series components with the specified frequency and order.
 #'
 #' @param dates Vector of dates.
@@ -905,7 +890,6 @@ fit.prophet <- function(m, df, ...) {
   prior.scales <- out2$prior.scales
 
   m <- set_changepoints(m)
-  A <- get_changepoint_matrix(m)
 
   # Construct input to stan
   dat <- list(
@@ -914,7 +898,6 @@ fit.prophet <- function(m, df, ...) {
     S = length(m$changepoints.t),
     y = history$y_scaled,
     t = history$t,
-    A = A,
     t_change = array(m$changepoints.t),
     X = as.matrix(seasonal.features),
     sigmas = array(prior.scales),

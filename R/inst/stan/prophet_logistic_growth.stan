@@ -1,3 +1,27 @@
+functions {
+  matrix get_changepoint_matrix(vector t, vector t_change, int T, int S) {
+    // Assumes t and t_change are sorted.
+    matrix[T, S] A;
+    row_vector[S] a_row;
+    int cp_idx;
+
+    // Start with an empty matrix.
+    A = rep_matrix(0, T, S);
+    a_row = rep_row_vector(0, S);
+    cp_idx = 1;
+
+    // Fill in each row of A.
+    for (i in 1:T) {
+      while ((cp_idx <= S) && (t[i] >= t_change[cp_idx])) {
+        a_row[cp_idx] = 1;
+        cp_idx += 1;
+      }
+      A[i] = a_row;
+    }
+    return A;
+  }
+}
+
 data {
   int T;                                // Sample size
   int<lower=1> K;                       // Number of seasonal vectors
@@ -5,11 +29,15 @@ data {
   vector[T] cap;                          // Capacities
   vector[T] y;                            // Time-series
   int S;                                // Number of changepoints
-  matrix[T, S] A;                   // Split indicators
-  real t_change[S];                 // Index of changepoints
+  vector[S] t_change;                 // Index of changepoints
   matrix[T,K] X;                    // season vectors
   vector[K] sigmas;               // scale on seasonality prior
   real<lower=0> tau;                  // scale on changepoints prior
+}
+
+transformed data {
+  matrix[T, S] A;
+  A = get_changepoint_matrix(t, t_change, T, S);
 }
 
 parameters {
