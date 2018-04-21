@@ -1,7 +1,9 @@
 library(prophet)
 context("Prophet stan model tests")
 
-rstan::expose_stan_functions(rstan::stanc(file="../..//inst/stan/prophet_logistic_growth.stan"))
+rstan::expose_stan_functions(
+  rstan::stanc(file="../..//inst/stan/prophet.stan")
+)
 
 DATA <- read.csv('data.csv')
 N <- nrow(DATA)
@@ -53,4 +55,45 @@ test_that("get_zero_changepoints", {
   expect_equal(nrow(mat), floor(N / 2))
   expect_equal(ncol(mat), 1)
   expect_true(all(mat == 1))
+})
+
+test_that("linear_trend", {
+  t <- seq(0, 10)
+  m <- 0
+  k <- 1.0
+  deltas <- c(0.5)
+  changepoint.ts <- c(5)
+  A <- get_changepoint_matrix(t, changepoint.ts, length(t), 1)
+
+  y <- linear_trend(k, m, deltas, t, A, changepoint.ts)
+  y.true <- c(0, 1, 2, 3, 4, 5, 6.5, 8, 9.5, 11, 12.5)
+  expect_equal(y, y.true)
+
+  t <- t[8:length(t)]
+  A <- get_changepoint_matrix(t, changepoint.ts, length(t), 1)
+  y.true <- y.true[8:length(y.true)]
+  y <- linear_trend(k, m, deltas, t, A, changepoint.ts)
+  expect_equal(y, y.true)
+})
+
+test_that("piecewise_logistic", {
+  t <- seq(0, 10)
+  cap <- rep(10, 11)
+  m <- 0
+  k <- 1.0
+  deltas <- c(0.5)
+  changepoint.ts <- c(5)
+  A <- get_changepoint_matrix(t, changepoint.ts, length(t), 1)
+
+  y <- logistic_trend(k, m, deltas, t, cap, A, changepoint.ts, 1)
+  y.true <- c(5.000000, 7.310586, 8.807971, 9.525741, 9.820138, 9.933071,
+              9.984988, 9.996646, 9.999252, 9.999833, 9.999963)
+  expect_equal(y, y.true, tolerance = 1e-6)
+  
+  t <- t[8:length(t)]
+  A <- get_changepoint_matrix(t, changepoint.ts, length(t), 1)
+  y.true <- y.true[8:length(y.true)]
+  cap <- cap[8:length(cap)]
+  y <- logistic_trend(k, m, deltas, t, cap, A, changepoint.ts, 1)
+  expect_equal(y, y.true, tolerance = 1e-6)
 })

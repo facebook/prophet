@@ -6,9 +6,10 @@
 ## of patent rights can be found in the PATENTS file in the same directory.
 
 .onLoad <- function(libname, pkgname) {
-  .prophet.stan.models <- list(
-    "linear"=get_prophet_stan_model("linear"),
-    "logistic"=get_prophet_stan_model("logistic"))
-  assign(".prophet.stan.models", .prophet.stan.models,
-         envir=parent.env(environment()))
+  .prophet.stan.model <- get_prophet_stan_model()
+  assign(
+    ".prophet.stan.model",
+    .prophet.stan.model,
+    envir=parent.env(environment())
+  )
 }
