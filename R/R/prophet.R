@@ -321,7 +321,8 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
   df$ds <- set_date(df$ds)
   if (anyNA(df$ds)) {
     stop(paste('Unable to parse date format in column ds. Convert to date ',
-               'format. Either %Y-%m-%d or %Y-%m-%d %H:%M:%S'))
+               'format (%Y-%m-%d or %Y-%m-%d %H:%M:%S) and check that there',
+               'are no NAs.'))
   }
   for (name in names(m$extra_regressors)) {
     if (!(name %in% colnames(df))) {
@@ -1360,6 +1361,9 @@ make_future_dataframe <- function(m, periods, freq = 'day',
   # For backwards compatability with previous zoo date type,
   if (freq == 'm') {
     freq <- 'month'
+  }
+  if (is.null(m$history.dates)) {
+    stop('Model must be fit before this can be used.')
   }
   dates <- seq(max(m$history.dates), length.out = periods + 1, by = freq)
   dates <- dates[2:(periods + 1)]  # Drop the first, which is max(history$ds)

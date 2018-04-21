@@ -162,9 +162,9 @@ class Prophet(object):
                 raise ValueError('Holidays must have both lower_window and ' +
                                  'upper_window, or neither')
             if has_lower:
-                if max(self.holidays['lower_window']) > 0:
+                if self.holidays['lower_window'].max() > 0:
                     raise ValueError('Holiday lower_window should be <= 0')
-                if min(self.holidays['upper_window']) < 0:
+                if self.holidays['upper_window'].min() < 0:
                     raise ValueError('Holiday upper_window should be >= 0')
             for h in self.holidays['holiday'].unique():
                 self.validate_column_name(h, check_holidays=False)
@@ -1218,6 +1218,8 @@ class Prophet(object):
         pd.Dataframe that extends forward from the end of self.history for the
         requested number of periods.
         """
+        if self.history_dates is None:
+            raise Exception('Model must be fit before this can be used.')
         last_date = self.history_dates.max()
         dates = pd.date_range(
             start=last_date,
@@ -1306,6 +1308,9 @@ class Prophet(object):
 
         fig, axes = plt.subplots(npanel, 1, facecolor='w',
                                  figsize=(9, 3 * npanel))
+
+        if npanel == 1:
+            axes = [axes]
 
         for ax, plot in zip(axes, components):
             if plot == 'trend':
@@ -1468,6 +1473,7 @@ class Prophet(object):
 
         Parameters
         ----------
+        name: Seasonality name, like 'daily', 'weekly'.
         ax: Optional matplotlib Axes to plot on. One will be created if
             this is not provided.
         uncertainty: Optional boolean to plot uncertainty intervals.
