@@ -330,18 +330,85 @@ test_that("fit_with_holidays", {
 })
 
 test_that("make_future_dataframe", {
-  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
-  train.t <- DATA[1:234, ]
-  m <- prophet(train.t)
-  future <- make_future_dataframe(m, periods = 3, freq = 'day',
-                                  include_history = FALSE)
-  correct <- prophet:::set_date(c('2013-04-26', '2013-04-27', '2013-04-28'))
-  expect_equal(future$ds, correct)
+    skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+    train.t <- DATA[1:234, ]
+    m <- prophet(train.t)
+    future <- make_future_dataframe(m, periods = 3, freq = 'day',
+                                    include_history = FALSE)
+    correct <- prophet:::set_date(c('2013-04-26', '2013-04-27', '2013-04-28'))
+    expect_equal(future$ds, correct)
+    
+    future <- make_future_dataframe(m, periods = 3, freq = 'month',
+                                    include_history = FALSE)
+    correct <- prophet:::set_date(c('2013-05-25', '2013-06-25', '2013-07-25'))
+    expect_equal(future$ds, correct)
 
-  future <- make_future_dataframe(m, periods = 3, freq = 'month',
-                                  include_history = FALSE)
-  correct <- prophet:::set_date(c('2013-05-25', '2013-06-25', '2013-07-25'))
-  expect_equal(future$ds, correct)
+    # test with history
+    train.t.days <- as.character(m$history.dates)
+    future <- make_future_dataframe(m, periods = 3, freq = 'day')
+    correct <- prophet:::set_date(c(train.t.days, '2013-04-26', '2013-04-27', '2013-04-28'))
+    expect_equal(future$ds, correct)
+    
+    future <- make_future_dataframe(m, periods = 3, freq = 'month')
+    correct <- prophet:::set_date(c(train.t.days, '2013-05-25', '2013-06-25', '2013-07-25'))
+    expect_equal(future$ds, correct)
+    
+})
+
+test_that("make_future_dataframe_extra_regressor", {
+    skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+    train.t <- dplyr::mutate(DATA[1:234, ], extra=rnorm(234))
+    
+    m <- prophet(train.t, fit=FALSE)
+    m <- add_regressor(m, 'extra')
+    m <- fit.prophet(m, train.t)
+    # first test without the extra column (i.e. repeat basic make_future_dataframe
+    # test after modifying m)
+    future <- make_future_dataframe(m, periods = 3, freq = 'day',
+                                    include_history = FALSE, include_extra_regressors = FALSE)
+    correct <- prophet:::set_date(c('2013-04-26', '2013-04-27', '2013-04-28'))
+    expect_equal(future$ds, correct)
+    
+    future <- make_future_dataframe(m, periods = 3, freq = 'month',
+                                    include_history = FALSE, include_extra_regressors = FALSE)
+    correct <- prophet:::set_date(c('2013-05-25', '2013-06-25', '2013-07-25'))
+    expect_equal(future$ds, correct)
+    # check extra column is made, noting the warning we're expecting
+    expect_warning({
+        future <- make_future_dataframe(m, periods = 3, freq = 'day',
+                                    include_history = FALSE)
+        expect_named(future, c('ds', 'extra'))
+        correct <- prophet:::set_date(c('2013-04-26', '2013-04-27', '2013-04-28'))
+        expect_equal(future$ds, correct)
+        expect_equal(sum(future$extra), 0)
+    })
+    # same as above, just on the monthly frequency
+    expect_warning({
+        future <- make_future_dataframe(m, periods = 3, freq = 'month',
+                                    include_history = FALSE)
+        expect_named(future, c('ds', 'extra'))
+        correct <- prophet:::set_date(c('2013-05-25', '2013-06-25', '2013-07-25'))
+        expect_equal(future$ds, correct)
+        expect_equal(sum(future$extra), 0)
+    })
+    # once again, with history.  This time though the 'extra' column won't be all
+    # zeros.  Make sure it's the same as in m$history
+    train.t.days <- as.character(m$history.dates)
+    expect_warning({
+        future <- make_future_dataframe(m, periods = 3, freq = 'day')
+        expect_named(future, c('ds', 'extra'))
+        correct <- prophet:::set_date(c(train.t.days, '2013-04-26', '2013-04-27', '2013-04-28'))
+        expect_equal(future$ds, correct)
+        expect_equal(sum(future$extra), sum(m$history$extra), tolerance=0.001)
+    })
+    expect_warning({
+        future <- make_future_dataframe(m, periods = 3, freq = 'month')
+        expect_named(future, c('ds', 'extra'))
+        correct <- prophet:::set_date(c(train.t.days, '2013-05-25', '2013-06-25', '2013-07-25'))
+        expect_equal(future$ds, correct)
+        expect_equal(sum(future$extra), sum(m$history$extra), tolerance=0.001)
+    })
+    
 })
 
 test_that("auto_weekly_seasonality", {
