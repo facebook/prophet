@@ -30,6 +30,19 @@ df.head()
 
 
 <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -88,6 +101,19 @@ future.tail()
 
 
 <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -133,6 +159,19 @@ forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail()
 
 
 <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -148,36 +187,36 @@ forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail()
       <th>3265</th>
       <td>2017-01-15</td>
       <td>8.206753</td>
-      <td>7.485107</td>
-      <td>8.920149</td>
+      <td>7.491735</td>
+      <td>8.947442</td>
     </tr>
     <tr>
       <th>3266</th>
       <td>2017-01-16</td>
       <td>8.531766</td>
-      <td>7.779331</td>
-      <td>9.284859</td>
+      <td>7.797246</td>
+      <td>9.214159</td>
     </tr>
     <tr>
       <th>3267</th>
       <td>2017-01-17</td>
       <td>8.319156</td>
-      <td>7.610545</td>
-      <td>8.986889</td>
+      <td>7.626729</td>
+      <td>9.021932</td>
     </tr>
     <tr>
       <th>3268</th>
       <td>2017-01-18</td>
       <td>8.151772</td>
-      <td>7.415802</td>
-      <td>8.875191</td>
+      <td>7.428147</td>
+      <td>8.861311</td>
     </tr>
     <tr>
       <th>3269</th>
       <td>2017-01-19</td>
       <td>8.163690</td>
-      <td>7.427153</td>
-      <td>8.884826</td>
+      <td>7.443024</td>
+      <td>8.900243</td>
     </tr>
   </tbody>
 </table>
@@ -189,7 +228,7 @@ You can plot the forecast by calling the `Prophet.plot` method and passing in yo
 
 ```python
 # Python
-m.plot(forecast);
+fig1 = m.plot(forecast)
 ```
  
 ![png](/prophet/static/quick_start_files/quick_start_12_0.png) 
@@ -199,7 +238,7 @@ If you want to see the forecast components, you can use the `Prophet.plot_compon
 
 ```python
 # Python
-m.plot_components(forecast);
+fig2 = m.plot_components(forecast)
 ```
  
 ![png](/prophet/static/quick_start_files/quick_start_14_0.png) 
