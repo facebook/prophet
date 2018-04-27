@@ -28,7 +28,9 @@ globalVariables(c(
 #' @param n.changepoints Number of potential changepoints to include. Not used
 #'  if input `changepoints` is supplied. If `changepoints` is not supplied,
 #'  then n.changepoints potential changepoints are selected uniformly from the
-#'  first 80 percent of df$ds.
+#'  first `changepoint.range` proportion((0,1]) of df$ds.
+#'  @param changepoint.range Parameter controlling where to select the changepoints.
+#'  Not used if input `changepoints` is supplied.
 #' @param yearly.seasonality Fit yearly seasonality. Can be 'auto', TRUE,
 #'  FALSE, or a number of Fourier terms to generate.
 #' @param weekly.seasonality Fit weekly seasonality. Can be 'auto', TRUE,
@@ -78,6 +80,7 @@ prophet <- function(df = NULL,
                     growth = 'linear',
                     changepoints = NULL,
                     n.changepoints = 25,
+                    changepoint.range = 0.8,
                     yearly.seasonality = 'auto',
                     weekly.seasonality = 'auto',
                     daily.seasonality = 'auto',
@@ -101,6 +104,7 @@ prophet <- function(df = NULL,
     growth = growth,
     changepoints = changepoints,
     n.changepoints = n.changepoints,
+    changepoint.range = changepoint.range,
     yearly.seasonality = yearly.seasonality,
     weekly.seasonality = weekly.seasonality,
     daily.seasonality = daily.seasonality,
@@ -443,9 +447,14 @@ set_changepoints <- function(m) {
       }
     }
   } else {
-    # Place potential changepoints evenly through the first 80 pcnt of
+    # Place potential changepoints evenly through the first changepoint.range proportion of
     # the history.
-    hist.size <- floor(nrow(m$history) * .8)
+    if (m$changepoint.range > 1 || m$changepoint.range <= 0){
+      m$changepoint.range <- .8
+      message('changepoint.range greater than 1 or less than equal to 0. Using ',m$changepoint.range)
+    }
+    hist.size <- floor(nrow(m$history) * m$changepoint.range)
+  
     if (m$n.changepoints + 1 > hist.size) {
       m$n.changepoints <- hist.size - 1
       message('n.changepoints greater than number of observations. Using ',
