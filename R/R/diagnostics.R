@@ -144,3 +144,50 @@ cross_validation <- function(
   }
   return(simulated_historical_forecasts(model, horizon, units, k, period))
 }
+
+#' Copy Prophet object.
+#'
+#' @param m Prophet model object.
+#' @param cutoff Date, possibly as string. Changepoints are only retained if
+#'  changepoints <= cutoff.
+#'
+#' @return An unfitted Prophet model object with the same parameters as the
+#'  input model.
+#'
+#' @keywords internal
+prophet_copy <- function(m, cutoff = NULL) {
+  if (is.null(m$history)) {
+    stop("This is for copying a fitted Prophet object.")
+  }
+
+  if (m$specified.changepoints) {
+    changepoints <- m$changepoints
+    if (!is.null(cutoff)) {
+      cutoff <- set_date(cutoff)
+      changepoints <- changepoints[changepoints <= cutoff]
+    }
+  } else {
+    changepoints <- NULL
+  }
+  # Auto seasonalities are set to FALSE because they are already set in
+  # m$seasonalities.
+  m2 <- prophet(
+    growth = m$growth,
+    changepoints = changepoints,
+    n.changepoints = m$n.changepoints,
+    yearly.seasonality = FALSE,
+    weekly.seasonality = FALSE,
+    daily.seasonality = FALSE,
+    holidays = m$holidays,
+    seasonality.prior.scale = m$seasonality.prior.scale,
+    changepoint.prior.scale = m$changepoint.prior.scale,
+    holidays.prior.scale = m$holidays.prior.scale,
+    mcmc.samples = m$mcmc.samples,
+    interval.width = m$interval.width,
+    uncertainty.samples = m$uncertainty.samples,
+    fit = FALSE
+  )
+  m2$extra_regressors <- m$extra_regressors
+  m2$seasonalities <- m$seasonalities
+  return(m2)
+}

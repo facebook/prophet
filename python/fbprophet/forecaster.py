@@ -11,7 +11,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import defaultdict
-from copy import deepcopy
 from datetime import timedelta
 import logging
 import warnings
@@ -30,6 +29,7 @@ from fbprophet.plot import (
     plot_yearly,
     plot_seasonality,
 )
+from fbprophet.diagnostics import prophet_copy
 # fb-block 1 end
 
 logging.basicConfig()
@@ -1340,46 +1340,9 @@ class Prophet(object):
         )
 
     def copy(self, cutoff=None):
-        """Copy Prophet object
-
-        Parameters
-        ----------
-        cutoff: pd.Timestamp or None, default None.
-            cuttoff Timestamp for changepoints member variable.
-            changepoints are only retained if 'changepoints <= cutoff'
-
-        Returns
-        -------
-        Prophet class object with the same parameter with model variable
-        """
-        if self.history is None:
-            raise Exception('This is for copying a fitted Prophet object.')
-
-        if self.specified_changepoints:
-            changepoints = self.changepoints
-            if cutoff is not None:
-                # Filter change points '<= cutoff'
-                changepoints = changepoints[changepoints <= cutoff]
-        else:
-            changepoints = None
-
-        # Auto seasonalities are set to False because they are already set in
-        # self.seasonalities.
-        m = Prophet(
-            growth=self.growth,
-            n_changepoints=self.n_changepoints,
-            changepoints=changepoints,
-            yearly_seasonality=False,
-            weekly_seasonality=False,
-            daily_seasonality=False,
-            holidays=self.holidays,
-            seasonality_prior_scale=self.seasonality_prior_scale,
-            changepoint_prior_scale=self.changepoint_prior_scale,
-            holidays_prior_scale=self.holidays_prior_scale,
-            mcmc_samples=self.mcmc_samples,
-            interval_width=self.interval_width,
-            uncertainty_samples=self.uncertainty_samples,
+        warnings.warn(
+            'This method will be removed in the next version. '
+            'Please use fbprophet.diagnostics.prophet_copy. ',
+            DeprecationWarning,
         )
-        m.extra_regressors = deepcopy(self.extra_regressors)
-        m.seasonalities = deepcopy(self.seasonalities)
-        return m
+        return prophet_copy(m=self, cutoff=cutoff)
