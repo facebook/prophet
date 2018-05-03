@@ -333,3 +333,37 @@ def plot_seasonality(m, name, ax=None, uncertainty=True):
     ax.set_xlabel('ds')
     ax.set_ylabel(name)
     return artists
+
+
+def add_changepoints_to_plot(
+    ax, m, fcst, threshold=0.01, cp_color='r', cp_linestyle='--', trend=True,
+):
+    """Add markers for significant changepoints to prophet forecast plot.
+    
+    Example:
+    fig = m.plot(forecast)
+    add_changepoints_to_plot(fig.gca(), m, forecast)
+    
+    Parameters
+    ----------
+    ax: axis on which to overlay changepoint markers.
+    m: Prophet model.
+    fcst: Forecast output from m.predict.
+    threshold: Threshold on trend change magnitude for significance.
+    cp_color: Color of changepoint markers.
+    cp_linestyle: Linestyle for changepoint markers.
+    trend: If True, will also overlay the trend.
+    
+    Returns
+    -------
+    a list of matplotlib artists
+    """
+    artists = []
+    if trend:
+        artists.append(ax.plot(fcst['ds'], fcst['trend'], c=cp_color))
+    signif_changepoints = m.changepoints[
+        np.abs(np.nanmean(m.params['delta'], axis=0)) >= threshold
+    ]
+    for cp in signif_changepoints:
+        artists.append(ax.axvline(x=cp, c=cp_color, ls=cp_linestyle))
+    return artists

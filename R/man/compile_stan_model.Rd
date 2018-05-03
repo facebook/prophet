@@ -4,7 +4,7 @@
 \alias{compile_stan_model}
 \title{Compile Stan model}
 \usage{
-compile_stan_model(model)
+compile_stan_model()
 }
 \arguments{
 \item{model}{String 'linear' or 'logistic' to specify a linear or logistic

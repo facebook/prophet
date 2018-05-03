@@ -4,10 +4,12 @@
 \alias{create_metric_data}
 \title{Prepare dataframe for metrics calculation.}
 \usage{
-create_metric_data(fcst)
+create_metric_data(m = NULL, df = NULL)
 }
 \arguments{
-\item{fcst}{Dataframe output of `predict`.}
+\item{m}{Prophet object. Default NULL}
+
+\item{df}{A dataframe which is output of `simulated_historical_forecasts` or `cross_validation` Default NULL}
 }
 \value{
 A dataframe only with y and yhat as a column.

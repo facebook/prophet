@@ -4,7 +4,7 @@
 \alias{get_prophet_stan_model}
 \title{Load compiled Stan model}
 \usage{
-get_prophet_stan_model(model)
+get_prophet_stan_model()
 }
 \arguments{
 \item{model}{String 'linear' or 'logistic' to specify a linear or logistic

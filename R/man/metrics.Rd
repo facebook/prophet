@@ -11,22 +11,24 @@
 \alias{all_metrics}
 \title{Metrics for Time Series Forecasts}
 \usage{
-me(fcst)
+me(m = NULL, df = NULL)
 
-mse(fcst)
+mse(m = NULL, df = NULL)
 
-rmse(fcst)
+rmse(m = NULL, df = NULL)
 
-mae(fcst)
+mae(m = NULL, df = NULL)
 
-mpe(fcst)
+mpe(m = NULL, df = NULL)
 
-mape(fcst)
+mape(m = NULL, df = NULL)
 
-all_metrics(fcst)
+all_metrics(m = NULL, df = NULL)
 }
 \arguments{
-\item{fcst}{Dataframe output of `predict`.}
+\item{m}{Prophet object. Default NULL}
+
+\item{df}{A dataframe which is output of `simulated_historical_forecasts` or `cross_validation` Default NULL}
 }
 \value{
 metrics value (numeric)
@@ -75,8 +77,14 @@ and is defined by the formula:
 \dontrun{
 # Create example model
 library(readr)
+library(prophet)
 df <- read_csv('../tests/testthat/data.csv')
 m <- prophet(df)
+future <- make_future_dataframe(m, periods = 365)
+forecast <- predict(m, future)
+all_metrics(forecast)
+df.cv <- cross_validation(m, horizon = 100, units = 'days')
+all_metrics(df.cv)
 # You can check your models's accuracy using me, mse, rmse ...etc.
 print(rmse(m))
 }

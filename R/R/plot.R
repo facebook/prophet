@@ -302,6 +302,40 @@ plot_seasonality <- function(m, name, uncertainty = TRUE) {
   return(gg.s)
 }
 
+#' Get layers to overlay significant changepoints on prophet forecast plot.
+#'
+#' @param m Prophet model object.
+#' @param threshold Numeric, changepoints where abs(delta) >= threshold are
+#'  significant. (Default 0.01)
+#' @param cp_color Character, line color. (Default "red")
+#' @param cp_linetype Character or integer, line type. (Default "dashed")
+#' @param trend Logical, if FALSE, do not draw trend line. (Default TRUE)
+#' @param ... Other arguments passed on to layers.
+#'
+#' @return A list of ggplot2 layers.
+#'
+#' @examples
+#' \dontrun{
+#' plot(m, fcst) + add_changepoints_to_plot(m)
+#' }
+#'
+#' @export
+add_changepoints_to_plot <- function(m, threshold = 0.01, cp_color = "red",
+                               cp_linetype = "dashed", trend = TRUE, ...) {
+  layers <- list()
+  if (trend) {
+    trend_layer <- ggplot2::geom_line(
+      ggplot2::aes_string("ds", "trend"), color = cp_color, ...)
+    layers <- append(layers, trend_layer)
+  }
+  signif_changepoints <- m$changepoints[abs(m$params$delta) >= threshold]
+  cp_layer <- ggplot2::geom_vline(
+    xintercept = as.integer(signif_changepoints), color = cp_color,
+    linetype = cp_linetype, ...)
+  layers <- append(layers, cp_layer)
+  return(layers)
+}
+
 #' Plot the prophet forecast.
 #'
 #' @param x Prophet object.
