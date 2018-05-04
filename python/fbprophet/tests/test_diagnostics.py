@@ -142,52 +142,21 @@ class TestDiagnostics(TestCase):
         df_cv = diagnostics.cross_validation(
             m, horizon='4 days', period='10 days', initial='90 days')
         # Aggregation level none
-        df_none = diagnostics.performance_metrics(df_cv, aggregation='none')
+        df_none = diagnostics.performance_metrics(df_cv, rolling_window=0)
         self.assertEqual(
             set(df_none.columns),
-            {
-                'y', 'yhat', 'yhat_lower', 'yhat_upper', 'ds', 'cutoff',
-                'horizon', 'coverage', 'mae', 'mape', 'mse',
-            },
+            {'horizon', 'coverage', 'mae', 'mape', 'mse'},
         )
-        # Check each metric
-        self.assertEqual(
-            np.abs(df_cv['yhat'][0] - df_cv['y'][0]),
-            df_none['mae'][0],
-        )
-        self.assertEqual(
-            np.abs((df_cv['yhat'][0] - df_cv['y'][0]) / df_cv['y'][0]),
-            df_none['mape'][0],
-        )
-        self.assertEqual(
-            (df_cv['yhat'][0] - df_cv['y'][0]) ** 2,
-            df_none['mse'][0],
-        )
-        self.assertEqual(
-            (
-                (df_cv['y'][0] >= df_cv['yhat_lower'][0])
-                and (df_cv['y'][0] <= df_cv['yhat_upper'][0])
-            ),
-            df_none['coverage'][0],
-        )
-        # Aggregation level horizon (default)
-        df_horizon = diagnostics.performance_metrics(df_cv)
+        self.assertEqual(df_none.shape[0], 14)
+        # Aggregation level 0.2
+        df_horizon = diagnostics.performance_metrics(df_cv, rolling_window=0.2)
         self.assertEqual(len(df_horizon['horizon'].unique()), 4)
-        self.assertEqual(
-            set(df_horizon.columns),
-            {'coverage', 'mse', 'mape', 'mae', 'horizon'},
-        )
-        self.assertEqual(df_horizon.shape[0], 4)
-        # Check aggregation
-        agg = df_none.groupby('horizon', as_index=False).agg('mean')
-        for metric in ['mse', 'mape', 'mae', 'horizon']:
-            self.assertTrue((agg[metric] == df_horizon[metric]).all())
+        self.assertEqual(df_horizon.shape[0], 13)
         # Aggregation level all
-        df_all = diagnostics.performance_metrics(df_cv, aggregation='all')
-        self.assertEqual(df_all.shape, (4,))
-        self.assertEqual(set(df_all.index), {'coverage', 'mse', 'mae', 'mape'})
+        df_all = diagnostics.performance_metrics(df_cv, rolling_window=1)
+        self.assertEqual(df_all.shape[0], 1)
         for metric in ['mse', 'mape', 'mae', 'coverage']:
-            self.assertEqual(df_all[metric], df_all[metric].mean())
+            self.assertEqual(df_all[metric].values[0], df_none[metric].mean())
         # Custom list of metrics
         df_horizon = diagnostics.performance_metrics(
             df_cv, metrics=['coverage', 'mse'],

@@ -196,7 +196,7 @@ def prophet_copy(m, cutoff=None):
     return m2
 
 
-def performance_metrics(df, metrics=None, aggregation='horizon'):
+def performance_metrics(df, metrics=None, rolling_window=0.05):
     """Compute performance metrics from cross-validation results.
 
     Computes a suite of performance metrics on the output of cross-validation.
@@ -209,13 +209,17 @@ def performance_metrics(df, metrics=None, aggregation='horizon'):
     A subset of these can be specified by passing a list of names as the
     `metrics` argument.
 
-    By default, metrics will be computed for each horizon (ds - cutoff).
-    Alternatively, metrics can be computed at the level of individual ds/cutoff
-    pairs (aggregation='none'), or aggregated over all ds/cutoffs
-    (aggregation='all').
+    Metrics are calculated over a rolling window of cross validation
+    predictions, after sorting by horizon. The size of that window (number of
+    simulated forecast points) is determined by the rolling_window argument,
+    which specifies a proportion of simulated forecast points to include in
+    each window. rolling_window=0 will compute it separately for each simulated
+    forecast point (i.e., 'mse' will actually be squared error with no mean).
+    The default of rolling_window=0.05 will use 5% of the rows in df in each
+    window. rolling_window=1 will compute the metric across all simulated forecast
+    points. The results are set to the right edge of the window.
 
-    The output is a dataframe containing the columns corresponding to the level
-    of aggregation ('horizon', 'ds' and 'cutoff', or none) along with columns
+    The output is a dataframe containing column 'horizon' along with columns
     for each of the metrics computed.
 
     Parameters
@@ -223,22 +227,13 @@ def performance_metrics(df, metrics=None, aggregation='horizon'):
     df: The dataframe returned by cross_validation.
     metrics: A list of performance metrics to compute. If not provided, will
         use ['mse', 'mae', 'mape', 'coverage'].
-    aggregation: Level of aggregation for computing performance statistics.
-        Must be 'horizon', 'none', or 'all'.
+    rolling_window: Proportion of data to use in each rolling window for
+        computing the metrics.
 
     Returns
     -------
-    Dataframe with a column for each metric, and a combination of columns 'ds',
-    'cutoff', and 'horizon', depending on the aggregation level.
+    Dataframe with a column for each metric, and column 'horizon'
     """
-    # Input validation
-    valid_aggregations = ['horizon', 'all', 'none']
-    if aggregation not in valid_aggregations:
-        raise ValueError(
-            'Aggregation {} is not valid; must be one of {}'.format(
-                aggregation, valid_agggregations
-            )
-        )
     valid_metrics = ['mse', 'mae', 'mape', 'coverage']
     if metrics is None:
         metrics = valid_metrics
@@ -248,62 +243,56 @@ def performance_metrics(df, metrics=None, aggregation='horizon'):
         raise ValueError(
             'Valid values for metrics are: {}'.format(valid_metrics)
         )
-    # Get function for the metrics we want
-    metric_fns = {m: eval(m) for m in metrics}
-    def all_metrics(df_g):
-        return pd.Series({name: fn(df_g) for name, fn in metric_fns.items()})
-    # Apply functions to groupby
-    if aggregation == 'all':
-        return all_metrics(df)
-    # else,
     df_m = df.copy()
     df_m['horizon'] = df_m['ds'] - df_m['cutoff']
-    if aggregation == 'horizon':
-        return df_m.groupby('horizon').apply(all_metrics).reset_index()
-    # else,
-    for name, fn in metric_fns.items():
-        df_m[name] = fn(df_m, agg=False)
-    return df_m
+    df_m.sort_values('horizon', inplace=True)
+    # Window size
+    w = int(rolling_window * df_m.shape[0])
+    w = max(w, 1)
+    w = min(w, df_m.shape[0])
+    cols = ['horizon']
+    for metric in metrics:
+        df_m[metric] = eval(metric)(df_m, w)
+        cols.append(metric)
+    df_m = df_m[cols]
+    return df_m.dropna()
+
+
+def rolling_mean(x, w):
+    s = np.cumsum(np.insert(x, 0, 0))
+    prefix = np.empty(w - 1)
+    prefix.fill(np.nan)
+    return np.hstack((prefix, (s[w:] - s[:-w]) / float(w)))  # right-aligned
 
 
 # The functions below specify performance metrics for cross-validation results.
-# Each takes as input the output of cross_validation, and has two modes of
-# return: if agg=True, returns a float that is the metric aggregated over the
-# input. If agg=False, returns results without aggregation (for
-# aggregation='none' in performance_metrics).
+# Each takes as input the output of cross_validation, and returns the statistic
+# as an array, given a window size for rolling aggregation.
 
 
-def mse(df, agg=True):
+def mse(df, w):
     """Mean squared error
     """
     se = (df['y'] - df['yhat']) ** 2
-    if agg:
-        return np.mean(se)
-    return se
+    return rolling_mean(se.values, w)
 
 
-def mae(df, agg=True):
+def mae(df, w):
     """Mean absolute error
     """
     ae = np.abs(df['y'] - df['yhat'])
-    if agg:
-        return np.mean(ae)
-    return ae
+    return rolling_mean(ae.values, w)
 
 
-def mape(df, agg=True):
+def mape(df, w):
     """Mean absolute percent error
     """
     ape = np.abs((df['y'] - df['yhat']) / df['y'])
-    if agg:
-        return np.mean(ape)
-    return ape
+    return rolling_mean(ape.values, w)
 
 
-def coverage(df, agg=True):
+def coverage(df, w):
     """Coverage
     """
     is_covered = (df['y'] >= df['yhat_lower']) & (df['y'] <= df['yhat_upper'])
-    if agg:
-        return np.mean(is_covered)
-    return is_covered
+    return rolling_mean(is_covered.values, w)
