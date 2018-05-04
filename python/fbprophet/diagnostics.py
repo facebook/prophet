@@ -196,7 +196,7 @@ def prophet_copy(m, cutoff=None):
     return m2
 
 
-def performance_metrics(df, metrics=None, rolling_window=0.05):
+def performance_metrics(df, metrics=None, rolling_window=0.1):
     """Compute performance metrics from cross-validation results.
 
     Computes a suite of performance metrics on the output of cross-validation.
@@ -216,7 +216,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.05):
     which specifies a proportion of simulated forecast points to include in
     each window. rolling_window=0 will compute it separately for each simulated
     forecast point (i.e., 'mse' will actually be squared error with no mean).
-    The default of rolling_window=0.05 will use 5% of the rows in df in each
+    The default of rolling_window=0.1 will use 10% of the rows in df in each
     window. rolling_window=1 will compute the metric across all simulated forecast
     points. The results are set to the right edge of the window.
 
@@ -227,9 +227,9 @@ def performance_metrics(df, metrics=None, rolling_window=0.05):
     ----------
     df: The dataframe returned by cross_validation.
     metrics: A list of performance metrics to compute. If not provided, will
-        use ['mse', 'mae', 'mape', 'coverage', 'rmse'].
+        use ['mse', 'rmse', 'mae', 'mape', 'coverage'].
     rolling_window: Proportion of data to use in each rolling window for
-        computing the metrics.
+        computing the metrics. Should be in [0, 1].
 
     Returns
     -------
