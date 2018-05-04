@@ -10,7 +10,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import itertools
 import numpy as np
 import pandas as pd
 
@@ -545,68 +544,3 @@ class TestProphet(TestCase):
         m.add_regressor('constant_feature')
         with self.assertRaises(ValueError):
             m.fit(df.copy())
-
-    def test_copy(self):
-        df = DATA.copy()
-        df['cap'] = 200.
-        df['binary_feature'] = [0] * 255 + [1] * 255
-        # These values are created except for its default values
-        holiday = pd.DataFrame(
-            {'ds': pd.to_datetime(['2016-12-25']), 'holiday': ['x']})
-        products = itertools.product(
-            ['linear', 'logistic'],  # growth
-            [None, pd.to_datetime(['2016-12-25'])],  # changepoints
-            [3],  # n_changepoints
-            [True, False],  # yearly_seasonality
-            [True, False],  # weekly_seasonality
-            [True, False],  # daily_seasonality
-            [None, holiday],  # holidays
-            [1.1],  # seasonality_prior_scale
-            [1.1],  # holidays_prior_scale
-            [0.1],  # changepoint_prior_scale
-            [100],  # mcmc_samples
-            [0.9],  # interval_width
-            [200]  # uncertainty_samples
-        )
-        # Values should be copied correctly
-        for product in products:
-            m1 = Prophet(*product)
-            m1.history = m1.setup_dataframe(
-                df.copy(), initialize_scales=True)
-            m1.set_auto_seasonalities()
-            m2 = m1.copy()
-            self.assertEqual(m1.growth, m2.growth)
-            self.assertEqual(m1.n_changepoints, m2.n_changepoints)
-            self.assertEqual(m1.changepoints, m2.changepoints)
-            self.assertEqual(False, m2.yearly_seasonality)
-            self.assertEqual(False, m2.weekly_seasonality)
-            self.assertEqual(False, m2.daily_seasonality)
-            self.assertEqual(
-                m1.yearly_seasonality, 'yearly' in m2.seasonalities)
-            self.assertEqual(
-                m1.weekly_seasonality, 'weekly' in m2.seasonalities)
-            self.assertEqual(
-                m1.daily_seasonality, 'daily' in m2.seasonalities)
-            if m1.holidays is None:
-                self.assertEqual(m1.holidays, m2.holidays)
-            else:
-                self.assertTrue((m1.holidays == m2.holidays).values.all())
-            self.assertEqual(m1.seasonality_prior_scale, m2.seasonality_prior_scale)
-            self.assertEqual(m1.changepoint_prior_scale, m2.changepoint_prior_scale)
-            self.assertEqual(m1.holidays_prior_scale, m2.holidays_prior_scale)
-            self.assertEqual(m1.mcmc_samples, m2.mcmc_samples)
-            self.assertEqual(m1.interval_width, m2.interval_width)
-            self.assertEqual(m1.uncertainty_samples, m2.uncertainty_samples)
-
-        # Check for cutoff and custom seasonality and extra regressors
-        changepoints = pd.date_range('2012-06-15', '2012-09-15')
-        cutoff = pd.Timestamp('2012-07-25')
-        m1 = Prophet(changepoints=changepoints)
-        m1.add_seasonality('custom', 10, 5)
-        m1.add_regressor('binary_feature')
-        m1.fit(df)
-        m2 = m1.copy(cutoff=cutoff)
-        changepoints = changepoints[changepoints <= cutoff]
-        self.assertTrue((changepoints == m2.changepoints).all())
-        self.assertTrue('custom' in m2.seasonalities)
-        self.assertTrue('binary_feature' in m2.extra_regressors)
