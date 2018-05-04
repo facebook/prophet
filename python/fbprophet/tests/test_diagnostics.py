@@ -145,7 +145,7 @@ class TestDiagnostics(TestCase):
         df_none = diagnostics.performance_metrics(df_cv, rolling_window=0)
         self.assertEqual(
             set(df_none.columns),
-            {'horizon', 'coverage', 'mae', 'mape', 'mse'},
+            {'horizon', 'coverage', 'mae', 'mape', 'mse', 'rmse'},
         )
         self.assertEqual(df_none.shape[0], 14)
         # Aggregation level 0.2
