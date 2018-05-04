@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 
 # fb-block 1 start
-from fbprophet.models import prophet_stan_models
+from fbprophet.models import prophet_stan_model
 from fbprophet.plot import (
     plot,
     plot_components,
@@ -347,13 +347,6 @@ class Prophet(object):
                 (self.changepoints - self.start) / self.t_scale))
         else:
             self.changepoints_t = np.array([0])  # dummy changepoint
-
-    def get_changepoint_matrix(self):
-        """Gets changepoint matrix for history dataframe."""
-        A = np.zeros((self.history.shape[0], len(self.changepoints_t)))
-        for i, t_i in enumerate(self.changepoints_t):
-            A[self.history['t'].values >= t_i, i] = 1
-        return A
 
     @staticmethod
     def fourier_series(dates, period, series_order):
@@ -790,7 +783,6 @@ class Prophet(object):
             self.make_all_seasonality_features(history))
 
         self.set_changepoints()
-        A = self.get_changepoint_matrix()
 
         dat = {
             'T': history.shape[0],
@@ -798,20 +790,21 @@ class Prophet(object):
             'S': len(self.changepoints_t),
             'y': history['y_scaled'],
             't': history['t'],
-            'A': A,
             't_change': self.changepoints_t,
             'X': seasonal_features,
             'sigmas': prior_scales,
             'tau': self.changepoint_prior_scale,
+            'trend_indicator': int(self.growth == 'logistic'),
         }
 
         if self.growth == 'linear':
+            dat['cap'] = np.zeros(self.history.shape[0])
             kinit = self.linear_growth_init(history)
         else:
             dat['cap'] = history['cap_scaled']
             kinit = self.logistic_growth_init(history)
 
-        model = prophet_stan_models[self.growth]
+        model = prophet_stan_model
 
         def stan_init():
             return {

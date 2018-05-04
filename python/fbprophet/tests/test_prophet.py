@@ -151,11 +151,7 @@ class TestProphet(TestCase):
         self.assertEqual(cp.shape[0], m.n_changepoints)
         self.assertEqual(len(cp.shape), 1)
         self.assertTrue(cp.min() > 0)
-        self.assertTrue(cp.max() < N)
-
-        mat = m.get_changepoint_matrix()
-        self.assertEqual(mat.shape[0], N // 2)
-        self.assertEqual(mat.shape[1], m.n_changepoints)
+        self.assertTrue(cp.max() < 1)
 
     def test_get_zero_changepoints(self):
         m = Prophet(n_changepoints=0)
@@ -169,10 +165,6 @@ class TestProphet(TestCase):
         cp = m.changepoints_t
         self.assertEqual(cp.shape[0], 1)
         self.assertEqual(cp[0], 0)
-
-        mat = m.get_changepoint_matrix()
-        self.assertEqual(mat.shape[0], N // 2)
-        self.assertEqual(mat.shape[1], 1)
 
     def test_override_n_changepoints(self):
         m = Prophet()

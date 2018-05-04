@@ -20,20 +20,19 @@ if platform.platform().startswith('Win'):
     PLATFORM = 'win'
 
 SETUP_DIR = os.path.dirname(os.path.abspath(__file__))
-MODELS_DIR = os.path.join(SETUP_DIR, 'stan', PLATFORM)
-MODELS_TARGET_DIR = os.path.join('fbprophet', 'stan_models')
+MODEL_DIR = os.path.join(SETUP_DIR, 'stan', PLATFORM)
+MODEL_TARGET_DIR = os.path.join('fbprophet', 'stan_model')
 
 
-def build_stan_models(target_dir, models_dir=MODELS_DIR):
+def build_stan_model(target_dir, model_dir=MODEL_DIR):
     from pystan import StanModel
-    for model_type in ['linear', 'logistic']:
-        model_name = 'prophet_{}_growth.stan'.format(model_type)
-        target_name = '{}_growth.pkl'.format(model_type)
-        with open(os.path.join(models_dir, model_name)) as f:
-            model_code = f.read()
-        sm = StanModel(model_code=model_code)
-        with open(os.path.join(target_dir, target_name), 'wb') as f:
-            pickle.dump(sm, f, protocol=pickle.HIGHEST_PROTOCOL)
+    model_name = 'prophet.stan'
+    target_name = 'prophet_model.pkl'
+    with open(os.path.join(model_dir, model_name)) as f:
+        model_code = f.read()
+    sm = StanModel(model_code=model_code)
+    with open(os.path.join(target_dir, target_name), 'wb') as f:
+        pickle.dump(sm, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 class BuildPyCommand(build_py):
@@ -41,9 +40,9 @@ class BuildPyCommand(build_py):
 
     def run(self):
         if not self.dry_run:
-            target_dir = os.path.join(self.build_lib, MODELS_TARGET_DIR)
+            target_dir = os.path.join(self.build_lib, MODEL_TARGET_DIR)
             self.mkpath(target_dir)
-            build_stan_models(target_dir)
+            build_stan_model(target_dir)
 
         build_py.run(self)
 
@@ -53,9 +52,9 @@ class DevelopCommand(develop):
 
     def run(self):
         if not self.dry_run:
-            target_dir = os.path.join(self.setup_path, MODELS_TARGET_DIR)
+            target_dir = os.path.join(self.setup_path, MODEL_TARGET_DIR)
             self.mkpath(target_dir)
-            build_stan_models(target_dir)
+            build_stan_model(target_dir)
 
         develop.run(self)
 
