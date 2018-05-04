@@ -103,3 +103,32 @@ test_that("cross_validation_default_value_check", {
     m, horizon = 32, units = 'days', period = 10, initial = 96)
   expect_equal(sum(dplyr::select(df.cv1 - df.cv2, y, yhat)), 0)
 })
+
+test_that("performance_metrics", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  m <- prophet(DATA)
+  df_cv <- cross_validation(
+    m, horizon = 4, units = "days", period = 10, initial = 90)
+  # Aggregation level none
+  df_none <- performance_metrics(df_cv, rolling_window = 0)
+  expect_true(all(
+    sort(colnames(df_none))
+    == sort(c('horizon', 'coverage', 'mae', 'mape', 'mse', 'rmse'))
+  ))
+  expect_equal(nrow(df_none), 14)
+  # Aggregation level 0.2
+  df_horizon <- performance_metrics(df_cv, rolling_window = 0.2)
+  expect_equal(length(unique(df_horizon$horizon)), 4)
+  expect_equal(nrow(df_horizon), 13)
+  # Aggregation level all
+  df_all <- performance_metrics(df_cv, rolling_window = 1)
+  expect_equal(nrow(df_all), 1)
+  for (metric in c('mse', 'mape', 'mae', 'coverage')) {
+    expect_equal(df_all[[metric]][1], mean(df_none[[metric]]))
+  }
+  # Custom list of metrics
+  df_horizon <- performance_metrics(df_cv, metrics = c('coverage', 'mse'))
+  expect_true(all(
+    sort(colnames(df_horizon)) == sort(c('coverage', 'mse', 'horizon'))
+  ))
+})

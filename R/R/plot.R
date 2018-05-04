@@ -406,3 +406,68 @@ dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
   return(dyBase)
 }
 
+#' Plot a performance metric vs. forecast horizon from cross validation.
+
+#' Cross validation produces a collection of out-of-sample model predictions
+#' that can be compared to actual values, at a range of different horizons
+#' (distance from the cutoff). This computes a specified performance metric
+#' for each prediction, and aggregated over a rolling window with horizon.
+#'
+#' This uses fbprophet.diagnostics.performance_metrics to compute the metrics.
+#' Valid values of metric are 'mse', 'rmse', 'mae', 'mape', and 'coverage'.
+#'
+#' rolling_window is the proportion of data included in the rolling window of
+#' aggregation. The default value of 0.1 means 10% of data are included in the
+#' aggregation for computing the metric.
+#'
+#' As a concrete example, if metric='mse', then this plot will show the
+#' squared error for each cross validation prediction, along with the MSE
+#' averaged over rolling windows of 10% of the data.
+#'
+#' @param df_cv The output from fbprophet.diagnostics.cross_validation.
+#' @param metric Metric name, one of 'mse', 'rmse', 'mae', 'mape', 'coverage'.
+#' @param rolling_window Proportion of data to use for rolling average of
+#'  metric. In [0, 1]. Defaults to 0.1.
+#'
+#' @return A ggplot2 plot.
+#'
+#' @export
+plot_cross_validation_metric <- function(df_cv, metric, rolling_window=0.1) {
+  df_none <- performance_metrics(df_cv, metrics = metric, rolling_window = 0)
+  df_h <- performance_metrics(
+    df_cv, metrics = metric, rolling_window = rolling_window
+  )
+
+  # Better plotting of difftime
+  # Target ~10 ticks
+  tick_w <- max(as.double(df_none$horizon, units = 'secs')) / 10.
+  # Find the largest time resolution that has <1 unit per bin
+  dts <- c('days', 'hours', 'mins', 'secs')
+  dt_conversions <- c(
+    24 * 60 * 60,
+    60 * 60,
+    60,
+    1
+  )
+  for (i in seq_along(dts)) {
+    if (as.difftime(1, units = dts[i]) < as.difftime(tick_w, units = 'secs')) {
+      break
+    }
+  }
+  df_none$x_plt <- (
+    as.double(df_none$horizon, units = 'secs') / dt_conversions[i]
+  )
+  df_h$x_plt <- as.double(df_h$horizon, units = 'secs') / dt_conversions[i]
+
+  gg <- (
+    ggplot2::ggplot(df_none, ggplot2::aes_string(x = 'x_plt', y = metric)) +
+    ggplot2::labs(x = paste0('Horizon (', dts[i], ')'), y = metric) +
+    ggplot2::geom_point(color = 'gray') +
+    ggplot2::geom_line(
+      data = df_h, ggplot2::aes_string(x = 'x_plt', y = metric), color = 'blue'
+    ) +
+    ggplot2::theme(aspect.ratio = 3 / 5)
+  )
+
+  return(gg)
+}

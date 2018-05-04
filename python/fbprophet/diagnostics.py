@@ -260,6 +260,20 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
 
 
 def rolling_mean(x, w):
+    """Compute a rolling mean of x
+
+    Right-aligned. Padded with NaNs on the front so the output is the same
+    size as x.
+
+    Parameters
+    ----------
+    x: Array.
+    w: Integer window size (number of elements).
+
+    Returns
+    -------
+    Rolling mean of x with window size w.
+    """
     s = np.cumsum(np.insert(x, 0, 0))
     prefix = np.empty(w - 1)
     prefix.fill(np.nan)
@@ -273,6 +287,15 @@ def rolling_mean(x, w):
 
 def mse(df, w):
     """Mean squared error
+
+    Parameters
+    ----------
+    df: Cross-validation results dataframe.
+    w: Aggregation window size.
+
+    Returns
+    -------
+    Array of mean squared errors.
     """
     se = (df['y'] - df['yhat']) ** 2
     return rolling_mean(se.values, w)
@@ -280,12 +303,30 @@ def mse(df, w):
 
 def rmse(df, w):
     """Root mean squared error
+
+    Parameters
+    ----------
+    df: Cross-validation results dataframe.
+    w: Aggregation window size.
+
+    Returns
+    -------
+    Array of root mean squared errors.
     """
     return np.sqrt(mse(df, w))
 
 
 def mae(df, w):
     """Mean absolute error
+
+    Parameters
+    ----------
+    df: Cross-validation results dataframe.
+    w: Aggregation window size.
+
+    Returns
+    -------
+    Array of mean absolute errors.
     """
     ae = np.abs(df['y'] - df['yhat'])
     return rolling_mean(ae.values, w)
@@ -293,6 +334,15 @@ def mae(df, w):
 
 def mape(df, w):
     """Mean absolute percent error
+
+    Parameters
+    ----------
+    df: Cross-validation results dataframe.
+    w: Aggregation window size.
+
+    Returns
+    -------
+    Array of mean absolute percent errors.
     """
     ape = np.abs((df['y'] - df['yhat']) / df['y'])
     return rolling_mean(ape.values, w)
@@ -300,6 +350,15 @@ def mape(df, w):
 
 def coverage(df, w):
     """Coverage
+
+    Parameters
+    ----------
+    df: Cross-validation results dataframe.
+    w: Aggregation window size.
+
+    Returns
+    -------
+    Array of coverages.
     """
     is_covered = (df['y'] >= df['yhat_lower']) & (df['y'] <= df['yhat_upper'])
     return rolling_mean(is_covered.values, w)
