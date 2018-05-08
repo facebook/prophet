@@ -152,6 +152,7 @@ class Prophet(object):
         self.params = {}
         self.history = None
         self.history_dates = None
+        self.train_component_cols = None
         self.validate_inputs()
 
     def validate_inputs(self):
@@ -187,7 +188,7 @@ class Prophet(object):
         if '_delim_' in name:
             raise ValueError('Name cannot contain "_delim_"')
         reserved_names = [
-            'trend', 'seasonal', 'seasonalities', 'daily', 'weekly', 'yearly',
+            'trend', 'additive_terms', 'daily', 'weekly', 'yearly',
             'holidays', 'zeros', 'extra_regressors', 'yhat'
         ]
         rn_l = [n + '_lower' for n in reserved_names]
@@ -557,6 +558,8 @@ class Prophet(object):
         -------
         pd.DataFrame with regression features.
         list of prior scales for each column of the features dataframe.
+        Dataframe with indicators for which regression components correspond to
+            which columns.
         """
         seasonal_features = []
         prior_scales = []
@@ -588,7 +591,10 @@ class Prophet(object):
             seasonal_features.append(
                 pd.DataFrame({'zeros': np.zeros(df.shape[0])}))
             prior_scales.append(1.)
-        return pd.concat(seasonal_features, axis=1), prior_scales
+
+        seasonal_features = pd.concat(seasonal_features, axis=1)
+        component_cols = self.regressor_column_matrix(seasonal_features)
+        return seasonal_features, prior_scales, component_cols
 
     def parse_seasonality_args(self, name, arg, auto_disable, default_order):
         """Get number of fourier components for built-in seasonalities.
@@ -779,8 +785,9 @@ class Prophet(object):
         history = self.setup_dataframe(history, initialize_scales=True)
         self.history = history
         self.set_auto_seasonalities()
-        seasonal_features, prior_scales = (
+        seasonal_features, prior_scales, component_cols = (
             self.make_all_seasonality_features(history))
+        self.train_component_cols = component_cols
 
         self.set_changepoints()
 
@@ -884,7 +891,7 @@ class Prophet(object):
             cols.append('floor')
         # Add in forecast components
         df2 = pd.concat((df[cols], intervals, seasonal_components), axis=1)
-        df2['yhat'] = df2['trend'] + df2['seasonal']
+        df2['yhat'] = df2['trend'] + df2['additive_terms']
         return df2
 
     @staticmethod
@@ -984,22 +991,38 @@ class Prophet(object):
         -------
         Dataframe with seasonal components.
         """
-        seasonal_features, _ = self.make_all_seasonality_features(df)
+        seasonal_features, _, component_cols = (
+            self.make_all_seasonality_features(df)
+        )
         lower_p = 100 * (1.0 - self.interval_width) / 2
         upper_p = 100 * (1.0 + self.interval_width) / 2
 
+        X = seasonal_features.as_matrix()
+        data = {}
+        for component in component_cols.columns:
+            beta_c = self.params['beta'] * component_cols[component].values
+
+            comp = np.matmul(X, beta_c.transpose()) * self.y_scale
+            data[component] = np.nanmean(comp, axis=1)
+            data[component + '_lower'] = np.nanpercentile(
+                comp, lower_p, axis=1,
+            )
+            data[component + '_upper'] = np.nanpercentile(
+                comp, upper_p, axis=1,
+            )
+        return pd.DataFrame(data)
+
+    def regressor_column_matrix(self, seasonal_features):
         components = pd.DataFrame({
             'col': np.arange(seasonal_features.shape[1]),
             'component': [x.split('_delim_')[0] for x in seasonal_features.columns],
         })
-        # Add total for all regression components
+        # Add total for all additive components
         components = components.append(pd.DataFrame({
             'col': np.arange(seasonal_features.shape[1]),
-            'component': 'seasonal',
+            'component': 'additive_terms',
         }))
-        # Add totals for seasonality, holiday, and extra regressors
-        components = self.add_group_component(
-            components, 'seasonalities', self.seasonalities.keys())
+        # Add totals for holidays and extra regressors
         if self.holidays is not None:
             components = self.add_group_component(
                 components, 'holidays', self.holidays['holiday'].unique())
@@ -1007,23 +1030,16 @@ class Prophet(object):
             components, 'extra_regressors', self.extra_regressors.keys())
         # Remove the placeholder
         components = components[components['component'] != 'zeros']
-
-        X = seasonal_features.as_matrix()
-        data = {}
-        for component, features in components.groupby('component'):
-            cols = features.col.tolist()
-            comp_beta = self.params['beta'][:, cols]
-            comp_features = X[:, cols]
-            comp = (
-                np.matmul(comp_features, comp_beta.transpose())
-                * self.y_scale  # noqa W503
-            )
-            data[component] = np.nanmean(comp, axis=1)
-            data[component + '_lower'] = np.nanpercentile(comp, lower_p,
-                                                            axis=1)
-            data[component + '_upper'] = np.nanpercentile(comp, upper_p,
-                                                            axis=1)
-        return pd.DataFrame(data)
+        # Convert to a binary matrix
+        component_cols = pd.crosstab(
+            components['col'], components['component'],
+        )
+        # Compare to the training, if set.
+        if self.train_component_cols is not None:
+            component_cols = component_cols[self.train_component_cols.columns]
+            if not component_cols.equals(self.train_component_cols):
+                raise Exception('A bug occurred in constructing regressors.')
+        return component_cols
 
     def add_group_component(self, components, name, group):
         """Adds a component with given name that contains all of the components
@@ -1061,7 +1077,7 @@ class Prophet(object):
         )))
 
         # Generate seasonality features once so we can re-use them.
-        seasonal_features, _ = self.make_all_seasonality_features(df)
+        seasonal_features, _, _ = self.make_all_seasonality_features(df)
 
         sim_values = {'yhat': [], 'trend': [], 'seasonal': []}
         for i in range(n_iterations):

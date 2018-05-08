@@ -460,12 +460,20 @@ class TestProphet(TestCase):
         m.add_seasonality(name='monthly', period=30, fourier_order=5,
                           prior_scale=2.)
         m.fit(DATA.copy())
-        seasonal_features, prior_scales = m.make_all_seasonality_features(
-            m.history)
+        seasonal_features, prior_scales, component_cols = (
+            m.make_all_seasonality_features(m.history)
+        )
+        self.assertEqual(sum(component_cols['monthly']), 10)
+        self.assertEqual(sum(component_cols['special_day']), 1)
+        self.assertEqual(sum(component_cols['weekly']), 6)
         if seasonal_features.columns[0] == 'monthly_delim_1':
             true = [2.] * 10 + [10.] * 6 + [4.]
+            self.assertEqual(sum(component_cols['monthly'][:10]), 10)
+            self.assertEqual(sum(component_cols['weekly'][10:16]), 6)
         else:
             true = [10.] * 6 + [2.] * 10 + [4.]
+            self.assertEqual(sum(component_cols['weekly'][:6]), 6)
+            self.assertEqual(sum(component_cols['monthly'][6:16]), 10)
         self.assertEqual(prior_scales, true)
 
     def test_added_regressors(self):
@@ -504,12 +512,19 @@ class TestProphet(TestCase):
         self.assertAlmostEqual(df2['numeric_feature'][0], -1.726962, places=4)
         self.assertAlmostEqual(df2['binary_feature2'][0], 2.022859, places=4)
         # Check that feature matrix and prior scales are correctly constructed
-        seasonal_features, prior_scales = m.make_all_seasonality_features(df2)
-        self.assertIn('binary_feature', seasonal_features)
-        self.assertIn('numeric_feature', seasonal_features)
-        self.assertIn('binary_feature2', seasonal_features)
+        seasonal_features, prior_scales, component_cols = (
+            m.make_all_seasonality_features(df2)
+        )
         self.assertEqual(seasonal_features.shape[1], 29)
-        self.assertEqual(set(prior_scales[26:]), set([0.2, 0.5, 10.]))
+        names = ['binary_feature', 'numeric_feature', 'binary_feature2']
+        true_priors = [0.2, 0.5, 10.]
+        for i, name in enumerate(names):
+            self.assertIn(name, seasonal_features)
+            self.assertEqual(sum(component_cols[name]), 1)
+            self.assertEqual(
+                sum(np.array(prior_scales) * component_cols[name]),
+                true_priors[i],
+            )
         # Check that forecast components are reasonable
         future = pd.DataFrame({
             'ds': ['2014-06-01'],
@@ -520,23 +535,19 @@ class TestProphet(TestCase):
             m.predict(future)
         future['binary_feature2'] = 0
         fcst = m.predict(future)
-        self.assertEqual(fcst.shape[1], 31)
+        self.assertEqual(fcst.shape[1], 28)
         self.assertEqual(fcst['binary_feature'][0], 0)
         self.assertAlmostEqual(
             fcst['extra_regressors'][0],
             fcst['numeric_feature'][0] + fcst['binary_feature2'][0],
         )
         self.assertAlmostEqual(
-            fcst['seasonalities'][0],
-            fcst['yearly'][0] + fcst['weekly'][0],
-        )
-        self.assertAlmostEqual(
-            fcst['seasonal'][0],
-            fcst['seasonalities'][0] + fcst['extra_regressors'][0],
+            fcst['additive_terms'][0],
+            fcst['yearly'][0] + fcst['weekly'][0] + fcst['extra_regressors'][0]
         )
         self.assertAlmostEqual(
             fcst['yhat'][0],
-            fcst['trend'][0] + fcst['seasonal'][0],
+            fcst['trend'][0] + fcst['additive_terms'][0],
         )
         # Check fails if constant extra regressor
         df['constant_feature'] = 5
