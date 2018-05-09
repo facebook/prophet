@@ -77,7 +77,8 @@ def plot_components(
     """Plot the Prophet forecast components.
 
     Will plot whichever are available of: trend, holidays, weekly
-    seasonality, and yearly seasonality.
+    seasonality, yearly seasonality, and additive and multiplicative extra
+    regressors.
 
     Parameters
     ----------
@@ -103,8 +104,12 @@ def plot_components(
         components.append('holidays')
     components.extend([name for name in m.seasonalities
                     if name in fcst])
-    if len(m.extra_regressors) > 0 and 'extra_regressors' in fcst:
-        components.append('extra_regressors')
+    regressors = {'additive': False, 'multiplicative': False}
+    for name, props in m.extra_regressors.items():
+        regressors[props['mode']] = True
+    for mode in ['additive', 'multiplicative']:
+        if regressors[mode] and 'extra_regressors_{}'.format(mode) in fcst:
+            components.append('extra_regressors_{}'.format(mode))
     npanel = len(components)
 
     fig, axes = plt.subplots(npanel, 1, facecolor='w',
@@ -119,11 +124,6 @@ def plot_components(
                 m=m, fcst=fcst, name='trend', ax=ax, uncertainty=uncertainty,
                 plot_cap=plot_cap,
             )
-        elif plot_name == 'holidays':
-            plot_forecast_component(
-                m=m, fcst=fcst, name='holidays', ax=ax,
-                uncertainty=uncertainty, plot_cap=False,
-            )
         elif plot_name == 'weekly':
             plot_weekly(
                 m=m, ax=ax, uncertainty=uncertainty, weekly_start=weekly_start,
@@ -132,10 +132,14 @@ def plot_components(
             plot_yearly(
                 m=m, ax=ax, uncertainty=uncertainty, yearly_start=yearly_start,
             )
-        elif plot_name == 'extra_regressors':
+        elif plot_name in [
+            'holidays',
+            'extra_regressors_additive',
+            'extra_regressors_multiplicative',
+        ]:
             plot_forecast_component(
-                m=m, fcst=fcst, name='extra_regressors', ax=ax,
-                uncertainty=uncertainty, plot_cap=False,
+                m=m, fcst=fcst, name=plot_name, ax=ax, uncertainty=uncertainty,
+                plot_cap=False,
             )
         else:
             plot_seasonality(
@@ -242,7 +246,7 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0):
     ax.set_xticks(range(len(days)))
     ax.set_xticklabels(days)
     ax.set_xlabel('Day of week')
-    ax.set_ylabel('weekly')
+    ax.set_ylabel('weekly ({})'.format(m.seasonalities['weekly']['mode']))
     return artists
 
 
@@ -284,7 +288,7 @@ def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0):
         lambda x, pos=None: '{dt:%B} {dt.day}'.format(dt=num2date(x))))
     ax.xaxis.set_major_locator(months)
     ax.set_xlabel('Day of year')
-    ax.set_ylabel('yearly')
+    ax.set_ylabel('yearly ({})'.format(m.seasonalities['yearly']['mode']))
     return artists
 
 
@@ -334,7 +338,7 @@ def plot_seasonality(m, name, ax=None, uncertainty=True):
     ax.xaxis.set_major_formatter(FuncFormatter(
         lambda x, pos=None: fmt_str.format(dt=num2date(x))))
     ax.set_xlabel('ds')
-    ax.set_ylabel(name)
+    ax.set_ylabel('{} ({})'.format(name, m.seasonalities[name]['mode']))
     return artists
 
 

@@ -85,6 +85,8 @@ data {
   vector[K] sigmas;     // Scale on seasonality prior
   real<lower=0> tau;    // Scale on changepoints prior
   int trend_indicator;  // 0 for linear, 1 for logistic
+  vector[K] s_a;        // Indicator of additive features
+  vector[K] s_m;        // Indicator of multiplicative features
 }
 
 transformed data {
@@ -102,12 +104,17 @@ parameters {
 
 transformed parameters {
   vector[T] trend;
+  vector[T] Xb_a;
+  vector[T] Xb_m;
 
   if (trend_indicator == 0) {
     trend = linear_trend(k, m, delta, t, A, t_change);
   } else if (trend_indicator == 1) {
     trend = logistic_trend(k, m, delta, t, cap, A, t_change, S);
   }
+
+  Xb_a = X * (beta .* s_a);
+  Xb_m = X * (beta .* s_m);
 }
 
 model {
@@ -119,5 +126,5 @@ model {
   beta ~ normal(0, sigmas);
 
   // Likelihood
-  y ~ normal(trend + X * beta, sigma_obs);
+  y ~ normal(trend .* (1 + Xb_m) + Xb_a, sigma_obs);
 }

@@ -70,6 +70,7 @@ class Prophet(object):
         lower_window=-2 will include 2 days prior to the date as holidays. Also
         optionally can have a column prior_scale specifying the prior scale for
         that holiday.
+    seasonality_mode: 'additive' (default) or 'multiplicative'.
     seasonality_prior_scale: Parameter modulating the strength of the
         seasonality model. Larger values allow the model to fit larger seasonal
         fluctuations, smaller values dampen the seasonality. Can be specified
@@ -100,6 +101,7 @@ class Prophet(object):
             weekly_seasonality='auto',
             daily_seasonality='auto',
             holidays=None,
+            seasonality_mode='additive',
             seasonality_prior_scale=10.0,
             holidays_prior_scale=10.0,
             changepoint_prior_scale=0.05,
@@ -132,6 +134,7 @@ class Prophet(object):
             holidays['ds'] = pd.to_datetime(holidays['ds'])
         self.holidays = holidays
 
+        self.seasonality_mode = seasonality_mode
         self.seasonality_prior_scale = float(seasonality_prior_scale)
         self.changepoint_prior_scale = float(changepoint_prior_scale)
         self.holidays_prior_scale = float(holidays_prior_scale)
@@ -173,6 +176,10 @@ class Prophet(object):
                     raise ValueError('Holiday upper_window should be >= 0')
             for h in self.holidays['holiday'].unique():
                 self.validate_column_name(h, check_holidays=False)
+        if self.seasonality_mode not in ['additive', 'multiplicative']:
+            raise ValueError(
+                "seasonality_mode must be 'additive' or 'multiplicative'"
+            )
 
     def validate_column_name(self, name, check_holidays=True,
                              check_seasonalities=True, check_regressors=True):
@@ -189,7 +196,8 @@ class Prophet(object):
             raise ValueError('Name cannot contain "_delim_"')
         reserved_names = [
             'trend', 'additive_terms', 'daily', 'weekly', 'yearly',
-            'holidays', 'zeros', 'extra_regressors', 'yhat'
+            'holidays', 'zeros', 'extra_regressors_additive',
+            'extra_regressors_multiplicative', 'yhat',
         ]
         rn_l = [n + '_lower' for n in reserved_names]
         rn_u = [n + '_upper' for n in reserved_names]
@@ -410,6 +418,7 @@ class Prophet(object):
         -------
         holiday_features: pd.DataFrame with a column for each holiday.
         prior_scale_list: List of prior scales for each holiday column.
+        holiday_names: List of names of holidays
         """
         # Holds columns of our future matrix.
         expanded_holidays = defaultdict(lambda: np.zeros(dates.shape[0]))
@@ -461,9 +470,11 @@ class Prophet(object):
             prior_scales[h.split('_delim_')[0]]
             for h in holiday_features.columns
         ]
-        return holiday_features, prior_scale_list
+        return holiday_features, prior_scale_list, list(prior_scales.keys())
 
-    def add_regressor(self, name, prior_scale=None, standardize='auto'):
+    def add_regressor(
+        self, name, prior_scale=None, standardize='auto', mode=None
+    ):
         """Add an additional regressor to be used for fitting and predicting.
 
         The dataframe passed to `fit` and `predict` will have a column with the
@@ -472,6 +483,10 @@ class Prophet(object):
         coefficient is given a prior with the specified scale parameter.
         Decreasing the prior scale will add additional regularization. If no
         prior scale is provided, self.holidays_prior_scale will be used.
+        Mode can be specified as either 'additive' or 'multiplicative'. If not
+        specified, self.seasonality_mode will be used. 'additive' means the
+        effect of the regressor will be added to the trend, 'multiplicative'
+        means it will multiply the trend.
 
         Parameters
         ----------
@@ -481,6 +496,8 @@ class Prophet(object):
         standardize: optional, specify whether this regressor will be
             standardized prior to fitting. Can be 'auto' (standardize if not
             binary), True, or False.
+        mode: optional, 'additive' or 'multiplicative'. Defaults to
+            self.seasonality_mode.
 
         Returns
         -------
@@ -492,16 +509,23 @@ class Prophet(object):
         self.validate_column_name(name, check_regressors=False)
         if prior_scale is None:
             prior_scale = float(self.holidays_prior_scale)
+        if mode is None:
+            mode = self.seasonality_mode
         assert prior_scale > 0
+        if mode not in ['additive', 'multiplicative']:
+            raise ValueError("mode must be 'additive' or 'multiplicative'")
         self.extra_regressors[name] = {
             'prior_scale': prior_scale,
             'standardize': standardize,
             'mu': 0.,
             'std': 1.,
+            'mode': mode,
         }
         return self
 
-    def add_seasonality(self, name, period, fourier_order, prior_scale=None):
+    def add_seasonality(
+        self, name, period, fourier_order, prior_scale=None, mode=None
+    ):
         """Add a seasonal component with specified period, number of Fourier
         components, and prior scale.
 
@@ -514,12 +538,18 @@ class Prophet(object):
         seasonality_prior_scale provided on Prophet initialization (defaults
         to 10).
 
+        Mode can be specified as either 'additive' or 'multiplicative'. If not
+        specified, self.seasonality_mode will be used (defaults to additive).
+        Additive means the seasonality will be added to the trend,
+        multiplicative means it will multiply the trend.
+
         Parameters
         ----------
         name: string name of the seasonality component.
         period: float number of days in one period.
         fourier_order: int number of Fourier components to use.
-        prior_scale: float prior scale for this component.
+        prior_scale: optional float prior scale for this component.
+        mode: optional 'additive' or 'multiplicative'
 
         Returns
         -------
@@ -537,10 +567,15 @@ class Prophet(object):
             ps = float(prior_scale)
         if ps <= 0:
             raise ValueError('Prior scale must be > 0')
+        if mode is None:
+            mode = self.seasonality_mode
+        if mode not in ['additive', 'multiplicative']:
+            raise ValueError("mode must be 'additive' or 'multiplicative'")
         self.seasonalities[name] = {
             'period': period,
             'fourier_order': fourier_order,
             'prior_scale': ps,
+            'mode': mode,
         }
         return self
 
@@ -560,9 +595,12 @@ class Prophet(object):
         list of prior scales for each column of the features dataframe.
         Dataframe with indicators for which regression components correspond to
             which columns.
+        Dictionary with keys 'additive' and 'multiplicative' listing the
+            component names for each mode of seasonality.
         """
         seasonal_features = []
         prior_scales = []
+        modes = {'additive': [], 'multiplicative': []}
 
         # Seasonality features
         for name, props in self.seasonalities.items():
@@ -575,26 +613,120 @@ class Prophet(object):
             seasonal_features.append(features)
             prior_scales.extend(
                 [props['prior_scale']] * features.shape[1])
+            modes[props['mode']].append(name)
 
         # Holiday features
         if self.holidays is not None:
-            features, holiday_priors = self.make_holiday_features(df['ds'])
+            features, holiday_priors, holiday_names = (
+                self.make_holiday_features(df['ds'])
+            )
             seasonal_features.append(features)
             prior_scales.extend(holiday_priors)
+            modes[self.seasonality_mode].extend(holiday_names)
 
         # Additional regressors
         for name, props in self.extra_regressors.items():
             seasonal_features.append(pd.DataFrame(df[name]))
             prior_scales.append(props['prior_scale'])
+            modes[props['mode']].append(name)
 
+        # Dummy to prevent empty X
         if len(seasonal_features) == 0:
             seasonal_features.append(
                 pd.DataFrame({'zeros': np.zeros(df.shape[0])}))
             prior_scales.append(1.)
 
         seasonal_features = pd.concat(seasonal_features, axis=1)
-        component_cols = self.regressor_column_matrix(seasonal_features)
-        return seasonal_features, prior_scales, component_cols
+        component_cols, modes = self.regressor_column_matrix(
+            seasonal_features, modes
+        )
+        return seasonal_features, prior_scales, component_cols, modes
+
+    def regressor_column_matrix(self, seasonal_features, modes):
+        """Dataframe indicating which columns of the feature matrix correspond
+        to which seasonality/regressor components.
+
+        Includes combination components, like 'additive_terms'. These
+        combination components will be added to the 'modes' input.
+
+        Parameters
+        ----------
+        seasonal_features: Constructed seasonal features dataframe
+        modes: Dictionary with keys 'additive' and 'multiplicative' listing the
+            component names for each mode of seasonality.
+
+        Returns
+        -------
+        component_cols: A binary indicator dataframe with columns seasonal
+            components and rows columns in seasonal_features. Entry is 1 if
+            that columns is used in that component.
+        modes: Updated input with combination components.
+        """
+        components = pd.DataFrame({
+            'col': np.arange(seasonal_features.shape[1]),
+            'component': [
+                x.split('_delim_')[0] for x in seasonal_features.columns
+            ],
+        })
+        # Add total for holidays
+        if self.holidays is not None:
+            components = self.add_group_component(
+                components, 'holidays', self.holidays['holiday'].unique())
+        # Add totals additive and multiplicative components, and regressors
+        for mode in ['additive', 'multiplicative']:
+            components = self.add_group_component(
+                components, mode + '_terms', modes[mode]
+            )
+            regressors_by_mode = [
+                r for r, props in self.extra_regressors.items()
+                if props['mode'] == mode
+            ]
+            components = self.add_group_component(
+                components, 'extra_regressors_' + mode, regressors_by_mode)
+            # Add combination components to modes
+            modes[mode].append(mode + '_terms')
+            modes[mode].append('extra_regressors_' + mode)
+        # Convert to a binary matrix
+        component_cols = pd.crosstab(
+            components['col'], components['component'],
+        )
+        # Add columns for additive and multiplicative terms, if missing
+        for name in ['additive_terms', 'multiplicative_terms']:
+            if name not in component_cols:
+                component_cols[name] = 0
+        # Remove the placeholder
+        component_cols.drop('zeros', axis=1, inplace=True, errors='ignore')
+        # Validation
+        if (
+            max(component_cols['additive_terms']
+            + component_cols['multiplicative_terms']) > 1
+        ):
+            raise Exception('A bug occurred in seasonal components.')
+        # Compare to the training, if set.
+        if self.train_component_cols is not None:
+            component_cols = component_cols[self.train_component_cols.columns]
+            if not component_cols.equals(self.train_component_cols):
+                raise Exception('A bug occurred in constructing regressors.')
+        return component_cols, modes
+
+    def add_group_component(self, components, name, group):
+        """Adds a component with given name that contains all of the components
+        in group.
+
+        Parameters
+        ----------
+        components: Dataframe with components.
+        name: Name of new group component.
+        group: List of components that form the group.
+
+        Returns
+        -------
+        Dataframe with components.
+        """
+        new_comp = components[components['component'].isin(set(group))].copy()
+        new_comp['component'] = name
+        components = components.append(new_comp)
+        return components
 
     def parse_seasonality_args(self, name, arg, auto_disable, default_order):
         """Get number of fourier components for built-in seasonalities.
@@ -656,6 +788,7 @@ class Prophet(object):
                 'period': 365.25,
                 'fourier_order': fourier_order,
                 'prior_scale': self.seasonality_prior_scale,
+                'mode': self.seasonality_mode,
             }
 
         # Weekly seasonality
@@ -668,6 +801,7 @@ class Prophet(object):
                 'period': 7,
                 'fourier_order': fourier_order,
                 'prior_scale': self.seasonality_prior_scale,
+                'mode': self.seasonality_mode,
             }
 
         # Daily seasonality
@@ -680,6 +814,7 @@ class Prophet(object):
                 'period': 1,
                 'fourier_order': fourier_order,
                 'prior_scale': self.seasonality_prior_scale,
+                'mode': self.seasonality_mode,
             }
 
     @staticmethod
@@ -785,7 +920,7 @@ class Prophet(object):
         history = self.setup_dataframe(history, initialize_scales=True)
         self.history = history
         self.set_auto_seasonalities()
-        seasonal_features, prior_scales, component_cols = (
+        seasonal_features, prior_scales, component_cols, _ = (
             self.make_all_seasonality_features(history))
         self.train_component_cols = component_cols
 
@@ -802,6 +937,8 @@ class Prophet(object):
             'sigmas': prior_scales,
             'tau': self.changepoint_prior_scale,
             'trend_indicator': int(self.growth == 'logistic'),
+            's_a': component_cols['additive_terms'],
+            's_m': component_cols['multiplicative_terms'],
         }
 
         if self.growth == 'linear':
@@ -891,7 +1028,10 @@ class Prophet(object):
             cols.append('floor')
         # Add in forecast components
         df2 = pd.concat((df[cols], intervals, seasonal_components), axis=1)
-        df2['yhat'] = df2['trend'] + df2['additive_terms']
+        df2['yhat'] = (
+            df2['trend'] * (1 + df2['multiplicative_terms'])
+            + df2['additive_terms']
+        )
         return df2
 
     @staticmethod
@@ -991,7 +1131,7 @@ class Prophet(object):
         -------
         Dataframe with seasonal components.
         """
-        seasonal_features, _, component_cols = (
+        seasonal_features, _, component_cols, modes = (
             self.make_all_seasonality_features(df)
         )
         lower_p = 100 * (1.0 - self.interval_width) / 2
@@ -1002,7 +1142,9 @@ class Prophet(object):
         for component in component_cols.columns:
             beta_c = self.params['beta'] * component_cols[component].values
 
-            comp = np.matmul(X, beta_c.transpose()) * self.y_scale
+            comp = np.matmul(X, beta_c.transpose())
+            if component in modes['additive']:
+                 comp *= self.y_scale
             data[component] = np.nanmean(comp, axis=1)
             data[component + '_lower'] = np.nanpercentile(
                 comp, lower_p, axis=1,
@@ -1011,54 +1153,6 @@ class Prophet(object):
                 comp, upper_p, axis=1,
             )
         return pd.DataFrame(data)
-
-    def regressor_column_matrix(self, seasonal_features):
-        components = pd.DataFrame({
-            'col': np.arange(seasonal_features.shape[1]),
-            'component': [x.split('_delim_')[0] for x in seasonal_features.columns],
-        })
-        # Add total for all additive components
-        components = components.append(pd.DataFrame({
-            'col': np.arange(seasonal_features.shape[1]),
-            'component': 'additive_terms',
-        }))
-        # Add totals for holidays and extra regressors
-        if self.holidays is not None:
-            components = self.add_group_component(
-                components, 'holidays', self.holidays['holiday'].unique())
-        components = self.add_group_component(
-            components, 'extra_regressors', self.extra_regressors.keys())
-        # Remove the placeholder
-        components = components[components['component'] != 'zeros']
-        # Convert to a binary matrix
-        component_cols = pd.crosstab(
-            components['col'], components['component'],
-        )
-        # Compare to the training, if set.
-        if self.train_component_cols is not None:
-            component_cols = component_cols[self.train_component_cols.columns]
-            if not component_cols.equals(self.train_component_cols):
-                raise Exception('A bug occurred in constructing regressors.')
-        return component_cols
-
-    def add_group_component(self, components, name, group):
-        """Adds a component with given name that contains all of the components
-        in group.
-
-        Parameters
-        ----------
-        components: Dataframe with components.
-        name: Name of new group component.
-        group: List of components that form the group.
-
-        Returns
-        -------
-        Dataframe with components.
-        """
-        new_comp = components[components['component'].isin(set(group))].copy()
-        new_comp['component'] = name
-        components = components.append(new_comp)
-        return components
 
     def sample_posterior_predictive(self, df):
         """Prophet posterior predictive samples.
@@ -1069,7 +1163,8 @@ class Prophet(object):
 
         Returns
         -------
-        Dictionary with posterior predictive samples for each component.
+        Dictionary with posterior predictive samples for the forecast yhat and
+        for the trend component.
         """
         n_iterations = self.params['k'].shape[0]
         samp_per_iter = max(1, int(np.ceil(
@@ -1077,12 +1172,20 @@ class Prophet(object):
         )))
 
         # Generate seasonality features once so we can re-use them.
-        seasonal_features, _, _ = self.make_all_seasonality_features(df)
+        seasonal_features, _, component_cols, _ = (
+            self.make_all_seasonality_features(df)
+        )
 
-        sim_values = {'yhat': [], 'trend': [], 'seasonal': []}
+        sim_values = {'yhat': [], 'trend': []}
         for i in range(n_iterations):
             for _j in range(samp_per_iter):
-                sim = self.sample_model(df, seasonal_features, i)
+                sim = self.sample_model(
+                    df=df,
+                    seasonal_features=seasonal_features,
+                    iteration=i,
+                    s_a=component_cols['additive_terms'],
+                    s_m=component_cols['multiplicative_terms'],
+                )
                 for key in sim_values:
                     sim_values[key].append(sim[key])
         for k, v in sim_values.items():
@@ -1099,9 +1202,8 @@ class Prophet(object):
 
         Returns
         -------
-        Dictionary with keys "trend", "seasonal", and "yhat" containing
-        posterior predictive samples for that component. "seasonal" is the sum
-        of seasonalities, holidays, and added regressors.
+        Dictionary with keys "trend" and "yhat" containing
+        posterior predictive samples for that component.
         """
         df = self.setup_dataframe(df.copy())
         sim_values = self.sample_posterior_predictive(df)
@@ -1132,7 +1234,7 @@ class Prophet(object):
 
         return pd.DataFrame(series)
 
-    def sample_model(self, df, seasonal_features, iteration):
+    def sample_model(self, df, seasonal_features, iteration, s_a, s_m):
         """Simulate observations from the extrapolated generative model.
 
         Parameters
@@ -1143,20 +1245,22 @@ class Prophet(object):
 
         Returns
         -------
-        Dataframe with trend, seasonality, and yhat, each like df['t'].
+        Dataframe with trend and yhat, each like df['t'].
         """
         trend = self.sample_predictive_trend(df, iteration)
 
         beta = self.params['beta'][iteration]
-        seasonal = np.matmul(seasonal_features.as_matrix(), beta) * self.y_scale
+        Xb_a = (
+            np.matmul(seasonal_features.as_matrix(), beta * s_a) * self.y_scale
+        )
+        Xb_m = np.matmul(seasonal_features.as_matrix(), beta * s_m)
 
         sigma = self.params['sigma_obs'][iteration]
         noise = np.random.normal(0, sigma, df.shape[0]) * self.y_scale
 
         return pd.DataFrame({
-            'yhat': trend + seasonal + noise,
-            'trend': trend,
-            'seasonal': seasonal,
+            'yhat': trend * (1 + Xb_m) + Xb_a + noise,
+            'trend': trend
         })
 
     def sample_predictive_trend(self, df, iteration):

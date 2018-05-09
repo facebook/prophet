@@ -59,7 +59,7 @@ functions {
 
     gamma = logistic_gamma(k, m, delta, t_change, S);
     for (i in 1:T) {
-      Y[i] = cap[i] / (1 + exp(-(k + dot_product(A[i], delta)) * (t[i] - (m + dot_product(A[i], gamma)))))
+      Y[i] = cap[i] / (1 + exp(-(k + dot_product(A[i], delta)) * (t[i] - (m + dot_product(A[i], gamma)))));
     }
     return Y;
   }
@@ -81,7 +81,7 @@ functions {
     
     gamma = (-t_change .* delta);
     for (i in 1:T) {
-      Y[i] = (k + dot_product(A[i], delta)) * t[i] + (m + dot_product(A[i], gamma))
+      Y[i] = (k + dot_product(A[i], delta)) * t[i] + (m + dot_product(A[i], gamma));
     }
     return Y;
   }
@@ -99,6 +99,8 @@ data {
   vector[K] sigmas;     // Scale on seasonality prior
   real<lower=0> tau;    // Scale on changepoints prior
   int trend_indicator;  // 0 for linear, 1 for logistic
+  vector[K] s_a;        // Indicator of additive features
+  vector[K] s_m;        // Indicator of multiplicative features
 }
 
 transformed data {
@@ -117,6 +119,8 @@ parameters {
 transformed parameters {
   vector[T] trend;
   vector[T] Y;
+  vector[T] Xb_a;
+  vector[T] Xb_m;
 
   if (trend_indicator == 0) {
     trend = linear_trend(k, m, delta, t, A, t_change, S, T);
@@ -125,7 +129,9 @@ transformed parameters {
   }
 
   for (i in 1:T) {
-    Y[i] = trend[i] + dot_product(X[i], beta);
+    Xb_a[i] = dot_product(X[i], beta .* s_a);
+    Xb_m[i] = dot_product(X[i], beta .* s_m);
+    Y[i] = trend[i] * (1 + Xb_m[i]) + Xb_a[i];
   }
 }
 

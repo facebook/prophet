@@ -184,6 +184,7 @@ class TestDiagnostics(TestCase):
             [True, False],  # weekly_seasonality
             [True, False],  # daily_seasonality
             [None, holiday],  # holidays
+            ['additive', 'multiplicative'],  # seasonality_mode
             [1.1],  # seasonality_prior_scale
             [1.1],  # holidays_prior_scale
             [0.1],  # changepoint_prior_scale
@@ -214,6 +215,7 @@ class TestDiagnostics(TestCase):
                 self.assertEqual(m1.holidays, m2.holidays)
             else:
                 self.assertTrue((m1.holidays == m2.holidays).values.all())
+            self.assertEqual(m1.seasonality_mode, m2.seasonality_mode)
             self.assertEqual(m1.seasonality_prior_scale, m2.seasonality_prior_scale)
             self.assertEqual(m1.changepoint_prior_scale, m2.changepoint_prior_scale)
             self.assertEqual(m1.holidays_prior_scale, m2.holidays_prior_scale)
