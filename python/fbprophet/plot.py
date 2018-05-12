@@ -186,6 +186,8 @@ def plot_forecast_component(
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
     ax.set_xlabel('ds')
     ax.set_ylabel(name)
+    if name in m.component_modes['multiplicative']:
+        ax = set_y_as_percent(ax)
     return artists
 
 
@@ -246,7 +248,9 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0):
     ax.set_xticks(range(len(days)))
     ax.set_xticklabels(days)
     ax.set_xlabel('Day of week')
-    ax.set_ylabel('weekly ({})'.format(m.seasonalities['weekly']['mode']))
+    ax.set_ylabel('weekly')
+    if m.seasonalities['weekly']['mode'] == 'multiplicative':
+        ax = set_y_as_percent(ax)
     return artists
 
 
@@ -288,7 +292,9 @@ def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0):
         lambda x, pos=None: '{dt:%B} {dt.day}'.format(dt=num2date(x))))
     ax.xaxis.set_major_locator(months)
     ax.set_xlabel('Day of year')
-    ax.set_ylabel('yearly ({})'.format(m.seasonalities['yearly']['mode']))
+    ax.set_ylabel('yearly')
+    if m.seasonalities['yearly']['mode'] == 'multiplicative':
+        ax = set_y_as_percent(ax)
     return artists
 
 
@@ -338,8 +344,17 @@ def plot_seasonality(m, name, ax=None, uncertainty=True):
     ax.xaxis.set_major_formatter(FuncFormatter(
         lambda x, pos=None: fmt_str.format(dt=num2date(x))))
     ax.set_xlabel('ds')
-    ax.set_ylabel('{} ({})'.format(name, m.seasonalities[name]['mode']))
+    ax.set_ylabel('{}'.format(name))
+    if m.seasonalities[name]['mode'] == 'multiplicative':
+        ax = set_y_as_percent(ax)
     return artists
+
+
+def set_y_as_percent(ax):
+    yticks = 100 * ax.get_yticks()
+    yticklabels = ['{0:.4g}%'.format(y) for y in yticks]
+    ax.set_yticklabels(yticklabels)
+    return ax
 
 
 def add_changepoints_to_plot(

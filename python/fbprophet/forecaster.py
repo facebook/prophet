@@ -156,6 +156,7 @@ class Prophet(object):
         self.history = None
         self.history_dates = None
         self.train_component_cols = None
+        self.component_modes = None
         self.validate_inputs()
 
     def validate_inputs(self):
@@ -196,8 +197,8 @@ class Prophet(object):
             raise ValueError('Name cannot contain "_delim_"')
         reserved_names = [
             'trend', 'additive_terms', 'daily', 'weekly', 'yearly',
-            'holidays', 'zeros', 'extra_regressors_additive',
-            'extra_regressors_multiplicative', 'yhat',
+            'holidays', 'zeros', 'extra_regressors_additive','yhat',
+            'extra_regressors_multiplicative', 'multiplicative_terms',
         ]
         rn_l = [n + '_lower' for n in reserved_names]
         rn_u = [n + '_upper' for n in reserved_names]
@@ -686,6 +687,8 @@ class Prophet(object):
             # Add combination components to modes
             modes[mode].append(mode + '_terms')
             modes[mode].append('extra_regressors_' + mode)
+        # After all of the additive/multiplicative groups have been added,
+        modes[self.seasonality_mode].append('holidays')
         # Convert to a binary matrix
         component_cols = pd.crosstab(
             components['col'], components['component'],
@@ -724,8 +727,10 @@ class Prophet(object):
         Dataframe with components.
         """
         new_comp = components[components['component'].isin(set(group))].copy()
-        new_comp['component'] = name
-        components = components.append(new_comp)
+        group_cols = new_comp['col'].unique()
+        if len(group_cols) > 0:
+            new_comp = pd.DataFrame({'component': name, 'col': group_cols})
+            components = components.append(new_comp)
         return components
 
     def parse_seasonality_args(self, name, arg, auto_disable, default_order):
@@ -920,9 +925,10 @@ class Prophet(object):
         history = self.setup_dataframe(history, initialize_scales=True)
         self.history = history
         self.set_auto_seasonalities()
-        seasonal_features, prior_scales, component_cols, _ = (
+        seasonal_features, prior_scales, component_cols, modes = (
             self.make_all_seasonality_features(history))
         self.train_component_cols = component_cols
+        self.component_modes = modes
 
         self.set_changepoints()
 
@@ -1131,7 +1137,7 @@ class Prophet(object):
         -------
         Dataframe with seasonal components.
         """
-        seasonal_features, _, component_cols, modes = (
+        seasonal_features, _, component_cols, _ = (
             self.make_all_seasonality_features(df)
         )
         lower_p = 100 * (1.0 - self.interval_width) / 2
@@ -1143,7 +1149,7 @@ class Prophet(object):
             beta_c = self.params['beta'] * component_cols[component].values
 
             comp = np.matmul(X, beta_c.transpose())
-            if component in modes['additive']:
+            if component in self.component_modes['additive']:
                  comp *= self.y_scale
             data[component] = np.nanmean(comp, axis=1)
             data[component + '_lower'] = np.nanpercentile(

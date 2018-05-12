@@ -678,5 +678,7 @@ class TestProphet(TestCase):
         self.assertEqual(
             set(modes['multiplicative']),
             {'weekly', 'yearly', 'xmas', 'numeric_feature',
-             'multiplicative_terms', 'extra_regressors_multiplicative'},
+             'multiplicative_terms', 'extra_regressors_multiplicative',
+             'holidays',
+            },
         )
