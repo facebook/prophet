@@ -69,8 +69,9 @@ plot.prophet <- function(x, fcst, uncertainty = TRUE, plot_cap = TRUE,
 }
 
 #' Plot the components of a prophet forecast.
-#' Prints a ggplot2 with panels for trend, weekly and yearly seasonalities if
-#' present, and holidays if present.
+#' Prints a ggplot2 with whichever are available of: trend, holidays, weekly
+#' seasonality, yearly seasonality, and additive and multiplicative extra
+#' regressors.
 #'
 #' @param m Prophet object.
 #' @param fcst Data frame returned by predict(m, df).
@@ -94,11 +95,12 @@ prophet_plot_components <- function(
   yearly_start = 0
 ) {
   # Plot the trend
-  panels <- list(plot_forecast_component(fcst, 'trend', uncertainty, plot_cap))
+  panels <- list(
+    plot_forecast_component(m, fcst, 'trend', uncertainty, plot_cap))
   # Plot holiday components, if present.
   if (!is.null(m$holidays) && ('holidays' %in% colnames(fcst))) {
     panels[[length(panels) + 1]] <- plot_forecast_component(
-      fcst, 'holidays', uncertainty, FALSE)
+      m, fcst, 'holidays', uncertainty, FALSE)
   }
   # Plot weekly seasonality, if present
   if ("weekly" %in% colnames(fcst)) {
@@ -116,10 +118,17 @@ prophet_plot_components <- function(
     }
   }
   # Plot extra regressors
-  if ((length(m$extra_regressors) > 0)
-      & ('extra_regressors' %in% colnames(fcst))) {
-    panels[[length(panels) + 1]] <- plot_forecast_component(
-      fcst, 'extra_regressors', uncertainty, FALSE)
+  regressors <- list(additive = FALSE, multiplicative = FALSE)
+  for (name in names(m$extra_regressors)) {
+    regressors[[m$extra_regressors[[name]]$mode]] <- TRUE
+  }
+  for (mode in c('additive', 'multiplicative')) {
+    if ((regressors[[mode]]) &
+        (paste0('extra_regressors_', mode) %in% colnames(fcst))
+    ) {
+      panels[[length(panels) + 1]] <- plot_forecast_component(
+        m, fcst, paste0('extra_regressors_', mode), uncertainty, FALSE)
+    }
   }
 
   # Make the plot.
@@ -135,6 +144,7 @@ prophet_plot_components <- function(
 
 #' Plot a particular component of the forecast.
 #'
+#' @param m Prophet model
 #' @param fcst Dataframe output of `predict`.
 #' @param name String name of the component to plot (column of fcst).
 #' @param uncertainty Boolean to plot uncertainty intervals.
@@ -145,7 +155,7 @@ prophet_plot_components <- function(
 #'
 #' @export
 plot_forecast_component <- function(
-  fcst, name, uncertainty = TRUE, plot_cap = FALSE
+  m, fcst, name, uncertainty = TRUE, plot_cap = FALSE
 ) {
   gg.comp <- ggplot2::ggplot(
       fcst, ggplot2::aes_string(x = 'ds', y = name, group = 1)) +
@@ -167,6 +177,9 @@ plot_forecast_component <- function(
         alpha = 0.2,
         fill = "#0072B2",
         na.rm = TRUE)
+  }
+  if (name %in% m$component.modes$multiplicative) {
+    gg.comp <- gg.comp + ggplot2::scale_y_continuous(labels = scales::percent)
   }
   return(gg.comp)
 }
@@ -220,6 +233,11 @@ plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0) {
                            fill = "#0072B2",
                            na.rm = TRUE)
   }
+  if (m$seasonalities$weekly$mode == 'multiplicative') {
+    gg.weekly <- (
+      gg.weekly + ggplot2::scale_y_continuous(labels = scales::percent)
+    )
+  }
   return(gg.weekly)
 }
 
@@ -254,6 +272,11 @@ plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0) {
                            alpha = 0.2,
                            fill = "#0072B2",
                            na.rm = TRUE)
+  }
+  if (m$seasonalities$yearly$mode == 'multiplicative') {
+    gg.yearly <- (
+      gg.yearly + ggplot2::scale_y_continuous(labels = scales::percent)
+    )
   }
   return(gg.yearly)
 }
@@ -298,6 +321,9 @@ plot_seasonality <- function(m, name, uncertainty = TRUE) {
       alpha = 0.2,
       fill = "#0072B2",
       na.rm = TRUE)
+  }
+  if (m$seasonalities[[name]]$mode == 'multiplicative') {
+    gg.s <- gg.s + ggplot2::scale_y_continuous(labels = scales::percent)
   }
   return(gg.s)
 }
@@ -386,8 +412,7 @@ dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
       dygraphs::dyAnnotation(x, text, text, attachAtBottom = TRUE)
   }
   
-  dyBase <- dyBase %>% 
-    dygraphs::dyOptions(colors = RColorBrewer::brewer.pal(3, "Set1")) %>%
+  dyBase <- dyBase %>%
     # plot actual values
     dygraphs::dySeries('y', label=actual.label) %>% 
     # plot forecast and ribbon
@@ -399,8 +424,11 @@ dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
   if (!is.null(x$holidays)) {
     for (i in 1:nrow(x$holidays)) {
       # make a gray line
-      dyBase <- dyBase %>% dygraphs::dyEvent(x$holidays$ds[i],color = "rgb(200,200,200)", strokePattern = "solid")
-      dyBase <- dyBase %>% dygraphs::dyAnnotation(x$holidays$ds[i], x$holidays$holiday[i], x$holidays$holiday[i], attachAtBottom = TRUE)
+      dyBase <- dyBase %>% dygraphs::dyEvent(
+        x$holidays$ds[i],color = "rgb(200,200,200)", strokePattern = "solid")
+      dyBase <- dyBase %>% dygraphs::dyAnnotation(
+        x$holidays$ds[i], x$holidays$holiday[i], x$holidays$holiday[i],
+        attachAtBottom = TRUE)
     }
   }
   return(dyBase)

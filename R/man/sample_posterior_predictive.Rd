@@ -12,7 +12,8 @@ sample_posterior_predictive(m, df)
 \item{df}{Prediction dataframe.}
 }
 \value{
-List with posterior predictive samples for each component.
+List with posterior predictive samples for the forecast yhat and
+ for the trend component.
 }
 \description{
 Prophet posterior predictive samples.

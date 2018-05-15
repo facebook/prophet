@@ -225,7 +225,7 @@ test_that("piecewise_logistic", {
 })
 
 test_that("holidays", {
-  holidays = data.frame(ds = c('2016-12-25'),
+  holidays <- data.frame(ds = c('2016-12-25'),
                         holiday = c('xmas'),
                         lower_window = c(-1),
                         upper_window = c(0))
@@ -236,12 +236,14 @@ test_that("holidays", {
   out <- prophet:::make_holiday_features(m, df$ds)
   feats <- out$holiday.features
   priors <- out$prior.scales
+  names <- out$holiday.names
   expect_equal(nrow(feats), nrow(df))
   expect_equal(ncol(feats), 2)
   expect_equal(sum(colSums(feats) - c(1, 1)), 0)
   expect_true(all(priors == c(10., 10.)))
+  expect_equal(names, c('xmas'))
 
-  holidays = data.frame(ds = c('2016-12-25'),
+  holidays <- data.frame(ds = c('2016-12-25'),
                         holiday = c('xmas'),
                         lower_window = c(-1),
                         upper_window = c(10))
@@ -249,9 +251,11 @@ test_that("holidays", {
   out <- prophet:::make_holiday_features(m, df$ds)
   feats <- out$holiday.features
   priors <- out$prior.scales
+  names <- out$holiday.names
   expect_equal(nrow(feats), nrow(df))
   expect_equal(ncol(feats), 12)
   expect_true(all(priors == rep(10, 12)))
+  expect_equal(names, c('xmas'))
   # Check prior specifications
   holidays <- data.frame(
     ds = prophet:::set_date(c('2016-12-25', '2017-12-25')),
@@ -263,7 +267,9 @@ test_that("holidays", {
   m <- prophet(holidays = holidays, fit = FALSE)
   out <- prophet:::make_holiday_features(m, df$ds)
   priors <- out$prior.scales
+  names <- out$holiday.names
   expect_true(all(priors == c(5., 5.)))
+  expect_equal(names, c('xmas'))
   # 2 different priors
   holidays2 <- data.frame(
     ds = prophet:::set_date(c('2012-06-06', '2013-06-06')),
@@ -276,7 +282,9 @@ test_that("holidays", {
   m <- prophet(holidays = holidays2, fit = FALSE)
   out <- prophet:::make_holiday_features(m, df$ds)
   priors <- out$prior.scales
+  names <- out$holiday.names
   expect_true(all(priors == c(8, 8, 5, 5)))
+  expect_true(all(sort(names) == c('seans-bday', 'xmas')))
   holidays2 <- data.frame(
     ds = prophet:::set_date(c('2012-06-06', '2013-06-06')),
     holiday = c('seans-bday', 'seans-bday'),
@@ -334,7 +342,8 @@ test_that("auto_weekly_seasonality", {
   expect_equal(m$weekly.seasonality, 'auto')
   m <- fit.prophet(m, train.w)
   expect_true('weekly' %in% names(m$seasonalities))
-  true <- list(period = 7, fourier.order = 3, prior.scale = 10)
+  true <- list(
+    period = 7, fourier.order = 3, prior.scale = 10, mode = 'additive')
   for (name in names(true)) {
     expect_equal(m$seasonalities$weekly[[name]], true[[name]])
   }
@@ -350,7 +359,8 @@ test_that("auto_weekly_seasonality", {
   m <- prophet(train.w)
   expect_false('weekly' %in% names(m$seasonalities))
   m <- prophet(DATA, weekly.seasonality = 2, seasonality.prior.scale = 3)
-  true <- list(period = 7, fourier.order = 2, prior.scale = 3)
+  true <- list(
+    period = 7, fourier.order = 2, prior.scale = 3, mode = 'additive')
   for (name in names(true)) {
     expect_equal(m$seasonalities$weekly[[name]], true[[name]])
   }
@@ -363,7 +373,8 @@ test_that("auto_yearly_seasonality", {
   expect_equal(m$yearly.seasonality, 'auto')
   m <- fit.prophet(m, DATA)
   expect_true('yearly' %in% names(m$seasonalities))
-  true <- list(period = 365.25, fourier.order = 10, prior.scale = 10)
+  true <- list(
+    period = 365.25, fourier.order = 10, prior.scale = 10, mode = 'additive')
   for (name in names(true)) {
     expect_equal(m$seasonalities$yearly[[name]], true[[name]])
   }
@@ -375,7 +386,8 @@ test_that("auto_yearly_seasonality", {
   m <- prophet(train.y, yearly.seasonality = TRUE)
   expect_true('yearly' %in% names(m$seasonalities))
   m <- prophet(DATA, yearly.seasonality = 7, seasonality.prior.scale = 3)
-  true <- list(period = 365.25, fourier.order = 7, prior.scale = 3)
+  true <- list(
+    period = 365.25, fourier.order = 7, prior.scale = 3, mode = 'additive')
   for (name in names(true)) {
     expect_equal(m$seasonalities$yearly[[name]], true[[name]])
   }
@@ -388,7 +400,8 @@ test_that("auto_daily_seasonality", {
   expect_equal(m$daily.seasonality, 'auto')
   m <- fit.prophet(m, DATA2)
   expect_true('daily' %in% names(m$seasonalities))
-  true <- list(period = 1, fourier.order = 4, prior.scale = 10)
+  true <- list(
+    period = 1, fourier.order = 4, prior.scale = 10, mode = 'additive')
   for (name in names(true)) {
     expect_equal(m$seasonalities$daily[[name]], true[[name]])
   }
@@ -400,7 +413,8 @@ test_that("auto_daily_seasonality", {
   m <- prophet(train.y, daily.seasonality = TRUE)
   expect_true('daily' %in% names(m$seasonalities))
   m <- prophet(DATA2, daily.seasonality = 7, seasonality.prior.scale = 3)
-  true <- list(period = 1, fourier.order = 7, prior.scale = 3)
+  true <- list(
+    period = 1, fourier.order = 7, prior.scale = 3, mode = 'additive')
   for (name in names(true)) {
     expect_equal(m$seasonalities$daily[[name]], true[[name]])
   }
@@ -424,7 +438,8 @@ test_that("custom_seasonality", {
                          prior_scale = c(4))
   m <- prophet(holidays=holidays)
   m <- add_seasonality(m, name='monthly', period=30, fourier.order=5)
-  true <- list(period = 30, fourier.order = 5, prior.scale = 10)
+  true <- list(
+    period = 30, fourier.order = 5, prior.scale = 10, mode = 'additive')
   for (name in names(true)) {
     expect_equal(m$seasonalities$monthly[[name]], true[[name]])
   }
@@ -436,12 +451,25 @@ test_that("custom_seasonality", {
   )
   m <- add_seasonality(m, name='weekly', period=30, fourier.order=5)
   # Test priors
-  m <- prophet(holidays = holidays, yearly.seasonality = FALSE)
+  m <- prophet(
+    holidays = holidays, yearly.seasonality = FALSE,
+    seasonality.mode = 'multiplicative')
   m <- add_seasonality(
-    m, name='monthly', period=30, fourier.order=5, prior.scale = 2)
+    m, name='monthly', period=30, fourier.order=5, prior.scale = 2,
+    mode = 'additive')
   m <- fit.prophet(m, DATA)
-  prior.scales <- prophet:::make_all_seasonality_features(
-    m, m$history)$prior.scales
+  expect_equal(m$seasonalities$monthly$mode, 'additive')
+  expect_equal(m$seasonalities$weekly$mode, 'multiplicative')
+  out <- prophet:::make_all_seasonality_features(m, m$history)
+  prior.scales <- out$prior.scales
+  component.cols <- out$component.cols
+  expect_equal(sum(component.cols$monthly), 10)
+  expect_equal(sum(component.cols$special_day), 1)
+  expect_equal(sum(component.cols$weekly), 6)
+  expect_equal(sum(component.cols$additive_terms), 10)
+  expect_equal(sum(component.cols$multiplicative_terms), 7)
+  expect_equal(sum(component.cols$monthly[1:11]), 10)
+  expect_equal(sum(component.cols$weekly[11:17]), 6)
   expect_true(all(prior.scales == c(rep(2, 10), rep(10, 6), 4)))
 })
 
@@ -450,10 +478,13 @@ test_that("added_regressors", {
   m <- prophet()
   m <- add_regressor(m, 'binary_feature', prior.scale=0.2)
   m <- add_regressor(m, 'numeric_feature', prior.scale=0.5)
+  m <- add_regressor(
+    m, 'numeric_feature2', prior.scale=0.5, mode = 'multiplicative')
   m <- add_regressor(m, 'binary_feature2', standardize=TRUE)
   df <- DATA
   df$binary_feature <- c(rep(0, 255), rep(1, 255))
   df$numeric_feature <- 0:509
+  df$numeric_feature2 <- 0:509
   # Require all regressors in df
   expect_error(
     fit.prophet(m, df)
@@ -461,7 +492,9 @@ test_that("added_regressors", {
   df$binary_feature2 <- c(rep(1, 100), rep(0, 410))
   m <- fit.prophet(m, df)
   # Check that standardizations are correctly set
-  true <- list(prior.scale = 0.2, mu = 0, std = 1, standardize = 'auto')
+  true <- list(
+    prior.scale = 0.2, mu = 0, std = 1, standardize = 'auto', mode = 'additive'
+  )
   for (name in names(true)) {
     expect_equal(true[[name]], m$extra_regressors$binary_feature[[name]])
   }
@@ -470,6 +503,7 @@ test_that("added_regressors", {
     expect_equal(true[[name]], m$extra_regressors$numeric_feature[[name]],
                  tolerance = 1e-5)
   }
+  expect_equal(m$extra_regressors$numeric_feature2$mode, 'multiplicative')
   true <- list(prior.scale = 10., mu = 0.1960784, std = 0.3974183)
   for (name in names(true)) {
     expect_equal(true[[name]], m$extra_regressors$binary_feature2[[name]],
@@ -484,28 +518,91 @@ test_that("added_regressors", {
   out <- prophet:::make_all_seasonality_features(m, df2)
   seasonal.features <- out$seasonal.features
   prior.scales <- out$prior.scales
-  expect_true('binary_feature' %in% colnames(seasonal.features))
-  expect_true('numeric_feature' %in% colnames(seasonal.features))
-  expect_true('binary_feature2' %in% colnames(seasonal.features))
-  expect_equal(ncol(seasonal.features), 29)
-  expect_true(all(sort(prior.scales[27:29]) == c(0.2, 0.5, 10.)))
+  component.cols <- out$component.cols
+  modes <- out$modes
+  expect_equal(ncol(seasonal.features), 30)
+  r_names <- c('binary_feature', 'numeric_feature', 'binary_feature2')
+  true.priors <- c(0.2, 0.5, 10.)
+  for (i in seq_along(r_names)) {
+    name <- r_names[i]
+    expect_true(name %in% colnames(seasonal.features))
+    expect_equal(sum(component.cols[[name]]), 1)
+    expect_equal(sum(prior.scales * component.cols[[name]]), true.priors[i])
+  }
   # Check that forecast components are reasonable
   future <- data.frame(
-    ds = c('2014-06-01'), binary_feature = c(0), numeric_feature = c(10))
+    ds = c('2014-06-01'),
+    binary_feature = c(0),
+    numeric_feature = c(10),
+    numeric_feature2 = c(10)
+  )
   expect_error(predict(m, future))
   future$binary_feature2 <- 0.
   fcst <- predict(m, future)
-  expect_equal(ncol(fcst), 31)
+  expect_equal(ncol(fcst), 37)
   expect_equal(fcst$binary_feature[1], 0)
-  expect_equal(fcst$extra_regressors[1],
+  expect_equal(fcst$extra_regressors_additive[1],
                fcst$numeric_feature[1] + fcst$binary_feature2[1])
-  expect_equal(fcst$seasonalities[1], fcst$yearly[1] + fcst$weekly[1])
-  expect_equal(fcst$seasonal[1],
-               fcst$seasonalities[1] + fcst$extra_regressors[1])
-  expect_equal(fcst$yhat[1], fcst$trend[1] + fcst$seasonal[1])
+  expect_equal(fcst$extra_regressors_multiplicative[1],
+               fcst$numeric_feature2[1])
+  expect_equal(fcst$additive_terms[1],
+               fcst$yearly[1] + fcst$weekly[1]
+               + fcst$extra_regressors_additive[1])
+  expect_equal(fcst$multiplicative_terms[1],
+               fcst$extra_regressors_multiplicative[1])
+  expect_equal(
+    fcst$yhat[1],
+    fcst$trend[1] * (1 + fcst$multiplicative_terms[1]) + fcst$additive_terms[1]
+  )
   # Check fails if constant extra regressor
   df$constant_feature <- 5
   m <- prophet()
   m <- add_regressor(m, 'constant_feature')
   expect_error(fit.prophet(m, df))
+})
+
+test_that("set_seasonality_mode", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  m <- prophet()
+  expect_equal(m$seasonality.mode, 'additive')
+  m <- prophet(seasonality.mode = 'multiplicative')
+  expect_equal(m$seasonality.mode, 'multiplicative')
+  expect_error(prophet(seasonality.mode = 'batman'))
+})
+
+test_that("seasonality_modes", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  holidays <- data.frame(ds = c('2016-12-25'),
+                        holiday = c('xmas'),
+                        lower_window = c(-1),
+                        upper_window = c(0))
+  m <- prophet(seasonality.mode = 'multiplicative', holidays = holidays)
+  m <- add_seasonality(
+    m, name = 'monthly', period = 30, fourier.order = 3, mode = 'additive')
+  m <- add_regressor(m, name = 'binary_feature', mode = 'additive')
+  m <- add_regressor(m, name = 'numeric_feature')
+  # Construct seasonal features
+  df <- DATA
+  df$binary_feature <- c(rep(0, 255), rep(1, 255))
+  df$numeric_feature <- 0:509
+  out <- prophet:::setup_dataframe(m, df, initialize_scales = TRUE)
+  df <- out$df
+  m <- out$m
+  m$history <- df
+  m <- prophet:::set_auto_seasonalities(m)
+  out <- prophet:::make_all_seasonality_features(m, df)
+  component.cols <- out$component.cols
+  modes <- out$modes
+  expect_equal(sum(component.cols$additive_terms), 7)
+  expect_equal(sum(component.cols$multiplicative_terms), 29)
+  expect_equal(
+    sort(modes$additive),
+    c('additive_terms', 'binary_feature', 'extra_regressors_additive',
+      'monthly')
+  )
+  expect_equal(
+    sort(modes$multiplicative),
+    c('extra_regressors_multiplicative', 'holidays', 'multiplicative_terms',
+      'numeric_feature', 'weekly', 'xmas', 'yearly')
+  )
 })

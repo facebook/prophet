@@ -1,9 +1,15 @@
 library(prophet)
 context("Prophet stan model tests")
 
-rstan::expose_stan_functions(
-  rstan::stanc(file="../..//inst/stan/prophet.stan")
-)
+fn <- tryCatch({
+  rstan::expose_stan_functions(
+    rstan::stanc(file="../../inst/stan/prophet.stan")
+  )
+}, error = function(e) {
+  rstan::expose_stan_functions(
+    rstan::stanc(file=system.file("stan/prophet.stan", package="prophet"))
+  )
+})
 
 DATA <- read.csv('data.csv')
 N <- nrow(DATA)

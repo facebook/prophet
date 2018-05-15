@@ -15,6 +15,7 @@ make_holiday_features(m, dates)
 A list with entries
  holiday.features: dataframe with a column for each holiday.
  prior.scales: array of prior scales for each holiday column.
+ holiday.names: array of names of all holidays.
 }
 \description{
 Construct a matrix of holiday features.

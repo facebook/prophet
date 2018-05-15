@@ -144,7 +144,8 @@ test_that("copy", {
     yearly.seasonality = c(TRUE, FALSE),
     weekly.seasonality = c(TRUE, FALSE),
     daily.seasonality = c(TRUE, FALSE),
-    holidays = c('null', 'insert_dataframe')
+    holidays = c('null', 'insert_dataframe'),
+    seasonality.mode = c('additive', 'multiplicative')
   )
   products <- expand.grid(inputs)
   for (i in 1:length(products)) {
@@ -178,7 +179,7 @@ test_that("copy", {
     args <- c('growth', 'changepoints', 'n.changepoints', 'holidays',
               'seasonality.prior.scale', 'holidays.prior.scale',
               'changepoints.prior.scale', 'mcmc.samples', 'interval.width',
-              'uncertainty.samples')
+              'uncertainty.samples', 'seasonality.mode')
     for (arg in args) {
       expect_equal(m1[[arg]], m2[[arg]])
     }

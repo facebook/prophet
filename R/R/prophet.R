@@ -40,6 +40,7 @@ utils::globalVariables(c(
 #'  range of days around the date to be included as holidays. lower_window=-2
 #'  will include 2 days prior to the date as holidays. Also optionally can have
 #'  a column prior_scale specifying the prior scale for each holiday.
+#' @param seasonality.mode 'additive' (default) or 'multiplicative'.
 #' @param seasonality.prior.scale Parameter modulating the strength of the
 #'  seasonality model. Larger values allow the model to fit larger seasonal
 #'  fluctuations, smaller values dampen the seasonality. Can be specified for
@@ -82,6 +83,7 @@ prophet <- function(df = NULL,
                     weekly.seasonality = 'auto',
                     daily.seasonality = 'auto',
                     holidays = NULL,
+                    seasonality.mode = 'additive',
                     seasonality.prior.scale = 10,
                     holidays.prior.scale = 10,
                     changepoint.prior.scale = 0.05,
@@ -105,6 +107,7 @@ prophet <- function(df = NULL,
     weekly.seasonality = weekly.seasonality,
     daily.seasonality = daily.seasonality,
     holidays = holidays,
+    seasonality.mode = seasonality.mode,
     seasonality.prior.scale = seasonality.prior.scale,
     changepoint.prior.scale = changepoint.prior.scale,
     holidays.prior.scale = holidays.prior.scale,
@@ -122,7 +125,9 @@ prophet <- function(df = NULL,
     stan.fit = NULL,
     params = list(),
     history = NULL,
-    history.dates = NULL
+    history.dates = NULL,
+    train.component.cols = NULL,
+    component.modes = NULL
   )
   validate_inputs(m)
   class(m) <- append("prophet", class(m))
@@ -168,6 +173,9 @@ validate_inputs <- function(m) {
       validate_column_name(m, h, check_holidays = FALSE)
     }
   }
+  if (!(m$seasonality.mode %in% c('additive', 'multiplicative'))) {
+    stop("seasonality.mode must be 'additive' or 'multiplicative'")
+  }
 }
 
 #' Validates the name of a seasonality, holiday, or regressor.
@@ -187,8 +195,9 @@ validate_column_name <- function(
     stop('Holiday name cannot contain "_delim_"')
   }
   reserved_names = c(
-    'trend', 'seasonal', 'seasonalities', 'daily', 'weekly', 'yearly',
-    'holidays', 'zeros', 'extra_regressors', 'yhat'
+    'trend', 'additive_terms', 'daily', 'weekly', 'yearly',
+    'holidays', 'zeros', 'extra_regressors_additive', 'yhat',
+    'extra_regressors_multiplicative', 'multiplicative_terms'
   )
   rn_l = paste0(reserved_names,"_lower")
   rn_u = paste0(reserved_names,"_upper")
@@ -511,6 +520,7 @@ make_seasonality_features <- function(dates, period, series.order, prefix) {
 #' @return A list with entries
 #'  holiday.features: dataframe with a column for each holiday.
 #'  prior.scales: array of prior scales for each holiday column.
+#'  holiday.names: array of names of all holidays.
 #'
 #' @importFrom dplyr "%>%"
 #' @keywords internal
@@ -568,7 +578,8 @@ make_holiday_features <- function(m, dates) {
     prior.scales <- c(prior.scales, prior.scales.list[[sn]])
   }
   return(list(holiday.features = holiday.features,
-              prior.scales = prior.scales))
+              prior.scales = prior.scales,
+              holiday.names = names(prior.scales.list)))
 }
 
 #' Add an additional regressor to be used for fitting and predicting.
@@ -579,6 +590,10 @@ make_holiday_features <- function(m, dates) {
 #' coefficient is given a prior with the specified scale parameter.
 #' Decreasing the prior scale will add additional regularization. If no
 #' prior scale is provided, holidays.prior.scale will be used.
+#' Mode can be specified as either 'additive' or 'multiplicative'. If not
+#' specified, m$seasonality.mode will be used. 'additive' means the effect of
+#' the regressor will be added to the trend, 'multiplicative' means it will
+#' multiply the trend.
 #'
 #' @param m Prophet object.
 #' @param name String name of the regressor
@@ -587,11 +602,15 @@ make_holiday_features <- function(m, dates) {
 #' @param standardize Bool, specify whether this regressor will be standardized
 #'  prior to fitting. Can be 'auto' (standardize if not binary), True, or
 #'  False.
+#' @param mode Optional, 'additive' or 'multiplicative'. Defaults to
+#'  m$seasonality.mode.
 #'
 #' @return  The prophet model with the regressor added.
 #'
 #' @export
-add_regressor <- function(m, name, prior.scale = NULL, standardize = 'auto'){
+add_regressor <- function(
+  m, name, prior.scale = NULL, standardize = 'auto', mode = NULL
+){
   if (!is.null(m$history)) {
     stop('Regressors must be added prior to model fitting.')
   }
@@ -599,14 +618,21 @@ add_regressor <- function(m, name, prior.scale = NULL, standardize = 'auto'){
   if (is.null(prior.scale)) {
     prior.scale <- m$holidays.prior.scale
   }
+  if (is.null(mode)) {
+    mode <- m$seasonality.mode
+  }
   if(prior.scale <= 0) {
     stop("Prior scale must be > 0")
+  }
+  if (!(mode %in% c('additive', 'multiplicative'))) {
+    stop("mode must be 'additive' or 'multiplicative'")
   }
   m$extra_regressors[[name]] <- list(
     prior.scale = prior.scale,
     standardize = standardize,
     mu = 0,
-    std = 1.0
+    std = 1.0,
+    mode = mode
   )
   return(m)
 }
@@ -622,17 +648,25 @@ add_regressor <- function(m, name, prior.scale = NULL, standardize = 'auto'){
 #' flexibility, decreasing will dampen it. If not provided, will use the
 #' seasonality.prior.scale provided on Prophet initialization (defaults to 10).
 #'
+#' Mode can be specified as either 'additive' or 'multiplicative'. If not
+#' specified, m$seasonality.mode will be used (defaults to 'additive').
+#' Additive means the seasonality will be added to the trend, multiplicative
+#' means it will multiply the trend.
+#'
 #' @param m Prophet object.
 #' @param name String name of the seasonality component.
 #' @param period Float number of days in one period.
 #' @param fourier.order Int number of Fourier components to use.
-#' @param prior.scale Float prior scale for this component.
+#' @param prior.scale Optional float prior scale for this component.
+#' @param mode Optional 'additive' or 'multiplicative'.
 #'
 #' @return The prophet model with the seasonality added.
 #'
 #' @importFrom dplyr "%>%"
 #' @export
-add_seasonality <- function(m, name, period, fourier.order, prior.scale = NULL) {
+add_seasonality <- function(
+  m, name, period, fourier.order, prior.scale = NULL, mode = NULL
+) {
   if (!is.null(m$history)) {
     stop("Seasonality must be added prior to model fitting.")
   }
@@ -648,10 +682,17 @@ add_seasonality <- function(m, name, period, fourier.order, prior.scale = NULL) 
   if (ps <= 0) {
     stop('Prior scale must be > 0')
   }
+  if (is.null(mode)) {
+    mode <- m$seasonality.mode
+  }
+  if (!(mode %in% c('additive', 'multiplicative'))) {
+    stop("mode must be 'additive' or 'multiplicative'")
+  }
   m$seasonalities[[name]] <- list(
     period = period,
     fourier.order = fourier.order,
-    prior.scale = ps
+    prior.scale = ps,
+    mode = mode
   )
   return(m)
 }
@@ -667,11 +708,16 @@ add_seasonality <- function(m, name, period, fourier.order, prior.scale = NULL) 
 #'  seasonal.features: Dataframe with regressor features,
 #'  prior.scales: Array of prior scales for each colum of the features
 #'    dataframe.
+#'  component.cols: Dataframe with indicators for which regression components
+#'    correspond to which columns.
+#'  modes: List with keys 'additive' and 'multiplicative' with arrays of
+#'    component names for each mode of seasonality.
 #'
 #' @keywords internal
 make_all_seasonality_features <- function(m, df) {
   seasonal.features <- data.frame(row.names = seq_len(nrow(df)))
   prior.scales <- c()
+  modes <- list(additive = c(), multiplicative = c())
 
   # Seasonality features
   for (name in names(m$seasonalities)) {
@@ -681,6 +727,7 @@ make_all_seasonality_features <- function(m, df) {
     seasonal.features <- cbind(seasonal.features, features)
     prior.scales <- c(prior.scales,
                       props$prior.scale * rep(1, ncol(features)))
+    modes[[props$mode]] <- c(modes[[props$mode]], name)
   }
 
   # Holiday features
@@ -688,20 +735,129 @@ make_all_seasonality_features <- function(m, df) {
     hf <- make_holiday_features(m, df$ds)
     seasonal.features <- cbind(seasonal.features, hf$holiday.features)
     prior.scales <- c(prior.scales, hf$prior.scales)
+    modes[[m$seasonality.mode]] <- c(
+      modes[[m$seasonality.mode]], hf$holiday.names)
   }
 
   # Additional regressors
   for (name in names(m$extra_regressors)) {
+    props <- m$extra_regressors[[name]]
     seasonal.features[[name]] <- df[[name]]
-    prior.scales <- c(prior.scales, m$extra_regressors[[name]]$prior.scale)
+    prior.scales <- c(prior.scales, props$prior.scale)
+    modes[[props$mode]] <- c(modes[[props$mode]], name)
   }
 
+  # Dummy to prevent empty X
   if (ncol(seasonal.features) == 0) {
     seasonal.features <- data.frame(zeros = rep(0, nrow(df)))
     prior.scales <- 1
   }
+
+  components.list <- regressor_column_matrix(m, seasonal.features, modes)
   return(list(seasonal.features = seasonal.features,
-              prior.scales = prior.scales))
+              prior.scales = prior.scales,
+              component.cols = components.list$component.cols,
+              modes = components.list$modes))
+}
+
+#' Dataframe indicating which columns of the feature matrix correspond to
+#' which seasonality/regressor components.
+#'
+#' Includes combination components, like 'additive_terms'. These combination
+#' components will be added to the 'modes' input.
+#'
+#' @param m Prophet object.
+#' @param seasonal.features Constructed seasonal features dataframe.
+#' @param modes List with keys 'additive' and 'multiplicative' with arrays of
+#'  component names for each mode of seasonality.
+#'
+#' @return List with items
+#'  component.cols: A binary indicator dataframe with columns seasonal
+#'    components and rows columns in seasonal.features. Entry is 1 if that
+#'    column is used in that component.
+#'  modes: Updated input with combination components.
+#'
+#' @keywords internal
+regressor_column_matrix <- function(m, seasonal.features, modes) {
+  components <- dplyr::data_frame(component = colnames(seasonal.features)) %>%
+    dplyr::mutate(col = seq_len(n())) %>%
+    tidyr::separate(component, c('component', 'part'), sep = "_delim_",
+                    extra = "merge", fill = "right") %>%
+    dplyr::select(col, component)
+  # Add total for holidays
+  if(!is.null(m$holidays)){
+    components <- add_group_component(
+      components, 'holidays', unique(m$holidays$holiday))
+  }
+  # Add totals for additive and multiplicative components, and regressors
+  for (mode in c('additive', 'multiplicative')) {
+    components <- add_group_component(
+      components, paste0(mode, '_terms'), modes[[mode]])
+    regressors_by_mode <- c()
+    for (name in names(m$extra_regressors)) {
+      if (m$extra_regressors[[name]]$mode == mode) {
+        regressors_by_mode <- c(regressors_by_mode, name)
+      }
+    }
+    components <- add_group_component(
+      components, paste0('extra_regressors_', mode), regressors_by_mode)
+    # Add combination components to modes
+    modes[[mode]] <- c(modes[[mode]], paste0(mode, '_terms'))
+    modes[[mode]] <- c(modes[[mode]], paste0('extra_regressors_', mode))
+  }
+  # After all of the additive/multiplicative groups have been added,
+  modes[[m$seasonality.mode]] <- c(modes[[m$seasonality.mode]], 'holidays')
+  # Convert to a binary matrix
+  component.cols <- as.data.frame.matrix(
+    table(components$col, components$component)
+  )
+  component.cols <- (
+    component.cols[order(as.numeric(row.names(component.cols))), ,
+                   drop = FALSE]
+  )
+  # Add columns for additive and multiplicative terms, if missing
+  for (name in c('additive_terms', 'multiplicative_terms')) {
+    if (!(name %in% colnames(component.cols))) {
+      component.cols[[name]] <- 0
+    }
+  }
+  # Remove the placeholder
+  components <- dplyr::filter(components, component != 'zeros')
+  # Validation
+  if (
+    max(component.cols$additive_terms
+    + component.cols$multiplicative_terms) > 1
+  ) {
+    stop('A bug occurred in seasonal components.')
+  }
+  # Compare to training, if set.
+  if (!is.null(m$train.component.cols)) {
+    component.cols <- component.cols[, colnames(m$train.component.cols)]
+    if (!all(component.cols == m$train.component.cols)) {
+      stop('A bug occurred in constructing regressors.')
+    }
+  }
+  return(list(component.cols = component.cols, modes = modes))
+}
+
+#' Adds a component with given name that contains all of the components
+#' in group.
+#'
+#' @param components Dataframe with components.
+#' @param name Name of new group component.
+#' @param group  List of components that form the group.
+#'
+#' @return Dataframe with components.
+#'
+#' @keywords internal
+add_group_component <- function(components, name, group) {
+  new_comp <- components[(components$component %in% group), ]
+  group_cols <- unique(new_comp$col)
+  if (length(group_cols) > 0) {
+    new_comp <- data.frame(col=group_cols, component=name)
+    components <- rbind(components, new_comp)
+  }
+  return(components)
 }
 
 #' Get number of Fourier components for built-in seasonalities.
@@ -764,7 +920,8 @@ set_auto_seasonalities <- function(m) {
     m$seasonalities[['yearly']] <- list(
       period = 365.25,
       fourier.order = fourier.order,
-      prior.scale = m$seasonality.prior.scale
+      prior.scale = m$seasonality.prior.scale,
+      mode = m$seasonality.mode
     )
   }
 
@@ -775,7 +932,8 @@ set_auto_seasonalities <- function(m) {
     m$seasonalities[['weekly']] <- list(
       period = 7,
       fourier.order = fourier.order,
-      prior.scale = m$seasonality.prior.scale
+      prior.scale = m$seasonality.prior.scale,
+      mode = m$seasonality.mode
     )
   }
 
@@ -786,7 +944,8 @@ set_auto_seasonalities <- function(m) {
     m$seasonalities[['daily']] <- list(
       period = 1,
       fourier.order = fourier.order,
-      prior.scale = m$seasonality.prior.scale
+      prior.scale = m$seasonality.prior.scale,
+      mode = m$seasonality.mode
     )
   }
   return(m)
@@ -891,6 +1050,9 @@ fit.prophet <- function(m, df, ...) {
   out2 <- make_all_seasonality_features(m, history)
   seasonal.features <- out2$seasonal.features
   prior.scales <- out2$prior.scales
+  component.cols <- out2$component.cols
+  m$train.component.cols <- component.cols
+  m$component.modes <- out2$modes
 
   m <- set_changepoints(m)
 
@@ -905,7 +1067,9 @@ fit.prophet <- function(m, df, ...) {
     X = as.matrix(seasonal.features),
     sigmas = array(prior.scales),
     tau = m$changepoint.prior.scale,
-    trend_indicator = as.numeric(m$growth == 'logistic')
+    trend_indicator = as.numeric(m$growth == 'logistic'),
+    s_a = array(component.cols$additive_terms),
+    s_m = array(component.cols$multiplicative_terms)
   )
 
   # Run stan
@@ -1023,7 +1187,7 @@ predict.prophet <- function(object, df = NULL, ...) {
   }
   df <- df[cols]
   df <- dplyr::bind_cols(df, seasonal.components, intervals)
-  df$yhat <- df$trend + df$seasonal
+  df$yhat <- df$trend * (1 + df$multiplicative_terms) + df$additive_terms
   return(df)
 }
 
@@ -1118,68 +1282,28 @@ predict_trend <- function(model, df) {
 #'
 #' @keywords internal
 predict_seasonal_components <- function(m, df) {
-  seasonal.features <- make_all_seasonality_features(m, df)$seasonal.features
+  out <- make_all_seasonality_features(m, df)
+  seasonal.features <- out$seasonal.features
+  component.cols <- out$component.cols
   lower.p <- (1 - m$interval.width)/2
   upper.p <- (1 + m$interval.width)/2
 
-  components <- dplyr::data_frame(component = colnames(seasonal.features)) %>%
-    dplyr::mutate(col = seq_len(n())) %>%
-    tidyr::separate(component, c('component', 'part'), sep = "_delim_",
-                    extra = "merge", fill = "right") %>%
-    dplyr::select(col, component)
-  # Add total for all regression components
-  components <- rbind(
-    components,
-    data.frame(col = seq_len(ncol(seasonal.features)), component = 'seasonal'))
-  # Add totals for seasonality, holiday, and extra regressors
-  components <- add_group_component(
-    components, 'seasonalities', names(m$seasonalities))
-  if(!is.null(m$holidays)){
-    components <- add_group_component(
-      components, 'holidays', unique(m$holidays$holiday))
+  X <- as.matrix(seasonal.features)
+  component.predictions <- data.frame(matrix(ncol = 0, nrow = nrow(X)))
+  for (component in colnames(component.cols)) {
+    beta.c <- m$params$beta * component.cols[[component]]
+
+    comp <- X %*% t(beta.c)
+    if (component %in% m$component.modes$additive) {
+      comp <- comp * m$y.scale
+    }
+    component.predictions[[component]] <- rowMeans(comp, na.rm = TRUE)
+    component.predictions[[paste0(component, '_lower')]] <- apply(
+      comp, 1, stats::quantile, lower.p, na.rm = TRUE)
+    component.predictions[[paste0(component, '_upper')]] <- apply(
+      comp, 1, stats::quantile, upper.p, na.rm = TRUE)
   }
-  components <- add_group_component(
-    components, 'extra_regressors', names(m$extra_regressors))
-  # Remove the placeholder
-  components <- dplyr::filter(components, component != 'zeros')
-
-  component.predictions <- components %>%
-    dplyr::group_by(component) %>% dplyr::do({
-      comp <- (as.matrix(seasonal.features[, .$col])
-               %*% t(m$params$beta[, .$col, drop = FALSE])) * m$y.scale
-      dplyr::data_frame(ix = seq_len(nrow(seasonal.features)),
-                        mean = rowMeans(comp, na.rm = TRUE),
-                        lower = apply(comp, 1, stats::quantile, lower.p,
-                                      na.rm = TRUE),
-                        upper = apply(comp, 1, stats::quantile, upper.p,
-                                      na.rm = TRUE))
-    }) %>%
-    tidyr::gather(stat, value, mean, lower, upper) %>%
-    dplyr::mutate(stat = ifelse(stat == 'mean', '', paste0('_', stat))) %>%
-    tidyr::unite(component, component, stat, sep="") %>%
-    tidyr::spread(component, value) %>%
-    dplyr::select(-ix)
-
   return(component.predictions)
-}
-
-#' Adds a component with given name that contains all of the components
-#' in group.
-#'
-#' @param components Dataframe with components.
-#' @param name Name of new group component.
-#' @param group  List of components that form the group.
-#'
-#' @return Dataframe with components.
-#'
-#' @keywords internal
-add_group_component <- function(components, name, group) {
-  new_comp <- components[(components$component %in% group), ]
-  if (nrow(new_comp) > 0) {
-    new_comp$component <- name
-    components <- rbind(components, new_comp)
-  }
-  return(components)
 }
 
 #' Prophet posterior predictive samples.
@@ -1187,7 +1311,8 @@ add_group_component <- function(components, name, group) {
 #' @param m Prophet object.
 #' @param df Prediction dataframe.
 #'
-#' @return List with posterior predictive samples for each component.
+#' @return List with posterior predictive samples for the forecast yhat and
+#'  for the trend component.
 #'
 #' @keywords internal
 sample_posterior_predictive <- function(m, df) {
@@ -1196,16 +1321,24 @@ sample_posterior_predictive <- function(m, df) {
   samp.per.iter <- max(1, ceiling(m$uncertainty.samples / n.iterations))
   nsamp <- n.iterations * samp.per.iter  # The actual number of samples
 
-  seasonal.features <- make_all_seasonality_features(m, df)$seasonal.features
+  out <- make_all_seasonality_features(m, df)
+  seasonal.features <- out$seasonal.features
+  component.cols <- out$component.cols
   sim.values <- list("trend" = matrix(, nrow = nrow(df), ncol = nsamp),
-                     "seasonal" = matrix(, nrow = nrow(df), ncol = nsamp),
                      "yhat" = matrix(, nrow = nrow(df), ncol = nsamp))
 
   for (i in seq_len(n.iterations)) {
     # For each set of parameters from MCMC (or just 1 set for MAP),
     for (j in seq_len(samp.per.iter)) {
       # Do a simulation with this set of parameters,
-      sim <- sample_model(m, df, seasonal.features, i)
+      sim <- sample_model(
+        m = m,
+        df = df,
+        seasonal.features = seasonal.features,
+        iteration = i,
+        s_a = component.cols$additive_terms,
+        s_m = component.cols$multiplicative_terms
+      )
       # Store the results
       for (key in c("trend", "seasonal", "yhat")) {
         sim.values[[key]][,(i - 1) * samp.per.iter + j] <- sim[[key]]
@@ -1221,9 +1354,8 @@ sample_posterior_predictive <- function(m, df) {
 #' @param df Dataframe with dates for predictions (column ds), and capacity
 #'  (column cap) if logistic growth.
 #'
-#' @return A list with items "trend", "seasonal", and "yhat" containing
-#'  posterior predictive samples for that component. "seasonal" is the sum
-#'  of seasonalities, holidays, and added regressors.
+#' @return A list with items "trend" and "yhat" containing
+#'  posterior predictive samples for that component.
 #'
 #' @export
 predictive_samples <- function(m, df) {
@@ -1264,22 +1396,24 @@ predict_uncertainty <- function(m, df) {
 #' @param df Prediction dataframe.
 #' @param seasonal.features Data frame of seasonal features
 #' @param iteration Int sampling iteration to use parameters from.
+#' @param s_a Indicator vector for additive components
+#' @param s_m Indicator vector for multiplicative components
 #'
-#' @return List of trend, seasonality, and yhat, each a vector like df$t.
+#' @return List of trend and yhat, each a vector like df$t.
 #'
 #' @keywords internal
-sample_model <- function(m, df, seasonal.features, iteration) {
+sample_model <- function(m, df, seasonal.features, iteration, s_a, s_m) {
   trend <- sample_predictive_trend(m, df, iteration)
 
   beta <- m$params$beta[iteration,]
-  seasonal <- (as.matrix(seasonal.features) %*% beta) * m$y.scale
+  Xb_a = as.matrix(seasonal.features) %*% (beta * s_a) * m$y.scale
+  Xb_m = as.matrix(seasonal.features) %*% (beta * s_m)
 
   sigma <- m$params$sigma_obs[iteration]
   noise <- stats::rnorm(nrow(df), mean = 0, sd = sigma) * m$y.scale
 
-  return(list("yhat" = trend + seasonal + noise,
-              "trend" = trend,
-              "seasonal" = seasonal))
+  return(list("yhat" = trend * (1 + Xb_m) + Xb_a + noise,
+              "trend" = trend))
 }
 
 #' Simulate the trend using the extrapolated generative model.

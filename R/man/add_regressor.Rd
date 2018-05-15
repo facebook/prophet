@@ -4,7 +4,8 @@
 \alias{add_regressor}
 \title{Add an additional regressor to be used for fitting and predicting.}
 \usage{
-add_regressor(m, name, prior.scale = NULL, standardize = "auto")
+add_regressor(m, name, prior.scale = NULL, standardize = "auto",
+  mode = NULL)
 }
 \arguments{
 \item{m}{Prophet object.}
@@ -17,6 +18,9 @@ holidays.prior.scale will be used.}
 \item{standardize}{Bool, specify whether this regressor will be standardized
 prior to fitting. Can be 'auto' (standardize if not binary), True, or
 False.}
+
+\item{mode}{Optional, 'additive' or 'multiplicative'. Defaults to
+m$seasonality.mode.}
 }
 \value{
 The prophet model with the regressor added.
@@ -28,4 +32,8 @@ regressor will be standardized unless it is binary. The regression
 coefficient is given a prior with the specified scale parameter.
 Decreasing the prior scale will add additional regularization. If no
 prior scale is provided, holidays.prior.scale will be used.
+Mode can be specified as either 'additive' or 'multiplicative'. If not
+specified, m$seasonality.mode will be used. 'additive' means the effect of
+the regressor will be added to the trend, 'multiplicative' means it will
+multiply the trend.
 }

@@ -18,6 +18,10 @@ List with items
  seasonal.features: Dataframe with regressor features,
  prior.scales: Array of prior scales for each colum of the features
    dataframe.
+ component.cols: Dataframe with indicators for which regression components
+   correspond to which columns.
+ modes: List with keys 'additive' and 'multiplicative' with arrays of
+   component names for each mode of seasonality.
 }
 \description{
 Dataframe with seasonality features.

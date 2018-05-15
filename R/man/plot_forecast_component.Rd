@@ -4,9 +4,11 @@
 \alias{plot_forecast_component}
 \title{Plot a particular component of the forecast.}
 \usage{
-plot_forecast_component(fcst, name, uncertainty = TRUE, plot_cap = FALSE)
+plot_forecast_component(m, fcst, name, uncertainty = TRUE, plot_cap = FALSE)
 }
 \arguments{
+\item{m}{Prophet model}
+
 \item{fcst}{Dataframe output of `predict`.}
 
 \item{name}{String name of the component to plot (column of fcst).}

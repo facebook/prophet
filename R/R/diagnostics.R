@@ -179,6 +179,7 @@ prophet_copy <- function(m, cutoff = NULL) {
     weekly.seasonality = FALSE,
     daily.seasonality = FALSE,
     holidays = m$holidays,
+    seasonality.mode = m$seasonality.mode,
     seasonality.prior.scale = m$seasonality.prior.scale,
     changepoint.prior.scale = m$changepoint.prior.scale,
     holidays.prior.scale = m$holidays.prior.scale,
@@ -253,7 +254,7 @@ performance_metrics <- function(df, metrics = NULL, rolling_window = 0.1) {
     cols <- c(cols, metric)
   }
   df_m <- df_m[cols]
-  return(na.omit(df_m))
+  return(stats::na.omit(df_m))
 }
 
 #' Compute a rolling mean of x

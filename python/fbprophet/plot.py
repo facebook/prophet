@@ -344,7 +344,7 @@ def plot_seasonality(m, name, ax=None, uncertainty=True):
     ax.xaxis.set_major_formatter(FuncFormatter(
         lambda x, pos=None: fmt_str.format(dt=num2date(x))))
     ax.set_xlabel('ds')
-    ax.set_ylabel('{}'.format(name))
+    ax.set_ylabel(name)
     if m.seasonalities[name]['mode'] == 'multiplicative':
         ax = set_y_as_percent(ax)
     return artists

@@ -13,9 +13,8 @@ predictive_samples(m, df)
 (column cap) if logistic growth.}
 }
 \value{
-A list with items "trend", "seasonal", and "yhat" containing
- posterior predictive samples for that component. "seasonal" is the sum
- of seasonalities, holidays, and added regressors.
+A list with items "trend" and "yhat" containing
+ posterior predictive samples for that component.
 }
 \description{
 Sample from the posterior predictive distribution.

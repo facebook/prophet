@@ -7,10 +7,10 @@
 prophet(df = NULL, growth = "linear", changepoints = NULL,
   n.changepoints = 25, yearly.seasonality = "auto",
   weekly.seasonality = "auto", daily.seasonality = "auto",
-  holidays = NULL, seasonality.prior.scale = 10,
-  holidays.prior.scale = 10, changepoint.prior.scale = 0.05,
-  mcmc.samples = 0, interval.width = 0.8, uncertainty.samples = 1000,
-  fit = TRUE, ...)
+  holidays = NULL, seasonality.mode = "additive",
+  seasonality.prior.scale = 10, holidays.prior.scale = 10,
+  changepoint.prior.scale = 0.05, mcmc.samples = 0, interval.width = 0.8,
+  uncertainty.samples = 1000, fit = TRUE, ...)
 }
 \arguments{
 \item{df}{(optional) Dataframe containing the history. Must have columns ds
@@ -45,6 +45,8 @@ type)and optionally columns lower_window and upper_window which specify a
 range of days around the date to be included as holidays. lower_window=-2
 will include 2 days prior to the date as holidays. Also optionally can have
 a column prior_scale specifying the prior scale for each holiday.}
+
+\item{seasonality.mode}{'additive' (default) or 'multiplicative'.}
 
 \item{seasonality.prior.scale}{Parameter modulating the strength of the
 seasonality model. Larger values allow the model to fit larger seasonal

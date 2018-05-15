@@ -692,7 +692,7 @@ class Prophet(object):
         # Convert to a binary matrix
         component_cols = pd.crosstab(
             components['col'], components['component'],
-        )
+        ).sort_index(level='col')
         # Add columns for additive and multiplicative terms, if missing
         for name in ['additive_terms', 'multiplicative_terms']:
             if name not in component_cols:
@@ -729,7 +729,7 @@ class Prophet(object):
         new_comp = components[components['component'].isin(set(group))].copy()
         group_cols = new_comp['col'].unique()
         if len(group_cols) > 0:
-            new_comp = pd.DataFrame({'component': name, 'col': group_cols})
+            new_comp = pd.DataFrame({'col': group_cols, 'component': name})
             components = components.append(new_comp)
         return components
 
@@ -1248,6 +1248,8 @@ class Prophet(object):
         df: Prediction dataframe.
         seasonal_features: pd.DataFrame of seasonal features.
         iteration: Int sampling iteration to use parameters from.
+        s_a: Indicator vector for additive components
+        s_m: Indicator vector for multiplicative components
 
         Returns
         -------
