@@ -102,21 +102,6 @@ parameters {
   vector[K] beta;           // Regressor coefficients
 }
 
-transformed parameters {
-  vector[T] trend;
-  vector[T] Xb_a;
-  vector[T] Xb_m;
-
-  if (trend_indicator == 0) {
-    trend = linear_trend(k, m, delta, t, A, t_change);
-  } else if (trend_indicator == 1) {
-    trend = logistic_trend(k, m, delta, t, cap, A, t_change, S);
-  }
-
-  Xb_a = X * (beta .* s_a);
-  Xb_m = X * (beta .* s_m);
-}
-
 model {
   //priors
   k ~ normal(0, 5);
@@ -126,5 +111,19 @@ model {
   beta ~ normal(0, sigmas);
 
   // Likelihood
-  y ~ normal(trend .* (1 + Xb_m) + Xb_a, sigma_obs);
+  if (trend_indicator == 0) {
+    y ~ normal(
+      linear_trend(k, m, delta, t, A, t_change)
+      .* (1 + X * (beta .* s_m))
+      + X * (beta .* s_a),
+      sigma_obs
+    );
+  } else if (trend_indicator == 1) {
+    y ~ normal(
+      logistic_trend(k, m, delta, t, cap, A, t_change, S)
+      .* (1 + X * (beta .* s_m))
+      + X * (beta .* s_a),
+      sigma_obs
+    );
+  }
 }
