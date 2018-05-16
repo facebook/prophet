@@ -1340,7 +1340,7 @@ sample_posterior_predictive <- function(m, df) {
         s_m = component.cols$multiplicative_terms
       )
       # Store the results
-      for (key in c("trend", "seasonal", "yhat")) {
+      for (key in c("trend", "yhat")) {
         sim.values[[key]][,(i - 1) * samp.per.iter + j] <- sim[[key]]
       }
     }
