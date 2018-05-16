@@ -34,8 +34,8 @@ df.head()
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>ds</th>
-      <th>y</th>
+      <th style="text-transform: none">ds</th>
+      <th style="text-transform: none">y</th>
     </tr>
   </thead>
   <tbody>
@@ -75,7 +75,7 @@ We fit the model by instantiating a new `Prophet` object.  Any settings to the f
 ```python
 # Python
 m = Prophet()
-m.fit(df);
+m.fit(df)
 ```
 Predictions are then made on a dataframe with a column `ds` containing the dates for which a prediction is to be made. You can get a suitable dataframe that extends into the future a specified number of days using the helper method `Prophet.make_future_dataframe`. By default it will also include the dates from the history, so we will see the model fit as well. 
 
@@ -92,7 +92,7 @@ future.tail()
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>ds</th>
+      <th style="text-transform: none">ds</th>
     </tr>
   </thead>
   <tbody>
@@ -137,10 +137,10 @@ forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail()
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>ds</th>
-      <th>yhat</th>
-      <th>yhat_lower</th>
-      <th>yhat_upper</th>
+      <th style="text-transform: none">ds</th>
+      <th style="text-transform: none">yhat</th>
+      <th style="text-transform: none">yhat_lower</th>
+      <th style="text-transform: none">yhat_upper</th>
     </tr>
   </thead>
   <tbody>
@@ -189,7 +189,7 @@ You can plot the forecast by calling the `Prophet.plot` method and passing in yo
 
 ```python
 # Python
-m.plot(forecast);
+m.plot(forecast)
 ```
  
 ![png](/prophet/static/quick_start_files/quick_start_12_0.png) 
@@ -199,7 +199,7 @@ If you want to see the forecast components, you can use the `Prophet.plot_compon
 
 ```python
 # Python
-m.plot_components(forecast);
+m.plot_components(forecast)
 ```
  
 ![png](/prophet/static/quick_start_files/quick_start_14_0.png) 
