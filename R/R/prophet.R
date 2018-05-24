@@ -607,7 +607,7 @@ make_holiday_features <- function(m, dates) {
 #' @return  The prophet model with the regressor added.
 #'
 #' @export
-add_regressor <- function(m, name, prior.scale = NULL, standardize = 'auto'){
+add_regressor <- function(m, name, prior.scale = NULL, modify_seasonality = FALSE, standardize = 'auto'){
   if (!is.null(m$history)) {
     stop('Regressors must be added prior to model fitting.')
   }
@@ -622,7 +622,8 @@ add_regressor <- function(m, name, prior.scale = NULL, standardize = 'auto'){
     prior.scale = prior.scale,
     standardize = standardize,
     mu = 0,
-    std = 1.0
+    std = 1.0,
+    modify_seasonality = modify_seasonality
   )
   return(m)
 }
@@ -697,6 +698,15 @@ make_all_seasonality_features <- function(m, df) {
     seasonal.features <- cbind(seasonal.features, features)
     prior.scales <- c(prior.scales,
                       props$prior.scale * rep(1, ncol(features)))
+    # Seasonal Modifiers
+    for (mname in names(m$extra_regressors)) {
+      if (m$extra_regressors[[mname]]$modify_seasonality == TRUE) {
+        for (sname in names(features)) {
+          seasonal.features[[paste0(sname, ":", mname)]] <- df[[mname]] * features[[sname]]
+          prior.scales <- c(prior.scales, m$extra_regressors[[mname]]$prior.scale)    
+        }
+      }
+    }
   }
 
   # Holiday features
