@@ -1143,7 +1143,7 @@ class Prophet(object):
         lower_p = 100 * (1.0 - self.interval_width) / 2
         upper_p = 100 * (1.0 + self.interval_width) / 2
 
-        X = seasonal_features.as_matrix()
+        X = seasonal_features.values
         data = {}
         for component in component_cols.columns:
             beta_c = self.params['beta'] * component_cols[component].values
@@ -1258,10 +1258,8 @@ class Prophet(object):
         trend = self.sample_predictive_trend(df, iteration)
 
         beta = self.params['beta'][iteration]
-        Xb_a = (
-            np.matmul(seasonal_features.as_matrix(), beta * s_a) * self.y_scale
-        )
-        Xb_m = np.matmul(seasonal_features.as_matrix(), beta * s_m)
+        Xb_a = np.matmul(seasonal_features.values, beta * s_a) * self.y_scale
+        Xb_m = np.matmul(seasonal_features.values, beta * s_m)
 
         sigma = self.params['sigma_obs'][iteration]
         noise = np.random.normal(0, sigma, df.shape[0]) * self.y_scale
