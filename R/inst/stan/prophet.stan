@@ -29,10 +29,7 @@ functions {
     real m_pr;
 
     // Compute the rate in each segment
-    k_s[1] = k;
-    for (i in 1:S) {
-      k_s[i + 1] = k_s[i] + delta[i];
-    }
+    k_s = append_row(k, k + cumulative_sum(delta));
 
     // Piecewise offsets
     m_pr = m; // The offset in the previous segment
@@ -42,7 +39,7 @@ functions {
     }
     return gamma;
   }
-  
+
   vector logistic_trend(
     real k,
     real m,
@@ -56,7 +53,7 @@ functions {
     vector[S] gamma;
 
     gamma = logistic_gamma(k, m, delta, t_change, S);
-    return cap ./ (1 + exp(-(k + A * delta) .* (t - (m + A * gamma))));
+    return cap .* inv_logit((k + A * delta) .* (t - (m + A * gamma)));
   }
 
   // Linear trend function
