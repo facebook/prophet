@@ -374,8 +374,9 @@ add_changepoints_to_plot <- function(m, threshold = 0.01, cp_color = "red",
 #'
 #' @examples
 #' \dontrun{
-#' history <- data.frame(ds = seq(as.Date('2015-01-01'), as.Date('2016-01-01'), by = 'd'),
-#'                       y = sin(1:366/200) + rnorm(366)/10)
+#' history <- data.frame(
+#'  ds = seq(as.Date('2015-01-01'), as.Date('2016-01-01'), by = 'd'),
+#'  y = sin(1:366/200) + rnorm(366)/10)
 #' m <- prophet(history)
 #' future <- make_future_dataframe(m, periods = 365)
 #' forecast <- predict(m, future)
@@ -389,7 +390,7 @@ dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
   forecast.label='Predicted'
   actual.label='Actual'
   # create data.frame for plotting
-  df <- df_for_plotting(x, fcst)
+  df <- prophet:::df_for_plotting(x, fcst)
   
   # build variables to include, or not, the uncertainty data
   if(uncertainty && exists("yhat_lower", where = df))
@@ -414,9 +415,11 @@ dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
   
   dyBase <- dyBase %>%
     # plot actual values
-    dygraphs::dySeries('y', label=actual.label) %>% 
+    dygraphs::dySeries(
+      'y', label=actual.label, color='black', drawPoints=TRUE, strokeWidth=0
+    ) %>%
     # plot forecast and ribbon
-    dygraphs::dySeries(forecastCols, label=forecast.label) %>% 
+    dygraphs::dySeries(forecastCols, label=forecast.label, color='blue') %>%
     # allow zooming
     dygraphs::dyRangeSelector() %>% 
     # make unzoom button
