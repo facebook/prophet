@@ -179,6 +179,7 @@ def prophet_copy(m, cutoff=None):
     m2 = m.__class__(
         growth=m.growth,
         n_changepoints=m.n_changepoints,
+        changepoint_range=m.changepoint_range,
         changepoints=changepoints,
         yearly_seasonality=False,
         weekly_seasonality=False,

@@ -150,7 +150,25 @@ class TestProphet(TestCase):
         self.assertEqual(cp.shape[0], m.n_changepoints)
         self.assertEqual(len(cp.shape), 1)
         self.assertTrue(cp.min() > 0)
-        self.assertTrue(cp.max() < 1)
+        cp_indx = int(np.ceil(0.8 * history.shape[0]))
+        self.assertTrue(cp.max() <= history['t'].values[cp_indx])
+
+    def test_set_changepoint_range(self):
+        m = Prophet(changepoint_range=0.4)
+        N = DATA.shape[0]
+        history = DATA.head(N // 2).copy()
+
+        history = m.setup_dataframe(history, initialize_scales=True)
+        m.history = history
+
+        m.set_changepoints()
+
+        cp = m.changepoints_t
+        self.assertEqual(cp.shape[0], m.n_changepoints)
+        self.assertEqual(len(cp.shape), 1)
+        self.assertTrue(cp.min() > 0)
+        cp_indx = int(np.ceil(0.4 * history.shape[0]))
+        self.assertTrue(cp.max() <= history['t'].values[cp_indx])
 
     def test_get_zero_changepoints(self):
         m = Prophet(n_changepoints=0)

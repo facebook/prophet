@@ -175,6 +175,7 @@ prophet_copy <- function(m, cutoff = NULL) {
     growth = m$growth,
     changepoints = changepoints,
     n.changepoints = m$n.changepoints,
+    changepoint.range = m$changepoint.range,
     yearly.seasonality = FALSE,
     weekly.seasonality = FALSE,
     daily.seasonality = FALSE,

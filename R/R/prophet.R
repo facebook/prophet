@@ -28,9 +28,10 @@ utils::globalVariables(c(
 #' @param n.changepoints Number of potential changepoints to include. Not used
 #'  if input `changepoints` is supplied. If `changepoints` is not supplied,
 #'  then n.changepoints potential changepoints are selected uniformly from the
-#'  first `changepoint.threshold` percent of df$ds.
-#' @param changepoint.threshold Parameter controling where to select the changepoints.
-#'  Not used if input `changepoints` is supplied.
+#'  first `changepoint.range` proportion of df$ds.
+#' @param changepoint.range Proportion of history in which trend changepoints
+#'  will be estimated. Defaults to 0.8 for the first 80%. Not used if
+#'  `changepoints` is specified.
 #' @param yearly.seasonality Fit yearly seasonality. Can be 'auto', TRUE,
 #'  FALSE, or a number of Fourier terms to generate.
 #' @param weekly.seasonality Fit weekly seasonality. Can be 'auto', TRUE,
@@ -81,7 +82,7 @@ prophet <- function(df = NULL,
                     growth = 'linear',
                     changepoints = NULL,
                     n.changepoints = 25,
-                    changepoint.threshold = 0.8,
+                    changepoint.range = 0.8,
                     yearly.seasonality = 'auto',
                     weekly.seasonality = 'auto',
                     daily.seasonality = 'auto',
@@ -106,7 +107,7 @@ prophet <- function(df = NULL,
     growth = growth,
     changepoints = changepoints,
     n.changepoints = n.changepoints,
-    changepoint.threshold = changepoint.threshold,
+    changepoint.range = changepoint.range,
     yearly.seasonality = yearly.seasonality,
     weekly.seasonality = weekly.seasonality,
     daily.seasonality = daily.seasonality,
@@ -151,6 +152,9 @@ prophet <- function(df = NULL,
 validate_inputs <- function(m) {
   if (!(m$growth %in% c('linear', 'logistic'))) {
     stop("Parameter 'growth' should be 'linear' or 'logistic'.")
+  }
+  if ((m$changepoint.range < 0) | (m$changepoint.range > 1)) {
+    stop("Parameter 'changepoint.range' must be in [0, 1]")
   }
   if (!is.null(m$holidays)) {
     if (!(exists('holiday', where = m$holidays))) {
@@ -455,14 +459,9 @@ set_changepoints <- function(m) {
       }
     }
   } else {
-    # Place potential changepoints evenly through the first changepoint.threshold pcnt of
-    # the history.
-    if (m$changepoint.threshold > 1 || m$changepoint.threshold <= 0){
-        m$changepoint.threshold <- .8
-        message('changepoint.threshold greater than 1 or less than equal to 0. Using ',
-                m$changepoint.threshold)
-    }
-    hist.size <- floor(nrow(m$history) * m$changepoint.threshold)
+    # Place potential changepoints evenly through the first changepoint.range
+    # proportion of the history.
+    hist.size <- floor(nrow(m$history) * m$changepoint.range)
     if (m$n.changepoints + 1 > hist.size) {
       m$n.changepoints <- hist.size - 1
       message('n.changepoints greater than number of observations. Using ',

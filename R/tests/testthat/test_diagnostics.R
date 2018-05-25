@@ -158,6 +158,7 @@ test_that("copy", {
       growth = as.character(products$growth[i]),
       changepoints = NULL,
       n.changepoints = 3,
+      changepoint.range = 0.9,
       yearly.seasonality = products$yearly.seasonality[i],
       weekly.seasonality = products$weekly.seasonality[i],
       daily.seasonality = products$daily.seasonality[i],
@@ -179,7 +180,7 @@ test_that("copy", {
     args <- c('growth', 'changepoints', 'n.changepoints', 'holidays',
               'seasonality.prior.scale', 'holidays.prior.scale',
               'changepoints.prior.scale', 'mcmc.samples', 'interval.width',
-              'uncertainty.samples', 'seasonality.mode')
+              'uncertainty.samples', 'seasonality.mode', 'changepoint.range')
     for (arg in args) {
       expect_equal(m1[[arg]], m2[[arg]])
     }

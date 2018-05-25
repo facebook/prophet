@@ -121,7 +121,24 @@ test_that("get_changepoints", {
   cp <- m$changepoints.t
   expect_equal(length(cp), m$n.changepoints)
   expect_true(min(cp) > 0)
-  expect_true(max(cp) < 1)
+  expect_true(max(cp) <= history$t[ceiling(0.8 * length(history$t))])
+})
+
+test_that("set_changepoint_range", {
+  history <- train
+  m <- prophet(history, fit = FALSE, changepoint.range = 0.4)
+
+  out <- prophet:::setup_dataframe(m, history, initialize_scales = TRUE)
+  history <- out$df
+  m <- out$m
+  m$history <- history
+
+  m <- prophet:::set_changepoints(m)
+
+  cp <- m$changepoints.t
+  expect_equal(length(cp), m$n.changepoints)
+  expect_true(min(cp) > 0)
+  expect_true(max(cp) <= history$t[ceiling(0.4 * length(history$t))])
 })
 
 test_that("get_zero_changepoints", {

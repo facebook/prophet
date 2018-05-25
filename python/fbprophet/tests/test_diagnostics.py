@@ -180,6 +180,7 @@ class TestDiagnostics(TestCase):
             ['linear', 'logistic'],  # growth
             [None, pd.to_datetime(['2016-12-25'])],  # changepoints
             [3],  # n_changepoints
+            [0.9],  # changepoint_range
             [True, False],  # yearly_seasonality
             [True, False],  # weekly_seasonality
             [True, False],  # daily_seasonality
@@ -201,6 +202,7 @@ class TestDiagnostics(TestCase):
             m2 = diagnostics.prophet_copy(m1)
             self.assertEqual(m1.growth, m2.growth)
             self.assertEqual(m1.n_changepoints, m2.n_changepoints)
+            self.assertEqual(m1.changepoint_range, m2.changepoint_range)
             self.assertEqual(m1.changepoints, m2.changepoints)
             self.assertEqual(False, m2.yearly_seasonality)
             self.assertEqual(False, m2.weekly_seasonality)
