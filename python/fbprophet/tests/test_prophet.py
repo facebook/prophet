@@ -169,6 +169,10 @@ class TestProphet(TestCase):
         self.assertTrue(cp.min() > 0)
         cp_indx = int(np.ceil(0.4 * history.shape[0]))
         self.assertTrue(cp.max() <= history['t'].values[cp_indx])
+        with self.assertRaises(ValueError):
+            m = Prophet(changepoint_range=-0.1)
+        with self.assertRaises(ValueError):
+            m = Prophet(changepoint_range=2)
 
     def test_get_zero_changepoints(self):
         m = Prophet(n_changepoints=0)

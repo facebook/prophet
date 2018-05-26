@@ -352,7 +352,7 @@ class Prophet(object):
                 )
             if self.n_changepoints > 0:
                 cp_indexes = (
-                    np.linspace(0, hist_size, self.n_changepoints + 1)
+                    np.linspace(0, hist_size - 1, self.n_changepoints + 1)
                     .round()
                     .astype(np.int)
                 )

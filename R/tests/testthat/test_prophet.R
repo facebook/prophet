@@ -139,6 +139,8 @@ test_that("set_changepoint_range", {
   expect_equal(length(cp), m$n.changepoints)
   expect_true(min(cp) > 0)
   expect_true(max(cp) <= history$t[ceiling(0.4 * length(history$t))])
+  expect_error(prophet(history, changepoint.range = -0.1))
+  expect_error(prophet(history, changepoint.range = 2))
 })
 
 test_that("get_zero_changepoints", {
