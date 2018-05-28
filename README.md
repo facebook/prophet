@@ -44,7 +44,7 @@ Prophet is on PyPI, so you can use pip to install it:
 $ pip install fbprophet
 ```
 
-The major dependency that Prophet has is `pystan`.   PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html).
+The major dependency that Prophet has is `pystan`.   PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install fbprophet.
 
 After installation, you can [get started!](https://facebook.github.io/prophet/docs/quick_start.html#python-api)
 
