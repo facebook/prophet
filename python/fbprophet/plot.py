@@ -118,6 +118,8 @@ def plot_components(
     if npanel == 1:
         axes = [axes]
 
+    multiplicative_axes = []
+
     for ax, plot_name in zip(axes, components):
         if plot_name == 'trend':
             plot_forecast_component(
@@ -145,8 +147,13 @@ def plot_components(
             plot_seasonality(
                 m=m, name=plot_name, ax=ax, uncertainty=uncertainty,
             )
+        if plot_name in m.component_modes['multiplicative']:
+            multiplicative_axes.append(ax)
 
     fig.tight_layout()
+    # Reset multiplicative axes labels after tight_layout adjustment
+    for ax in multiplicative_axes:
+        ax = set_y_as_percent(ax)
     return fig
 
 
