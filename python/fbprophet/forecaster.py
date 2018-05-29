@@ -927,6 +927,11 @@ class Prophet(object):
         if self.history is not None:
             raise Exception('Prophet object can only be fit once. '
                             'Instantiate a new object.')
+        if ('ds' not in df) or ('y' not in df):
+            raise ValueError(
+                "Dataframe must have columns 'ds' and 'y' with the dates and "
+                "values respectively."
+            )
         history = df[df['y'].notnull()].copy()
         if history.shape[0] < 2:
             raise ValueError('Dataframe has less than 2 non-NaN rows.')

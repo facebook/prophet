@@ -1043,6 +1043,12 @@ fit.prophet <- function(m, df, ...) {
   if (!is.null(m$history)) {
     stop("Prophet object can only be fit once. Instantiate a new object.")
   }
+  if (!(exists('ds', where = df)) | !(exists('y', where = df))) {
+    stop(paste(
+      "Dataframe must have columns 'ds' and 'y' with the dates and values",
+      "respectively."
+    ))
+  }
   history <- df %>%
     dplyr::filter(!is.na(y))
   if (nrow(history) < 2) {
