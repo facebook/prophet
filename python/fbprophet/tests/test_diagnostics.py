@@ -11,13 +11,12 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import itertools
+import os
+from unittest import TestCase
 
 import numpy as np
 import pandas as pd
 
-# fb-block 1 start
-import os
-from unittest import TestCase
 from fbprophet import Prophet
 from fbprophet import diagnostics
 
@@ -25,8 +24,6 @@ DATA_all = pd.read_csv(
     os.path.join(os.path.dirname(__file__), 'data.csv'), parse_dates=['ds']
 )
 DATA = DATA_all.head(100)
-# fb-block 1 end
-# fb-block 2
 
 
 class TestDiagnostics(TestCase):

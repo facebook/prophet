@@ -17,8 +17,12 @@ import warnings
 
 import numpy as np
 import pandas as pd
+try:
+    import pystan  # noqa F401
+except ImportError:
+    logger.exception('You cannot run fbprophet without pystan installed')
 
-# fb-block 1 start
+from fbprophet.diagnostics import prophet_copy
 from fbprophet.models import prophet_stan_model
 from fbprophet.plot import (
     plot,
@@ -29,20 +33,10 @@ from fbprophet.plot import (
     plot_yearly,
     plot_seasonality,
 )
-from fbprophet.diagnostics import prophet_copy
-# fb-block 1 end
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 warnings.filterwarnings("default", category=DeprecationWarning)
-
-try:
-    import pystan  # noqa F401
-except ImportError:
-    logger.error('You cannot run prophet without pystan installed')
-    raise
-
-# fb-block 2
 
 
 class Prophet(object):
@@ -903,7 +897,6 @@ class Prophet(object):
         k = (L0 - L1) / T
         return (k, m)
 
-    # fb-block 7
     def fit(self, df, **kwargs):
         """Fit the Prophet model.
 
@@ -1024,7 +1017,6 @@ class Prophet(object):
 
         return self
 
-    # fb-block 8
     def predict(self, df=None):
         """Predict using the prophet model.
 

@@ -97,8 +97,6 @@ prophet <- function(df = NULL,
                     fit = TRUE,
                     ...
 ) {
-  # fb-block 1
-
   if (!is.null(changepoints)) {
     n.changepoints <- length(changepoints)
   }
@@ -139,8 +137,6 @@ prophet <- function(df = NULL,
   if ((fit) && (!is.null(df))) {
     m <- fit.prophet(m, df, ...)
   }
-
-  # fb-block 2
   return(m)
 }
 
@@ -1509,5 +1505,3 @@ make_future_dataframe <- function(m, periods, freq = 'day',
   }
   return(data.frame(ds = dates))
 }
-
-# fb-block 3
