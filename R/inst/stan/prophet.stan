@@ -14,7 +14,7 @@ functions {
     for (i in 1:T) {
       while ((cp_idx <= S) && (t[i] >= t_change[cp_idx])) {
         a_row[cp_idx] = 1;
-        cp_idx += 1;
+        cp_idx = cp_idx + 1;
       }
       A[i] = a_row;
     }
