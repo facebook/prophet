@@ -980,7 +980,10 @@ class Prophet(object):
                 'sigma_obs': 1,
             }
 
-        if history['y'].min() == history['y'].max():
+        if (
+            (history['y'].min() == history['y'].max())
+            and self.growth == 'linear'
+        ):
             # Nothing to fit.
             self.params = stan_init()
             self.params['sigma_obs'] = 1e-9
