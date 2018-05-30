@@ -22,6 +22,7 @@ DATA$ds <- prophet:::set_date(DATA$ds)
 DATA2$ds <- prophet:::set_date(DATA2$ds)
 
 test_that("get_changepoint_matrix", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   history <- train
   m <- prophet(history, fit = FALSE)
 
@@ -46,6 +47,7 @@ test_that("get_changepoint_matrix", {
 })
 
 test_that("get_zero_changepoints", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   history <- train
   m <- prophet(history, n.changepoints = 0, fit = FALSE)
   
@@ -64,6 +66,7 @@ test_that("get_zero_changepoints", {
 })
 
 test_that("linear_trend", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   t <- seq(0, 10)
   m <- 0
   k <- 1.0
@@ -83,6 +86,7 @@ test_that("linear_trend", {
 })
 
 test_that("piecewise_logistic", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   t <- seq(0, 10)
   cap <- rep(10, 11)
   m <- 0
