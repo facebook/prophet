@@ -11,102 +11,50 @@ globalVariables(c(
 
 #' Generate cutoff dates
 #'
-#' @param df Dataframe with historical data
-#' @param horizon timediff forecast horizon
-#' @param k integer number of forecast points
+#' @param df Dataframe with historical data.
+#' @param horizon timediff forecast horizon.
+#' @param initial timediff initial window.
 #' @param period timediff Simulated forecasts are done with this period.
 #'
-#' @return Array of datetimes
+#' @return Array of datetimes.
 #'
 #' @keywords internal
-generate_cutoffs <- function(df, horizon, k, period) {
+generate_cutoffs <- function(df, horizon, initial, period) {
   # Last cutoff is (latest date in data) - (horizon).
   cutoff <- max(df$ds) - horizon
-  if (cutoff < min(df$ds)) {
-    stop('Less data than horizon.')
-  }
   tzone <- attr(cutoff, "tzone")  # Timezone is wiped by putting in array
-  result <- cutoff
-  if (k > 1) {
-    for (i in 2:k) {
-      cutoff <- cutoff - period
-      # If data does not exist in data range (cutoff, cutoff + horizon]
-      if (!any((df$ds > cutoff) & (df$ds <= cutoff + horizon))) {
+  result <- c(cutoff)
+  while (result[length(result)] >= min(df$ds) + initial) {
+    cutoff <- cutoff - period
+    # If data does not exist in data range (cutoff, cutoff + horizon]
+    if (!any((df$ds > cutoff) & (df$ds <= cutoff + horizon))) {
         # Next cutoff point is 'closest date before cutoff in data - horizon'
         closest.date <- max(df$ds[df$ds <= cutoff])
         cutoff <- closest.date - horizon
-      }
-      if (cutoff < min(df$ds)) {
-        warning('Not enough data for requested number of cutoffs! Using ', i)
-        break
-      }
-      result <- c(result, cutoff)
     }
+    result <- c(result, cutoff)
+  }
+  result <- head(result, -1)
+  if (length(result) == 0) {
+    stop(paste(
+      'Less data than horizon after initial window.',
+      'Make horizon or initial shorter.'
+    ))
   }
   # Reset timezones
   attr(result, "tzone") <- tzone
+  message(paste(
+    'Making', length(result), 'forecasts with cutoffs between',
+    result[length(result)], 'and', result[1]
+  ))
   return(rev(result))
-}
-
-#' Simulated historical forecasts.
-#'
-#' Make forecasts from k historical cutoff points, working backwards from
-#' (end - horizon) with a spacing of period between each cutoff.
-#'
-#' @param model Fitted Prophet model.
-#' @param horizon Integer size of the horizon
-#' @param units String unit of the horizon, e.g., "days", "secs".
-#' @param k integer number of forecast points
-#' @param period Integer amount of time between cutoff dates. Same units as
-#'  horizon. If not provided, will use 0.5 * horizon.
-#'
-#' @return A dataframe with the forecast, actual value, and cutoff date.
-#'
-#' @export
-simulated_historical_forecasts <- function(model, horizon, units, k,
-                                           period = NULL) {
-  df <- model$history
-  horizon <- as.difftime(horizon, units = units)
-  if (is.null(period)) {
-    period <- horizon / 2
-  } else {
-    period <- as.difftime(period, units = units)
-  }
-  cutoffs <- generate_cutoffs(df, horizon, k, period)
-  predicts <- data.frame()
-  for (i in seq_along(cutoffs)) {
-    cutoff <- cutoffs[i]
-    # Copy the model
-    m <- prophet_copy(model, cutoff)
-    # Train model
-    history.c <- dplyr::filter(df, ds <= cutoff)
-    m <- fit.prophet(m, history.c)
-    # Calculate yhat
-    df.predict <- dplyr::filter(df, ds > cutoff, ds <= cutoff + horizon)
-    # Get the columns for the future dataframe
-    columns <- 'ds'
-    if (m$growth == 'logistic') {
-      columns <- c(columns, 'cap')
-      if (m$logistic.floor) {
-        columns <- c(columns, 'floor')
-      }
-    }
-    columns <- c(columns, names(m$extra_regressors))
-    future <- df[columns]
-    yhat <- stats::predict(m, future)
-    # Merge yhat, y, and cutoff.
-    df.c <- dplyr::inner_join(df.predict, yhat, by = "ds")
-    df.c <- dplyr::select(df.c, ds, y, yhat, yhat_lower, yhat_upper)
-    df.c$cutoff <- cutoff
-    predicts <- rbind(predicts, df.c)
-  }
-  return(predicts)
 }
 
 #' Cross-validation for time series.
 #'
-#' Computes forecasts from historical cutoff points. Beginning from initial,
-#' makes cutoffs with a spacing of period up to (end - horizon).
+#' Computes forecasts from historical cutoff points. Beginning from
+#' (end - horizon), works backwards making cutoffs with a spacing of period
+#' until initial is reached.
 #'
 #' When period is equal to the time interval of the data, this is the
 #' technique described in https://robjhyndman.com/hyndsight/tscv/ .
@@ -124,8 +72,9 @@ simulated_historical_forecasts <- function(model, horizon, units, k,
 #' @export
 cross_validation <- function(
     model, horizon, units, period = NULL, initial = NULL) {
-  te <- max(model$history$ds)
-  ts <- min(model$history$ds)
+  df <- model$history
+  te <- max(df$ds)
+  ts <- min(df$ds)
   if (is.null(period)) {
     period <- 0.5 * horizon
   }
@@ -135,14 +84,39 @@ cross_validation <- function(
   horizon.dt <- as.difftime(horizon, units = units)
   initial.dt <- as.difftime(initial, units = units)
   period.dt <- as.difftime(period, units = units)
-  k <- ceiling(
-    as.double((te - horizon.dt) - (ts + initial.dt), units='secs') /
-    as.double(period.dt, units = 'secs')
-  )
-  if (k < 1) {
-    stop('Not enough data for specified horizon, period, and initial.')
+
+  cutoffs <- generate_cutoffs(df, horizon.dt, initial.dt, period.dt)
+  predicts <- data.frame()
+  for (i in seq_along(cutoffs)) {
+    cutoff <- cutoffs[i]
+    # Copy the model
+    m <- prophet_copy(model, cutoff)
+    # Train model
+    history.c <- dplyr::filter(df, ds <= cutoff)
+    if (nrow(history.c) < 2) {
+      stop('Less than two datapoints before cutoff. Increase initial window.')
+    }
+    m <- fit.prophet(m, history.c)
+    # Calculate yhat
+    df.predict <- dplyr::filter(df, ds > cutoff, ds <= cutoff + horizon.dt)
+    # Get the columns for the future dataframe
+    columns <- 'ds'
+    if (m$growth == 'logistic') {
+      columns <- c(columns, 'cap')
+      if (m$logistic.floor) {
+        columns <- c(columns, 'floor')
+      }
+    }
+    columns <- c(columns, names(m$extra_regressors))
+    future <- df.predict[columns]
+    yhat <- stats::predict(m, future)
+    # Merge yhat, y, and cutoff.
+    df.c <- dplyr::inner_join(df.predict, yhat, by = "ds")
+    df.c <- dplyr::select(df.c, ds, y, yhat, yhat_lower, yhat_upper)
+    df.c$cutoff <- cutoff
+    predicts <- rbind(predicts, df.c)
   }
-  return(simulated_historical_forecasts(model, horizon, units, k, period))
+  return(predicts)
 }
 
 #' Copy Prophet object.

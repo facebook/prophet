@@ -4,14 +4,14 @@
 \alias{generate_cutoffs}
 \title{Generate cutoff dates}
 \usage{
-generate_cutoffs(df, horizon, k, period)
+generate_cutoffs(df, horizon, initial, period)
 }
 \arguments{
 \item{df}{Dataframe with historical data}
 
 \item{horizon}{timediff forecast horizon}
 
-\item{k}{integer number of forecast points}
+\item{initial}{timediff initial window}
 
 \item{period}{timediff Simulated forecasts are done with this period.}
 }

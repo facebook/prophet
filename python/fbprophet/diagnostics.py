@@ -21,18 +21,15 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def _cutoffs(df, horizon, k, period):
+def generate_cutoffs(df, horizon, initial, period):
     """Generate cutoff dates
 
     Parameters
     ----------
-    df: pd.DataFrame with historical data
-    horizon: pd.Timedelta.
-        Forecast horizon
-    k: Int number.
-        The number of forecasts point.
-    period: pd.Timedelta.
-        Simulated Forecast will be done at every this period.
+    df: pd.DataFrame with historical data.
+    horizon: pd.Timedelta forecast horizon.
+    initial: pd.Timedelta window of the initial forecast period.
+    period: pd.Timedelta simulated forecasts are done with this period.
 
     Returns
     -------
@@ -43,56 +40,70 @@ def _cutoffs(df, horizon, k, period):
     if cutoff < df['ds'].min():
         raise ValueError('Less data than horizon.')
     result = [cutoff]
-
-    for i in range(1, k):
+    while result[-1] >= min(df['ds']) + initial:
         cutoff -= period
         # If data does not exist in data range (cutoff, cutoff + horizon]
         if not (((df['ds'] > cutoff) & (df['ds'] <= cutoff + horizon)).any()):
             # Next cutoff point is 'last date before cutoff in data - horizon'
             closest_date = df[df['ds'] <= cutoff].max()['ds']
             cutoff = closest_date - horizon
-        if cutoff < df['ds'].min():
-            logger.warning(
-                'Not enough data for requested number of cutoffs! '
-                'Using {}.'.format(i))
-            break
         result.append(cutoff)
-
-    # Sort lines in ascending order
+    result = result[:-1]
+    if len(result) == 0:
+        raise ValueError(
+            'Less data than horizon after initial window. '
+            'Make horizon or initial shorter.'
+        )
+    logger.info('Making {} forecasts with cutoffs between {} and {}'.format(
+        len(result), result[-1], result[0]
+    ))
     return reversed(result)
 
 
-def simulated_historical_forecasts(model, horizon, k, period=None):
-    """Simulated Historical Forecasts.
+def cross_validation(model, horizon, period=None, initial=None):
+    """Cross-Validation for time series.
 
-    Make forecasts from k historical cutoff points, working backwards from
-    (end - horizon) with a spacing of period between each cutoff.
+    Computes forecasts from historical cutoff points. Beginning from
+    (end - horizon), works backwards making cutoffs with a spacing of period
+    until initial is reached.
+
+    When period is equal to the time interval of the data, this is the
+    technique described in https://robjhyndman.com/hyndsight/tscv/ .
 
     Parameters
     ----------
-    model: Prophet class object.
-        Fitted Prophet model
+    model: Prophet class object. Fitted Prophet model
     horizon: string with pd.Timedelta compatible style, e.g., '5 days',
         '3 hours', '10 seconds'.
-    k: Int number of forecasts point.
-    period: Optional string with pd.Timedelta compatible style. Simulated
-        forecast will be done at every this period. If not provided,
-        0.5 * horizon is used.
+    period: string with pd.Timedelta compatible style. Simulated forecast will
+        be done at every this period. If not provided, 0.5 * horizon is used.
+    initial: string with pd.Timedelta compatible style. The first training
+        period will begin here. If not provided, 3 * horizon is used.
 
     Returns
     -------
     A pd.DataFrame with the forecast, actual value and cutoff.
     """
     df = model.history.copy().reset_index(drop=True)
+    te = df['ds'].max()
+    ts = df['ds'].min()
     horizon = pd.Timedelta(horizon)
     period = 0.5 * horizon if period is None else pd.Timedelta(period)
-    cutoffs = _cutoffs(df, horizon, k, period)
+    initial = 3 * horizon if initial is None else pd.Timedelta(initial)
+
+    cutoffs = generate_cutoffs(df, horizon, initial, period)
     predicts = []
     for cutoff in cutoffs:
         # Generate new object with copying fitting options
         m = prophet_copy(model, cutoff)
         # Train model
-        m.fit(df[df['ds'] <= cutoff])
+        history_c = df[df['ds'] <= cutoff]
+        if history_c.shape[0] < 2:
+            raise Exception(
+                'Less than two datapoints before cutoff. '
+                'Increase initial window.'
+            )
+        m.fit(history_c)
         # Calculate yhat
         index_predicted = (df['ds'] > cutoff) & (df['ds'] <= cutoff + horizon)
         # Get the columns for the future dataframe
@@ -112,42 +123,6 @@ def simulated_historical_forecasts(model, horizon, k, period=None):
 
     # Combine all predicted pd.DataFrame into one pd.DataFrame
     return reduce(lambda x, y: x.append(y), predicts).reset_index(drop=True)
-
-
-def cross_validation(model, horizon, period=None, initial=None):
-    """Cross-Validation for time series.
-
-    Computes forecasts from historical cutoff points. Beginning from initial,
-    makes cutoffs with a spacing of period up to (end - horizon).
-
-    When period is equal to the time interval of the data, this is the
-    technique described in https://robjhyndman.com/hyndsight/tscv/ .
-
-    Parameters
-    ----------
-    model: Prophet class object. Fitted Prophet model
-    horizon: string with pd.Timedelta compatible style, e.g., '5 days',
-        '3 hours', '10 seconds'.
-    period: string with pd.Timedelta compatible style. Simulated forecast will
-        be done at every this period. If not provided, 0.5 * horizon is used.
-    initial: string with pd.Timedelta compatible style. The first training
-        period will begin here. If not provided, 3 * horizon is used.
-
-    Returns
-    -------
-    A pd.DataFrame with the forecast, actual value and cutoff.
-    """
-    te = model.history['ds'].max()
-    ts = model.history['ds'].min()
-    horizon = pd.Timedelta(horizon)
-    period = 0.5 * horizon if period is None else pd.Timedelta(period)
-    initial = 3 * horizon if initial is None else pd.Timedelta(initial)
-    k = int(np.ceil(((te - horizon) - (ts + initial)) / period))
-    if k < 1:
-        raise ValueError(
-            'Not enough data for specified horizon, period, and initial.')
-    return simulated_historical_forecasts(model, horizon, k, period)
-
 
 def prophet_copy(m, cutoff=None):
     """Copy Prophet object

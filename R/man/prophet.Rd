@@ -5,12 +5,13 @@
 \title{Prophet forecaster.}
 \usage{
 prophet(df = NULL, growth = "linear", changepoints = NULL,
-  n.changepoints = 25, yearly.seasonality = "auto",
-  weekly.seasonality = "auto", daily.seasonality = "auto",
-  holidays = NULL, seasonality.mode = "additive",
-  seasonality.prior.scale = 10, holidays.prior.scale = 10,
-  changepoint.prior.scale = 0.05, mcmc.samples = 0, interval.width = 0.8,
-  uncertainty.samples = 1000, fit = TRUE, ...)
+  n.changepoints = 25, changepoint.range = 0.8,
+  yearly.seasonality = "auto", weekly.seasonality = "auto",
+  daily.seasonality = "auto", holidays = NULL,
+  seasonality.mode = "additive", seasonality.prior.scale = 10,
+  holidays.prior.scale = 10, changepoint.prior.scale = 0.05,
+  mcmc.samples = 0, interval.width = 0.8, uncertainty.samples = 1000,
+  fit = TRUE, ...)
 }
 \arguments{
 \item{df}{(optional) Dataframe containing the history. Must have columns ds
@@ -29,7 +30,11 @@ automatically.}
 \item{n.changepoints}{Number of potential changepoints to include. Not used
 if input `changepoints` is supplied. If `changepoints` is not supplied,
 then n.changepoints potential changepoints are selected uniformly from the
-first 80 percent of df$ds.}
+first `changepoint.range` proportion of df$ds.}
+
+\item{changepoint.range}{Proportion of history in which trend changepoints
+will be estimated. Defaults to 0.8 for the first 80%. Not used if
+`changepoints` is specified.}
 
 \item{yearly.seasonality}{Fit yearly seasonality. Can be 'auto', TRUE,
 FALSE, or a number of Fourier terms to generate.}

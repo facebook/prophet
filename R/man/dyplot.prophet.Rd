@@ -24,8 +24,9 @@ Plot the prophet forecast.
 }
 \examples{
 \dontrun{
-history <- data.frame(ds = seq(as.Date('2015-01-01'), as.Date('2016-01-01'), by = 'd'),
-                      y = sin(1:366/200) + rnorm(366)/10)
+history <- data.frame(
+ ds = seq(as.Date('2015-01-01'), as.Date('2016-01-01'), by = 'd'),
+ y = sin(1:366/200) + rnorm(366)/10)
 m <- prophet(history)
 future <- make_future_dataframe(m, periods = 365)
 forecast <- predict(m, future)
