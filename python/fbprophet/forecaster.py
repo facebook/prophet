@@ -267,7 +267,11 @@ class Prophet(object):
         else:
             df['floor'] = 0
         if self.growth == 'logistic':
-            assert 'cap' in df
+            if 'cap' not in df:
+                raise ValueError(
+                    "Capacities must be supplied for logistic growth in "
+                    "column 'cap'"
+                )
             df['cap_scaled'] = (df['cap'] - df['floor']) / self.y_scale
 
         df['t'] = (df['ds'] - self.start) / self.t_scale
@@ -522,7 +526,8 @@ class Prophet(object):
             prior_scale = float(self.holidays_prior_scale)
         if mode is None:
             mode = self.seasonality_mode
-        assert prior_scale > 0
+        if prior_scale <= 0:
+            raise ValueError('Prior scale must be > 0')
         if mode not in ['additive', 'multiplicative']:
             raise ValueError("mode must be 'additive' or 'multiplicative'")
         self.extra_regressors[name] = {
