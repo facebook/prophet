@@ -1447,30 +1447,18 @@ sample_predictive_trend <- function(model, df, iteration) {
   t <- df$t
   T <- max(t)
 
+  # New changepoints from a Poisson process with rate S on [1, T]
   if (T > 1) {
-    # Get the time discretization of the history
-    dt <- diff(model$history$t)
-    dt <- min(dt[dt > 0])
-    # Number of time periods in the future
-    N <- ceiling((T - 1) / dt)
     S <- length(model$changepoints.t)
-    # The history had S split points, over t = [0, 1].
-    # The forecast is on [1, T], and should have the same average frequency of
-    # rate changes. Thus for N time periods in the future, we want an average
-    # of S * (T - 1) changepoints in expectation.
-    prob.change <- min(1, (S * (T - 1)) / N)
-    # This calculation works for both history and df not uniformly spaced.
-    n.changes <- stats::rbinom(1, N, prob.change)
-
-    # Sample ts
-    if (n.changes == 0) {
-      changepoint.ts.new <- c()
-    } else {
-      changepoint.ts.new <- sort(stats::runif(n.changes, min = 1, max = T))
-    }
+    n.changes <- stats::rpois(1, S * (T - 1))
+  } else {
+    n.changes <- 0
+  }
+  if (n.changes > 0) {
+    changepoint.ts.new <- 1 + stats::runif(n.changes) * (T - 1)
+    changepoint.ts.new <- sort(changepoint.ts.new)
   } else {
     changepoint.ts.new <- c()
-    n.changes <- 0
   }
 
   # Get the empirical scale of the deltas, plus epsilon to avoid NaNs.

@@ -1303,23 +1303,17 @@ class Prophet(object):
         t = np.array(df['t'])
         T = t.max()
 
+        # New changepoints from a Poisson process with rate S on [1, T]
         if T > 1:
-            # Get the time discretization of the history
-            dt = np.diff(self.history['t'])
-            dt = np.min(dt[dt > 0])
-            # Number of time periods in the future
-            N = np.ceil((T - 1) / float(dt))
             S = len(self.changepoints_t)
-
-            prob_change = min(1, (S * (T - 1)) / N)
-            n_changes = np.random.binomial(N, prob_change)
-
-            # Sample ts
-            changepoint_ts_new = sorted(np.random.uniform(1, T, n_changes))
+            n_changes = np.random.poisson(S * (T - 1))
         else:
-            # Case where we're not extrapolating.
-            changepoint_ts_new = []
             n_changes = 0
+        if n_changes > 0:
+            changepoint_ts_new = 1 + np.random.rand(n_changes) * (T - 1)
+            changepoint_ts_new.sort()
+        else:
+            changepoint_ts_new = []
 
         # Get the empirical scale of the deltas, plus epsilon to avoid NaNs.
         lambda_ = np.mean(np.abs(deltas)) + 1e-8
