@@ -64,6 +64,15 @@ Use `conda install gcc` to set up gcc. The easiest way to install Prophet is thr
 
 ## Changelog
 
+### Version 0.3 (2018.06.01)
+
+- Multiplicative seasonality
+- Cross validation error metrics and visualizations
+- Parameter to set range of potential changepoints
+- Unified Stan model for both trend types
+- Improved future trend uncertainty for sub-daily data
+- Bugfixes
+
 ### Version 0.2.1 (2017.11.08)
 
 - Bugfixes
