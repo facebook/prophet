@@ -7,16 +7,16 @@
 generate_cutoffs(df, horizon, initial, period)
 }
 \arguments{
-\item{df}{Dataframe with historical data}
+\item{df}{Dataframe with historical data.}
 
-\item{horizon}{timediff forecast horizon}
+\item{horizon}{timediff forecast horizon.}
 
-\item{initial}{timediff initial window}
+\item{initial}{timediff initial window.}
 
 \item{period}{timediff Simulated forecasts are done with this period.}
 }
 \value{
-Array of datetimes
+Array of datetimes.
 }
 \description{
 Generate cutoff dates

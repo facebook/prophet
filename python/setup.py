@@ -98,7 +98,7 @@ with open('requirements.txt', 'r') as f:
 
 setup(
     name='fbprophet',
-    version='0.2.1',
+    version='0.3',
     description='Automatic Forecasting Procedure',
     url='https://facebook.github.io/prophet/',
     author='Sean J. Taylor <sjt@fb.com>, Ben Letham <bletham@fb.com>',
@@ -119,6 +119,6 @@ setup(
     },
     test_suite='fbprophet.tests',
     long_description="""
-Implements a procedure for forecasting time series data based on an additive model where non-linear trends are fit with yearly and weekly seasonality, plus holidays.  It works best with daily periodicity data with at least one year of historical data.  Prophet is robust to missing data, shifts in the trend, and large outliers.
+Implements a procedure for forecasting time series data based on an additive model where non-linear trends are fit with yearly, weekly, and daily seasonality, plus holiday effects. It works best with time series that have strong seasonal effects and several seasons of historical data. Prophet is robust to missing data and shifts in the trend, and typically handles outliers well.
 """
 )
