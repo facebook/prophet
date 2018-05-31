@@ -6,8 +6,6 @@ Prophet is a procedure for forecasting time series data based on an additive mod
 
 Prophet is [open source software](https://code.facebook.com/projects/) released by Facebook's [Core Data Science team](https://research.fb.com/category/data-science/).  It is available for download on [CRAN](https://cran.r-project.org/package=prophet) and [PyPI](https://pypi.python.org/pypi/fbprophet/).
 
-The method is described in the paper: Sean J. Taylor, Benjamin Letham (2018) Forecasting at scale. The American Statistician 72(1):37-45.
-
 ## Important links
 
 
@@ -18,7 +16,7 @@ The method is described in the paper: Sean J. Taylor, Benjamin Letham (2018) For
 - Prophet R package: https://cran.r-project.org/package=prophet
 - Prophet Python package: https://pypi.python.org/pypi/fbprophet/
 - Release blogpost: https://research.fb.com/prophet-forecasting-at-scale/
-- Prophet paper, "Forecasting at Scale": https://peerj.com/preprints/3190.pdf
+- Prophet paper:Sean J. Taylor, Benjamin Letham (2018) Forecasting at scale. The American Statistician 72(1):37-45 (https://peerj.com/preprints/3190.pdf).
 
 ## Installation in R
 
