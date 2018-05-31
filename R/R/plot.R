@@ -390,7 +390,7 @@ dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
   forecast.label='Predicted'
   actual.label='Actual'
   # create data.frame for plotting
-  df <- prophet:::df_for_plotting(x, fcst)
+  df <- df_for_plotting(x, fcst)
   
   # build variables to include, or not, the uncertainty data
   if(uncertainty && exists("yhat_lower", where = df))

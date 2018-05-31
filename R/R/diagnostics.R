@@ -34,7 +34,7 @@ generate_cutoffs <- function(df, horizon, initial, period) {
     }
     result <- c(result, cutoff)
   }
-  result <- head(result, -1)
+  result <- utils::head(result, -1)
   if (length(result) == 0) {
     stop(paste(
       'Less data than horizon after initial window.',
