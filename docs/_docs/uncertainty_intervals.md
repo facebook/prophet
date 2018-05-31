@@ -15,39 +15,39 @@ One property of this way of measuring uncertainty is that allowing higher flexib
 
 The width of the uncertainty intervals (by default 80%) can be set using the parameter `interval_width`:
 
-```python
-# Python
-forecast = Prophet(interval_width=0.95).fit(df).predict(future)
-```
 ```R
 # R
 m <- prophet(df, interval.width = 0.95)
 forecast <- predict(m, future)
 ```
+```python
+# Python
+forecast = Prophet(interval_width=0.95).fit(df).predict(future)
+```
 Again, these intervals assume that the future will see the same frequency and magnitude of rate changes as the past. This assumption is probably not true, so you should not expect to get accurate coverage on these uncertainty intervals.
 
 ### Uncertainty in seasonality
-By default Prophet will only return uncertainty in the trend and observation noise. To get uncertainty in seasonality, you must do full Bayesian sampling. This is done using the parameter `mcmc.samples` (which defaults to 0). We do this here for the Peyton Manning data from the Quickstart:
+By default Prophet will only return uncertainty in the trend and observation noise. To get uncertainty in seasonality, you must do full Bayesian sampling. This is done using the parameter `mcmc.samples` (which defaults to 0). We do this here for the first six months of the Peyton Manning data from the Quickstart:
 
-```python
-# Python
-m = Prophet(mcmc_samples=300)
-forecast = m.fit(df).predict(future)
-```
 ```R
 # R
 m <- prophet(df, mcmc.samples = 300)
 forecast <- predict(m, future)
 ```
-This replaces the typical MAP estimation with MCMC sampling, and takes much longer - think 10 minutes instead of 10 seconds. If you do full sampling, then you will see the uncertainty in seasonal components when you plot them:
-
 ```python
 # Python
-m.plot_components(forecast);
+m = Prophet(mcmc_samples=300)
+forecast = m.fit(df).predict(future)
 ```
+This replaces the typical MAP estimation with MCMC sampling, and can take much longer depending on how many observations there are - expect several minutes instead of several seconds. If you do full sampling, then you will see the uncertainty in seasonal components when you plot them:
+
 ```R
 # R
-prophet_plot_components(m, forecast);
+prophet_plot_components(m, forecast)
+```
+```python
+# Python
+fig = m.plot_components(forecast)
 ```
  
 ![png](/prophet/static/uncertainty_intervals_files/uncertainty_intervals_10_0.png) 

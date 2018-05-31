@@ -8,22 +8,20 @@ permalink: /docs/quick_start.html
 
 Prophet follows the `sklearn` model API.  We create an instance of the `Prophet` class and then call its `fit` and `predict` methods.  
 
-The input to Prophet is always a dataframe with two columns: `ds` and `y`.  The `ds` (datestamp) column must contain a date or datetime (either is fine). The `y` column must be numeric, and represents the measurement we wish to forecast.
+The input to Prophet is always a dataframe with two columns: `ds` and `y`.  The `ds` (datestamp) column should be of a format expected by Pandas, ideally YYYY-MM-DD for a date or YYYY-MM-DD HH:MM:SS for a timestamp. The `y` column must be numeric, and represents the measurement we wish to forecast.
 
-As an example, let's look at a time series of daily page views for the Wikipedia page for [Peyton Manning](https://en.wikipedia.org/wiki/Peyton_Manning).  We scraped this data using the [Wikipediatrend](https://cran.r-project.org/web/packages/wikipediatrend/vignettes/using-wikipediatrend.html) package in R.  Peyton Manning provides a nice example because it illustrates some of Prophet's features, like multiple seasonality, changing growth rates, and the ability to model special days (such as Manning's playoff and superbowl appearances). The CSV is available [here](https://github.com/facebook/prophet/blob/master/examples/example_wp_peyton_manning.csv).
+As an example, let's look at a time series of the log daily page views for the Wikipedia page for [Peyton Manning](https://en.wikipedia.org/wiki/Peyton_Manning).  We scraped this data using the [Wikipediatrend](https://cran.r-project.org/web/packages/wikipediatrend/vignettes/using-wikipediatrend.html) package in R.  Peyton Manning provides a nice example because it illustrates some of Prophet's features, like multiple seasonality, changing growth rates, and the ability to model special days (such as Manning's playoff and superbowl appearances). The CSV is available [here](https://github.com/facebook/prophet/blob/master/examples/example_wp_log_peyton_manning.csv).
 
-First we'll import the data and log-transform the y variable.
+First we'll import the data:
 
 ```python
 # Python
 import pandas as pd
-import numpy as np
 from fbprophet import Prophet
 ```
 ```python
 # Python
-df = pd.read_csv('../examples/example_wp_peyton_manning.csv')
-df['y'] = np.log(df['y'])
+df = pd.read_csv('../examples/example_wp_log_peyton_manning.csv')
 df.head()
 ```
 
@@ -88,7 +86,7 @@ We fit the model by instantiating a new `Prophet` object.  Any settings to the f
 ```python
 # Python
 m = Prophet()
-m.fit(df);
+m.fit(df)
 ```
 Predictions are then made on a dataframe with a column `ds` containing the dates for which a prediction is to be made. You can get a suitable dataframe that extends into the future a specified number of days using the helper method `Prophet.make_future_dataframe`. By default it will also include the dates from the history, so we will see the model fit as well. 
 
@@ -186,37 +184,37 @@ forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail()
     <tr>
       <th>3265</th>
       <td>2017-01-15</td>
-      <td>8.206753</td>
-      <td>7.432279</td>
-      <td>8.937916</td>
+      <td>8.199274</td>
+      <td>7.489884</td>
+      <td>8.969065</td>
     </tr>
     <tr>
       <th>3266</th>
       <td>2017-01-16</td>
-      <td>8.531766</td>
-      <td>7.791623</td>
-      <td>9.279194</td>
+      <td>8.524244</td>
+      <td>7.790682</td>
+      <td>9.266504</td>
     </tr>
     <tr>
       <th>3267</th>
       <td>2017-01-17</td>
-      <td>8.319156</td>
-      <td>7.601640</td>
-      <td>9.077195</td>
+      <td>8.311615</td>
+      <td>7.553025</td>
+      <td>9.049803</td>
     </tr>
     <tr>
       <th>3268</th>
       <td>2017-01-18</td>
-      <td>8.151772</td>
-      <td>7.436613</td>
-      <td>8.895926</td>
+      <td>8.144232</td>
+      <td>7.428174</td>
+      <td>8.864747</td>
     </tr>
     <tr>
       <th>3269</th>
       <td>2017-01-19</td>
-      <td>8.163690</td>
-      <td>7.472291</td>
-      <td>8.926861</td>
+      <td>8.156091</td>
+      <td>7.395160</td>
+      <td>8.883232</td>
     </tr>
   </tbody>
 </table>
@@ -244,7 +242,7 @@ fig2 = m.plot_components(forecast)
 ![png](/prophet/static/quick_start_files/quick_start_14_0.png) 
 
 
-More details about the options available for each method are available in the docstrings, for example, via `help(Prophet)` or `help(Prophet.fit)`.
+More details about the options available for each method are available in the docstrings, for example, via `help(Prophet)` or `help(Prophet.fit)`. The [R reference manual](https://cran.r-project.org/web/packages/prophet/prophet.pdf) on CRAN provides a concise list of all of the available functions, each of which has a Python equivalent.
 
 ## R API
 
@@ -253,14 +251,12 @@ In R, we use the normal model fitting API.  We provide a `prophet` function that
 ```R
 # R
 library(prophet)
-library(dplyr)
 ```
-First we read in the data and create the outcome variable. As in the Python API, this is a dataframe with columns `ds` and `y`, containing the date and numeric value respectively. As above, we use here the log number of views to Petyon Manning's Wikipedia page, available [here](https://github.com/facebook/prophet/blob/master/examples/example_wp_peyton_manning.csv).
+First we read in the data and create the outcome variable. As in the Python API, this is a dataframe with columns `ds` and `y`, containing the date and numeric value respectively. The ds column should be YYYY-MM-DD for a date, or YYYY-MM-DD HH:MM:SS for a timestamp. As above, we use here the log number of views to Petyon Manning's Wikipedia page, available [here](https://github.com/facebook/prophet/blob/master/examples/example_wp_log_peyton_manning.csv).
 
 ```R
 # R
-df <- read.csv('../examples/example_wp_peyton_manning.csv') %>%
-  mutate(y = log(y))
+df <- read.csv('../examples/example_wp_log_peyton_manning.csv')
 ```
 We call the `prophet` function to fit the model.  The first argument is the historical dataframe.  Additional arguments control how Prophet fits the data and are described in later pages of this documentation.
 
@@ -295,12 +291,12 @@ tail(forecast[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
 ```
 
                  ds     yhat yhat_lower yhat_upper
-    3265 2017-01-14 7.825609   7.183818   8.488012
-    3266 2017-01-15 8.207400   7.478778   8.951113
-    3267 2017-01-16 8.532394   7.826360   9.240482
-    3268 2017-01-17 8.319785   7.596815   9.042505
-    3269 2017-01-18 8.152424   7.440858   8.874581
-    3270 2017-01-19 8.164327   7.419148   8.882906
+    3265 2017-01-14 7.824163   7.127881   8.609668
+    3266 2017-01-15 8.205942   7.452071   8.904387
+    3267 2017-01-16 8.530942   7.742400   9.300974
+    3268 2017-01-17 8.318327   7.606534   9.071184
+    3269 2017-01-18 8.150948   7.440224   8.902922
+    3270 2017-01-19 8.162839   7.385953   8.890669
 
 
 
@@ -323,5 +319,7 @@ prophet_plot_components(m, forecast)
  
 ![png](/prophet/static/quick_start_files/quick_start_29_0.png) 
 
+
+An interactive plot of the forecast using Dygraphs can be made with the command `dyplot.prophet(m, forecast)`.
 
 More details about the options available for each method are available in the docstrings, for example, via `?prophet` or `?fit.prophet`. This documentation is also available in the [reference manual](https://cran.r-project.org/web/packages/prophet/prophet.pdf) on CRAN.

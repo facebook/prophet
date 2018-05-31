@@ -19,7 +19,23 @@ Even though we have a lot of places where the rate can possibly change, because 
 ![png](/prophet/static/trend_changepoints_files/trend_changepoints_6_0.png) 
 
 
-The number of potential changepoints can be set using the argument `n_changepoints`, but this is better tuned by adjusting the regularization.
+The number of potential changepoints can be set using the argument `n_changepoints`, but this is better tuned by adjusting the regularization. The locations of the signification changepoints can be visualized with:
+
+```R
+# R
+plot(m, forecast) + add_changepoints_to_plot(m)
+```
+```python
+# Python
+from fbprophet.plot import add_changepoints_to_plot
+fig = m.plot(forecast)
+a = add_changepoints_to_plot(fig.gca(), m, forecast)
+```
+ 
+![png](/prophet/static/trend_changepoints_files/trend_changepoints_9_0.png) 
+
+
+By default changepoints are only inferred for the first 80% of the time series in order to have plenty of runway for projecting the trend forward and to avoid overfitting fluctuations at the end of the time series. This default works in many situations but not all, and can be change using the `changepoint_range` argument. For example, `m = Prophet(changepoint_range=0.9)` in Python or `m <- prophet(changepoint.range = 0.9)` in R will place potential changepoints in the first 90% of the time series.
 
 ### Adjusting trend flexibility
 If the trend changes are being overfit (too much flexibility) or underfit (not enough flexibility), you can adjust the strength of the sparse prior using the input argument `changepoint_prior_scale`. By default, this parameter is set to 0.05. Increasing it will make the trend *more* flexible:
@@ -28,16 +44,16 @@ If the trend changes are being overfit (too much flexibility) or underfit (not e
 # R
 m <- prophet(df, changepoint.prior.scale = 0.5)
 forecast <- predict(m, future)
-plot(m, forecast);
+plot(m, forecast)
 ```
 ```python
 # Python
 m = Prophet(changepoint_prior_scale=0.5)
 forecast = m.fit(df).predict(future)
-m.plot(forecast);
+fig = m.plot(forecast)
 ```
  
-![png](/prophet/static/trend_changepoints_files/trend_changepoints_10_0.png) 
+![png](/prophet/static/trend_changepoints_files/trend_changepoints_13_0.png) 
 
 
 Decreasing it will make the trend *less* flexible:
@@ -46,34 +62,34 @@ Decreasing it will make the trend *less* flexible:
 # R
 m <- prophet(df, changepoint.prior.scale = 0.001)
 forecast <- predict(m, future)
-plot(m, forecast);
+plot(m, forecast)
 ```
 ```python
 # Python
 m = Prophet(changepoint_prior_scale=0.001)
 forecast = m.fit(df).predict(future)
-m.plot(forecast);
+fig = m.plot(forecast)
 ```
  
-![png](/prophet/static/trend_changepoints_files/trend_changepoints_13_0.png) 
+![png](/prophet/static/trend_changepoints_files/trend_changepoints_16_0.png) 
 
 
 ### Specifying the locations of the changepoints
 
-If you wish, rather than using automatic changepoint detection you can manually specify the locations of potential changepoints with the `changepoints` argument.
+If you wish, rather than using automatic changepoint detection you can manually specify the locations of potential changepoints with the `changepoints` argument. Slope changes will then be allowed only at these points, with the same sparse regularization as before. One could, for instance, create a grid of points as is done automatically, but then augment that grid with some specific dates that are known to be likely to have changes. As another example, the changepoints could be entirely limited to a small set of dates, as is done here:
 
 ```R
 # R
 m <- prophet(df, changepoints = c('2014-01-01'))
 forecast <- predict(m, future)
-plot(m, forecast);
+plot(m, forecast)
 ```
 ```python
 # Python
 m = Prophet(changepoints=['2014-01-01'])
 forecast = m.fit(df).predict(future)
-m.plot(forecast);
+fig = m.plot(forecast)
 ```
  
-![png](/prophet/static/trend_changepoints_files/trend_changepoints_17_0.png) 
+![png](/prophet/static/trend_changepoints_files/trend_changepoints_20_0.png) 
 

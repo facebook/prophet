@@ -8,22 +8,20 @@ There are two main ways that outliers can affect Prophet forecasts. Here we make
 
 ```R
 # R
-df <- read.csv('../examples/example_wp_R_outliers1.csv')
-df$y <- log(df$y)
+df <- read.csv('../examples/example_wp_log_R_outliers1.csv')
 m <- prophet(df)
 future <- make_future_dataframe(m, periods = 1096)
 forecast <- predict(m, future)
-plot(m, forecast);
+plot(m, forecast)
 ```
 ```python
 # Python
-df = pd.read_csv('../examples/example_wp_R_outliers1.csv')
-df['y'] = np.log(df['y'])
+df = pd.read_csv('../examples/example_wp_log_R_outliers1.csv')
 m = Prophet()
 m.fit(df)
 future = m.make_future_dataframe(periods=1096)
 forecast = m.predict(future)
-m.plot(forecast);
+fig = m.plot(forecast)
 ```
  
 ![png](/prophet/static/outliers_files/outliers_4_0.png) 
@@ -40,13 +38,13 @@ outliers <- (as.Date(df$ds) > as.Date('2010-01-01')
 df$y[outliers] = NA
 m <- prophet(df)
 forecast <- predict(m, future)
-plot(m, forecast);
+plot(m, forecast)
 ```
 ```python
 # Python
 df.loc[(df['ds'] > '2010-01-01') & (df['ds'] < '2011-01-01'), 'y'] = None
 model = Prophet().fit(df)
-model.plot(model.predict(future));
+fig = model.plot(model.predict(future))
 ```
  
 ![png](/prophet/static/outliers_files/outliers_7_0.png) 
@@ -56,22 +54,20 @@ In the above example the outliers messed up the uncertainty estimation but did n
 
 ```R
 # R
-df <- read.csv('../examples/example_wp_R_outliers2.csv')
-df$y = log(df$y)
+df <- read.csv('../examples/example_wp_log_R_outliers2.csv')
 m <- prophet(df)
 future <- make_future_dataframe(m, periods = 1096)
 forecast <- predict(m, future)
-plot(m, forecast);
+plot(m, forecast)
 ```
 ```python
 # Python
-df = pd.read_csv('../examples/example_wp_R_outliers2.csv')
-df['y'] = np.log(df['y'])
+df = pd.read_csv('../examples/example_wp_log_R_outliers2.csv')
 m = Prophet()
 m.fit(df)
 future = m.make_future_dataframe(periods=1096)
 forecast = m.predict(future)
-m.plot(forecast);
+fig = m.plot(forecast)
 ```
  
 ![png](/prophet/static/outliers_files/outliers_10_0.png) 
@@ -86,13 +82,13 @@ outliers <- (as.Date(df$ds) > as.Date('2015-06-01')
 df$y[outliers] = NA
 m <- prophet(df)
 forecast <- predict(m, future)
-plot(m, forecast);
+plot(m, forecast)
 ```
 ```python
 # Python
 df.loc[(df['ds'] > '2015-06-01') & (df['ds'] < '2015-06-30'), 'y'] = None
 m = Prophet().fit(df)
-m.plot(m.predict(future));
+fig = m.plot(m.predict(future))
 ```
  
 ![png](/prophet/static/outliers_files/outliers_13_0.png) 
