@@ -33,7 +33,7 @@ Prophet is on PyPI, so you can use pip to install it:
 $ pip install fbprophet
 ```
 
-The major dependency that Prophet has is `pystan`.   PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html).
+The major dependency that Prophet has is `pystan`.   PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install fbprophet.
 
 After installation, you can [get started!](quick_start.html#python-api)
 
@@ -43,7 +43,7 @@ On Windows, PyStan requires a compiler so you'll need to [follow the instruction
 
 ### Linux
 
-Make sure compilers (gcc, g++) and Python development tools (python-dev) are installed. If you are using a VM, be aware that you will need at least 4GB of memory to install fbprophet, and at least 2GB of memory to use fbprophet.
+Make sure compilers (gcc, g++, build-essential) and Python development tools (python-dev, python3-dev) are installed. In Red Hat systems, install the packages gcc64 and gcc64-c++. If you are using a VM, be aware that you will need at least 4GB of memory to install fbprophet, and at least 2GB of memory to use fbprophet.
 
 ### Anaconda
 
