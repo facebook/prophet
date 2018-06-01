@@ -221,4 +221,4 @@ fig = plot_cross_validation_metric(df_cv, metric='mape')
 
 The size of the rolling window in the figure can be changed with the optional argument `rolling_window`, which specifies the proportion of forecasts to use in each rolling window. The default is 0.1, corresponding to 10% of rows from `df_cv` included in each window; increasing this will lead to a smoother average curve in the figure.
 
-When using cross validation on a model with extra regressors, the cross validation will exit with an error if the extra regressor is constant in the simulated history. The `initial` period should be long enough for the extra regressor to take on multiple values. Similarly, the initial period should be long enough to capture any seasonalities that are included in the model: at least a year for yearly seasonality, at least a week for weekly seasonality, etc.
+The `initial` period should be long enough to capture all of the components of the model, in particular seasonalities and extra regressors: at least a year for yearly seasonality, at least a week for weekly seasonality, etc.
