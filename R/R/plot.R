@@ -85,6 +85,8 @@ plot.prophet <- function(x, fcst, uncertainty = TRUE, plot_cap = TRUE,
 #' @param yearly_start Integer specifying the start day of the yearly
 #'  seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts by 1 day
 #'  to Jan 2, and so on.
+#' @param render_plot Boolean indicating if the plots should be rendered.
+#'  Set to FALSE if you want the function to only return the list of panels.
 #'
 #' @return Invisibly return a list containing the plotted ggplot objects
 #'
@@ -92,7 +94,7 @@ plot.prophet <- function(x, fcst, uncertainty = TRUE, plot_cap = TRUE,
 #' @importFrom dplyr "%>%"
 prophet_plot_components <- function(
   m, fcst, uncertainty = TRUE, plot_cap = TRUE, weekly_start = 0,
-  yearly_start = 0
+  yearly_start = 0, render_plot = TRUE
 ) {
   # Plot the trend
   panels <- list(
@@ -131,13 +133,15 @@ prophet_plot_components <- function(
     }
   }
 
-  # Make the plot.
-  grid::grid.newpage()
-  grid::pushViewport(grid::viewport(layout = grid::grid.layout(length(panels),
-                                                               1)))
-  for (i in seq_along(panels)) {
-    print(panels[[i]], vp = grid::viewport(layout.pos.row = i,
-                                           layout.pos.col = 1))
+  if (render_plot) {
+    # Make the plot.
+    grid::grid.newpage()
+    grid::pushViewport(grid::viewport(layout = grid::grid.layout(length(panels),
+                                                                 1)))
+    for (i in seq_along(panels)) {
+      print(panels[[i]], vp = grid::viewport(layout.pos.row = i,
+                                             layout.pos.col = 1))
+    }
   }
   return(invisible(panels))
 }
