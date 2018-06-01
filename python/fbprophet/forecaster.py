@@ -305,7 +305,7 @@ class Prophet(object):
             standardize = props['standardize']
             n_vals = len(df[name].unique())
             if n_vals < 2:
-                raise ValueError('Regressor {} is constant.'.format(name))
+                standardize = False
             if standardize == 'auto':
                 if set(df[name].unique()) == set([1, 0]):
                     # Don't standardize binary variables.

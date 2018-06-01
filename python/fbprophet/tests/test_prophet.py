@@ -651,12 +651,12 @@ class TestProphet(TestCase):
             fcst['trend'][0] * (1 + fcst['multiplicative_terms'][0])
                 + fcst['additive_terms'][0],
         )
-        # Check fails if constant extra regressor
-        df['constant_feature'] = 5
+        # Check works if constant extra regressor at 0
+        df['constant_feature'] = 0
         m = Prophet()
         m.add_regressor('constant_feature')
-        with self.assertRaises(ValueError):
-            m.fit(df.copy())
+        m.fit(df)
+        self.assertEqual(m.extra_regressors['constant_feature']['std'], 1)
 
     def test_set_seasonality_mode(self):
         # Setting attribute

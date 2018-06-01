@@ -573,11 +573,12 @@ test_that("added_regressors", {
     fcst$yhat[1],
     fcst$trend[1] * (1 + fcst$multiplicative_terms[1]) + fcst$additive_terms[1]
   )
-  # Check fails if constant extra regressor
-  df$constant_feature <- 5
+  # Check works with constant extra regressor of 0
+  df$constant_feature <- 0
   m <- prophet()
-  m <- add_regressor(m, 'constant_feature')
-  expect_error(fit.prophet(m, df))
+  m <- add_regressor(m, 'constant_feature', standardize = TRUE)
+  m <- fit.prophet(m, df)
+  expect_equal(m$extra_regressors$constant_feature$std, 1)
 })
 
 test_that("set_seasonality_mode", {

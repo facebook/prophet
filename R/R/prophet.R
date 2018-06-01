@@ -408,11 +408,11 @@ initialize_scales_fn <- function(m, initialize_scales, df) {
   m$start <- min(df$ds)
   m$t.scale <- time_diff(max(df$ds), m$start, "secs")
   for (name in names(m$extra_regressors)) {
+    standardize <- m$extra_regressors[[name]]$standardize
     n.vals <- length(unique(df[[name]]))
     if (n.vals < 2) {
-      stop('Regressor ', name, ' is constant.')
+      standardize <- FALSE
     }
-    standardize <- m$extra_regressors[[name]]$standardize
     if (standardize == 'auto') {
       if (n.vals == 2 && all(sort(unique(df[[name]])) == c(0, 1))) {
         # Don't standardize binary variables
