@@ -3,11 +3,12 @@
 \name{prophet_plot_components}
 \alias{prophet_plot_components}
 \title{Plot the components of a prophet forecast.
-Prints a ggplot2 with panels for trend, weekly and yearly seasonalities if
-present, and holidays if present.}
+Prints a ggplot2 with whichever are available of: trend, holidays, weekly
+seasonality, yearly seasonality, and additive and multiplicative extra
+regressors.}
 \usage{
 prophet_plot_components(m, fcst, uncertainty = TRUE, plot_cap = TRUE,
-  weekly_start = 0, yearly_start = 0)
+  weekly_start = 0, yearly_start = 0, render_plot = TRUE)
 }
 \arguments{
 \item{m}{Prophet object.}
@@ -27,12 +28,16 @@ to Monday, and so on.}
 \item{yearly_start}{Integer specifying the start day of the yearly
 seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts by 1 day
 to Jan 2, and so on.}
+
+\item{render_plot}{Boolean indicating if the plots should be rendered.
+Set to FALSE if you want the function to only return the list of panels.}
 }
 \value{
 Invisibly return a list containing the plotted ggplot objects
 }
 \description{
 Plot the components of a prophet forecast.
-Prints a ggplot2 with panels for trend, weekly and yearly seasonalities if
-present, and holidays if present.
+Prints a ggplot2 with whichever are available of: trend, holidays, weekly
+seasonality, yearly seasonality, and additive and multiplicative extra
+regressors.
 }

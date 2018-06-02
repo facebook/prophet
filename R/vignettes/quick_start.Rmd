@@ -16,6 +16,7 @@ library(prophet)
 library(dplyr)
 ```
 
+This document provides a very brief introduction to the Prophet API. For a detailed guide on using Prophet, please visit the main site at [https://facebook.github.io/prophet/](https://facebook.github.io/prophet/).
 
 Prophet uses the normal model fitting API.  We provide a `prophet` function that performs fitting and returns a model object.  You can then call `predict` and `plot` on this model object.
 
@@ -50,7 +51,7 @@ You can use the generic `plot` function to plot the forecast, but you must also 
 plot(m, forecast)
 ```
 
-Just as in Python, you can plot the components of the forecast.  In R, you use the `prophet_plot_components` function instead of an instance method:
+You can plot the components of the forecast using the `prophet_plot_components` function:
 
 ```{r}
 prophet_plot_components(m, forecast)

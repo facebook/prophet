@@ -1,6 +1,8 @@
 # Prophet: Automatic Forecasting Procedure
 
-Prophet is a procedure for forecasting time series data.  It is based on an additive model where non-linear trends are fit with yearly and weekly seasonality, plus holidays. It works best with daily periodicity data with at least one year of historical data. Prophet is robust to missing data, shifts in the trend, and large outliers.
+[![Build Status](https://travis-ci.org/facebook/prophet.svg?branch=master)](https://travis-ci.org/facebook/prophet)
+
+Prophet is a procedure for forecasting time series data based on an additive model where non-linear trends are fit with yearly, weekly, and daily seasonality, plus holiday effects. It works best with time series that have strong seasonal effects and several seasons of historical data. Prophet is robust to missing data and shifts in the trend, and typically handles outliers well.
 
 Prophet is [open source software](https://code.facebook.com/projects/) released by Facebook's [Core Data Science team](https://research.fb.com/category/data-science/).  It is available for download on [CRAN](https://cran.r-project.org/package=prophet) and [PyPI](https://pypi.python.org/pypi/fbprophet/).
 
@@ -14,7 +16,7 @@ Prophet is [open source software](https://code.facebook.com/projects/) released 
 - Prophet R package: https://cran.r-project.org/package=prophet
 - Prophet Python package: https://pypi.python.org/pypi/fbprophet/
 - Release blogpost: https://research.fb.com/prophet-forecasting-at-scale/
-- Prophet paper, "Forecasting at Scale": https://peerj.com/preprints/3190.pdf
+- Prophet paper: Sean J. Taylor, Benjamin Letham (2018) Forecasting at scale. The American Statistician 72(1):37-45 (https://peerj.com/preprints/3190.pdf).
 
 ## Installation in R
 
@@ -42,9 +44,11 @@ Prophet is on PyPI, so you can use pip to install it:
 $ pip install fbprophet
 ```
 
-The major dependency that Prophet has is `pystan`.   PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html).
+The major dependency that Prophet has is `pystan`.   PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install fbprophet.
 
 After installation, you can [get started!](https://facebook.github.io/prophet/docs/quick_start.html#python-api)
+
+If you upgrade the version of PyStan installed on your system, you may need to reinstall fbprophet ([see here](https://github.com/facebook/prophet/issues/324)).
 
 ### Windows
 
@@ -52,13 +56,22 @@ On Windows, PyStan requires a compiler so you'll need to [follow the instruction
 
 ### Linux
 
-Make sure compilers (gcc, g++, build-essential) and Python development tools (python-dev, python3-dev) are installed. If you are using a VM, be aware that you will need at least 4GB of memory to install fbprophet, and at least 2GB of memory to use fbprophet.
+Make sure compilers (gcc, g++, build-essential) and Python development tools (python-dev, python3-dev) are installed. In Red Hat systems, install the packages gcc64 and gcc64-c++. If you are using a VM, be aware that you will need at least 4GB of memory to install fbprophet, and at least 2GB of memory to use fbprophet.
 
 ### Anaconda
 
 Use `conda install gcc` to set up gcc. The easiest way to install Prophet is through conda-forge: `conda install -c conda-forge fbprophet`.
 
 ## Changelog
+
+### Version 0.3 (2018.06.01)
+
+- Multiplicative seasonality
+- Cross validation error metrics and visualizations
+- Parameter to set range of potential changepoints
+- Unified Stan model for both trend types
+- Improved future trend uncertainty for sub-daily data
+- Bugfixes
 
 ### Version 0.2.1 (2017.11.08)
 

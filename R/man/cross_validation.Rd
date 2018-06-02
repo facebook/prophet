@@ -23,8 +23,9 @@ horizon. If not provided, 0.5 * horizon is used.}
 A dataframe with the forecast, actual value, and cutoff date.
 }
 \description{
-Computes forecasts from historical cutoff points. Beginning from initial,
-makes cutoffs with a spacing of period up to (end - horizon).
+Computes forecasts from historical cutoff points. Beginning from
+(end - horizon), works backwards making cutoffs with a spacing of period
+until initial is reached.
 }
 \details{
 When period is equal to the time interval of the data, this is the

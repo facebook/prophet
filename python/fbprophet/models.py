@@ -11,27 +11,17 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import pickle
-
-# fb-block 1 start
 import pkg_resources
-# fb-block 1 end
-# fb-block 2
 
 
-def get_prophet_stan_model(model):
+def get_prophet_stan_model():
     """Load compiled Stan model"""
-    # fb-block 3
-    # fb-block 4 start
     model_file = pkg_resources.resource_filename(
         'fbprophet',
-        'stan_models/{}_growth.pkl'.format(model),
+        'stan_model/prophet_model.pkl',
     )
-    # fb-block 4 end
     with open(model_file, 'rb') as f:
         return pickle.load(f)
 
 
-prophet_stan_models = {
-    'linear': get_prophet_stan_model('linear'),
-    'logistic': get_prophet_stan_model('logistic'),
-}
+prophet_stan_model = get_prophet_stan_model()
