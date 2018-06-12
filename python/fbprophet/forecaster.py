@@ -34,7 +34,7 @@ from fbprophet.plot import (
     plot_seasonality,
 )
 
-logging.basicConfig()
+
 logger = logging.getLogger(__name__)
 warnings.filterwarnings("default", category=DeprecationWarning)
 
