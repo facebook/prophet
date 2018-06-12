@@ -1304,9 +1304,9 @@ predict_seasonal_components <- function(m, df) {
   X <- as.matrix(seasonal.features)
   component.predictions <- data.frame(matrix(ncol = 0, nrow = nrow(X)))
   for (component in colnames(component.cols)) {
-    beta.c <- m$params$beta * component.cols[[component]]
+    beta.c <- t(m$params$beta) * component.cols[[component]]
 
-    comp <- X %*% t(beta.c)
+    comp <- X %*% beta.c
     if (component %in% m$component.modes$additive) {
       comp <- comp * m$y.scale
     }
