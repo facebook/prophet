@@ -18,7 +18,6 @@ import pandas as pd
 from fbprophet.diagnostics import performance_metrics
 
 
-logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 try:
