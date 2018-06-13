@@ -85,6 +85,7 @@ test_that("setup_dataframe", {
 
 test_that("logistic_floor", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  skip_on_os('mac')  # Resolves mysterious CRAN build issue
   m <- prophet(growth = 'logistic')
   history <- train
   history$floor <- 10.
