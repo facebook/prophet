@@ -6,7 +6,11 @@
     <ul>
       {% for item in site.data.nav %}
       <li class="navItem">
-        <a href="{{ item.href }}"{% if item.category == "external" %} target="_blank"{% endif %}>{{ item.title }}</a>
+        {% if item.category == "external" %}
+          <a href="{{ item.href }}"  target="_blank">{{ item.title }}</a>
+        {% else %}
+          <a href="{{ item.href | relative_url }}">{{ item.title }}</a>
+        {% endif %}
       </li>
       {% endfor %}
       {% if site.searchconfig %}
