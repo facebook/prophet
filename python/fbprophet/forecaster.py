@@ -33,6 +33,8 @@ from fbprophet.plot import (
     plot_yearly,
     plot_seasonality,
 )
+import fbprophet.hdays as hdays
+import holidays
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -1474,3 +1476,42 @@ class Prophet(object):
             DeprecationWarning,
         )
         return prophet_copy(m=self, cutoff=cutoff)
+
+    @classmethod
+    def make_holidays(cls, year_list, country_list):
+        """Make dataframe of holidays for given years and countries
+
+        Parameters
+        ----------
+        cls: Prophet class
+        year_list: a list of years
+        country_list: a list of countries
+
+        Returns
+        -------
+        Dataframe with 'ds' and 'holiday', which can directly feed
+        to 'holidays' params in Prophet
+        """
+        all_hdays = []
+        for country in country_list:
+            for year in year_list:
+                try:
+                    temp = getattr(cls.hdays, country)(years=year)
+                except:
+                    try:
+                        temp = getattr(holidays, country)(years=year)
+                    except:
+                        raise AttributeError("Holidays in {} are not currently supported!".format(country))
+                temp_df = pd.DataFrame(list(temp.items()),
+                                       columns=['ds', 'holiday'])
+                all_hdays.append(temp_df)
+        res = pd.concat(all_hdays,
+                        axis=0,
+                        ignore_index=True)
+
+        res = res.groupby(['ds']) \
+            .first() \
+            .reset_index() \
+            .sort_values('ds') \
+            .reset_index(drop=True)
+        return (res)
