@@ -134,6 +134,7 @@ class Prophet(object):
         if (holidays is not None) and (append_holidays is not None):
             raise ValueError("User cannot set up both holidays and append_holidays!")
 
+        self.calculate_holidays = False
         if holidays is not None:
             if not (
                 isinstance(holidays, pd.DataFrame)
@@ -143,7 +144,6 @@ class Prophet(object):
                 raise ValueError("holidays must be a DataFrame with 'ds' and "
                                  "'holiday' columns.")
             holidays['ds'] = pd.to_datetime(holidays['ds'])
-            self.calculate_holidays=False
         self.holidays = holidays
 
         if append_holidays is not None:
@@ -155,7 +155,6 @@ class Prophet(object):
                                       or a list of strings")
                 self.calculate_holidays = True
                 self.append_holidays = append_holidays
-        self.calculate_holidays = False
         self.seasonality_mode = seasonality_mode
         self.seasonality_prior_scale = float(seasonality_prior_scale)
         self.changepoint_prior_scale = float(changepoint_prior_scale)
