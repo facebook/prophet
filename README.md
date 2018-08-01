@@ -27,12 +27,6 @@ Prophet is a [CRAN package](https://cran.r-project.org/package=prophet) so you c
 > install.packages('prophet')
 ```
 
-On Mac OS X, the binaries on CRAN are still being updated, so use
-```
-# R
-> install.packages('prophet', type='source')
-```
-
 After installation, you can [get started!](https://facebook.github.io/prophet/docs/quick_start.html#r-api)
 
 ### Windows
