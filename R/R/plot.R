@@ -497,6 +497,7 @@ plot_cross_validation_metric <- function(df_cv, metric, rolling_window=0.1) {
   gg <- (
     ggplot2::ggplot(df_none, ggplot2::aes_string(x = 'x_plt', y = metric)) +
     ggplot2::labs(x = paste0('Horizon (', dts[i], ')'), y = metric) +
+    ggplot2::ggtitle(paste0("Evolution of ", ggplot2::quo_name((metric)), " over horizon"))
     ggplot2::geom_point(color = 'gray') +
     ggplot2::geom_line(
       data = df_h, ggplot2::aes_string(x = 'x_plt', y = metric), color = 'blue'
