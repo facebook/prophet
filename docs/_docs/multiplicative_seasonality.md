@@ -39,7 +39,7 @@ plot(m, forecast)
 ```
 ```python
 # Python
-m = Prophet(seasonality_mode='multiplicative')
+m = Prophet(seasonality.mode='multiplicative')
 m.fit(df)
 forecast = m.predict(future)
 fig = m.plot(forecast)
