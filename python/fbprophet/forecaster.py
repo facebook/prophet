@@ -766,6 +766,7 @@ class Prophet(object):
             raise Exception('A bug occurred in seasonal components.')
         # Compare to the training, if set.
         if self.train_component_cols is not None:
+            component_cols = component_cols[self.train_component_cols.columns]
             if not component_cols.equals(self.train_component_cols):
                 raise Exception('A bug occurred in constructing regressors.')
         return component_cols, modes
