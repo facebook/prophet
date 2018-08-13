@@ -37,7 +37,6 @@ try:
 except ImportError:
     logger.exception('You cannot run fbprophet without pystan installed')
 
-
 class Prophet(object):
     """Prophet forecaster.
 

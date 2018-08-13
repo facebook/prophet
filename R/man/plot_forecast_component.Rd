@@ -4,7 +4,8 @@
 \alias{plot_forecast_component}
 \title{Plot a particular component of the forecast.}
 \usage{
-plot_forecast_component(m, fcst, name, uncertainty = TRUE, plot_cap = FALSE)
+plot_forecast_component(m, fcst, name, uncertainty = TRUE,
+  plot_cap = FALSE)
 }
 \arguments{
 \item{m}{Prophet model}

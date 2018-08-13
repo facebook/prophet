@@ -43,6 +43,7 @@ globalVariables(c(
 #'  range of days around the date to be included as holidays. lower_window=-2
 #'  will include 2 days prior to the date as holidays. Also optionally can have
 #'  a column prior_scale specifying the prior scale for each holiday.
+#' @param append.holidays country name or abbreviation (character).
 #' @param seasonality.mode 'additive' (default) or 'multiplicative'.
 #' @param seasonality.prior.scale Parameter modulating the strength of the
 #'  seasonality model. Larger values allow the model to fit larger seasonal
@@ -87,6 +88,7 @@ prophet <- function(df = NULL,
                     weekly.seasonality = 'auto',
                     daily.seasonality = 'auto',
                     holidays = NULL,
+                    append.holidays = NULL,
                     seasonality.mode = 'additive',
                     seasonality.prior.scale = 10,
                     holidays.prior.scale = 10,
@@ -110,6 +112,7 @@ prophet <- function(df = NULL,
     weekly.seasonality = weekly.seasonality,
     daily.seasonality = daily.seasonality,
     holidays = holidays,
+    append.holidays = append.holidays,
     seasonality.mode = seasonality.mode,
     seasonality.prior.scale = seasonality.prior.scale,
     changepoint.prior.scale = changepoint.prior.scale,
@@ -129,6 +132,7 @@ prophet <- function(df = NULL,
     params = list(),
     history = NULL,
     history.dates = NULL,
+    train.holiday.names = NULL,
     train.component.cols = NULL,
     component.modes = NULL
   )
@@ -177,6 +181,11 @@ validate_inputs <- function(m) {
       validate_column_name(m, h, check_holidays = FALSE)
     }
   }
+  if (!is.null(m$append.holidays)) {
+    if (!m$append.holidays %in% generated_holidays$country){
+      stop("Holidays in ", m$append.holidays," are not currently supported!")
+    } 
+  }
   if (!(m$seasonality.mode %in% c('additive', 'multiplicative'))) {
     stop("seasonality.mode must be 'additive' or 'multiplicative'")
   }
@@ -213,6 +222,10 @@ validate_column_name <- function(
   if(check_holidays & !is.null(m$holidays) &
      (name %in% unique(m$holidays$holiday))){
     stop("Name ", name, " already used for a holiday.")
+  }
+  if(check_holidays & !is.null(m$append.holidays) &
+     (name %in% get_holiday_names(m$append.holidays))){
+    stop("Name ", name, " is a holiday name in ", m$append.holidays, ".")
   }
   if(check_seasonalities & (!is.null(m$seasonalities[[name]]))){
     stop("Name ", name, " already used for a seasonality.")
@@ -534,10 +547,26 @@ make_seasonality_features <- function(dates, period, series.order, prefix) {
 make_holiday_features <- function(m, dates) {
   # Strip dates to be just days, for joining on holidays
   dates <- set_date(format(dates, "%Y-%m-%d"))
-  wide <- m$holidays %>%
+  all.holidays <- m$holidays %>% 
+    dplyr::mutate(ds=as.character(ds), holiday=as.character(holiday)) 
+  if (!is.null(m$append.holidays)){
+    years <- as.numeric(unique(format(dates, "%Y")))
+    append.holidays.df <- make_holidays_df(years, m$append.holidays) %>%
+      dplyr::mutate(ds=as.character(ds), holiday=as.character(holiday))
+    all.holidays <- all.holidays %>% dplyr::bind_rows(append.holidays.df)
+  }
+  # Make fit.prophet and predict.prophet holidays components match
+  if (!is.null(m$train.holiday.names)){
+    row.to.drop <- which(all.holidays$holiday %in% m$train.holiday.names)
+    all.holidays <- all.holidays[row.to.drop,]
+    holidays.to.add <- data.frame(holiday=setdiff(m$train.holiday.names, 
+                                                    all.holidays$holiday)) 
+    all.holidays <- all.holidays %>% dplyr::bind_rows(holidays.to.add)
+  }
+  wide <- all.holidays %>%
     dplyr::mutate(ds = set_date(ds)) %>%
     dplyr::group_by(holiday, ds) %>%
-    dplyr::filter(row_number() == 1) %>%
+    dplyr::filter(dplyr::row_number() == 1) %>%
     dplyr::do({
       if (exists('lower_window', where = .) && !is.na(.$lower_window)
           && !is.na(.$upper_window)) {
@@ -555,16 +584,17 @@ make_holiday_features <- function(m, dates) {
   holiday.features <- data.frame(ds = set_date(dates)) %>%
     dplyr::left_join(wide, by = 'ds') %>%
     dplyr::select(-ds)
-
+  # Make sure fit.prophet and predict.prophet component.cols perfectly equal
+  holiday.features <- holiday.features[,sort(names(holiday.features))]
   holiday.features[is.na(holiday.features)] <- 0
 
   # Prior scales
-  if (!('prior_scale' %in% colnames(m$holidays))) {
-    m$holidays$prior_scale <- m$holidays.prior.scale
+  if (!('prior_scale' %in% colnames(all.holidays))) {
+    all.holidays$prior_scale <- m$holidays.prior.scale
   }
   prior.scales.list <- list()
-  for (name in unique(m$holidays$holiday)) {
-    df.h <- m$holidays[m$holidays$holiday == name, ]
+  for (name in unique(all.holidays$holiday)) {
+    df.h <- all.holidays[all.holidays$holiday == name, ]
     ps <- unique(df.h$prior_scale)
     if (length(ps) > 1) {
       stop('Holiday ', name, ' does not have a consistent prior scale ',
@@ -583,6 +613,10 @@ make_holiday_features <- function(m, dates) {
   for (name in colnames(holiday.features)) {
     sn <- strsplit(name, '_delim_', fixed = TRUE)[[1]][1]
     prior.scales <- c(prior.scales, prior.scales.list[[sn]])
+  }
+  holiday.names <- names(prior.scales.list)
+  if (is.null(m$train.holiday.names)){
+    m$train_holiday_names <- holiday.names
   }
   return(list(holiday.features = holiday.features,
               prior.scales = prior.scales,
@@ -738,7 +772,7 @@ make_all_seasonality_features <- function(m, df) {
   }
 
   # Holiday features
-  if (!is.null(m$holidays)) {
+  if (!is.null(m$holidays) || !is.null(m$append.holidays)) {
     hf <- make_holiday_features(m, df$ds)
     seasonal.features <- cbind(seasonal.features, hf$holiday.features)
     prior.scales <- c(prior.scales, hf$prior.scales)
@@ -792,9 +826,9 @@ regressor_column_matrix <- function(m, seasonal.features, modes) {
                     extra = "merge", fill = "right") %>%
     dplyr::select(col, component)
   # Add total for holidays
-  if(!is.null(m$holidays)){
+  if(!is.null(m$train.holiday.names)){
     components <- add_group_component(
-      components, 'holidays', unique(m$holidays$holiday))
+      components, 'holidays', unique(m$train.holiday.names))
   }
   # Add totals for additive and multiplicative components, and regressors
   for (mode in c('additive', 'multiplicative')) {
