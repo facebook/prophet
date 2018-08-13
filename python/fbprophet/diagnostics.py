@@ -159,6 +159,7 @@ def prophet_copy(m, cutoff=None):
         weekly_seasonality=False,
         daily_seasonality=False,
         holidays=m.holidays,
+        append_holidays=m.append_holidays,
         seasonality_mode=m.seasonality_mode,
         seasonality_prior_scale=m.seasonality_prior_scale,
         changepoint_prior_scale=m.changepoint_prior_scale,
