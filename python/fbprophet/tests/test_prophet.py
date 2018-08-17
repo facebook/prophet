@@ -358,6 +358,30 @@ class TestProphet(TestCase):
         model = Prophet(holidays=holidays, uncertainty_samples=0)
         model.fit(DATA).predict()
 
+    def test_fit_predict_with_append_holidays(self):
+        holidays = pd.DataFrame({
+            'ds': pd.to_datetime(['2012-06-06', '2013-06-06']),
+            'holiday': ['seans-bday'] * 2,
+            'lower_window': [0] * 2,
+            'upper_window': [1] * 2,
+        })
+        append_holidays = 'US'
+        # Test with holidays and append_holidays
+        model = Prophet(holidays=holidays,
+                        append_holidays=append_holidays,
+                        uncertainty_samples=0)
+        model.fit(DATA).predict()
+        # There are training holidays missing in the test set
+        train = DATA.head(154)
+        future = DATA.tail(355)
+        model = Prophet(append_holidays=append_holidays, uncertainty_samples=0)
+        model.fit(train).predict(future)
+        # There are test holidays missing in the training set
+        train = DATA.tail(355)
+        future = DATA2
+        model = Prophet(append_holidays=append_holidays, uncertainty_samples=0)
+        model.fit(train).predict(future)
+
     def test_make_future_dataframe(self):
         N = 468
         train = DATA.head(N // 2)

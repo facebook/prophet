@@ -19,6 +19,7 @@ import pandas as pd
 
 from fbprophet.diagnostics import prophet_copy
 from fbprophet.models import prophet_stan_model
+from fbprophet.make_holidays import make_holidays
 from fbprophet.plot import (
     plot,
     plot_components,
@@ -28,9 +29,6 @@ from fbprophet.plot import (
     plot_yearly,
     plot_seasonality,
 )
-
-import fbprophet.hdays as hdays_part1
-import holidays as hdays_part2
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -172,7 +170,6 @@ class Prophet(object):
         self.history_dates = None
         self.train_component_cols = None
         self.component_modes = None
-        self.all_holidays = None
         self.train_holiday_names = None
         self.validate_inputs()
 
@@ -450,13 +447,22 @@ class Prophet(object):
         all_holidays = self.holidays
         if self.append_holidays is not None:
             year_list = list({x.year for x in dates})
-            append_holidays_df = self.make_holidays(
+            append_holidays_df = make_holidays(
                                     year_list=year_list,
                                     country_list=self.append_holidays)
+            #Validates names of generated holidays.
+            if self.train_holiday_names is None:
+                for name in append_holidays_df.holiday:
+                    if name in self.seasonalities:
+                        raise ValueError(
+                            'Seasonality name "{}" already used for a holiday.'.format(name))
+                    if name in self.extra_regressors:
+                        raise ValueError(
+                            'Regressor name "{}" already used for a holiday.'.format(name))
             all_holidays = pd.concat((all_holidays, append_holidays_df), sort=False)
             all_holidays.reset_index(drop=True, inplace=True)
         # Make fit and predict holidays components match
-        if self.train_component_cols is not None:
+        if self.train_holiday_names is not None:
             train_holidays = self.train_holiday_names
             # Remove holiday names didn't show up in fit
             index_to_drop = all_holidays.index[
@@ -471,7 +477,6 @@ class Prophet(object):
                                             train_holidays.isin(all_holidays.holiday))]})
             all_holidays = pd.concat((all_holidays, holidays_to_add), sort=False)
             all_holidays.reset_index(drop=True, inplace=True)
-        self.all_holidays = all_holidays
 
         # Holds columns of our future matrix.
         expanded_holidays = defaultdict(lambda: np.zeros(dates.shape[0]))
@@ -480,7 +485,7 @@ class Prophet(object):
         # Strip to just dates.
         row_index = pd.DatetimeIndex(dates.apply(lambda x: x.date()))
 
-        for _ix, row in self.all_holidays.iterrows():
+        for _ix, row in all_holidays.iterrows():
             dt = row.ds.date()
             try:
                 lw = int(row.get('lower_window', 0))
@@ -527,7 +532,7 @@ class Prophet(object):
         ]
         holiday_names = list(prior_scales.keys())
         # Store holiday names used in fit
-        if self.train_component_cols is None:
+        if self.train_holiday_names is None:
             self.train_holiday_names = pd.Series(holiday_names)
         return holiday_features, prior_scale_list, holiday_names
 
@@ -729,9 +734,9 @@ class Prophet(object):
             ],
         })
         # Add total for holidays
-        if self.all_holidays is not None:
+        if self.train_holiday_names is not None:
             components = self.add_group_component(
-                components, 'holidays', self.all_holidays['holiday'].unique())
+                components, 'holidays', self.train_holiday_names.unique())
         # Add totals additive and multiplicative components, and regressors
         for mode in ['additive', 'multiplicative']:
             components = self.add_group_component(
@@ -1524,58 +1529,3 @@ class Prophet(object):
             DeprecationWarning,
         )
         return prophet_copy(m=self, cutoff=cutoff)
-
-    def make_holidays(self, year_list, country_list):
-        """Make dataframe of holidays for given years and countries
-
-        Parameters
-        ----------
-        cls: Prophet class
-        year_list: a list of years
-        country_list: a list of countries
-
-        Returns
-        -------
-        Dataframe with 'ds' and 'holiday', which can directly feed
-        to 'holidays' params in Prophet
-        """
-
-        if isinstance(country_list, str):
-            all_hdays = []
-            for year in year_list:
-                try:
-                    temp = getattr(hdays_part1, country_list)(years=year)
-                except AttributeError:
-                    try:
-                        temp = getattr(hdays_part2, country_list)(years=year)
-                    except AttributeError:
-                        raise AttributeError(
-                            "Holidays in {} are not currently supported!".format(country_list))
-                temp_df = pd.DataFrame(list(temp.items()),
-                                       columns=['ds', 'holiday'])
-                all_hdays.append(temp_df)
-
-        elif isinstance(country_list, list):
-            all_hdays = []
-            for country in country_list:
-                for year in year_list:
-                    try:
-                        temp = getattr(hdays_part1, country)(years=year)
-                    except AttributeError:
-                        try:
-                            temp = getattr(hdays_part2, country)(years=year)
-                        except AttributeError:
-                            raise AttributeError(
-                                "Holidays in {} are not currently supported!".format(country))
-                    temp_df = pd.DataFrame(list(temp.items()),
-                                           columns=['ds', 'holiday'])
-                    all_hdays.append(temp_df)
-        res = pd.concat(all_hdays, axis=0, ignore_index=True)
-
-        res = res.groupby(['ds']) \
-            .first() \
-            .reset_index() \
-            .sort_values('ds') \
-            .reset_index(drop=True)
-        res['ds'] = pd.to_datetime(res['ds'])
-        return (res)
