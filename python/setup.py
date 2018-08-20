@@ -18,7 +18,8 @@ from setuptools.command.test import test as test_command
 PLATFORM = 'unix'
 if platform.platform().startswith('Win'):
     PLATFORM = 'win'
-
+if platform.platform().startswith('Dar'):
+    PLATFORM = 'mac'
 SETUP_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(SETUP_DIR, 'stan', PLATFORM)
 MODEL_TARGET_DIR = os.path.join('fbprophet', 'stan_model')
