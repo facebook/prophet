@@ -19,7 +19,7 @@ import pandas as pd
 
 from fbprophet.diagnostics import prophet_copy
 from fbprophet.models import prophet_stan_model
-from fbprophet.make_holidays import make_holidays
+from fbprophet.make_holidays import get_holiday_names, make_holidays_df
 from fbprophet.plot import (
     plot,
     plot_components,
@@ -69,8 +69,7 @@ class Prophet(object):
         lower_window=-2 will include 2 days prior to the date as holidays. Also
         optionally can have a column prior_scale specifying the prior scale for
         that holiday.
-    append_holidays: List of country names or abbreviations; if only one country
-        needed, this can be specified as a String.
+    append_holidays: country name or abbreviation; must be string
     seasonality_mode: 'additive' (default) or 'multiplicative'.
     seasonality_prior_scale: Parameter modulating the strength of the
         seasonality model. Larger values allow the model to fit larger seasonal
@@ -141,10 +140,8 @@ class Prophet(object):
         if append_holidays is not None:
             if not (
                     isinstance(append_holidays, str)
-                    or isinstance(append_holidays, list)
             ):
-                raise ValueError("append_holidays must be a string \
-                                      or a list of strings")
+                raise ValueError("append_holidays must be a string")
         self.append_holidays = append_holidays
 
         self.seasonality_mode = seasonality_mode
@@ -228,6 +225,10 @@ class Prophet(object):
                 name in self.holidays['holiday'].unique()):
             raise ValueError(
                 'Name "{}" already used for a holiday.'.format(name))
+        if (check_holidays and self.append_holidays is not None and
+                name in get_holiday_names(self.append_holidays)):
+            raise ValueError(
+                'Name "{}" is a holiday name in {}.'.format(name, self.append_holidays))
         if check_seasonalities and name in self.seasonalities:
             raise ValueError(
                 'Name "{}" already used for a seasonality.'.format(name))
@@ -447,18 +448,9 @@ class Prophet(object):
         all_holidays = self.holidays
         if self.append_holidays is not None:
             year_list = list({x.year for x in dates})
-            append_holidays_df = make_holidays(
+            append_holidays_df = make_holidays_df(
                                     year_list=year_list,
-                                    country_list=self.append_holidays)
-            #Validates names of generated holidays.
-            if self.train_holiday_names is None:
-                for name in append_holidays_df.holiday:
-                    if name in self.seasonalities:
-                        raise ValueError(
-                            'Seasonality name "{}" already used for a holiday.'.format(name))
-                    if name in self.extra_regressors:
-                        raise ValueError(
-                            'Regressor name "{}" already used for a holiday.'.format(name))
+                                    country=self.append_holidays)
             all_holidays = pd.concat((all_holidays, append_holidays_df), sort=False)
             all_holidays.reset_index(drop=True, inplace=True)
         # Make fit and predict holidays components match
