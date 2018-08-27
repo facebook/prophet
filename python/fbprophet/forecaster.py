@@ -14,16 +14,12 @@ from collections import defaultdict
 from datetime import timedelta
 import logging
 import warnings
-
 import numpy as np
 import pandas as pd
-try:
-    import pystan  # noqa F401
-except ImportError:
-    logger.exception('You cannot run fbprophet without pystan installed')
 
 from fbprophet.diagnostics import prophet_copy
 from fbprophet.models import prophet_stan_model
+from fbprophet.make_holidays import get_holiday_names, make_holidays_df
 from fbprophet.plot import (
     plot,
     plot_components,
@@ -37,6 +33,11 @@ from fbprophet.plot import (
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 warnings.filterwarnings("default", category=DeprecationWarning)
+
+try:
+    import pystan  # noqa F401
+except ImportError:
+    logger.exception('You cannot run fbprophet without pystan installed')
 
 
 class Prophet(object):
@@ -68,6 +69,7 @@ class Prophet(object):
         lower_window=-2 will include 2 days prior to the date as holidays. Also
         optionally can have a column prior_scale specifying the prior scale for
         that holiday.
+    append_holidays: country name or abbreviation; must be string
     seasonality_mode: 'additive' (default) or 'multiplicative'.
     seasonality_prior_scale: Parameter modulating the strength of the
         seasonality model. Larger values allow the model to fit larger seasonal
@@ -100,6 +102,7 @@ class Prophet(object):
             weekly_seasonality='auto',
             daily_seasonality='auto',
             holidays=None,
+            append_holidays=None,
             seasonality_mode='additive',
             seasonality_prior_scale=10.0,
             holidays_prior_scale=10.0,
@@ -134,6 +137,13 @@ class Prophet(object):
             holidays['ds'] = pd.to_datetime(holidays['ds'])
         self.holidays = holidays
 
+        if append_holidays is not None:
+            if not (
+                    isinstance(append_holidays, str)
+            ):
+                raise ValueError("append_holidays must be a string")
+        self.append_holidays = append_holidays
+
         self.seasonality_mode = seasonality_mode
         self.seasonality_prior_scale = float(seasonality_prior_scale)
         self.changepoint_prior_scale = float(changepoint_prior_scale)
@@ -157,6 +167,7 @@ class Prophet(object):
         self.history_dates = None
         self.train_component_cols = None
         self.component_modes = None
+        self.train_holiday_names = None
         self.validate_inputs()
 
     def validate_inputs(self):
@@ -199,7 +210,7 @@ class Prophet(object):
             raise ValueError('Name cannot contain "_delim_"')
         reserved_names = [
             'trend', 'additive_terms', 'daily', 'weekly', 'yearly',
-            'holidays', 'zeros', 'extra_regressors_additive','yhat',
+            'holidays', 'zeros', 'extra_regressors_additive', 'yhat',
             'extra_regressors_multiplicative', 'multiplicative_terms',
         ]
         rn_l = [n + '_lower' for n in reserved_names]
@@ -214,6 +225,10 @@ class Prophet(object):
                 name in self.holidays['holiday'].unique()):
             raise ValueError(
                 'Name "{}" already used for a holiday.'.format(name))
+        if (check_holidays and self.append_holidays is not None and
+                name in get_holiday_names(self.append_holidays)):
+            raise ValueError(
+                'Name "{}" is a holiday name in {}.'.format(name, self.append_holidays))
         if check_seasonalities and name in self.seasonalities:
             raise ValueError(
                 'Name "{}" already used for a seasonality.'.format(name))
@@ -351,8 +366,8 @@ class Prophet(object):
             if self.n_changepoints > 0:
                 cp_indexes = (
                     np.linspace(0, hist_size - 1, self.n_changepoints + 1)
-                    .round()
-                    .astype(np.int)
+                        .round()
+                        .astype(np.int)
                 )
                 self.changepoints = (
                     self.history.iloc[cp_indexes]['ds'].tail(-1)
@@ -384,8 +399,8 @@ class Prophet(object):
         # convert to days since epoch
         t = np.array(
             (dates - pd.datetime(1970, 1, 1))
-            .dt.total_seconds()
-            .astype(np.float)
+                .dt.total_seconds()
+                .astype(np.float)
         ) / (3600 * 24.)
         return np.column_stack([
             fun((2.0 * (i + 1) * np.pi * t / period))
@@ -429,6 +444,32 @@ class Prophet(object):
         prior_scale_list: List of prior scales for each holiday column.
         holiday_names: List of names of holidays
         """
+        # Concatenate holidays and append_holidays
+        all_holidays = self.holidays
+        if self.append_holidays is not None:
+            year_list = list({x.year for x in dates})
+            append_holidays_df = make_holidays_df(
+                                    year_list=year_list,
+                                    country=self.append_holidays)
+            all_holidays = pd.concat((all_holidays, append_holidays_df), sort=False)
+            all_holidays.reset_index(drop=True, inplace=True)
+        # Make fit and predict holidays components match
+        if self.train_holiday_names is not None:
+            train_holidays = self.train_holiday_names
+            # Remove holiday names didn't show up in fit
+            index_to_drop = all_holidays.index[
+                                np.logical_not(
+                                    all_holidays.holiday.isin(train_holidays))]
+            all_holidays = all_holidays.drop(index_to_drop)
+            # Add holiday names show up in fit but not in predict with ds as NA
+            holidays_to_add = pd.DataFrame(
+                                {'holiday':
+                                    train_holidays[
+                                        np.logical_not(
+                                            train_holidays.isin(all_holidays.holiday))]})
+            all_holidays = pd.concat((all_holidays, holidays_to_add), sort=False)
+            all_holidays.reset_index(drop=True, inplace=True)
+
         # Holds columns of our future matrix.
         expanded_holidays = defaultdict(lambda: np.zeros(dates.shape[0]))
         prior_scales = {}
@@ -436,7 +477,7 @@ class Prophet(object):
         # Strip to just dates.
         row_index = pd.DatetimeIndex(dates.apply(lambda x: x.date()))
 
-        for _ix, row in self.holidays.iterrows():
+        for _ix, row in all_holidays.iterrows():
             dt = row.ds.date()
             try:
                 lw = int(row.get('lower_window', 0))
@@ -448,7 +489,7 @@ class Prophet(object):
             if np.isnan(ps):
                 ps = float(self.holidays_prior_scale)
             if (
-                row.holiday in prior_scales and prior_scales[row.holiday] != ps
+                    row.holiday in prior_scales and prior_scales[row.holiday] != ps
             ):
                 raise ValueError(
                     'Holiday {} does not have consistent prior scale '
@@ -475,14 +516,20 @@ class Prophet(object):
                     # Access key to generate value
                     expanded_holidays[key]
         holiday_features = pd.DataFrame(expanded_holidays)
+        # Make sure fit and predict component_cols perfectly equal
+        holiday_features = holiday_features[sorted(holiday_features.columns.tolist())]
         prior_scale_list = [
             prior_scales[h.split('_delim_')[0]]
             for h in holiday_features.columns
         ]
-        return holiday_features, prior_scale_list, list(prior_scales.keys())
+        holiday_names = list(prior_scales.keys())
+        # Store holiday names used in fit
+        if self.train_holiday_names is None:
+            self.train_holiday_names = pd.Series(holiday_names)
+        return holiday_features, prior_scale_list, holiday_names
 
     def add_regressor(
-        self, name, prior_scale=None, standardize='auto', mode=None
+            self, name, prior_scale=None, standardize='auto', mode=None
     ):
         """Add an additional regressor to be used for fitting and predicting.
 
@@ -534,7 +581,7 @@ class Prophet(object):
         return self
 
     def add_seasonality(
-        self, name, period, fourier_order, prior_scale=None, mode=None
+            self, name, period, fourier_order, prior_scale=None, mode=None
     ):
         """Add a seasonal component with specified period, number of Fourier
         components, and prior scale.
@@ -626,7 +673,7 @@ class Prophet(object):
             modes[props['mode']].append(name)
 
         # Holiday features
-        if self.holidays is not None:
+        if self.holidays is not None or self.append_holidays is not None:
             features, holiday_priors, holiday_names = (
                 self.make_holiday_features(df['ds'])
             )
@@ -679,9 +726,9 @@ class Prophet(object):
             ],
         })
         # Add total for holidays
-        if self.holidays is not None:
+        if self.train_holiday_names is not None:
             components = self.add_group_component(
-                components, 'holidays', self.holidays['holiday'].unique())
+                components, 'holidays', self.train_holiday_names.unique())
         # Add totals additive and multiplicative components, and regressors
         for mode in ['additive', 'multiplicative']:
             components = self.add_group_component(
@@ -710,8 +757,8 @@ class Prophet(object):
         component_cols.drop('zeros', axis=1, inplace=True, errors='ignore')
         # Validation
         if (
-            max(component_cols['additive_terms']
-            + component_cols['multiplicative_terms']) > 1
+                max(component_cols['additive_terms']
+                    + component_cols['multiplicative_terms']) > 1
         ):
             raise Exception('A bug occurred in seasonal components.')
         # Compare to the training, if set.
@@ -979,8 +1026,8 @@ class Prophet(object):
             }
 
         if (
-            (history['y'].min() == history['y'].max())
-            and self.growth == 'linear'
+                (history['y'].min() == history['y'].max())
+                and self.growth == 'linear'
         ):
             # Nothing to fit.
             self.params = stan_init()
@@ -1050,8 +1097,8 @@ class Prophet(object):
         # Add in forecast components
         df2 = pd.concat((df[cols], intervals, seasonal_components), axis=1)
         df2['yhat'] = (
-            df2['trend'] * (1 + df2['multiplicative_terms'])
-            + df2['additive_terms']
+                df2['trend'] * (1 + df2['multiplicative_terms'])
+                + df2['additive_terms']
         )
         return df2
 
@@ -1104,8 +1151,8 @@ class Prophet(object):
         gammas = np.zeros(len(changepoint_ts))
         for i, t_s in enumerate(changepoint_ts):
             gammas[i] = (
-                (t_s - m - np.sum(gammas))
-                * (1 - k_cum[i] / k_cum[i + 1])  # noqa W503
+                    (t_s - m - np.sum(gammas))
+                    * (1 - k_cum[i] / k_cum[i + 1])  # noqa W503
             )
         # Get cumulative rate and offset at each t
         k_t = k * np.ones_like(t)
@@ -1165,7 +1212,7 @@ class Prophet(object):
 
             comp = np.matmul(X, beta_c.transpose())
             if component in self.component_modes['additive']:
-                 comp *= self.y_scale
+                comp *= self.y_scale
             data[component] = np.nanmean(comp, axis=1)
             data[component + '_lower'] = np.nanpercentile(
                 comp, lower_p, axis=1,
