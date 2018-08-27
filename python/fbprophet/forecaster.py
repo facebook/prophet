@@ -13,7 +13,6 @@ from __future__ import unicode_literals
 from collections import defaultdict
 from datetime import timedelta
 import logging
-import warnings
 import numpy as np
 import pandas as pd
 
@@ -32,7 +31,6 @@ from fbprophet.plot import (
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-warnings.filterwarnings("default", category=DeprecationWarning)
 
 try:
     import pystan  # noqa F401
@@ -1463,61 +1461,3 @@ class Prophet(object):
             m=self, fcst=fcst, uncertainty=uncertainty, plot_cap=plot_cap,
             weekly_start=weekly_start, yearly_start=yearly_start,
         )
-
-    def plot_forecast_component(
-            self, fcst, name, ax=None, uncertainty=True, plot_cap=False):
-        warnings.warn(
-            'This method will be removed in the next version. '
-            'Please use fbprophet.plot.plot_forecast_component. ',
-            DeprecationWarning,
-        )
-        return plot_forecast_component(
-            self, fcst=fcst, name=name, ax=ax, uncertainty=uncertainty,
-            plot_cap=plot_cap,
-        )
-
-    def seasonality_plot_df(self, ds):
-        warnings.warn(
-            'This method will be removed in the next version. '
-            'Please use fbprophet.plot.seasonality_plot_df. ',
-            DeprecationWarning,
-        )
-        return seasonality_plot_df(self, ds=ds)
-
-    def plot_weekly(self, ax=None, uncertainty=True, weekly_start=0):
-        warnings.warn(
-            'This method will be removed in the next version. '
-            'Please use fbprophet.plot.plot_weekly. ',
-            DeprecationWarning,
-        )
-        return plot_weekly(
-            self, ax=ax, uncertainty=uncertainty, weekly_start=weekly_start,
-        )
-
-    def plot_yearly(self, ax=None, uncertainty=True, yearly_start=0):
-        warnings.warn(
-            'This method will be removed in the next version. '
-            'Please use fbprophet.plot.plot_yearly. ',
-            DeprecationWarning,
-        )
-        return plot_yearly(
-            self, ax=ax, uncertainty=uncertainty, yearly_start=yearly_start,
-        )
-
-    def plot_seasonality(self, name, ax=None, uncertainty=True):
-        warnings.warn(
-            'This method will be removed in the next version. '
-            'Please use fbprophet.plot.plot_seasonality. ',
-            DeprecationWarning,
-        )
-        return plot_seasonality(
-            self, name=name, ax=ax, uncertainty=uncertainty,
-        )
-
-    def copy(self, cutoff=None):
-        warnings.warn(
-            'This method will be removed in the next version. '
-            'Please use fbprophet.diagnostics.prophet_copy. ',
-            DeprecationWarning,
-        )
-        return prophet_copy(m=self, cutoff=cutoff)
