@@ -106,6 +106,7 @@ setup(
     license='BSD',
     packages=['fbprophet', 'fbprophet.tests'],
     setup_requires=[
+        'pystan'
     ],
     install_requires=install_requires,
     zip_safe=False,
