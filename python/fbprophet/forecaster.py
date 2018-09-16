@@ -10,11 +10,12 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from datetime import timedelta
 import logging
 import numpy as np
 import pandas as pd
+
 
 from fbprophet.diagnostics import prophet_copy
 from fbprophet.models import prophet_stan_model
@@ -158,7 +159,7 @@ class Prophet(object):
         self.t_scale = None
         self.changepoints_t = None
         self.seasonalities = {}
-        self.extra_regressors = {}
+        self.extra_regressors = OrderedDict({})
         self.stan_fit = None
         self.params = {}
         self.history = None
