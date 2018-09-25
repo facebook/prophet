@@ -1,2 +1,2 @@
 [build-system]
-requires = ["cython", "numpy", "pystan"]
+requires = ["Cython>=0.22", "numpy>=1.10.0", "pystan>=2.14"]
