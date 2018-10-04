@@ -55,3 +55,8 @@ def generate_holidays_file():
     generated_holidays = pd.concat(all_holidays, axis=0, ignore_index=True)
     generated_holidays['year'] = generated_holidays.ds.apply(lambda x: x.year)
     generated_holidays.to_csv("../R/data-raw/generated_holidays.csv")
+
+
+if __name__ == "__main__":
+    # execute only if run as a script
+    generate_holidays_file()

@@ -121,6 +121,7 @@ test_that("copy", {
     weekly.seasonality = c(TRUE, FALSE),
     daily.seasonality = c(TRUE, FALSE),
     holidays = c('null', 'insert_dataframe'),
+    append.holidays = c(NULL, 'US'),
     seasonality.mode = c('additive', 'multiplicative')
   )
   products <- expand.grid(inputs)
@@ -139,6 +140,7 @@ test_that("copy", {
       weekly.seasonality = products$weekly.seasonality[i],
       daily.seasonality = products$daily.seasonality[i],
       holidays = holidays,
+      append.holidays = products$append.holidays[i],
       seasonality.prior.scale = 1.1,
       holidays.prior.scale = 1.1,
       changepoints.prior.scale = 0.1,
@@ -153,7 +155,7 @@ test_that("copy", {
     m1 <- prophet:::set_auto_seasonalities(m1)
     m2 <- prophet:::prophet_copy(m1)
     # Values should be copied correctly
-    args <- c('growth', 'changepoints', 'n.changepoints', 'holidays',
+    args <- c('growth', 'changepoints', 'n.changepoints', 'holidays', 'append.holidays',
               'seasonality.prior.scale', 'holidays.prior.scale',
               'changepoints.prior.scale', 'mcmc.samples', 'interval.width',
               'uncertainty.samples', 'seasonality.mode', 'changepoint.range')

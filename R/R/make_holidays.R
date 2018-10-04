@@ -29,26 +29,17 @@ get_holiday_names <- function(country.name){
 #'  to 'holidays' params in Prophet
 #' @export
 make_holidays_df <- function(years, country.name){
-  max.year <- max(generated_holidays$year)
-  min.year <- min(generated_holidays$year)
-  if (country.name == 'Indonesia' || country.name == 'ID'){
-    warning("We only support Nyepi holiday from 2009 to 2019")
-  }
-  if (country.name == 'Thailand' || country.name == 'TH'){
-    warning("We only support Diwali and Holi holidays from 2010 to 2025")
-  }
-  if (country.name == 'India' || country.name == 'IN'){
-    warning.msg = "We only support Asalha Puja holiday from 2006 to 2025 and \
-                    Vassa holiday from 2006 to 2020"
-    warning(warning.msg)
-  }
+  country.holidays = generated_holidays %>%
+    dplyr::filter(country == country.name)
+  max.year <- max(country.holidays$year)
+  min.year <- min(country.holidays$year)
   if (max(years) > max.year ||  min(years) < min.year){
-    warning.msg = paste("We only support holidays from year", min.year, 
-                        "to year", max.year)
+    warning.msg = paste("Holidays for", country.name, "are only supported from", min.year, 
+                        "to", max.year)
     warning(warning.msg)
   }
-  holidays.df <- generated_holidays %>%
-    dplyr::filter(country == country.name, year %in% years) %>%
+  holidays.df <- country.holidays %>%
+    dplyr::filter(year %in% years) %>%
     dplyr::select(ds, holiday) %>%
     data.frame
   return(holidays.df)
