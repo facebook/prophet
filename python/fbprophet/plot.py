@@ -45,6 +45,7 @@ def plot(
         in the figure, if available.
     xlabel: Optional label name on X-axis
     ylabel: Optional label name on Y-axis
+    figsize: Optional tuple width, height in inches.
 
     Returns
     -------
@@ -95,6 +96,7 @@ def plot_components(
     yearly_start: Optional int specifying the start day of the yearly
         seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts
         by 1 day to Jan 2, and so on.
+    figsize: Optional tuple width, height in inches.
 
     Returns
     -------
@@ -173,6 +175,7 @@ def plot_forecast_component(
     uncertainty: Optional boolean to plot uncertainty intervals.
     plot_cap: Optional boolean indicating if the capacity should be shown
         in the figure, if available.
+    figsize: Optional tuple width, height in inches.
 
     Returns
     -------
@@ -232,6 +235,7 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6)):
     weekly_start: Optional int specifying the start day of the weekly
         seasonality plot. 0 (default) starts the week on Sunday. 1 shifts
         by 1 day to Monday, and so on.
+    figsize: Optional tuple width, height in inches.
 
     Returns
     -------
@@ -275,6 +279,7 @@ def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6)):
     yearly_start: Optional int specifying the start day of the yearly
         seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts
         by 1 day to Jan 2, and so on.
+    figsize: Optional tuple width, height in inches.
 
     Returns
     -------
@@ -317,6 +322,7 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
     ax: Optional matplotlib Axes to plot on. One will be created if
         this is not provided.
     uncertainty: Optional boolean to plot uncertainty intervals.
+    figsize: Optional tuple width, height in inches.
 
     Returns
     -------
