@@ -1047,7 +1047,7 @@ class Prophet(object):
                 params = model.optimizing(
                     dat, init=stan_init, iter=1e4, **kwargs)
             except RuntimeError:
-		kwargs.pop('algorithm')
+                kwargs.pop('algorithm')
                 params = model.optimizing(
                     dat, init=stan_init, iter=1e4, algorithm='Newton',
                     **kwargs
