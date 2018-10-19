@@ -349,6 +349,49 @@ test_that("fit_with_holidays", {
   expect_error(predict(m), NA)
 })
 
+test_that("fit_with_append_holidays", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  holidays <- data.frame(ds = c('2012-06-06', '2013-06-06'),
+                         holiday = c('seans-bday', 'seans-bday'),
+                         lower_window = c(0, 0),
+                         upper_window = c(1, 1))
+  append.holidays = 'US'
+  # Test with holidays and append_holidays
+  m <- prophet(DATA, 
+               holidays = holidays, 
+               append.holidays = append.holidays, 
+               uncertainty.samples = 0)
+  expect_error(predict(m), NA)
+  # There are training holidays missing in the test set
+  train2 <- DATA %>% head(155)
+  future2 <- DATA %>% tail(355)
+  model <- prophet(train2,
+                   append.holidays = append.holidays, 
+                   uncertainty.samples = 0)
+  expect_error(predict(m, future2), NA)
+  # There are test holidays missing in the training set
+  train2 <- DATA %>% tail(355)
+  future2 <- DATA2
+  model <- prophet(train2,
+                   append.holidays = append.holidays, 
+                   uncertainty.samples = 0)
+  expect_error(predict(m, future2), NA)
+  # Append_holidays with non-existing year
+  max.year <- generated_holidays %>% 
+    dplyr::filter(country==append.holidays) %>%
+    dplyr::select(year) %>%
+    max()
+  train2 <- data.frame('ds'=c(paste(max.year+1, "-01-01", sep=''),
+                              paste(max.year+1, "-01-02", sep='')),
+                       'y'=1)
+  expect_warning(prophet(train2, 
+                         append.holidays = append.holidays))
+  # Append_holidays with non-existing country
+  append.holidays = 'Utopia'
+  expect_error(prophet(DATA, 
+                       append.holidays = append.holidays))
+})
+
 test_that("make_future_dataframe", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   train.t <- DATA[1:234, ]

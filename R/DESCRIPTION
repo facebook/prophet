@@ -32,7 +32,7 @@ Suggests:
     readr
 License: BSD_3_clause + file LICENSE
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 VignetteBuilder: knitr
 SystemRequirements: C++11
 Encoding: UTF-8

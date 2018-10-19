@@ -25,9 +25,8 @@ def get_holiday_names(country):
     country: country name
 
     Returns
-    ------- a
-    Dataframe with 'ds' and 'holiday', which can directly feed
-    to 'holidays' params in Prophet
+    -------
+    A set of all possible holiday names of given country
     """
     years = np.arange(1995, 2045)
     try:
