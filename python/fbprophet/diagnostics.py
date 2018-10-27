@@ -325,6 +325,22 @@ def mape(df, w):
     return rolling_mean(ape.values, w)
 
 
+def smape(df, w):
+    """Symmetric mean absolute percentage error
+
+    Parameters
+    ----------
+    df: Cross-validation results dataframe.
+    w: Aggregation window size.
+
+    Returns
+    -------
+    Array of symmetric mean absolute percent errors.
+    """
+    sape = np.abs(df['yhat']-df['y']) / ((np.abs(df['y']) + np.abs(df['yhat'])) /2)
+    return rolling_mean(sape.values, w)
+
+
 def coverage(df, w):
     """Coverage
 
