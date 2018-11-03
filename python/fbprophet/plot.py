@@ -52,7 +52,7 @@ def plot(
     A matplotlib figure.
     """
     if ax is None:
-        fig = plt.figure(facecolor='w', figsize)
+        fig = plt.figure(facecolor='w', figsize=figsize)
         ax = fig.add_subplot(111)
     else:
         fig = ax.get_figure()
