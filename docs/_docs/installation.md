@@ -3,9 +3,16 @@ layout: docs
 docid: "installation"
 title: "Installation"
 permalink: /docs/installation.html
+subsections:
+  - id: r
+    title: Using R
+  - id: python
+    title: Using Python
 ---
 
 Prophet has two implementations: [R](#installation-in-r) and [Python](#installation-in-python).  Note the slight name difference for the Python package.
+
+<a href="#r"></a>
 
 ## Installation in R
 
@@ -23,6 +30,8 @@ After installation, you can [get started!](quick_start.html#r-api)
 On Windows, R requires a compiler so you'll need to [follow the instructions](https://github.com/stan-dev/rstan/wiki/Installing-RStan-on-Windows) provided by `rstan`.  The key step is installing [Rtools](http://cran.r-project.org/bin/windows/Rtools/) before attempting to install the package.
 
 If you have custom Stan compiler settings, install from source rather than the CRAN binary.
+
+<a href="#python"></a>
 
 ## Installation in Python
 

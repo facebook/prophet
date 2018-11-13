@@ -166,6 +166,11 @@ nav.toc {
           display: block;
           padding-bottom: 10px;
           padding-top: 10px;
+
+          .navListSubItems {
+            padding-bottom: 0px;
+            padding-top: 0px;
+          }
         }
 
         h3 {
@@ -181,7 +186,7 @@ nav.toc {
 
     ul {
       padding-left: 0;
-      padding-right: 24px;
+      padding-right: 18px;
 
       li {
         list-style-type: none;
@@ -194,8 +199,8 @@ nav.toc {
           display: inline-block;
           font-size: 14px;
           line-height: 1.1em;
-          margin: 2px 10px 5px;
-          padding: 5px 0 2px;
+          margin: 2px 10px 2px;
+          padding: 1px 0 1px;
           transition: color 0.3s;
 
           &:hover,
@@ -206,6 +211,20 @@ nav.toc {
           &.navItemActive {
             color: $primary-bg;
             font-weight: 900;
+          }
+
+          &.navItem {
+            font-weight: bold;
+          }
+
+        }
+
+        .navListSubItem {
+          padding-top: 0;
+          margin-left: 20px;
+
+          a.navItem {
+            font-weight: normal;
           }
         }
       }
@@ -329,4 +348,5 @@ nav.toc {
       padding: 0 10px;
     }
   }
+
 }

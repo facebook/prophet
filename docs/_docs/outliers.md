@@ -3,8 +3,10 @@ layout: docs
 docid: "outliers"
 title: "Outliers"
 permalink: /docs/outliers.html
+subsections:
 ---
 There are two main ways that outliers can affect Prophet forecasts. Here we make a forecast on the logged Wikipedia visits to the R page from before, but with a block of bad data:
+
 
 ```R
 # R
@@ -29,7 +31,10 @@ fig = m.plot(forecast)
 
 The trend forecast seems reasonable, but the uncertainty intervals seem way too wide. Prophet is able to handle the outliers in the history, but only by fitting them with trend changes. The uncertainty model then expects future trend changes of similar magnitude.
 
+
+
 The best way to handle outliers is to remove them - Prophet has no problem with missing data. If you set their values to `NA` in the history but leave the dates in `future`, then Prophet will give you a prediction for their values.
+
 
 ```R
 # R
@@ -51,6 +56,7 @@ fig = model.plot(model.predict(future))
 
 
 In the above example the outliers messed up the uncertainty estimation but did not impact the main forecast `yhat`. This isn't always the case, as in this example with added outliers:
+
 
 ```R
 # R
@@ -74,6 +80,7 @@ fig = m.plot(forecast)
 
 
 Here a group of extreme outliers in June 2015 mess up the seasonality estimate, so their effect reverberates into the future forever. Again the right approach is to remove them:
+
 
 ```R
 # R

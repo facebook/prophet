@@ -3,8 +3,10 @@ layout: docs
 docid: "multiplicative_seasonality"
 title: "Multiplicative Seasonality"
 permalink: /docs/multiplicative_seasonality.html
+subsections:
 ---
 By default Prophet fits additive seasonalities, meaning the effect of the seasonality is added to the trend to get the forecast. This time series of the number of air passengers is an example of when additive seasonality does not work:
+
 
 ```R
 # R
@@ -29,7 +31,10 @@ fig = m.plot(forecast)
 
 This time series has a clear yearly cycle, but the seasonality in the forecast is too large at the start of the time series and too small at the end. In this time series, the seasonality is not a constant additive factor as assumed by Prophet, rather it grows with the trend. This is multiplicative seasonality.
 
+
+
 Prophet can model multiplicative seasonality by setting `seasonality_mode='multiplicative'` in the input arguments:
+
 
 ```R
 # R
@@ -50,6 +55,7 @@ fig = m.plot(forecast)
 
 The components figure will now show the seasonality as a percent of the trend:
 
+
 ```R
 # R
 prophet_plot_components(m, forecast)
@@ -64,7 +70,10 @@ fig = m.plot_components(forecast)
 
 With `seasonality_mode='multiplicative'`, holiday effects will also be modeled as multiplicative. Any added seasonalities or extra regressors will by default use whatever `seasonality_mode` is set to, but can be overriden by specifying `mode='additive'` or `mode='multiplicative'` as an argument when adding the seasonality or regressor.
 
+
+
 For example, this block sets the built-in seasonalities to multiplicative, but includes an additive quarterly seasonality and an additive regressor:
+
 
 ```R
 # R
@@ -79,3 +88,4 @@ m.add_seasonality('quarterly', period=91.25, fourier_order=8, mode='additive')
 m.add_regressor('regressor', mode='additive')
 ```
 Additive and multiplicative extra regressors will show up in separate panels on the components plot.
+
