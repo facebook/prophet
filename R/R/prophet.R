@@ -1440,11 +1440,12 @@ predict_uncertainty <- function(m, df) {
             na.rm = TRUE)),
     t(apply(t(sim.values$trend), 2, stats::quantile, c(lower.p, upper.p),
             na.rm = TRUE))
-  ) %>% dplyr::as_data_frame()
+  )
 
   colnames(intervals) <- paste(rep(c('yhat', 'trend'), each=2),
                                c('lower', 'upper'), sep = "_")
-  return(intervals)
+
+  return(dplyr::as_data_frame(intervals))
 }
 
 #' Simulate observations from the extrapolated generative model.
