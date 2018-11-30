@@ -211,7 +211,7 @@ fig = m.plot_components(forecast)
 ![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_13_0.png) 
 
 
-Individual holidays can be plotted using the `plot_forecast_component` function (imported from `fbprophet.plot` in Python) like `plot_forecast_component(forecast, 'superbowl')` to plot just the superbowl holiday component.
+Individual holidays can be plotted using the `plot_forecast_component` function (imported from `fbprophet.plot` in Python) like `plot_forecast_component(m, forecast, 'superbowl')` to plot just the superbowl holiday component.
 
 
 <a id="fourier-order-for-seasonalities"> </a>
