@@ -31,6 +31,8 @@ Suggests:
     testthat,
     readr
 License: BSD_3_clause + file LICENSE
+URL: https://github.com/facebook/prophet
+BugReports: https://github.com/facebook/prophet/issues
 LazyData: true
 RoxygenNote: 6.1.0
 VignetteBuilder: knitr
