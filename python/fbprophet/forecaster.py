@@ -434,10 +434,12 @@ class Prophet(object):
         
         Returns
         -------
+        dataframe of holiday dates, in holiday dataframe format used in
+        initialization.
         """
         all_holidays = pd.DataFrame()
         if self.holidays is not None:
-            all_holidays = pd.concat((all_holidays, self.holidays))
+            all_holidays = self.holidays.copy()
         if self.country_holidays is not None:
             year_list = list({x.year for x in dates})
             country_holidays_df = make_holidays_df(
@@ -464,7 +466,7 @@ class Prophet(object):
             all_holidays = pd.concat((all_holidays, holidays_to_add), sort=False)
             all_holidays.reset_index(drop=True, inplace=True)
         return all_holidays
-        
+
     def make_holiday_features(self, dates, holidays):
         """Construct a dataframe of holiday features.
 
@@ -526,7 +528,7 @@ class Prophet(object):
                     # Access key to generate value
                     expanded_holidays[key]
         holiday_features = pd.DataFrame(expanded_holidays)
-        # Make sure fit and predict component_cols perfectly equal
+        # Make sure column order is consistent
         holiday_features = holiday_features[sorted(holiday_features.columns.tolist())]
         prior_scale_list = [
             prior_scales[h.split('_delim_')[0]]

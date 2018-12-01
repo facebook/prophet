@@ -3,6 +3,7 @@
 S3method(plot,prophet)
 S3method(predict,prophet)
 export(add_changepoints_to_plot)
+export(add_country_holidays)
 export(add_regressor)
 export(add_seasonality)
 export(cross_validation)
