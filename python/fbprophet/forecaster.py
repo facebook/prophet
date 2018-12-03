@@ -1092,7 +1092,6 @@ class Prophet(object):
             )
             for par in stan_fit.model_pars:
                 self.params[par] = stan_fit[par]
-
         else:
             try:
                 params = model.optimizing(
@@ -1103,8 +1102,12 @@ class Prophet(object):
                     dat, init=stan_init, iter=1e4, algorithm='Newton',
                     **kwargs
                 )
-            for par in params:
-                self.params[par] = params[par].reshape((1, -1))
+            self.params = params
+
+        # Reshape all parameters to matrix shape
+        for p, v in self.params.items():
+            if len(v.shape) == 1:
+                self.params[p] = v.reshape((-1, 1))
 
         # If no changepoints were requested, replace delta with 0s
         if len(self.changepoints) == 0:
