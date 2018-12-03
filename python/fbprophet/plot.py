@@ -435,6 +435,7 @@ def plot_cross_validation_metric(
         In [0, 1]. Defaults to 0.1.
     ax: Optional matplotlib axis on which to plot. If not given, a new figure
         will be created.
+    figsize: Optional tuple width, height in inches.
 
     Returns
     -------

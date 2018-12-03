@@ -8,10 +8,12 @@
 ## Makes R CMD CHECK happy due to dplyr syntax below
 globalVariables(c(
   "ds", "y", "cap", ".",
-  "component", "dow", "doy", "holiday", "holidays", "holidays_lower",
+  "component", "dow", "doy", "holiday", "holidays", "holidays_lower", "generated_holidays",
   "holidays_upper", "ix", "lower", "n", "stat", "trend", "row_number", "extra_regressors", "col",
   "trend_lower", "trend_upper", "upper", "value", "weekly", "weekly_lower", "weekly_upper",
-  "x", "yearly", "yearly_lower", "yearly_upper", "yhat", "yhat_lower", "yhat_upper"))
+  "x", "yearly", "yearly_lower", "yearly_upper", "yhat", "yhat_lower", "yhat_upper",
+  "country", "year"
+))
 
 #' Prophet forecaster.
 #'
