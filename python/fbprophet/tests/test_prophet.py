@@ -589,7 +589,7 @@ class TestProphet(TestCase):
         )
         m.add_regressor('binary_feature2', standardize=True)
         df = DATA.copy()
-        df['binary_feature'] = [0] * 255 + [1] * 255
+        df['binary_feature'] = ['0'] * 255 + ['1'] * 255
         df['numeric_feature'] = range(510)
         df['numeric_feature2'] = range(510)
         with self.assertRaises(ValueError):
