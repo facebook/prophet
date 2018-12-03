@@ -357,6 +357,10 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
     if (!(name %in% colnames(df))) {
       stop('Regressor "', name, '" missing from dataframe')
     }
+    df[[name]] <- as.numeric(df[[name]])
+    if (anyNA(df[[name]])) {
+      stop('Found NaN in column ', name)
+    }
   }
 
   df <- df %>%
@@ -386,12 +390,8 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
   }
 
   for (name in names(m$extra_regressors)) {
-    df[[name]] <- as.numeric(df[[name]])
     props <- m$extra_regressors[[name]]
     df[[name]] <- (df[[name]] - props$mu) / props$std
-    if (anyNA(df[[name]])) {
-      stop('Found NaN in column ', name)
-    }
   }
   return(list("m" = m, "df" = df))
 }
