@@ -14,7 +14,8 @@ Description: Implements a procedure for forecasting time series data based on
     handles outliers well.
 Depends:
     R (>= 3.2.3),
-    Rcpp (>= 0.12.0)
+    Rcpp (>= 0.12.0),
+    rlang (>= 0.3.0.1)
 Imports:
     dplyr (>= 0.5.0),
     dygraphs (>= 1.1.1.4),
