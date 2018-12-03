@@ -122,16 +122,6 @@ class Prophet(object):
         self.yearly_seasonality = yearly_seasonality
         self.weekly_seasonality = weekly_seasonality
         self.daily_seasonality = daily_seasonality
-
-        if holidays is not None:
-            if not (
-                isinstance(holidays, pd.DataFrame)
-                and 'ds' in holidays  # noqa W503
-                and 'holiday' in holidays  # noqa W503
-            ):
-                raise ValueError("holidays must be a DataFrame with 'ds' and "
-                                 "'holiday' columns.")
-            holidays['ds'] = pd.to_datetime(holidays['ds'])
         self.holidays = holidays
 
         self.seasonality_mode = seasonality_mode
@@ -169,6 +159,14 @@ class Prophet(object):
         if ((self.changepoint_range < 0) or (self.changepoint_range > 1)):
             raise ValueError("Parameter 'changepoint_range' must be in [0, 1]")
         if self.holidays is not None:
+            if not (
+                isinstance(holidays, pd.DataFrame)
+                and 'ds' in holidays  # noqa W503
+                and 'holiday' in holidays  # noqa W503
+            ):
+                raise ValueError("holidays must be a DataFrame with 'ds' and "
+                                 "'holiday' columns.")
+            holidays['ds'] = pd.to_datetime(holidays['ds'])
             has_lower = 'lower_window' in self.holidays
             has_upper = 'upper_window' in self.holidays
             if has_lower + has_upper == 1:

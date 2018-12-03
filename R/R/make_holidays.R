@@ -41,6 +41,7 @@ make_holidays_df <- function(years, country.name){
   holidays.df <- country.holidays %>%
     dplyr::filter(year %in% years) %>%
     dplyr::select(ds, holiday) %>%
+    dplyr::mutate(ds = as.Date(ds)) %>%
     data.frame
   return(holidays.df)
 }

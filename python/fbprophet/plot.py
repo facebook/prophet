@@ -104,7 +104,7 @@ def plot_components(
     """
     # Identify components to be plotted
     components = ['trend']
-    if m.holidays is not None and 'holidays' in fcst:
+    if m.train_holiday_names is not None and 'holidays' in fcst:
         components.append('holidays')
     components.extend([name for name in m.seasonalities
                     if name in fcst])

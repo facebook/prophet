@@ -100,7 +100,7 @@ prophet_plot_components <- function(
   panels <- list(
     plot_forecast_component(m, fcst, 'trend', uncertainty, plot_cap))
   # Plot holiday components, if present.
-  if (!is.null(m$holidays) && ('holidays' %in% colnames(fcst))) {
+  if (!is.null(m$train.holiday.names) && ('holidays' %in% colnames(fcst))) {
     panels[[length(panels) + 1]] <- plot_forecast_component(
       m, fcst, 'holidays', uncertainty, FALSE)
   }

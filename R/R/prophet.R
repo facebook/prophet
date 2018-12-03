@@ -134,7 +134,7 @@ prophet <- function(df = NULL,
     train.component.cols = NULL,
     component.modes = NULL
   )
-  validate_inputs(m)
+  m <- validate_inputs(m)
   class(m) <- append("prophet", class(m))
   if ((fit) && (!is.null(df))) {
     m <- fit.prophet(m, df, ...)
@@ -145,6 +145,8 @@ prophet <- function(df = NULL,
 #' Validates the inputs to Prophet.
 #'
 #' @param m Prophet object.
+#'
+#' @return The Prophet object.
 #'
 #' @keywords internal
 validate_inputs <- function(m) {
@@ -161,6 +163,7 @@ validate_inputs <- function(m) {
     if (!(exists('ds', where = m$holidays))) {
       stop('Holidays dataframe must have ds field.')
     }
+    m$holidays$ds <- as.Date(m$holidays$ds)
     has.lower <- exists('lower_window', where = m$holidays)
     has.upper <- exists('upper_window', where = m$holidays)
     if (has.lower + has.upper == 1) {
@@ -182,6 +185,7 @@ validate_inputs <- function(m) {
   if (!(m$seasonality.mode %in% c('additive', 'multiplicative'))) {
     stop("seasonality.mode must be 'additive' or 'multiplicative'")
   }
+  return(m)
 }
 
 #' Validates the name of a seasonality, holiday, or regressor.
@@ -543,8 +547,7 @@ construct_holiday_dataframe <- function(m, dates) {
   }
   if (!is.null(m$country_holidays)) {
     year.list <- as.numeric(unique(format(dates, "%Y")))
-    country.holidays.df <- make_holidays_df(year.list, m$country_holidays) %>%
-      dplyr::mutate(ds=as.character(ds), holiday=as.character(holiday))
+    country.holidays.df <- make_holidays_df(year.list, m$country_holidays)
     all.holidays <- suppressWarnings(dplyr::bind_rows(all.holidays, country.holidays.df))
   }
   # If the model has already been fit with a certain set of holidays,
