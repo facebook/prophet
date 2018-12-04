@@ -10,12 +10,15 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import inspect
+import unicodedata
+import warnings
+
 import pandas as pd
 import numpy as np
-import warnings
+
 import holidays as hdays_part1
 import fbprophet.hdays as hdays_part2
-import inspect
 
 
 def generate_holidays_file():
@@ -54,7 +57,20 @@ def generate_holidays_file():
 
     generated_holidays = pd.concat(all_holidays, axis=0, ignore_index=True)
     generated_holidays['year'] = generated_holidays.ds.apply(lambda x: x.year)
-    generated_holidays.to_csv("../R/data-raw/generated_holidays.csv")
+    generated_holidays.sort_values(['country', 'ds', 'holiday'], inplace=True)
+
+    # The holidays often have utf-8 characters.
+    # These are not allowed in R package data (they generate a NOTE).
+    # TODO: revisit whether we want to do this lossy conversion.
+    def utf8_to_ascii(text):
+        return (
+            unicodedata.normalize('NFD', text)
+            .encode('ascii', 'ignore')
+            .decode('ascii')
+        )
+
+    generated_holidays['holiday'] = generated_holidays['holiday'].apply(utf8_to_ascii)
+    generated_holidays.to_csv("../R/data-raw/generated_holidays.csv", index=False)
 
 
 if __name__ == "__main__":
