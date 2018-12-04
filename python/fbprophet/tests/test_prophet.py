@@ -281,7 +281,7 @@ class TestProphet(TestCase):
         df = pd.DataFrame({
             'ds': pd.date_range('2016-12-20', '2016-12-31')
         })
-        feats, priors, names = model.make_holiday_features(df['ds'])
+        feats, priors, names = model.make_holiday_features(df['ds'], model.holidays)
         # 11 columns generated even though only 8 overlap
         self.assertEqual(feats.shape, (df.shape[0], 2))
         self.assertEqual((feats.sum(0) - np.array([1.0, 1.0])).sum(), 0)
@@ -295,7 +295,7 @@ class TestProphet(TestCase):
             'upper_window': [10],
         })
         m = Prophet(holidays=holidays)
-        feats, priors, names = m.make_holiday_features(df['ds'])
+        feats, priors, names = m.make_holiday_features(df['ds'], m.holidays)
         # 12 columns generated even though only 8 overlap
         self.assertEqual(feats.shape, (df.shape[0], 12))
         self.assertEqual(priors, list(10. * np.ones(12)))
@@ -309,7 +309,7 @@ class TestProphet(TestCase):
             'prior_scale': [5., 5.],
         })
         m = Prophet(holidays=holidays)
-        feats, priors, names = m.make_holiday_features(df['ds'])
+        feats, priors, names = m.make_holiday_features(df['ds'], m.holidays)
         self.assertEqual(priors, [5., 5.])
         self.assertEqual(names, ['xmas'])
         # 2 different priors
@@ -322,7 +322,7 @@ class TestProphet(TestCase):
         })
         holidays2 = pd.concat((holidays, holidays2))
         m = Prophet(holidays=holidays2)
-        feats, priors, names = m.make_holiday_features(df['ds'])
+        feats, priors, names = m.make_holiday_features(df['ds'], m.holidays)
         pn = zip(priors, [s.split('_delim_')[0] for s in feats.columns])
         for t in pn:
             self.assertIn(t, [(8., 'seans-bday'), (5., 'xmas')])
@@ -335,7 +335,7 @@ class TestProphet(TestCase):
         holidays2 = pd.concat((holidays, holidays2))
         feats, priors, names = Prophet(
             holidays=holidays2, holidays_prior_scale=4
-        ).make_holiday_features(df['ds'])
+        ).make_holiday_features(df['ds'], holidays2)
         self.assertEqual(set(priors), {4., 5.})
         # Check incompatible priors
         holidays = pd.DataFrame({
@@ -346,7 +346,7 @@ class TestProphet(TestCase):
             'prior_scale': [5., 6.],
         })
         with self.assertRaises(ValueError):
-            Prophet(holidays=holidays).make_holiday_features(df['ds'])
+            Prophet(holidays=holidays).make_holiday_features(df['ds'], holidays)
 
     def test_fit_with_holidays(self):
         holidays = pd.DataFrame({
@@ -358,28 +358,28 @@ class TestProphet(TestCase):
         model = Prophet(holidays=holidays, uncertainty_samples=0)
         model.fit(DATA).predict()
 
-    def test_fit_predict_with_append_holidays(self):
+    def test_fit_predict_with_country_holidays(self):
         holidays = pd.DataFrame({
             'ds': pd.to_datetime(['2012-06-06', '2013-06-06']),
             'holiday': ['seans-bday'] * 2,
             'lower_window': [0] * 2,
             'upper_window': [1] * 2,
         })
-        append_holidays = 'US'
-        # Test with holidays and append_holidays
-        model = Prophet(holidays=holidays,
-                        append_holidays=append_holidays,
-                        uncertainty_samples=0)
+        # Test with holidays and country_holidays
+        model = Prophet(holidays=holidays, uncertainty_samples=0)
+        model.add_country_holidays(country_name='US')
         model.fit(DATA).predict()
         # There are training holidays missing in the test set
         train = DATA.head(154)
         future = DATA.tail(355)
-        model = Prophet(append_holidays=append_holidays, uncertainty_samples=0)
+        model = Prophet(uncertainty_samples=0)
+        model.add_country_holidays(country_name='US')
         model.fit(train).predict(future)
         # There are test holidays missing in the training set
         train = DATA.tail(355)
         future = DATA2
-        model = Prophet(append_holidays=append_holidays, uncertainty_samples=0)
+        model = Prophet(uncertainty_samples=0)
+        model.add_country_holidays(country_name='US')
         model.fit(train).predict(future)
 
     def test_make_future_dataframe(self):
@@ -589,7 +589,7 @@ class TestProphet(TestCase):
         )
         m.add_regressor('binary_feature2', standardize=True)
         df = DATA.copy()
-        df['binary_feature'] = [0] * 255 + [1] * 255
+        df['binary_feature'] = ['0'] * 255 + ['1'] * 255
         df['numeric_feature'] = range(510)
         df['numeric_feature2'] = range(510)
         with self.assertRaises(ValueError):

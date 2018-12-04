@@ -11,7 +11,7 @@
 #' @param country.name Country name (character).
 #'
 #' @return A vector of all possible holiday names (unique) of given country.
-#' @export
+#' @internal
 get_holiday_names <- function(country.name){
     holidays <- generated_holidays %>% 
       dplyr::filter(country == country.name) %>%
@@ -23,11 +23,12 @@ get_holiday_names <- function(country.name){
 
 #' Make dataframe of holidays for given years and countries
 #'
+#' @param years List of years for which to include holiday dates.
 #' @param country.name Country name (character).
 #'
 #' @return Dataframe with 'ds' and 'holiday', which can directly feed
 #'  to 'holidays' params in Prophet
-#' @export
+#' @internal
 make_holidays_df <- function(years, country.name){
   country.holidays = generated_holidays %>%
     dplyr::filter(country == country.name)
@@ -41,6 +42,7 @@ make_holidays_df <- function(years, country.name){
   holidays.df <- country.holidays %>%
     dplyr::filter(year %in% years) %>%
     dplyr::select(ds, holiday) %>%
+    dplyr::mutate(ds = as.Date(ds)) %>%
     data.frame
   return(holidays.df)
 }

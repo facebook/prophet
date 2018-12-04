@@ -7,6 +7,8 @@
 make_holidays_df(years, country.name)
 }
 \arguments{
+\item{years}{List of years for which to include holiday dates.}
+
 \item{country.name}{Country name (character).}
 }
 \value{

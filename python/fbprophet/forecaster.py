@@ -15,6 +15,7 @@ from datetime import timedelta
 import logging
 import numpy as np
 import pandas as pd
+import pystan  # noqa F401
 
 
 from fbprophet.diagnostics import prophet_copy
@@ -30,13 +31,10 @@ from fbprophet.plot import (
     plot_seasonality,
 )
 
-logging.basicConfig()
-logger = logging.getLogger(__name__)
-
-try:
-    import pystan  # noqa F401
-except ImportError:
-    logger.exception('You cannot run fbprophet without pystan installed')
+logger = logging.getLogger('fbprophet')
+logger.addHandler(logging.NullHandler())
+if len(logger.handlers) == 1:
+    logging.basicConfig(level=logging.INFO)
 
 
 class Prophet(object):
@@ -68,7 +66,6 @@ class Prophet(object):
         lower_window=-2 will include 2 days prior to the date as holidays. Also
         optionally can have a column prior_scale specifying the prior scale for
         that holiday.
-    append_holidays: country name or abbreviation; must be string
     seasonality_mode: 'additive' (default) or 'multiplicative'.
     seasonality_prior_scale: Parameter modulating the strength of the
         seasonality model. Larger values allow the model to fit larger seasonal
@@ -101,7 +98,6 @@ class Prophet(object):
             weekly_seasonality='auto',
             daily_seasonality='auto',
             holidays=None,
-            append_holidays=None,
             seasonality_mode='additive',
             seasonality_prior_scale=10.0,
             holidays_prior_scale=10.0,
@@ -124,24 +120,7 @@ class Prophet(object):
         self.yearly_seasonality = yearly_seasonality
         self.weekly_seasonality = weekly_seasonality
         self.daily_seasonality = daily_seasonality
-
-        if holidays is not None:
-            if not (
-                isinstance(holidays, pd.DataFrame)
-                and 'ds' in holidays  # noqa W503
-                and 'holiday' in holidays  # noqa W503
-            ):
-                raise ValueError("holidays must be a DataFrame with 'ds' and "
-                                 "'holiday' columns.")
-            holidays['ds'] = pd.to_datetime(holidays['ds'])
         self.holidays = holidays
-
-        if append_holidays is not None:
-            if not (
-                    isinstance(append_holidays, str)
-            ):
-                raise ValueError("append_holidays must be a string")
-        self.append_holidays = append_holidays
 
         self.seasonality_mode = seasonality_mode
         self.seasonality_prior_scale = float(seasonality_prior_scale)
@@ -152,7 +131,7 @@ class Prophet(object):
         self.interval_width = interval_width
         self.uncertainty_samples = uncertainty_samples
 
-        # Set during fitting
+        # Set during fitting or by other methods
         self.start = None
         self.y_scale = None
         self.logistic_floor = False
@@ -160,6 +139,7 @@ class Prophet(object):
         self.changepoints_t = None
         self.seasonalities = {}
         self.extra_regressors = OrderedDict({})
+        self.country_holidays = None
         self.stan_fit = None
         self.params = {}
         self.history = None
@@ -177,6 +157,14 @@ class Prophet(object):
         if ((self.changepoint_range < 0) or (self.changepoint_range > 1)):
             raise ValueError("Parameter 'changepoint_range' must be in [0, 1]")
         if self.holidays is not None:
+            if not (
+                isinstance(self.holidays, pd.DataFrame)
+                and 'ds' in self.holidays  # noqa W503
+                and 'holiday' in self.holidays  # noqa W503
+            ):
+                raise ValueError("holidays must be a DataFrame with 'ds' and "
+                                 "'holiday' columns.")
+            self.holidays['ds'] = pd.to_datetime(self.holidays['ds'])
             has_lower = 'lower_window' in self.holidays
             has_upper = 'upper_window' in self.holidays
             if has_lower + has_upper == 1:
@@ -224,10 +212,10 @@ class Prophet(object):
                 name in self.holidays['holiday'].unique()):
             raise ValueError(
                 'Name "{}" already used for a holiday.'.format(name))
-        if (check_holidays and self.append_holidays is not None and
-                name in get_holiday_names(self.append_holidays)):
+        if (check_holidays and self.country_holidays is not None and
+                name in get_holiday_names(self.country_holidays)):
             raise ValueError(
-                'Name "{}" is a holiday name in {}.'.format(name, self.append_holidays))
+                'Name "{}" is a holiday name in {}.'.format(name, self.country_holidays))
         if check_seasonalities and name in self.seasonalities:
             raise ValueError(
                 'Name "{}" already used for a seasonality.'.format(name))
@@ -263,6 +251,9 @@ class Prophet(object):
             if name not in df:
                 raise ValueError(
                     'Regressor "{}" missing from dataframe'.format(name))
+            df[name] = pd.to_numeric(df[name])
+            if df[name].isnull().any():
+                raise ValueError('Found NaN in column ' + name)
 
         df = df.sort_values('ds')
         df.reset_index(inplace=True, drop=True)
@@ -287,10 +278,7 @@ class Prophet(object):
             df['y_scaled'] = (df['y'] - df['floor']) / self.y_scale
 
         for name, props in self.extra_regressors.items():
-            df[name] = pd.to_numeric(df[name])
             df[name] = ((df[name] - props['mu']) / props['std'])
-            if df[name].isnull().any():
-                raise ValueError('Found NaN in column ' + name)
         return df
 
     def initialize_scales(self, initialize_scales, df):
@@ -430,12 +418,59 @@ class Prophet(object):
         ]
         return pd.DataFrame(features, columns=columns)
 
-    def make_holiday_features(self, dates):
+    def construct_holiday_dataframe(self, dates):
+        """Construct a dataframe of holiday dates.
+        
+        Will combine self.holidays with the built-in country holidays
+        corresponding to input dates, if self.country_holidays is set.
+        
+        Parameters
+        ----------
+        dates: pd.Series containing timestamps used for computing seasonality.
+        
+        Returns
+        -------
+        dataframe of holiday dates, in holiday dataframe format used in
+        initialization.
+        """
+        all_holidays = pd.DataFrame()
+        if self.holidays is not None:
+            all_holidays = self.holidays.copy()
+        if self.country_holidays is not None:
+            year_list = list({x.year for x in dates})
+            country_holidays_df = make_holidays_df(
+                year_list=year_list, country=self.country_holidays
+            )
+            all_holidays = pd.concat((all_holidays, country_holidays_df), sort=False)
+            all_holidays.reset_index(drop=True, inplace=True)
+        # If the model has already been fit with a certain set of holidays,
+        # make sure we are using those same ones.
+        if self.train_holiday_names is not None:
+            # Remove holiday names didn't show up in fit
+            index_to_drop = all_holidays.index[
+                np.logical_not(
+                    all_holidays.holiday.isin(self.train_holiday_names)
+                )
+            ]
+            all_holidays = all_holidays.drop(index_to_drop)
+            # Add holiday names in fit but not in predict with ds as NA
+            holidays_to_add = pd.DataFrame({
+                'holiday': self.train_holiday_names[
+                    np.logical_not(self.train_holiday_names.isin(all_holidays.holiday))
+                ]
+            })
+            all_holidays = pd.concat((all_holidays, holidays_to_add), sort=False)
+            all_holidays.reset_index(drop=True, inplace=True)
+        return all_holidays
+
+    def make_holiday_features(self, dates, holidays):
         """Construct a dataframe of holiday features.
 
         Parameters
         ----------
         dates: pd.Series containing timestamps used for computing seasonality.
+        holidays: pd.Dataframe containing holidays, as returned by
+            construct_holiday_dataframe.
 
         Returns
         -------
@@ -443,32 +478,6 @@ class Prophet(object):
         prior_scale_list: List of prior scales for each holiday column.
         holiday_names: List of names of holidays
         """
-        # Concatenate holidays and append_holidays
-        all_holidays = self.holidays
-        if self.append_holidays is not None:
-            year_list = list({x.year for x in dates})
-            append_holidays_df = make_holidays_df(
-                                    year_list=year_list,
-                                    country=self.append_holidays)
-            all_holidays = pd.concat((all_holidays, append_holidays_df), sort=False)
-            all_holidays.reset_index(drop=True, inplace=True)
-        # Make fit and predict holidays components match
-        if self.train_holiday_names is not None:
-            train_holidays = self.train_holiday_names
-            # Remove holiday names didn't show up in fit
-            index_to_drop = all_holidays.index[
-                                np.logical_not(
-                                    all_holidays.holiday.isin(train_holidays))]
-            all_holidays = all_holidays.drop(index_to_drop)
-            # Add holiday names show up in fit but not in predict with ds as NA
-            holidays_to_add = pd.DataFrame(
-                                {'holiday':
-                                    train_holidays[
-                                        np.logical_not(
-                                            train_holidays.isin(all_holidays.holiday))]})
-            all_holidays = pd.concat((all_holidays, holidays_to_add), sort=False)
-            all_holidays.reset_index(drop=True, inplace=True)
-
         # Holds columns of our future matrix.
         expanded_holidays = defaultdict(lambda: np.zeros(dates.shape[0]))
         prior_scales = {}
@@ -476,7 +485,7 @@ class Prophet(object):
         # Strip to just dates.
         row_index = pd.DatetimeIndex(dates.apply(lambda x: x.date()))
 
-        for _ix, row in all_holidays.iterrows():
+        for _ix, row in holidays.iterrows():
             dt = row.ds.date()
             try:
                 lw = int(row.get('lower_window', 0))
@@ -515,7 +524,7 @@ class Prophet(object):
                     # Access key to generate value
                     expanded_holidays[key]
         holiday_features = pd.DataFrame(expanded_holidays)
-        # Make sure fit and predict component_cols perfectly equal
+        # Make sure column order is consistent
         holiday_features = holiday_features[sorted(holiday_features.columns.tolist())]
         prior_scale_list = [
             prior_scales[h.split('_delim_')[0]]
@@ -635,6 +644,44 @@ class Prophet(object):
         }
         return self
 
+    def add_country_holidays(self, country_name):
+        """Add in built-in holidays for the specified country.
+
+        These holidays will be included in addition to any specified on model
+        initialization.
+
+        Holidays will be calculated for arbitrary date ranges in the history
+        and future. See the online documentation for the list of countries with
+        built-in holidays.
+
+        Built-in country holidays can only be set for a single country.
+
+        Parameters
+        ----------
+        country_name: Name of the country, like 'UnitedStates' or 'US'
+
+        Returns
+        -------
+        The prophet object.
+        """
+        if self.history is not None:
+            raise Exception(
+                "Country holidays must be added prior to model fitting."
+            )
+        # Validate names.
+        for name in get_holiday_names(country_name):
+            # Allow merging with existing holidays
+            self.validate_column_name(name, check_holidays=False)
+        # Set the holidays.
+        if self.country_holidays is not None:
+            logger.warning(
+                'Changing country holidays from {} to {}'.format(
+                    self.country_holidays, country_name
+                )
+            )
+        self.country_holidays = country_name
+        return self
+
     def make_all_seasonality_features(self, df):
         """Dataframe with seasonality features.
 
@@ -672,9 +719,10 @@ class Prophet(object):
             modes[props['mode']].append(name)
 
         # Holiday features
-        if self.holidays is not None or self.append_holidays is not None:
+        holidays = self.construct_holiday_dataframe(df['ds'])
+        if len(holidays) > 0:
             features, holiday_priors, holiday_names = (
-                self.make_holiday_features(df['ds'])
+                self.make_holiday_features(df['ds'], holidays)
             )
             seasonal_features.append(features)
             prior_scales.extend(holiday_priors)
@@ -1042,7 +1090,9 @@ class Prophet(object):
             )
             for par in stan_fit.model_pars:
                 self.params[par] = stan_fit[par]
-
+                # Shape vector parameters
+                if par in ['delta', 'beta'] and len(self.params[par].shape) < 2:
+                    self.params[par] = self.params[par].reshape((-1, 1))
         else:
             try:
                 params = model.optimizing(

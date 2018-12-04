@@ -259,7 +259,7 @@ test_that("holidays", {
     ds = seq(prophet:::set_date('2016-12-20'),
              prophet:::set_date('2016-12-31'), by='d'))
   m <- prophet(train, holidays = holidays, fit = FALSE)
-  out <- prophet:::make_holiday_features(m, df$ds)
+  out <- prophet:::make_holiday_features(m, df$ds, m$holidays)
   feats <- out$holiday.features
   priors <- out$prior.scales
   names <- out$holiday.names
@@ -274,7 +274,7 @@ test_that("holidays", {
                         lower_window = c(-1),
                         upper_window = c(10))
   m <- prophet(train, holidays = holidays, fit = FALSE)
-  out <- prophet:::make_holiday_features(m, df$ds)
+  out <- prophet:::make_holiday_features(m, df$ds, m$holidays)
   feats <- out$holiday.features
   priors <- out$prior.scales
   names <- out$holiday.names
@@ -291,7 +291,7 @@ test_that("holidays", {
     prior_scale = c(5., 5.)
   )
   m <- prophet(holidays = holidays, fit = FALSE)
-  out <- prophet:::make_holiday_features(m, df$ds)
+  out <- prophet:::make_holiday_features(m, df$ds, m$holidays)
   priors <- out$prior.scales
   names <- out$holiday.names
   expect_true(all(priors == c(5., 5.)))
@@ -306,7 +306,7 @@ test_that("holidays", {
   )
   holidays2 <- rbind(holidays, holidays2)
   m <- prophet(holidays = holidays2, fit = FALSE)
-  out <- prophet:::make_holiday_features(m, df$ds)
+  out <- prophet:::make_holiday_features(m, df$ds, m$holidays)
   priors <- out$prior.scales
   names <- out$holiday.names
   expect_true(all(priors == c(8, 8, 5, 5)))
@@ -324,7 +324,7 @@ test_that("holidays", {
   # manual factorizing to avoid above bind_rows() warning
   holidays2$holiday <- factor(holidays2$holiday)
   m <- prophet(holidays = holidays2, fit = FALSE, holidays.prior.scale = 4)
-  out <- prophet:::make_holiday_features(m, df$ds)
+  out <- prophet:::make_holiday_features(m, df$ds, m$holidays)
   priors <- out$prior.scales
   expect_true(all(priors == c(4, 4, 5, 5)))
   # Check incompatible priors
@@ -336,7 +336,7 @@ test_that("holidays", {
     prior_scale = c(5., 6.)
   )
   m <- prophet(holidays = holidays, fit = FALSE)
-  expect_error(prophet:::make_holiday_features(m, df$ds))
+  expect_error(prophet:::make_holiday_features(m, df$ds, m$holidays))
 })
 
 test_that("fit_with_holidays", {
@@ -349,47 +349,45 @@ test_that("fit_with_holidays", {
   expect_error(predict(m), NA)
 })
 
-test_that("fit_with_append_holidays", {
+test_that("fit_with_country_holidays", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   holidays <- data.frame(ds = c('2012-06-06', '2013-06-06'),
                          holiday = c('seans-bday', 'seans-bday'),
                          lower_window = c(0, 0),
                          upper_window = c(1, 1))
-  append.holidays = 'US'
   # Test with holidays and append_holidays
-  m <- prophet(DATA, 
-               holidays = holidays, 
-               append.holidays = append.holidays, 
-               uncertainty.samples = 0)
+  m <- prophet(holidays = holidays, uncertainty.samples = 0)
+  m <- add_country_holidays(m, 'US')
+  m <- fit.prophet(m, DATA)
   expect_error(predict(m), NA)
   # There are training holidays missing in the test set
   train2 <- DATA %>% head(155)
   future2 <- DATA %>% tail(355)
-  model <- prophet(train2,
-                   append.holidays = append.holidays, 
-                   uncertainty.samples = 0)
+  m <- prophet(uncertainty.samples = 0)
+  m <- add_country_holidays(m, 'US')
+  m <- fit.prophet(m, train2)
   expect_error(predict(m, future2), NA)
   # There are test holidays missing in the training set
   train2 <- DATA %>% tail(355)
   future2 <- DATA2
-  model <- prophet(train2,
-                   append.holidays = append.holidays, 
-                   uncertainty.samples = 0)
+  m <- prophet(uncertainty.samples = 0)
+  m <- add_country_holidays(m, 'US')
+  m <- fit.prophet(m, train2)
   expect_error(predict(m, future2), NA)
   # Append_holidays with non-existing year
   max.year <- generated_holidays %>% 
-    dplyr::filter(country==append.holidays) %>%
+    dplyr::filter(country=='US') %>%
     dplyr::select(year) %>%
     max()
   train2 <- data.frame('ds'=c(paste(max.year+1, "-01-01", sep=''),
                               paste(max.year+1, "-01-02", sep='')),
                        'y'=1)
-  expect_warning(prophet(train2, 
-                         append.holidays = append.holidays))
+  m <- prophet()
+  m <- add_country_holidays(m, 'US')
+  expect_warning(m <- fit.prophet(m, train2))
   # Append_holidays with non-existing country
-  append.holidays = 'Utopia'
-  expect_error(prophet(DATA, 
-                       append.holidays = append.holidays))
+  m <- prophet()
+  expect_error(add_country_holidays(m, 'Utopia'))
 })
 
 test_that("make_future_dataframe", {

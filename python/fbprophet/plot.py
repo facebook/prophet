@@ -17,9 +17,8 @@ import pandas as pd
 
 from fbprophet.diagnostics import performance_metrics
 
+logger = logging.getLogger('fbprophet')
 
-logging.basicConfig()
-logger = logging.getLogger(__name__)
 
 try:
     from matplotlib import pyplot as plt
@@ -104,7 +103,7 @@ def plot_components(
     """
     # Identify components to be plotted
     components = ['trend']
-    if m.holidays is not None and 'holidays' in fcst:
+    if m.train_holiday_names is not None and 'holidays' in fcst:
         components.append('holidays')
     components.extend([name for name in m.seasonalities
                     if name in fcst])
@@ -435,6 +434,7 @@ def plot_cross_validation_metric(
         In [0, 1]. Defaults to 0.1.
     ax: Optional matplotlib axis on which to plot. If not given, a new figure
         will be created.
+    figsize: Optional tuple width, height in inches.
 
     Returns
     -------
