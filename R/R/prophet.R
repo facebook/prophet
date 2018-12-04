@@ -1213,24 +1213,26 @@ fit.prophet <- function(m, df, ...) {
     m$params$sigma_obs <- 0.
     n.iteration <- 1.
   } else if (m$mcmc.samples > 0) {
-    stan.fit <- rstan::sampling(
-      model,
+    args <- list(
+      object = model,
       data = dat,
       init = stan_init,
-      iter = m$mcmc.samples,
-      ...
+      iter = m$mcmc.samples
     )
+    args <- modifyList(args, list(...))
+    stan.fit <- do.call(rstan::sampling, args)
     m$params <- rstan::extract(stan.fit)
     n.iteration <- length(m$params$k)
   } else {
-    stan.fit <- rstan::optimizing(
-      model,
+    args <- list(
+      object = model,
       data = dat,
       init = stan_init,
       iter = 1e4,
-      as_vector = FALSE,
-      ...
+      as_vector = FALSE
     )
+    args <- modifyList(args, list(...))
+    stan.fit <- do.call(rstan::optimizing, args)
     m$params <- stan.fit$par
     n.iteration <- 1
   }
