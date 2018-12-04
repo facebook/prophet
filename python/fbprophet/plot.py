@@ -105,8 +105,17 @@ def plot_components(
     components = ['trend']
     if m.train_holiday_names is not None and 'holidays' in fcst:
         components.append('holidays')
-    components.extend([name for name in m.seasonalities
-                    if name in fcst])
+    # Plot weekly seasonality, if present
+    if 'weekly' in m.seasonalities and 'weekly' in fcst:
+        components.append('weekly')
+    # Yearly if present
+    if 'yearly' in m.seasonalities and 'yearly' in fcst:
+        components.append('yearly')
+    # Other seasonalities
+    components.extend([
+        name for name in sorted(m.seasonalities)
+        if name in fcst and name not in ['weekly', 'yearly']
+    ])
     regressors = {'additive': False, 'multiplicative': False}
     for name, props in m.extra_regressors.items():
         regressors[props['mode']] = True

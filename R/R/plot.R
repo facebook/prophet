@@ -113,7 +113,7 @@ prophet_plot_components <- function(
     panels[[length(panels) + 1]] <- plot_yearly(m, uncertainty, yearly_start)
   }
   # Plot other seasonalities
-  for (name in names(m$seasonalities)) {
+  for (name in sort(names(m$seasonalities))) {
     if (!(name %in% c('weekly', 'yearly')) &&
         (name %in% colnames(fcst))) {
       panels[[length(panels) + 1]] <- plot_seasonality(m, name, uncertainty)
