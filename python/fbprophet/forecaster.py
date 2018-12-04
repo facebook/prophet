@@ -31,8 +31,10 @@ from fbprophet.plot import (
     plot_seasonality,
 )
 
-logging.basicConfig()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('fbprophet')
+logger.addHandler(logging.NullHandler())
+if len(logger.handlers) == 1:
+    logging.basicConfig(level=logging.INFO)
 
 
 class Prophet(object):

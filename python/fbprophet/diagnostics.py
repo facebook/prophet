@@ -17,7 +17,7 @@ import logging
 import numpy as np
 import pandas as pd
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('fbprophet')
 
 
 def generate_cutoffs(df, horizon, initial, period):
