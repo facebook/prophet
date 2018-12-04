@@ -11,7 +11,7 @@
 #' @param country.name Country name (character).
 #'
 #' @return A vector of all possible holiday names (unique) of given country.
-#' @internal
+#' @keywords internal
 get_holiday_names <- function(country.name){
     holidays <- generated_holidays %>% 
       dplyr::filter(country == country.name) %>%
@@ -28,7 +28,7 @@ get_holiday_names <- function(country.name){
 #'
 #' @return Dataframe with 'ds' and 'holiday', which can directly feed
 #'  to 'holidays' params in Prophet
-#' @internal
+#' @keywords internal
 make_holidays_df <- function(years, country.name){
   country.holidays = generated_holidays %>%
     dplyr::filter(country == country.name)

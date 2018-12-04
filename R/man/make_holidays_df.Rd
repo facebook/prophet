@@ -18,3 +18,4 @@ Dataframe with 'ds' and 'holiday', which can directly feed
 \description{
 Make dataframe of holidays for given years and countries
 }
+\keyword{internal}

@@ -15,3 +15,4 @@ A vector of all possible holiday names (unique) of given country.
 \description{
 Return all possible holiday names of given country
 }
+\keyword{internal}

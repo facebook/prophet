@@ -154,7 +154,6 @@ prophet_copy <- function(m, cutoff = NULL) {
     weekly.seasonality = FALSE,
     daily.seasonality = FALSE,
     holidays = m$holidays,
-    append.holidays = m$append.holidays,
     seasonality.mode = m$seasonality.mode,
     seasonality.prior.scale = m$seasonality.prior.scale,
     changepoint.prior.scale = m$changepoint.prior.scale,
@@ -166,6 +165,7 @@ prophet_copy <- function(m, cutoff = NULL) {
   )
   m2$extra_regressors <- m$extra_regressors
   m2$seasonalities <- m$seasonalities
+  m2$country_holidays <- m$country_holidays
   return(m2)
 }
 

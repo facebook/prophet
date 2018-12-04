@@ -80,6 +80,7 @@ globalVariables(c(
 #' @export
 #' @importFrom dplyr "%>%"
 #' @import Rcpp
+#' @import rlang
 prophet <- function(df = NULL,
                     growth = 'linear',
                     changepoints = NULL,
@@ -1219,7 +1220,7 @@ fit.prophet <- function(m, df, ...) {
       init = stan_init,
       iter = m$mcmc.samples
     )
-    args <- modifyList(args, list(...))
+    args <- utils::modifyList(args, list(...))
     stan.fit <- do.call(rstan::sampling, args)
     m$params <- rstan::extract(stan.fit)
     n.iteration <- length(m$params$k)
@@ -1231,7 +1232,7 @@ fit.prophet <- function(m, df, ...) {
       iter = 1e4,
       as_vector = FALSE
     )
-    args <- modifyList(args, list(...))
+    args <- utils::modifyList(args, list(...))
     stan.fit <- do.call(rstan::optimizing, args)
     m$params <- stan.fit$par
     n.iteration <- 1

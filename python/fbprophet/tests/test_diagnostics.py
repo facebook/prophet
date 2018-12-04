@@ -141,7 +141,6 @@ class TestDiagnostics(TestCase):
         # These values are created except for its default values
         holiday = pd.DataFrame(
             {'ds': pd.to_datetime(['2016-12-25']), 'holiday': ['x']})
-        append_holidays = 'US'
         products = itertools.product(
             ['linear', 'logistic'],  # growth
             [None, pd.to_datetime(['2016-12-25'])],  # changepoints
@@ -151,7 +150,6 @@ class TestDiagnostics(TestCase):
             [True, False],  # weekly_seasonality
             [True, False],  # daily_seasonality
             [None, holiday],  # holidays
-            [None, append_holidays],  # append_holidays
             ['additive', 'multiplicative'],  # seasonality_mode
             [1.1],  # seasonality_prior_scale
             [1.1],  # holidays_prior_scale
@@ -163,6 +161,7 @@ class TestDiagnostics(TestCase):
         # Values should be copied correctly
         for product in products:
             m1 = Prophet(*product)
+            m1.country_holidays = 'US'
             m1.history = m1.setup_dataframe(
                 df.copy(), initialize_scales=True)
             m1.set_auto_seasonalities()
@@ -184,7 +183,7 @@ class TestDiagnostics(TestCase):
                 self.assertEqual(m1.holidays, m2.holidays)
             else:
                 self.assertTrue((m1.holidays == m2.holidays).values.all())
-            self.assertEqual(m1.append_holidays, m2.append_holidays)
+            self.assertEqual(m1.country_holidays, m2.country_holidays)
             self.assertEqual(m1.seasonality_mode, m2.seasonality_mode)
             self.assertEqual(m1.seasonality_prior_scale, m2.seasonality_prior_scale)
             self.assertEqual(m1.changepoint_prior_scale, m2.changepoint_prior_scale)
