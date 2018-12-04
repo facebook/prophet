@@ -906,7 +906,7 @@ class Turkey(HolidayBase):
     Implement public holidays in Turkey
 
     Reference:
-    https://en.wikipedia.org/wiki/Public_holidays_in_Thailand
+    https://en.wikipedia.org/wiki/Public_holidays_in_Turkey
     """
 
     def __init__(self, **kwargs):
