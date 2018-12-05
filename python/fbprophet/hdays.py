@@ -927,7 +927,7 @@ class Turkey(HolidayBase):
         self[date(year, 5, 1)] = name
 
         # Commemoration of Atatürk, Youth and Sports Day
-        name = "Commemoration of Atatürk, Youth and Sports Day"
+        name = u"Commemoration of Atatürk, Youth and Sports Day"
         self[date(year, 5, 19)] = name
 
         # Democracy and National Unity Day
