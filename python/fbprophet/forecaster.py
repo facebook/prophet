@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2017-present, Facebook, Inc.
 # All rights reserved.
 #
@@ -5,31 +6,22 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function
 
-from collections import defaultdict, OrderedDict
-from datetime import timedelta
 import logging
+from collections import OrderedDict, defaultdict
+from datetime import timedelta
+
 import numpy as np
 import pandas as pd
 import pystan  # noqa F401
 
-
 from fbprophet.diagnostics import prophet_copy
-from fbprophet.models import prophet_stan_model
 from fbprophet.make_holidays import get_holiday_names, make_holidays_df
-from fbprophet.plot import (
-    plot,
-    plot_components,
-    plot_forecast_component,
-    seasonality_plot_df,
-    plot_weekly,
-    plot_yearly,
-    plot_seasonality,
-)
+from fbprophet.models import prophet_stan_model
+from fbprophet.plot import (plot, plot_components, plot_forecast_component,
+                            plot_seasonality, plot_weekly, plot_yearly,
+                            seasonality_plot_df)
 
 logger = logging.getLogger('fbprophet')
 logger.addHandler(logging.NullHandler())
@@ -420,14 +412,14 @@ class Prophet(object):
 
     def construct_holiday_dataframe(self, dates):
         """Construct a dataframe of holiday dates.
-        
+
         Will combine self.holidays with the built-in country holidays
         corresponding to input dates, if self.country_holidays is set.
-        
+
         Parameters
         ----------
         dates: pd.Series containing timestamps used for computing seasonality.
-        
+
         Returns
         -------
         dataframe of holiday dates, in holiday dataframe format used in
