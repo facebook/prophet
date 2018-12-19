@@ -6,6 +6,8 @@ permalink: /docs/seasonality,_holiday_effects,_and_regressors.html
 subsections:
   - title: Modeling Holidays and Special Events
     id: modeling-holidays-and-special-events
+  - title: Built-in Country Holidays
+    id: built-in-country-holidays
   - title: Fourier Order for Seasonalities
     id: fourier-order-for-seasonalities
   - title: Specifying Custom Seasonalities
@@ -23,7 +25,7 @@ If you have holidays or other recurring events that you'd like to model, you mus
 
 
 
-You can also include columns `lower_window` and `upper_window` which extend the holiday out to `[lower_window, upper_window]` days around the date. For instance, if you wanted to included Christmas Eve in addition to Christmas you'd include `lower_window=-1,upper_window=0`. If you wanted to use Black Friday in addition to Thanksgiving, you'd include `lower_window=0,upper_window=1`. You can also include a column `prior_scale` to set the prior scale separately for each holiday, as described below.
+You can also include columns `lower_window` and `upper_window` which extend the holiday out to `[lower_window, upper_window]` days around the date. For instance, if you wanted to include Christmas Eve in addition to Christmas you'd include `lower_window=-1,upper_window=0`. If you wanted to use Black Friday in addition to Thanksgiving, you'd include `lower_window=0,upper_window=1`. You can also include a column `prior_scale` to set the prior scale separately for each holiday, as described below.
 
 
 
@@ -214,6 +216,102 @@ fig = m.plot_components(forecast)
 Individual holidays can be plotted using the `plot_forecast_component` function (imported from `fbprophet.plot` in Python) like `plot_forecast_component(m, forecast, 'superbowl')` to plot just the superbowl holiday component.
 
 
+<a id="built-in-country-holidays"> </a>
+
+### Built-in Country Holidays
+
+
+
+You can use a built-in collection of country-specific holidays using the `add_country_holidays` method (Python) or function (R). The name of the country is specified, and then major holidays for that country will be included in addition to any holidays that are specified via the `holidays` argument described above:
+
+
+```R
+# R
+m <- prophet(holidays = holidays)
+m <- add_country_holidays(m, country_name = 'US')
+m <- fit.prophet(m, df)
+```
+```python
+# Python
+m = Prophet(holidays=holidays)
+m.add_country_holidays(country_name='US')
+m.fit(df)
+```
+You can see which holidays were included by looking at the `train_holiday_names` (Python) or `train.holiday.names` (R) attribute of the model:
+
+
+```R
+# R
+m$train.holiday.names
+```
+
+     [1] "playoff"                     "superbowl"                  
+     [3] "New Year's Day"              "Martin Luther King, Jr. Day"
+     [5] "Washington's Birthday"       "Memorial Day"               
+     [7] "Independence Day"            "Labor Day"                  
+     [9] "Columbus Day"                "Veterans Day"               
+    [11] "Veterans Day (Observed)"     "Thanksgiving"               
+    [13] "Christmas Day"               "Independence Day (Observed)"
+    [15] "New Year's Day (Observed)"   "Christmas Day (Observed)"   
+
+
+
+```python
+# Python
+m.train_holiday_names
+```
+
+
+
+    0                  New Year's Day
+    1                       superbowl
+    2                    Thanksgiving
+    3         Veterans Day (Observed)
+    4                    Veterans Day
+    5           Washington's Birthday
+    6     Martin Luther King, Jr. Day
+    7                   Christmas Day
+    8     Independence Day (Observed)
+    9                    Memorial Day
+    10               Independence Day
+    11                      Labor Day
+    12       Christmas Day (Observed)
+    13                   Columbus Day
+    14                        playoff
+    15      New Year's Day (Observed)
+    dtype: object
+
+
+
+The holidays for each country are provided by the `holidays` package in Python. A list of available countries, and the country name to use, is available on their page: https://github.com/dr-prodigy/python-holidays. In addition to those countries, Prophet includes holidays for these countries: Brazil (BR), Indonesia (ID), India (IN), Malaysia (MY), Vietnam (VN), Thailand (TH), Philippines (PH), Turkey (TU), Pakistan (PK), Bangladesh (BD), Egypt (EG), China (CN), and Russian (RU).
+
+
+
+In Python, most holidays are computed deterministically and so are available for any date range; a warning will be raised if dates fall outside the range supported by that country. In R, holiday dates are computed for 1995 through 2044 and stored in the package as `data-raw/generated_holidays.csv`. If a wider date range is needed, this script can be used to replace that file with a different date range: https://github.com/facebook/prophet/blob/master/python/scripts/generate_holidays_file.py.
+
+
+
+As above, the country-level holidays will then show up in the components plot:
+
+
+```R
+# R
+forecast <- predict(m, future)
+prophet_plot_components(m, forecast)
+```
+ 
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_22_0.png) 
+
+
+```python
+# Python
+forecast = m.predict(future)
+fig = m.plot_components(forecast)
+```
+ 
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_23_0.png) 
+
+
 <a id="fourier-order-for-seasonalities"> </a>
 
 ### Fourier Order for Seasonalities
@@ -235,7 +333,7 @@ m = Prophet().fit(df)
 a = plot_yearly(m)
 ```
  
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_17_0.png) 
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_26_0.png) 
 
 
 The default values are often appropriate, but they can be increased when the seasonality needs to fit higher-frequency changes, and generally be less smooth. The Fourier order can be specified for each built-in seasonality when instantiating the model, here it is increased to 20:
@@ -253,7 +351,7 @@ m = Prophet(yearly_seasonality=20).fit(df)
 a = plot_yearly(m)
 ```
  
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_20_0.png) 
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_29_0.png) 
 
 
 Increasing the number of Fourier terms allows the seasonality to fit faster changing cycles, but can also lead to overfitting: N Fourier terms corresponds to 2N variables used for modeling the cycle
@@ -293,7 +391,7 @@ forecast = m.fit(df).predict(future)
 fig = m.plot_components(forecast)
 ```
  
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_23_0.png) 
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_32_0.png) 
 
 
 <a id="prior-scale-for-holidays-and-seasonality"> </a>
@@ -478,7 +576,7 @@ forecast = m.predict(future)
 fig = m.plot_components(forecast)
 ```
  
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_32_0.png) 
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_41_0.png) 
 
 
 NFL Sundays could also have been handled using the "holidays" interface described above, by creating a list of past and future NFL Sundays. The `add_regressor` function provides a more general interface for defining extra linear regressors, and in particular does not require that the regressor be a binary indicator. Another time series could be used as a regressor, although its future values would have to be known.
