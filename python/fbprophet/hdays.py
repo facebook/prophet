@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2017-present, Facebook, Inc.
 # All rights reserved.
 #
@@ -5,17 +6,15 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function
 
-from holidays import HolidayBase, MONDAY, WEEKEND, rd, easter
-from lunardate import LunarDate
+import warnings
 from calendar import Calendar
 from datetime import date, timedelta
-from convertdate.islamic import to_gregorian, from_gregorian
-import warnings
+
+from convertdate.islamic import from_gregorian, to_gregorian
+from holidays import MONDAY, WEEKEND, HolidayBase, easter, rd
+from lunardate import LunarDate
 
 
 # Official public holidays at a country level
@@ -927,7 +926,7 @@ class Turkey(HolidayBase):
         self[date(year, 5, 1)] = name
 
         # Commemoration of Atatürk, Youth and Sports Day
-        name = "Commemoration of Atatürk, Youth and Sports Day"
+        name = u"Commemoration of Atatürk, Youth and Sports Day"
         self[date(year, 5, 19)] = name
 
         # Democracy and National Unity Day

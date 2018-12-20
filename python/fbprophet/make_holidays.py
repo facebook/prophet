@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2017-present, Facebook, Inc.
 # All rights reserved.
 #
@@ -5,16 +6,15 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function
 
-import pandas as pd
-import numpy as np
 import warnings
-import holidays as hdays_part1
+
+import numpy as np
+import pandas as pd
+
 import fbprophet.hdays as hdays_part2
+import holidays as hdays_part1
 
 
 def get_holiday_names(country):
