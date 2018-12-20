@@ -10,7 +10,6 @@ from pkg_resources import (
     require,
 )
 from setuptools import setup
-# from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
 from setuptools.command.test import test as test_command
@@ -110,7 +109,6 @@ setup(
     ],
     install_requires=install_requires,
     zip_safe=False,
-    include_package_data=True,
     # For Python 3, Will enforce that tests are run after a build.
     use_2to3=True,
     cmdclass={
