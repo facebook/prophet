@@ -1,7 +1,7 @@
 ---
 layout: docs
-docid: "installation"
-title: "Installation"
+docid: 'installation'
+title: 'Installation'
 permalink: /docs/installation.html
 subsections:
   - id: r
@@ -10,13 +10,13 @@ subsections:
     title: Using Python
 ---
 
-Prophet has two implementations: [R](#installation-in-r) and [Python](#installation-in-python).  Note the slight name difference for the Python package.
+Prophet has two implementations: [R](#installation-in-r) and [Python](#installation-in-python). Note the slight name difference for the Python package.
 
 <a href="#r"></a>
 
 ## Installation in R
 
-Due to [an upstream issue](https://github.com/r-lib/pkgbuild/issues/54) in pkgbuild, we recommend that you use `devtools` to install Prophet.  This is currently the only way to get the latest release.  We hope to resolve this in the near future.
+Due to [an upstream issue](https://github.com/r-lib/pkgbuild/issues/54) in pkgbuild, we recommend that you use `devtools` to install Prophet. This is currently the only way to get the latest release. We hope to resolve this in the near future.
 
 ```
 # R
@@ -34,7 +34,7 @@ After installation, you can [get started!](quick_start.html#r-api)
 
 ### Windows
 
-On Windows, R requires a compiler so you'll need to [follow the instructions](https://github.com/stan-dev/rstan/wiki/Installing-RStan-on-Windows) provided by `rstan`.  The key step is installing [Rtools](http://cran.r-project.org/bin/windows/Rtools/) before attempting to install the package.
+On Windows, R requires a compiler so you'll need to [follow the instructions](https://github.com/stan-dev/rstan/wiki/Installing-RStan-on-Windows) provided by `rstan`. The key step is installing [Rtools](http://cran.r-project.org/bin/windows/Rtools/) before attempting to install the package.
 
 If you have custom Stan compiler settings, install from source rather than the CRAN binary.
 
@@ -49,13 +49,13 @@ Prophet is on PyPI, so you can use pip to install it:
 $ pip install fbprophet
 ```
 
-The major dependency that Prophet has is `pystan`.   PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install fbprophet.
+The major dependency that Prophet has is `pystan`. PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install fbprophet.
 
 After installation, you can [get started!](quick_start.html#python-api)
 
 ### Windows
 
-On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html).  The key step is installing a recent [C++ compiler](http://landinghub.visualstudio.com/visual-cpp-build-tools).
+On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html). The key step is installing a recent [C++ compiler](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
 
 ### Linux
 

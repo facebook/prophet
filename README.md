@@ -4,10 +4,9 @@
 
 Prophet is a procedure for forecasting time series data based on an additive model where non-linear trends are fit with yearly, weekly, and daily seasonality, plus holiday effects. It works best with time series that have strong seasonal effects and several seasons of historical data. Prophet is robust to missing data and shifts in the trend, and typically handles outliers well.
 
-Prophet is [open source software](https://code.facebook.com/projects/) released by Facebook's [Core Data Science team](https://research.fb.com/category/data-science/).  It is available for download on [CRAN](https://cran.r-project.org/package=prophet) and [PyPI](https://pypi.python.org/pypi/fbprophet/).
+Prophet is [open source software](https://code.facebook.com/projects/) released by Facebook's [Core Data Science team](https://research.fb.com/category/data-science/). It is available for download on [CRAN](https://cran.r-project.org/package=prophet) and [PyPI](https://pypi.python.org/pypi/fbprophet/).
 
 ## Important links
-
 
 - Homepage: https://facebook.github.io/prophet/
 - HTML documentation: https://facebook.github.io/prophet/docs/quick_start.html
@@ -31,7 +30,7 @@ After installation, you can [get started!](https://facebook.github.io/prophet/do
 
 ### Windows
 
-On Windows, R requires a compiler so you'll need to [follow the instructions](https://github.com/stan-dev/rstan/wiki/Installing-RStan-on-Windows) provided by `rstan`.  The key step is installing [Rtools](http://cran.r-project.org/bin/windows/Rtools/) before attempting to install the package.
+On Windows, R requires a compiler so you'll need to [follow the instructions](https://github.com/stan-dev/rstan/wiki/Installing-RStan-on-Windows) provided by `rstan`. The key step is installing [Rtools](http://cran.r-project.org/bin/windows/Rtools/) before attempting to install the package.
 
 If you have custom Stan compiler settings, install from source rather than the CRAN binary.
 
@@ -44,7 +43,7 @@ Prophet is on PyPI, so you can use pip to install it:
 $ pip install fbprophet
 ```
 
-The major dependency that Prophet has is `pystan`.   PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install fbprophet.
+The major dependency that Prophet has is `pystan`. PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install fbprophet.
 
 After installation, you can [get started!](https://facebook.github.io/prophet/docs/quick_start.html#python-api)
 
@@ -52,7 +51,7 @@ If you upgrade the version of PyStan installed on your system, you may need to r
 
 ### Windows
 
-On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html).  The key step is installing a recent [C++ compiler](http://landinghub.visualstudio.com/visual-cpp-build-tools).
+On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html). The key step is installing a recent [C++ compiler](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
 
 ### Linux
 
