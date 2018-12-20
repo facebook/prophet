@@ -885,7 +885,7 @@ make_all_seasonality_features <- function(m, df) {
 #' @keywords internal
 regressor_column_matrix <- function(m, seasonal.features, modes) {
   components <- dplyr::data_frame(component = colnames(seasonal.features)) %>%
-    dplyr::mutate(col = seq_len(n())) %>%
+    dplyr::mutate(col = seq_len(dplyr::n())) %>%
     tidyr::separate(component, c('component', 'part'), sep = "_delim_",
                     extra = "merge", fill = "right") %>%
     dplyr::select(col, component)
