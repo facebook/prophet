@@ -105,13 +105,12 @@ setup(
     author='Sean J. Taylor <sjt@fb.com>, Ben Letham <bletham@fb.com>',
     author_email='sjt@fb.com',
     license='BSD',
-    # packages=find_packages(),
     packages=['fbprophet', 'fbprophet.tests'],
     setup_requires=[
     ],
     install_requires=install_requires,
     zip_safe=False,
-    # include_package_data=True,
+    include_package_data=True,
     # For Python 3, Will enforce that tests are run after a build.
     use_2to3=True,
     cmdclass={

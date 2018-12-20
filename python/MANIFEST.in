@@ -2,7 +2,6 @@ include stan/unix/*.stan
 include stan/win/*.stan
 include LICENSE
 include requirements.txt
-include pyproject.toml
 
 # Ensure in-place built models do not get included in the source dist.
 prune fbprophet/stan_model
