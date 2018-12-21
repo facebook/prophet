@@ -9,7 +9,7 @@ from pkg_resources import (
     add_activation_listener,
     require,
 )
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
 from setuptools.command.test import test as test_command
@@ -19,8 +19,7 @@ PLATFORM = 'unix'
 if platform.platform().startswith('Win'):
     PLATFORM = 'win'
 
-SETUP_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_DIR = os.path.join(SETUP_DIR, 'stan', PLATFORM)
+MODEL_DIR = os.path.join('stan', PLATFORM)
 MODEL_TARGET_DIR = os.path.join('fbprophet', 'stan_model')
 
 
@@ -100,18 +99,16 @@ setup(
     name='fbprophet',
     version='0.4',
     description='Automatic Forecasting Procedure',
-    url='facebook.github.io/prophet/',
+    url='https://facebook.github.io/prophet/',
     author='Sean J. Taylor <sjt@fb.com>, Ben Letham <bletham@fb.com>',
     author_email='sjt@fb.com',
     license='BSD',
-    packages=['fbprophet', 'fbprophet.tests'],
+    packages=find_packages(),
     setup_requires=[
     ],
     install_requires=install_requires,
     zip_safe=False,
     include_package_data=True,
-    # For Python 3, Will enforce that tests are run after a build.
-    use_2to3=True,
     cmdclass={
         'build_py': BuildPyCommand,
         'develop': DevelopCommand,
