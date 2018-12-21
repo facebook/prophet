@@ -100,7 +100,7 @@ setup(
     name='fbprophet',
     version='0.4',
     description='Automatic Forecasting Procedure',
-    url='https://facebook.github.io/prophet/',
+    url='facebook.github.io/prophet/',
     author='Sean J. Taylor <sjt@fb.com>, Ben Letham <bletham@fb.com>',
     author_email='sjt@fb.com',
     license='BSD',
@@ -109,6 +109,7 @@ setup(
     ],
     install_requires=install_requires,
     zip_safe=False,
+    include_package_data=True,
     # For Python 3, Will enforce that tests are run after a build.
     use_2to3=True,
     cmdclass={
