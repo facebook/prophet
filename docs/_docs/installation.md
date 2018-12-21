@@ -16,14 +16,7 @@ Prophet has two implementations: [R](#installation-in-r) and [Python](#installat
 
 ## Installation in R
 
-Due to [an upstream issue](https://github.com/r-lib/pkgbuild/issues/54) in pkgbuild, we recommend that you use `devtools` to install Prophet.  This is currently the only way to get the latest release.  We hope to resolve this in the near future.
-
-```
-# R
-> devtools::install_github('facebook/prophet', subdir='R')
-```
-
-Prophet is a [CRAN package](https://cran.r-project.org/package=prophet) and you can continue to use `install.packages` if you are ok with using an earlier release:
+Prophet is a [CRAN package](https://cran.r-project.org/package=prophet) and you can use `install.packages`:
 
 ```
 # R
