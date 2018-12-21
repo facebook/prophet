@@ -10,11 +10,17 @@ packageStartupMessage(paste('Compiling using binary:', R.home('bin')))
 
 model.src <- file.path(R_PACKAGE_SOURCE, 'inst', 'stan', 'prophet.stan')
 model.binary <- file.path(dest, 'prophet_stan_model.RData')
-model.stanc <- rstan::stanc(model.src)
-model.stanm <- rstan::stan_model(
-  stanc_ret = model.stanc,
-  model_name = 'prophet_model'
-)
+
+# See: https://github.com/r-lib/pkgbuild/issues/54#issuecomment-448702834
+# TODO: move stan compilation into Makevars
+suppressMessages({
+  model.stanc <- rstan::stanc(model.src)
+  model.stanm <- rstan::stan_model(
+    stanc_ret = model.stanc,
+    model_name = 'prophet_model'
+  )
+})
+
 save('model.stanm', file = model.binary)
 
 packageStartupMessage('------ Model successfully compiled!')
