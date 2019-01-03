@@ -9,11 +9,11 @@
 from __future__ import absolute_import, division, print_function
 
 import warnings
-from calendar import Calendar
+from calendar import Calendar, MONDAY
 from datetime import date, timedelta
 
 from convertdate.islamic import from_gregorian, to_gregorian
-from holidays import MONDAY, WEEKEND, HolidayBase, easter, rd
+from holidays import WEEKEND, HolidayBase, easter, rd
 from lunardate import LunarDate
 
 
