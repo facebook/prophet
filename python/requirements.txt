@@ -5,5 +5,5 @@ pandas>=0.20.1
 matplotlib>=2.0.0
 lunardate>=0.1.5
 convertdate>=2.1.2
-holidays>=0.9.5
+holidays>=0.9.9
 setuptools-git>=1.2
