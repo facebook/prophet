@@ -1,6 +1,6 @@
 # Prophet: Automatic Forecasting Procedure
 
-[![Build Status](https://travis-ci.com/facebook/prophet.svg?branch=master)](https://travis-ci.org/facebook/prophet)
+[![Build Status](https://travis-ci.com/facebook/prophet.svg?branch=master)](https://travis-ci.com/facebook/prophet)
 
 Prophet is a procedure for forecasting time series data based on an additive model where non-linear trends are fit with yearly, weekly, and daily seasonality, plus holiday effects. It works best with time series that have strong seasonal effects and several seasons of historical data. Prophet is robust to missing data and shifts in the trend, and typically handles outliers well.
 
