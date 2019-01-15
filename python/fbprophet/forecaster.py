@@ -1369,8 +1369,8 @@ class Prophet(object):
         trend = self.sample_predictive_trend(df, iteration)
 
         beta = self.params['beta'][iteration]
-        Xb_a = np.matmul(seasonal_features.values, beta * s_a) * self.y_scale
-        Xb_m = np.matmul(seasonal_features.values, beta * s_m)
+        Xb_a = np.matmul(seasonal_features.values, beta * s_a.values) * self.y_scale
+        Xb_m = np.matmul(seasonal_features.values, beta * s_m.values)
 
         sigma = self.params['sigma_obs'][iteration]
         noise = np.random.normal(0, sigma, df.shape[0]) * self.y_scale
