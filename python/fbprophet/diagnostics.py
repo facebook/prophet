@@ -210,9 +210,10 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     -------
     Dataframe with a column for each metric, and column 'horizon'
     """
-    valid_metrics = ['mse', 'rmse', 'mae', 'mape', 'coverage']
+    valid_metrics = ['mse', 'rmse', 'mae', 'mape','smape','mase','mda','coverage']
+    default_metrics = ['mse', 'rmse', 'mae', 'mape','coverage']
     if metrics is None:
-        metrics = valid_metrics
+        metrics = default_metrics
     if len(set(metrics)) != len(metrics):
         raise ValueError('Input metrics must be a list of unique values')
     if not set(metrics).issubset(set(valid_metrics)):
@@ -222,16 +223,13 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     df_m = df.copy()
     df_m['horizon'] = df_m['ds'] - df_m['cutoff']
     df_m.sort_values('horizon', inplace=True)
-    # Window size
-    w = int(rolling_window * df_m.shape[0])
-    w = max(w, 1)
-    w = min(w, df_m.shape[0])
     cols = ['horizon']
     for metric in metrics:
-        df_m[metric] = eval(metric)(df_m, w)
+        new_column=df_m.groupby("cutoff",as_index=False).apply(lambda x: eval(metric)(x, rolling_window))
+        df_m[metric] = new_column.reset_index(drop=True)
         cols.append(metric)
     df_m = df_m[cols]
-    return df_m.dropna()
+    return df_m.dropna() 
 
 
 def rolling_mean(x, w):
@@ -249,10 +247,11 @@ def rolling_mean(x, w):
     -------
     Rolling mean of x with window size w.
     """
-    s = np.cumsum(np.insert(x, 0, 0))
-    prefix = np.empty(w - 1)
-    prefix.fill(np.nan)
-    return np.hstack((prefix, (s[w:] - s[:-w]) / float(w)))  # right-aligned
+    # Window size needs to be computed for each group
+    w = int(rolling_window * x.shape[0])
+    w = max(w, 1)
+    w = min(w, x.shape[0])   
+    return x.rolling(w).mean()  # right-aligned by default
 
 
 # The functions below specify performance metrics for cross-validation results.
@@ -272,8 +271,8 @@ def mse(df, w):
     -------
     Array of mean squared errors.
     """
-    se = (df['y'] - df['yhat']) ** 2
-    return rolling_mean(se.values, w)
+    se = (df['y'] - df['yhat']).apply(lambda x: x** 2)
+    return rolling_mean(se, w)
 
 
 def rmse(df, w):
@@ -288,7 +287,7 @@ def rmse(df, w):
     -------
     Array of root mean squared errors.
     """
-    return np.sqrt(mse(df, w))
+    return (mse(df, w)).apply(np.sqrt)
 
 
 def mae(df, w):
@@ -303,8 +302,8 @@ def mae(df, w):
     -------
     Array of mean absolute errors.
     """
-    ae = np.abs(df['y'] - df['yhat'])
-    return rolling_mean(ae.values, w)
+    ae = (df['y'] - df['yhat']).apply(np.abs)
+    return rolling_mean(ae, w)
 
 
 def mape(df, w):
@@ -319,8 +318,8 @@ def mape(df, w):
     -------
     Array of mean absolute percent errors.
     """
-    ape = np.abs((df['y'] - df['yhat']) / df['y'])
-    return rolling_mean(ape.values, w)
+    ape = (df['y'] - df['yhat']).apply(np.abs) / (df['y']).apply(np.abs)
+    return rolling_mean(ape, w)
 
 
 def smape(df, w):
@@ -336,7 +335,7 @@ def smape(df, w):
     Array of symmetric mean absolute percent errors.
     """
     sape = np.abs(df['yhat']-df['y']) / ((np.abs(df['y']) + np.abs(df['yhat'])) /2)
-    return rolling_mean(sape.values, w)
+    return rolling_mean(sape, w)
 
 
 def coverage(df, w):
@@ -351,5 +350,36 @@ def coverage(df, w):
     -------
     Array of coverages.
     """
-    is_covered = (df['y'] >= df['yhat_lower']) & (df['y'] <= df['yhat_upper'])
-    return rolling_mean(is_covered.values, w)
+    is_covered = ((df['y'] >= df['yhat_lower']) & (df['y'] <= df['yhat_upper'])).astype(np.float)
+    # this conversion is because I get a strange result I don't understand
+    return pd.Series(rolling_mean(is_covered, w).values)
+
+
+def mase(df, w):
+    """Mean absolute scaled error
+    Parameters
+    ----------
+    df: Cross-validation results dataframe.
+    w: Aggregation window size.
+    Returns
+    -------
+    Array of  mean absolute scaled errors.
+    """
+    denom = rolling_mean(np.abs(df.diff().y).iloc[1:], w-1)
+    denom = np.concatenate( ([np.nan],denom) )
+    ase = (df['yhat']-df['y']).apply(np.abs)
+    return rolling_mean(ase, w)/denom
+
+
+def mda(df, w):
+    """Mean directional accuracy
+    Parameters
+    ----------
+    df: Cross-validation results dataframe.
+    w: Aggregation window size.
+    Returns
+    -------
+    Array of mean directional accuracy
+    """
+    da = np.sign(df.y.diff()) == np.sign(df.yhat.diff())
+    return rolling_mean(da.iloc[1:], w) 
