@@ -232,7 +232,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     return df_m.dropna() 
 
 
-def rolling_mean(x, w):
+def rolling_mean(x, rolling_window):
     """Compute a rolling mean of x
 
     Right-aligned. Padded with NaNs on the front so the output is the same
