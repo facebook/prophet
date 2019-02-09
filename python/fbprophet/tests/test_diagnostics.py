@@ -117,9 +117,9 @@ class TestDiagnostics(TestCase):
         )
         self.assertEqual(df_none.shape[0], 16)
         # Aggregation level 0.2
-        df_horizon = diagnostics.performance_metrics(df_cv, rolling_window=0.2)
+        df_horizon = diagnostics.performance_metrics(df_cv, rolling_window=0.5)
         self.assertEqual(len(df_horizon['horizon'].unique()), 4)
-        self.assertEqual(df_horizon.shape[0], 14)
+        self.assertEqual(df_horizon.shape[0], 15)
         # Aggregation level all
         df_all = diagnostics.performance_metrics(df_cv, rolling_window=1)
         self.assertEqual(df_all.shape[0], 1)
