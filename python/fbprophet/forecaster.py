@@ -58,6 +58,8 @@ class Prophet(object):
         lower_window=-2 will include 2 days prior to the date as holidays. Also
         optionally can have a column prior_scale specifying the prior scale for
         that holiday.
+    periods_df: pd.DataFrame with columns period_name (string), start_ds (date type),
+        end_ds (date type), fourier_order and optionally prior_scale and mode
     seasonality_mode: 'additive' (default) or 'multiplicative'.
     seasonality_prior_scale: Parameter modulating the strength of the
         seasonality model. Larger values allow the model to fit larger seasonal
@@ -90,6 +92,7 @@ class Prophet(object):
             weekly_seasonality='auto',
             daily_seasonality='auto',
             holidays=None,
+            periods_df=None,
             seasonality_mode='additive',
             seasonality_prior_scale=10.0,
             holidays_prior_scale=10.0,
@@ -113,6 +116,7 @@ class Prophet(object):
         self.weekly_seasonality = weekly_seasonality
         self.daily_seasonality = daily_seasonality
         self.holidays = holidays
+        self.periods_df = periods_df
 
         self.seasonality_mode = seasonality_mode
         self.seasonality_prior_scale = float(seasonality_prior_scale)
@@ -130,6 +134,7 @@ class Prophet(object):
         self.t_scale = None
         self.changepoints_t = None
         self.seasonalities = {}
+        self.augmented_seasonalities = {}
         self.extra_regressors = OrderedDict({})
         self.country_holidays = None
         self.stan_fit = None
@@ -169,6 +174,19 @@ class Prophet(object):
                     raise ValueError('Holiday upper_window should be >= 0')
             for h in self.holidays['holiday'].unique():
                 self.validate_column_name(h, check_holidays=False)
+        if self.periods_df is not None:
+            if not (
+                isinstance(self.periods_df, pd.DataFrame)
+                and 'ds_start' in self.periods_df  # noqa W503
+                and 'ds_end' in self.periods_df  # noqa W503
+                and 'period_name' in self.periods_df  # noqa W503
+            ):
+                raise ValueError("periods_df must be a DataFrame with 'ds_start', "
+                                 "'ds_end' and 'period_name' columns.")
+            self.periods_df['ds_start'] = pd.to_datetime(self.periods_df['ds_start'])
+            self.periods_df['ds_end'] = pd.to_datetime(self.periods_df['ds_end'])
+            for pn in self.periods_df['period_name'].unique():
+                self.validate_column_name(pn)
         if self.seasonality_mode not in ['additive', 'multiplicative']:
             raise ValueError(
                 "seasonality_mode must be 'additive' or 'multiplicative'"
@@ -528,6 +546,104 @@ class Prophet(object):
             self.train_holiday_names = pd.Series(holiday_names)
         return holiday_features, prior_scale_list, holiday_names
 
+    @staticmethod
+    def convert_to_days_since(dates_to, dates_from):
+        """Provides days since date_from to date_to.
+
+        Parameters
+        ----------
+        dates_to: pd.Series containing timestamps.
+        dates_from: pd.Series containing timestamps or a datetime value.
+
+        Returns
+        -------
+        Numpy array with number of days
+        """
+        return ((dates_to - dates_from)
+                .dt.total_seconds()
+                .values
+                .astype(np.float)
+                ) / (3600 * 24.)
+
+    @classmethod
+    def augmented_fourier_series(cls, dates, period_df, series_order):
+        """Provides Fourier series components with the specified frequency
+        and order.
+
+        Parameters
+        ----------
+        dates: pd.Series containing timestamps.
+        period_df: DataFrame containing ds_start and ds_end
+        series_order: Number of components.
+
+        Returns
+        -------
+        Matrix with fourier series coefficents
+        """
+        period_df = period_df.sort_values('ds_start')
+        # Join dates on closest ds start
+        dates_w_periods = pd.merge_asof(dates.to_frame(), period_df, left_on='ds', right_on='ds_start')
+
+        t = cls.convert_to_days_since(dates_w_periods['ds'], pd.datetime(1970, 1, 1))[:, None]
+        t0 = cls.convert_to_days_since(dates_w_periods['ds_start'], pd.datetime(1970, 1, 1))[:, None]
+        period = cls.convert_to_days_since(dates_w_periods['ds_end'], dates_w_periods['ds_start'])[:, None]
+        n = np.arange(1, series_order + 1)[:, None]
+        fourier_components = np.column_stack([
+            fun((2.0 * n.T * np.pi * (t - t0) / period))
+            for fun in (np.sin, np.cos)
+        ])
+        fourier_components[((t - t0) >= period)[:, 0]] = 0
+        fourier_components = np.nan_to_num(fourier_components)
+        return fourier_components
+
+    @classmethod
+    def make_augmented_seasonality_features(cls, dates, period_df, series_order, prefix):
+        """Data frame with seasonality features.
+
+        Parameters
+        ----------
+        cls: Prophet class.
+        dates: pd.Series containing timestamps.
+        period_df: DataFrame containing df_start and ds_end
+        series_order: Number of components.
+        prefix: Column name prefix.
+
+        Returns
+        -------
+        pd.DataFrame with seasonality features.
+        """
+        features = cls.augmented_fourier_series(dates, period_df, series_order)
+        columns = [
+            '{}_delim_{}'.format(prefix, i + 1)
+            for i in range(features.shape[1])
+        ]
+        return pd.DataFrame(features, columns=columns)
+
+    def set_augmented_seasonalities(self):
+        """Sets the augmented seasonality dictionary based on provided periods_df"""
+        for _ix, row in self.periods_df.iterrows():
+
+            fourier_order = row.get('fourier_order')
+            if fourier_order <= 0:
+                raise ValueError('Fourier order must be > 0')
+            prior_scale = row.get('prior_scale', self.seasonality_prior_scale)
+            if prior_scale <= 0:
+                raise ValueError('Prior scale must be > 0')
+            mode = row.get('mode', self.seasonality_mode)
+            if mode not in ['additive', 'multiplicative']:
+                raise ValueError("mode must be 'additive' or 'multiplicative'")
+
+            seasonality = {
+                    'fourier_order': fourier_order,
+                    'prior_scale': prior_scale,
+                    'mode': mode
+                }
+            if row.period_name in self.augmented_seasonalities:
+                if self.augmented_seasonalities[row.period_name] != seasonality:
+                    'Period {} does not have consistent arguments specification.'.format(row.period_name)
+            else:
+                self.augmented_seasonalities[row.period_name] = seasonality
+
     def add_regressor(
             self, name, prior_scale=None, standardize='auto', mode=None
     ):
@@ -702,6 +818,19 @@ class Prophet(object):
             features = self.make_seasonality_features(
                 df['ds'],
                 props['period'],
+                props['fourier_order'],
+                name,
+            )
+            seasonal_features.append(features)
+            prior_scales.extend(
+                [props['prior_scale']] * features.shape[1])
+            modes[props['mode']].append(name)
+
+        # Augmented seasonality features
+        for name, props in self.augmented_seasonalities.items():
+            features = self.make_augmented_seasonality_features(
+                df['ds'],
+                self.periods_df[self.periods_df['period_name'] == name],
                 props['fourier_order'],
                 name,
             )
@@ -1024,6 +1153,8 @@ class Prophet(object):
         history = self.setup_dataframe(history, initialize_scales=True)
         self.history = history
         self.set_auto_seasonalities()
+        if self.periods_df is not None:
+            self.set_augmented_seasonalities()
         seasonal_features, prior_scales, component_cols, modes = (
             self.make_all_seasonality_features(history))
         self.train_component_cols = component_cols
