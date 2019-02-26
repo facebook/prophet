@@ -1183,12 +1183,12 @@ fit.prophet <- function(m, df, ...) {
     s_a = array(component.cols$additive_terms),
     s_m = array(component.cols$multiplicative_terms),
     
-    T_pred = 0,
-    t_pred = rep(0, 0),
-    cap_pred = rep(0, 0),
-    X_pred = matrix(0, 0, ncol(seasonal.features)),
-    n_samp = 50,
-    S_pred = 3
+    T_pred = 0,                                      #dummy values
+    t_pred = rep(0, 0),                              #dummy values
+    cap_pred = rep(0, 0),                            #dummy values
+    X_pred = matrix(0, 0, ncol(seasonal.features)),  #dummy values
+    n_samp = 1,                                      #dummy values
+    S_pred = 1                                       #dummy values
   )
   
   # Run stan
