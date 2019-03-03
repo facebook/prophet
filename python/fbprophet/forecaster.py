@@ -581,7 +581,7 @@ class Prophet(object):
         return self
 
     def add_seasonality(
-            self, name, period, fourier_order, prior_scale=None, mode=None
+            self, name, period, fourier_order, prior_scale=None, mode=None, condition_name=None
     ):
         """Add a seasonal component with specified period, number of Fourier
         components, and prior scale.
@@ -600,6 +600,9 @@ class Prophet(object):
         Additive means the seasonality will be added to the trend,
         multiplicative means it will multiply the trend.
 
+        The dataframe passed to `fit` and `predict` will have a column with the
+        specified condition_name containing booleans which decides when to apply seasonality
+
         Parameters
         ----------
         name: string name of the seasonality component.
@@ -607,6 +610,7 @@ class Prophet(object):
         fourier_order: int number of Fourier components to use.
         prior_scale: optional float prior scale for this component.
         mode: optional 'additive' or 'multiplicative'
+        condition_name: string name of the seasonality condition.
 
         Returns
         -------
@@ -628,11 +632,13 @@ class Prophet(object):
             mode = self.seasonality_mode
         if mode not in ['additive', 'multiplicative']:
             raise ValueError("mode must be 'additive' or 'multiplicative'")
+        self.validate_column_name(condition_name)
         self.seasonalities[name] = {
             'period': period,
             'fourier_order': fourier_order,
             'prior_scale': ps,
             'mode': mode,
+            'condition_name': condition_name
         }
         return self
 
@@ -705,6 +711,8 @@ class Prophet(object):
                 props['fourier_order'],
                 name,
             )
+            if 'condition_name' in props:
+                features[~df[props['condition_name']]] = 0
             seasonal_features.append(features)
             prior_scales.extend(
                 [props['prior_scale']] * features.shape[1])
