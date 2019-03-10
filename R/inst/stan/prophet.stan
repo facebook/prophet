@@ -50,7 +50,7 @@ functions {
     vector[S] gamma;
 
     gamma = logistic_gamma(k, m, delta, t_change, S);
-    return cap ./ (1 + exp(-(k + A * delta) .* (t - (m + A * gamma))));
+    return cap .* inv_logit((k + A * delta) .* (t - (m + A * gamma)));
   }
 
   // Linear trend function
@@ -116,7 +116,7 @@ model {
   k ~ normal(0, 5);
   m ~ normal(0, 5);
   delta ~ double_exponential(0, tau);
-  sigma_obs ~ normal(0, 0.1);
+  sigma_obs ~ normal(0, 0.5);
   beta ~ normal(0, sigmas);
 
    // Likelihood
