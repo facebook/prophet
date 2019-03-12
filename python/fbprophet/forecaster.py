@@ -246,6 +246,15 @@ class Prophet(object):
             df[name] = pd.to_numeric(df[name])
             if df[name].isnull().any():
                 raise ValueError('Found NaN in column ' + name)
+        for props in self.seasonalities.values():
+            condition_name = props.get('condition_name')
+            if condition_name is not None:
+                if condition_name not in df:
+                    raise ValueError(
+                        'Condition "{}" missing from dataframe'.format(condition_name))
+                if not df[condition_name].isin([True, False]).all():
+                    raise ValueError('Found non-boolean in column ' + condition_name)
+                df[condition_name] = df[condition_name].astype('bool')
 
         df = df.sort_values('ds')
         df.reset_index(inplace=True, drop=True)
@@ -632,14 +641,15 @@ class Prophet(object):
             mode = self.seasonality_mode
         if mode not in ['additive', 'multiplicative']:
             raise ValueError("mode must be 'additive' or 'multiplicative'")
-        self.validate_column_name(condition_name)
         self.seasonalities[name] = {
             'period': period,
             'fourier_order': fourier_order,
             'prior_scale': ps,
             'mode': mode,
-            'condition_name': condition_name
         }
+        if condition_name is not None:
+            self.validate_column_name(condition_name)
+            self.seasonalities[name]['condition_name'] = condition_name
         return self
 
     def add_country_holidays(self, country_name):

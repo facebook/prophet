@@ -580,6 +580,43 @@ class TestProphet(TestCase):
             self.assertEqual(sum(component_cols['monthly'][6:16]), 10)
         self.assertEqual(prior_scales, true)
 
+    def test_conditional_custom_seasonality(self):
+        m = Prophet(weekly_seasonality=False, yearly_seasonality=False)
+        m.add_seasonality(name='conditional_weekly', period=7, fourier_order=3,
+                          prior_scale=2., condition_name='is_conditional_week')
+        m.add_seasonality(name='normal_monthly', period=30.5, fourier_order=5,
+                          prior_scale=2.)
+        df = DATA.copy()
+        with self.assertRaises(ValueError):
+            # Require all conditions names in df
+            m.fit(df)
+        df['is_conditional_week'] = [0] * 255 + [2] * 255
+        with self.assertRaises(ValueError):
+            # Require boolean compatible values
+            m.fit(df)
+        df['is_conditional_week'] = [0] * 255 + [1] * 255
+        m.fit(df)
+        self.assertEqual(
+            m.seasonalities['conditional_weekly'],
+            {
+                'period': 7,
+                'fourier_order': 3,
+                'prior_scale': 2.,
+                'mode': 'additive',
+                'condition_name': 'is_conditional_week'
+            },
+        )
+        self.assertNotIn('condition_name', m.seasonalities['normal_monthly'])
+        seasonal_features, prior_scales, component_cols, modes = (
+            m.make_all_seasonality_features(m.history)
+        )
+        # Confirm that only values without is_conditional_week has non zero entries
+        conditional_weekly_columns = seasonal_features.columns[
+            seasonal_features.columns.str.startswith('conditional_weekly')]
+        np.testing.assert_array_equal((seasonal_features[conditional_weekly_columns] != 0).any(axis=1).values,
+                                      df['is_conditional_week'].values)
+
+
     def test_added_regressors(self):
         m = Prophet()
         m.add_regressor('binary_feature', prior_scale=0.2)

@@ -136,9 +136,10 @@ def plot_components(
                 m=m, fcst=fcst, name='trend', ax=ax, uncertainty=uncertainty,
                 plot_cap=plot_cap,
             )
-        elif plot_name == 'weekly':
+        elif plot_name == 'weekly' or (plot_name in m.seasonalities and
+                                       m.seasonalities[plot_name]['period'] == 7):
             plot_weekly(
-                m=m, ax=ax, uncertainty=uncertainty, weekly_start=weekly_start,
+                m=m, ax=ax, uncertainty=uncertainty, weekly_start=weekly_start, name=plot_name,
             )
         elif plot_name == 'yearly':
             plot_yearly(
@@ -224,12 +225,17 @@ def seasonality_plot_df(m, ds):
     df_dict = {'ds': ds, 'cap': 1., 'floor': 0.}
     for name in m.extra_regressors:
         df_dict[name] = 0.
+    # Activate all conditional seasonality columns
+    for props in m.seasonalities.values():
+        condition_name = props.get('condition_name')
+        if condition_name is not None:
+            df_dict[condition_name] = True
     df = pd.DataFrame(df_dict)
     df = m.setup_dataframe(df)
     return df
 
 
-def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6)):
+def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), name='weekly'):
     """Plot the weekly component of the forecast.
 
     Parameters
@@ -242,6 +248,7 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6)):
         seasonality plot. 0 (default) starts the week on Sunday. 1 shifts
         by 1 day to Monday, and so on.
     figsize: Optional tuple width, height in inches.
+    name: Seasonality name of weekly seasonality, default 'weekly'.
 
     Returns
     -------
@@ -257,18 +264,18 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6)):
     df_w = seasonality_plot_df(m, days)
     seas = m.predict_seasonal_components(df_w)
     days = days.weekday_name
-    artists += ax.plot(range(len(days)), seas['weekly'], ls='-',
+    artists += ax.plot(range(len(days)), seas[name], ls='-',
                     c='#0072B2')
     if uncertainty:
         artists += [ax.fill_between(range(len(days)),
-                                    seas['weekly_lower'], seas['weekly_upper'],
+                                    seas[name + '_lower'], seas[name + '_upper'],
                                     color='#0072B2', alpha=0.2)]
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
     ax.set_xticks(range(len(days)))
     ax.set_xticklabels(days)
     ax.set_xlabel('Day of week')
-    ax.set_ylabel('weekly')
-    if m.seasonalities['weekly']['mode'] == 'multiplicative':
+    ax.set_ylabel(name)
+    if m.seasonalities[name]['mode'] == 'multiplicative':
         ax = set_y_as_percent(ax)
     return artists
 
