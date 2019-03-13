@@ -1269,29 +1269,29 @@ fit.prophet <- function(m, df, ...) {
 #' plot(m, forecast)
 #' }
 #' @export
-predict.prophet <- function(m, df = NULL, ...) {
+predict.prophet <- function(object, df = NULL, ...) {
   
   if (is.null(df)) {
-    df <- m$history
+    df <- object$history
   } else {
     if (nrow(df) == 0) {
       stop("Dataframe has no rows.")
     }
-    out <- setup_dataframe(m, df)
+    out <- setup_dataframe(object, df)
     df <- out$df
-    m <- out$m
+    object <- out$m
   }
   
   # Construct input to stan
-  out.fit <- make_all_seasonality_features(m, m$history)
-  out.predict <- make_all_seasonality_features(m, df)
+  out.fit <- make_all_seasonality_features(object, object$history)
+  out.predict <- make_all_seasonality_features(object, df)
   
   dat <- data_for_stan(
-    m, 
+    object, 
     df = df, 
     fit.seasonal.features = out.fit$seasonal.features,
     predict.seasonal.features = out.predict$seasonal.features, 
-    component.cols = m$train.component.cols, 
+    component.cols = object$train.component.cols, 
     prior.scales = out.fit$prior.scales, 
     type = "predict"
   )
@@ -1305,21 +1305,20 @@ predict.prophet <- function(m, df = NULL, ...) {
   
   stan_init <- 
     list(
-      k = m$params$k,
-      m = m$params$m,
-      delta = as.numeric(m$params$delta),
-      beta = as.numeric(m$params$beta),
-      sigma_obs = m$params$sigma_obs
+      k = object$params$k,
+      m = object$params$m,
+      delta = as.numeric(object$params$delta),
+      beta = as.numeric(object$params$beta),
+      sigma_obs = object$params$sigma_obs
     )
   
-  if (m$mcmc.samples > 0) {
+  if (object$mcmc.samples > 0) {
     args <- list(
       object = model,
       data = dat,
       init = stan_init,
       iter = m$mcmc.samples
     )
-    args <- utils::modifyList(args, list(...))
     stan.fit <- do.call(rstan::sampling, args)
   } else {
     args <- list(
@@ -1331,7 +1330,6 @@ predict.prophet <- function(m, df = NULL, ...) {
       algorithm = 'Newton',
       verbose = FALSE
     )
-    args <- utils::modifyList(args, list(...))
     stan.fit <- do.call(rstan::optimizing, args)
     
     # Extract overall and trend predictions
@@ -1341,7 +1339,7 @@ predict.prophet <- function(m, df = NULL, ...) {
       mutate(yhat = y_hat, trend = trend_hat)
     
     # Extract overall and trend intervals
-    stan.intervals <- predict_uncertainty(m, stan.fit)
+    stan.intervals <- predict_uncertainty(object, stan.fit)
   }
   
   df <- 
@@ -1360,10 +1358,10 @@ predict.prophet <- function(m, df = NULL, ...) {
         "yhat", "yhat_lower", "yhat_upper",
         "trend", "trend_lower", "trend_upper"
       ),
-      funs(. * m$y.scale + df$floor)
+      funs(. * object$y.scale + df$floor)
     ) %>% # Now add seasonal breakdowns and intervals
     cbind(
-      predict_seasonal_components(m, df)
+      predict_seasonal_components(object, df)
     )
   
   return(df)
@@ -1375,10 +1373,10 @@ predict.prophet <- function(m, df = NULL, ...) {
 #' @param m The fitted prophet object
 #' @param df Data frame with historical or future data for fitting or prediction resp.
 #' @param fit.seasonal.features matrix of seasonal, holiday & exogenous regressors for fitting
-#' @param predict.seasonal.features  matrix of seasonal, holiday & exogenous regressors for predictions
 #' @param component.cols indicators for additive or multiplicative components in seasonal.features
 #' @param prior.scales prior scale hyperparameters
 #' @param type 'fit' or 'predict'
+#' @param predict.seasonal.features  matrix of seasonal, holiday & exogenous regressors for predictions
 #' 
 #' @return List with all data required for stan fitting or prediction
 #'
@@ -1386,142 +1384,61 @@ predict.prophet <- function(m, df = NULL, ...) {
 data_for_stan <- function(
   m, df, 
   fit.seasonal.features, 
-  predict.seasonal.features = matrix(0, 0, ncol(fit.seasonal.features)),
   component.cols, 
   prior.scales, 
-  type) {
+  type,
+  predict.seasonal.features = matrix(0, 0, ncol(fit.seasonal.features))
+) {
+  
+  
+  dat <- list(
+    T = nrow(m$history),
+    K = ncol(fit.seasonal.features),
+    S = length(m$changepoints.t),
+    y = m$history$y_scaled,
+    t = m$history$t,
+    cap = switch(
+      m$growth, 
+      linear = rep(0, nrow(m$history)),              # Unused inside Stan
+      df$cap_scaled                                  # Add capacities to the Stan data
+    ), 
+    t_change = array(m$changepoints.t),
+    X = as.matrix(fit.seasonal.features),
+    sigmas = array(prior.scales),
+    tau = m$changepoint.prior.scale,
+    trend_indicator = as.numeric(m$growth == 'logistic'),
+    s_a = array(component.cols$additive_terms),
+    s_m = array(component.cols$multiplicative_terms)
+  )
   
   if (type == "fit") {
     
-    dat <- list(
-      T = nrow(df),
-      K = ncol(fit.seasonal.features),
-      S = length(m$changepoints.t),
-      y = df$y_scaled,
-      t = df$t,
-      cap = switch(
-        m$growth, 
-        linear = rep(0, nrow(df)),                     # Unused inside Stan
-        df$cap_scaled                                  # Add capacities to the Stan data
-      ), 
-      t_change = array(m$changepoints.t),
-      X = as.matrix(fit.seasonal.features),
-      sigmas = array(prior.scales),
-      tau = m$changepoint.prior.scale,
-      trend_indicator = as.numeric(m$growth == 'logistic'),
-      s_a = array(component.cols$additive_terms),
-      s_m = array(component.cols$multiplicative_terms),
-      
-      T_pred = 0,                                      #dummy values
-      t_pred = rep(0, 0),                              #dummy values
-      cap_pred = rep(0, 0),                            #dummy values
-      X_pred = as.matrix(predict.seasonal.features),   #dummy values
-      n_samp = 1,                                      #dummy values
-      S_pred = 1                                       #dummy values
-    )
+    dat$T_pred <- 0                                      #dummy values
+    dat$t_pred <- rep(0, 0)                              #dummy values
+    dat$cap_pred <- rep(0, 0)                            #dummy values
+    dat$X_pred <- as.matrix(predict.seasonal.features)   #dummy values
+    dat$n_samp <- 1                                      #dummy values
+    dat$S_pred <- 1                                      #dummy values
     
   } else {
     
-    dat <- list(
-      T = nrow(m$history),
-      K = ncol(fit.seasonal.features),
-      S = length(m$changepoints.t),
-      y = m$history$y_scaled,                         
-      t = m$history$t,                                
-      cap = switch(
-        m$growth, 
-        linear = rep(0, nrow(m$history)),              # Unused inside Stan
-        m$history$cap_scaled                           # Add capacities to the Stan data
-      ),
-      t_change = array(m$changepoints.t),
-      X = as.matrix(fit.seasonal.features),            
-      sigmas = array(prior.scales),
-      tau = m$changepoint.prior.scale,
-      trend_indicator = as.numeric(m$growth == 'logistic'),
-      s_a = array(component.cols$additive_terms),
-      s_m = array(component.cols$multiplicative_terms),
-      
-      T_pred = nrow(df),
-      t_pred = df$t,
-      cap_pred = 
-        if(!'cap' %in% colnames(df)) { 
-          rep(0, length(df$t)) 
-        } else { 
-          switch(
-            m$growth, 
-            linear = rep(0, nrow(df)),                   # Unused inside Stan
-            df$cap_scaled                               # Add capacities to the Stan data
-          )
-        },
-      X_pred = as.matrix(predict.seasonal.features),
-      n_samp = m$uncertainty.samples
+    dat$T_pred <- nrow(df)
+    dat$t_pred <- df$t
+    dat$cap_pred <- switch(
+      m$growth, 
+      linear = rep(0, nrow(df)),                         # Unused inside Stan
+      df$cap_scaled                                      # Add capacities to the Stan data
     )
-    
-    # Future # of change points assuming a homog. Poisson process
-    dat$S_pred <- stats::qpois(0.95, dat$S * (max(dat$t_pred) - 1) )
+    dat$X_pred <- as.matrix(predict.seasonal.features)
+    dat$n_samp <- m$uncertainty.samples
+    dat$S_pred <- stats::qpois(0.95, dat$S * (max(dat$t_pred) - 1))
     
   }
   
   dat
 }
 
-#' Evaluate the piecewise linear function.
-#'
-#' @param t Vector of times on which the function is evaluated.
-#' @param deltas Vector of rate changes at each changepoint.
-#' @param k Float initial rate.
-#' @param m Float initial offset.
-#' @param changepoint.ts Vector of changepoint times.
-#'
-#' @return Vector y(t).
-#'
-#' @keywords internal
-piecewise_linear <- function(t, deltas, k, m, changepoint.ts) {
-  # Intercept changes
-  gammas <- -changepoint.ts * deltas
-  # Get cumulative slope and intercept at each t
-  k_t <- rep(k, length(t))
-  m_t <- rep(m, length(t))
-  for (s in 1:length(changepoint.ts)) {
-    indx <- t >= changepoint.ts[s]
-    k_t[indx] <- k_t[indx] + deltas[s]
-    m_t[indx] <- m_t[indx] + gammas[s]
-  }
-  y <- k_t * t + m_t
-  return(y)
-}
 
-#' Evaluate the piecewise logistic function.
-#'
-#' @param t Vector of times on which the function is evaluated.
-#' @param cap Vector of capacities at each t.
-#' @param deltas Vector of rate changes at each changepoint.
-#' @param k Float initial rate.
-#' @param m Float initial offset.
-#' @param changepoint.ts Vector of changepoint times.
-#'
-#' @return Vector y(t).
-#'
-#' @keywords internal
-piecewise_logistic <- function(t, cap, deltas, k, m, changepoint.ts) {
-  # Compute offset changes
-  k.cum <- c(k, cumsum(deltas) + k)
-  gammas <- rep(0, length(changepoint.ts))
-  for (i in 1:length(changepoint.ts)) {
-    gammas[i] <- ((changepoint.ts[i] - m - sum(gammas))
-                  * (1 - k.cum[i] / k.cum[i + 1]))
-  }
-  # Get cumulative rate and offset at each t
-  k_t <- rep(k, length(t))
-  m_t <- rep(m, length(t))
-  for (s in 1:length(changepoint.ts)) {
-    indx <- t >= changepoint.ts[s]
-    k_t[indx] <- k_t[indx] + deltas[s]
-    m_t[indx] <- m_t[indx] + gammas[s]
-  }
-  y <- cap / (1 + exp(-k_t * (t - m_t)))
-  return(y)
-}
 
 #' Predict trend using the prophet model.
 #'
