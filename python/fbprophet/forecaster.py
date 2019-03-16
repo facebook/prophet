@@ -1096,12 +1096,10 @@ class Prophet(object):
             try:
                 params = model.optimizing(**args)
             except RuntimeError:
-                if 'algorithm' not in args:
-                    # Fall back on Newton
-                    args['algorithm'] = 'Newton'
-                    params = model.optimizing(**args)
-                else:
-                    raise
+                # Fall back on Newton
+                args['algorithm'] = 'Newton'
+                params = model.optimizing(**args)
+
             for par in params:
                 self.params[par] = params[par].reshape((1, -1))
 
