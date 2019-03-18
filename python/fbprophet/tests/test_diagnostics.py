@@ -75,8 +75,11 @@ class TestDiagnostics(TestCase):
     def test_cross_validation_extra_regressors(self):
         df = self.__df.copy()
         df['extra'] = range(df.shape[0])
+        df['is_conditional_week'] = np.arange(df.shape[0]) // 7 % 2
         m = Prophet()
         m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
+        m.add_seasonality(name='conditional_weekly', period=7, fourier_order=3,
+                          prior_scale=2., condition_name='is_conditional_week')
         m.add_regressor('extra')
         m.fit(df)
         df_cv = diagnostics.cross_validation(

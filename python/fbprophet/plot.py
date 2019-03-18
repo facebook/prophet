@@ -136,14 +136,19 @@ def plot_components(
                 m=m, fcst=fcst, name='trend', ax=ax, uncertainty=uncertainty,
                 plot_cap=plot_cap,
             )
-        elif plot_name == 'weekly':
-            plot_weekly(
-                m=m, ax=ax, uncertainty=uncertainty, weekly_start=weekly_start,
-            )
-        elif plot_name == 'yearly':
-            plot_yearly(
-                m=m, ax=ax, uncertainty=uncertainty, yearly_start=yearly_start,
-            )
+        elif plot_name in m.seasonalities:
+            if plot_name == 'weekly' or m.seasonalities[plot_name]['period'] == 7:
+                plot_weekly(
+                    m=m, name=plot_name, ax=ax, uncertainty=uncertainty, weekly_start=weekly_start
+                )
+            elif plot_name == 'yearly' or m.seasonalities[plot_name]['period'] == 365.25:
+                plot_yearly(
+                    m=m, name=plot_name, ax=ax, uncertainty=uncertainty, yearly_start=yearly_start
+                )
+            else:
+                plot_seasonality(
+                    m=m, name=plot_name, ax=ax, uncertainty=uncertainty,
+                )
         elif plot_name in [
             'holidays',
             'extra_regressors_additive',
@@ -152,10 +157,6 @@ def plot_components(
             plot_forecast_component(
                 m=m, fcst=fcst, name=plot_name, ax=ax, uncertainty=uncertainty,
                 plot_cap=False,
-            )
-        else:
-            plot_seasonality(
-                m=m, name=plot_name, ax=ax, uncertainty=uncertainty,
             )
         if plot_name in m.component_modes['multiplicative']:
             multiplicative_axes.append(ax)
@@ -224,12 +225,16 @@ def seasonality_plot_df(m, ds):
     df_dict = {'ds': ds, 'cap': 1., 'floor': 0.}
     for name in m.extra_regressors:
         df_dict[name] = 0.
+    # Activate all conditional seasonality columns
+    for props in m.seasonalities.values():
+        if props['condition_name'] is not None:
+            df_dict[props['condition_name']] = True
     df = pd.DataFrame(df_dict)
     df = m.setup_dataframe(df)
     return df
 
 
-def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6)):
+def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), name='weekly'):
     """Plot the weekly component of the forecast.
 
     Parameters
@@ -242,6 +247,7 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6)):
         seasonality plot. 0 (default) starts the week on Sunday. 1 shifts
         by 1 day to Monday, and so on.
     figsize: Optional tuple width, height in inches.
+    name: Name of seasonality component if changed from default 'weekly'.
 
     Returns
     -------
@@ -257,23 +263,23 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6)):
     df_w = seasonality_plot_df(m, days)
     seas = m.predict_seasonal_components(df_w)
     days = days.weekday_name
-    artists += ax.plot(range(len(days)), seas['weekly'], ls='-',
+    artists += ax.plot(range(len(days)), seas[name], ls='-',
                     c='#0072B2')
     if uncertainty:
         artists += [ax.fill_between(range(len(days)),
-                                    seas['weekly_lower'], seas['weekly_upper'],
+                                    seas[name + '_lower'], seas[name + '_upper'],
                                     color='#0072B2', alpha=0.2)]
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
     ax.set_xticks(range(len(days)))
     ax.set_xticklabels(days)
     ax.set_xlabel('Day of week')
-    ax.set_ylabel('weekly')
-    if m.seasonalities['weekly']['mode'] == 'multiplicative':
+    ax.set_ylabel(name)
+    if m.seasonalities[name]['mode'] == 'multiplicative':
         ax = set_y_as_percent(ax)
     return artists
 
 
-def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6)):
+def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6), name='yearly'):
     """Plot the yearly component of the forecast.
 
     Parameters
@@ -286,6 +292,7 @@ def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6)):
         seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts
         by 1 day to Jan 2, and so on.
     figsize: Optional tuple width, height in inches.
+    name: Name of seasonality component if previously changed from default 'yearly'.
 
     Returns
     -------
@@ -301,19 +308,19 @@ def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6)):
     df_y = seasonality_plot_df(m, days)
     seas = m.predict_seasonal_components(df_y)
     artists += ax.plot(
-        df_y['ds'].dt.to_pydatetime(), seas['yearly'], ls='-', c='#0072B2')
+        df_y['ds'].dt.to_pydatetime(), seas[name], ls='-', c='#0072B2')
     if uncertainty:
         artists += [ax.fill_between(
-            df_y['ds'].dt.to_pydatetime(), seas['yearly_lower'],
-            seas['yearly_upper'], color='#0072B2', alpha=0.2)]
+            df_y['ds'].dt.to_pydatetime(), seas[name + '_lower'],
+            seas[name + '_upper'], color='#0072B2', alpha=0.2)]
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
     months = MonthLocator(range(1, 13), bymonthday=1, interval=2)
     ax.xaxis.set_major_formatter(FuncFormatter(
         lambda x, pos=None: '{dt:%B} {dt.day}'.format(dt=num2date(x))))
     ax.xaxis.set_major_locator(months)
     ax.set_xlabel('Day of year')
-    ax.set_ylabel('yearly')
-    if m.seasonalities['yearly']['mode'] == 'multiplicative':
+    ax.set_ylabel(name)
+    if m.seasonalities[name]['mode'] == 'multiplicative':
         ax = set_y_as_percent(ax)
     return artists
 

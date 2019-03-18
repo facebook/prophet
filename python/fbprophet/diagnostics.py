@@ -110,6 +110,10 @@ def cross_validation(model, horizon, period=None, initial=None):
             if m.logistic_floor:
                 columns.append('floor')
         columns.extend(m.extra_regressors.keys())
+        columns.extend([
+            props['condition_name']
+            for props in m.seasonalities.values()
+            if props['condition_name'] is not None])
         yhat = m.predict(df[index_predicted][columns])
         # Merge yhat(predicts), y(df, original data) and cutoff
         predicts.append(pd.concat([
