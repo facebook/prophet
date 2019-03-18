@@ -416,6 +416,7 @@ class TestProphet(TestCase):
                 'fourier_order': 3,
                 'prior_scale': 10.,
                 'mode': 'additive',
+                'condition_name': None
             },
         )
         # Should be disabled due to too short history
@@ -441,6 +442,7 @@ class TestProphet(TestCase):
                 'fourier_order': 2,
                 'prior_scale': 3.,
                 'mode': 'additive',
+                'condition_name': None
             },
         )
 
@@ -457,6 +459,7 @@ class TestProphet(TestCase):
                 'fourier_order': 10,
                 'prior_scale': 10.,
                 'mode': 'additive',
+                'condition_name': None
             },
         )
         # Should be disabled due to too short history
@@ -477,6 +480,7 @@ class TestProphet(TestCase):
                 'fourier_order': 7,
                 'prior_scale': 3.,
                 'mode': 'additive',
+                'condition_name': None
             },
         )
 
@@ -493,6 +497,7 @@ class TestProphet(TestCase):
                 'fourier_order': 4,
                 'prior_scale': 10.,
                 'mode': 'additive',
+                'condition_name': None
             },
         )
         # Should be disabled due to too short history
@@ -513,6 +518,7 @@ class TestProphet(TestCase):
                 'fourier_order': 7,
                 'prior_scale': 3.,
                 'mode': 'additive',
+                'condition_name': None
             },
         )
         m = Prophet()
@@ -545,6 +551,7 @@ class TestProphet(TestCase):
                 'fourier_order': 5,
                 'prior_scale': 2.,
                 'mode': 'additive',
+                'condition_name': None
             },
         )
         with self.assertRaises(ValueError):
@@ -606,15 +613,15 @@ class TestProphet(TestCase):
                 'condition_name': 'is_conditional_week'
             },
         )
-        self.assertNotIn('condition_name', m.seasonalities['normal_monthly'])
+        self.assertIsNone(m.seasonalities['normal_monthly']['condition_name'])
         seasonal_features, prior_scales, component_cols, modes = (
             m.make_all_seasonality_features(m.history)
         )
         # Confirm that only values without is_conditional_week has non zero entries
         conditional_weekly_columns = seasonal_features.columns[
             seasonal_features.columns.str.startswith('conditional_weekly')]
-        np.testing.assert_array_equal((seasonal_features[conditional_weekly_columns] != 0).any(axis=1).values,
-                                      df['is_conditional_week'].values)
+        self.assertTrue(np.array_equal((seasonal_features[conditional_weekly_columns] != 0).any(axis=1).values,
+                                       df['is_conditional_week'].values))
 
 
     def test_added_regressors(self):

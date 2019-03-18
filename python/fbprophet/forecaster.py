@@ -247,7 +247,7 @@ class Prophet(object):
             if df[name].isnull().any():
                 raise ValueError('Found NaN in column ' + name)
         for props in self.seasonalities.values():
-            condition_name = props.get('condition_name')
+            condition_name = props['condition_name']
             if condition_name is not None:
                 if condition_name not in df:
                     raise ValueError(
@@ -609,8 +609,9 @@ class Prophet(object):
         Additive means the seasonality will be added to the trend,
         multiplicative means it will multiply the trend.
 
-        The dataframe passed to `fit` and `predict` will have a column with the
-        specified condition_name containing booleans which decides when to apply seasonality
+        If condition_name is provided, the dataframe passed to `fit` and `predict`
+        should have a column with the specified condition_name containing booleans
+        which decides when to apply seasonality.
 
         Parameters
         ----------
@@ -641,15 +642,15 @@ class Prophet(object):
             mode = self.seasonality_mode
         if mode not in ['additive', 'multiplicative']:
             raise ValueError("mode must be 'additive' or 'multiplicative'")
+        if condition_name is not None:
+            self.validate_column_name(condition_name)
         self.seasonalities[name] = {
             'period': period,
             'fourier_order': fourier_order,
             'prior_scale': ps,
             'mode': mode,
+            'condition_name': condition_name,
         }
-        if condition_name is not None:
-            self.validate_column_name(condition_name)
-            self.seasonalities[name]['condition_name'] = condition_name
         return self
 
     def add_country_holidays(self, country_name):
@@ -721,7 +722,7 @@ class Prophet(object):
                 props['fourier_order'],
                 name,
             )
-            if 'condition_name' in props:
+            if props['condition_name'] is not None:
                 features[~df[props['condition_name']]] = 0
             seasonal_features.append(features)
             prior_scales.extend(
@@ -907,6 +908,7 @@ class Prophet(object):
                 'fourier_order': fourier_order,
                 'prior_scale': self.seasonality_prior_scale,
                 'mode': self.seasonality_mode,
+                'condition_name': None
             }
 
         # Weekly seasonality
@@ -920,6 +922,7 @@ class Prophet(object):
                 'fourier_order': fourier_order,
                 'prior_scale': self.seasonality_prior_scale,
                 'mode': self.seasonality_mode,
+                'condition_name': None
             }
 
         # Daily seasonality
@@ -933,6 +936,7 @@ class Prophet(object):
                 'fourier_order': fourier_order,
                 'prior_scale': self.seasonality_prior_scale,
                 'mode': self.seasonality_mode,
+                'condition_name': None
             }
 
     @staticmethod
