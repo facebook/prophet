@@ -548,6 +548,46 @@ test_that("custom_seasonality", {
   expect_true(all(prior.scales == c(rep(2, 10), rep(10, 6), 4)))
 })
 
+test_that("conditional_custom_seasonality", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  m <- prophet(weekly_seasonality=FALSE, yearly_seasonality=FALSE)
+  m <- add_seasonality(m, name='conditional_weekly', period=7, fourier.order=3,
+                       prior.scale=2., condition.name='is_conditional_week')
+  m <- add_seasonality(m, name='normal_monthly', period=30.5, fourier.order=5,
+                       prior.scale=2.)
+  df <- DATA
+  # Require all conditions names in df
+  expect_error(
+    fit.prophet(m, df)
+  )
+  df$is_conditional_week <- c(rep(0, 255), rep(2, 255))
+  # Require boolean compatible values
+  expect_error(
+    fit.prophet(m, df)
+  )
+  df$is_conditional_week <- c(rep(0, 255), rep(1, 255))
+  fit.prophet(m, df)
+  true <- list(
+    period = 7, fourier.order = 3, prior.scale = 2., mode = 'additive', 
+    condition.name = 'is_conditional_week')
+  for (name in names(true)) {
+    expect_equal(m$seasonalities[['conditional_weekly']][[name]], true[[name]])
+  }
+  expect_equal(
+    m$seasonalities[['normal_monthly']]$condition.name, NULL
+  )
+  out <- prophet:::make_all_seasonality_features(m, df)
+  #Confirm that only values without is_conditional_week has non zero entries
+  nonzero.weekly = out$seasonal.features %>%
+    dplyr::select(dplyr::starts_with('conditional_weekly')) %>%
+    dplyr::mutate_all(~ . != 0) %>%
+    dplyr::mutate(nonzero = rowSums(. != 0) > 0) %>% 
+    dplyr::pull(nonzero)
+  expect_equal(
+    nonzero.weekly, as.logical(df$is_conditional_week)
+  )
+})
+
 test_that("added_regressors", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   m <- prophet()

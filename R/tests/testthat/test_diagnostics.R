@@ -55,8 +55,12 @@ test_that("cross_validation_extra_regressors", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   df <- DATA
   df$extra <- seq(0, nrow(df) - 1)
+  df$is_conditional_week <- seq(0, nrow(df) - 1) %/% 7 %% 2
   m <- prophet()
   m <- add_seasonality(m, name = 'monthly', period = 30.5, fourier.order = 5)
+  m <- add_seasonality(m, name = 'conditional_weekly', period = 7, 
+                       fourier.order = 3, prior.scale = 2., 
+                       condition.name = 'is_conditional_week')
   m <- add_regressor(m, 'extra')
   m <- fit.prophet(m, df)
   df.cv <- cross_validation(

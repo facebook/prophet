@@ -116,7 +116,15 @@ prophet_plot_components <- function(
   for (name in sort(names(m$seasonalities))) {
     if (!(name %in% c('weekly', 'yearly')) &&
         (name %in% colnames(fcst))) {
-      panels[[length(panels) + 1]] <- plot_seasonality(m, name, uncertainty)
+      if (m$seasonalities[[name]]$period == 7) {
+        panels[[length(panels) + 1]] <- plot_weekly(m, uncertainty, 
+                                                    weekly_start, name)
+      } else if (m$seasonalities[[name]]$period == 365.25) {
+        panels[[length(panels) + 1]] <- plot_yearly(m, uncertainty, 
+                                                    yearly_start, name)
+      } else {
+        panels[[length(panels) + 1]] <- plot_seasonality(m, name, uncertainty)
+      }
     }
   }
   # Plot extra regressors
@@ -201,6 +209,13 @@ seasonality_plot_df <- function(m, ds) {
   for (name in names(m$extra_regressors)) {
     df_list[[name]] <- 0
   }
+  # Activate all conditional seasonality columns
+  for (name in names(m$seasonalities)) {
+    condition.name = m$seasonalities[[name]]$condition.name
+    if (!is.null(condition.name)) {
+      df_list[[condition.name]] <- TRUE
+    }
+  }
   df <- as.data.frame(df_list)
   df <- setup_dataframe(m, df)$df
   return(df)
@@ -213,11 +228,14 @@ seasonality_plot_df <- function(m, ds) {
 #' @param weekly_start Integer specifying the start day of the weekly
 #'  seasonality plot. 0 (default) starts the week on Sunday. 1 shifts by 1 day
 #'  to Monday, and so on.
+#' @param name Name of seasonality component if previously changed 
+#'  from default 'weekly'.
 #'
 #' @return A ggplot2 plot.
 #'
 #' @keywords internal
-plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0) {
+plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0, 
+                        name = 'weekly') {
   # Compute weekly seasonality for a Sun-Sat sequence of dates.
   days <- seq(set_date('2017-01-01'), by='d', length.out=7) + as.difftime(
     weekly_start, units = "days")
@@ -225,19 +243,19 @@ plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0) {
   seas <- predict_seasonal_components(m, df.w)
   seas$dow <- factor(weekdays(df.w$ds), levels=weekdays(df.w$ds))
 
-  gg.weekly <- ggplot2::ggplot(seas, ggplot2::aes(x = dow, y = weekly,
-                                                  group = 1)) +
+  gg.weekly <- ggplot2::ggplot(
+      seas, ggplot2::aes_string(x = 'dow', y = name, group = 1)) +
     ggplot2::geom_line(color = "#0072B2", na.rm = TRUE) +
     ggplot2::labs(x = "Day of week")
   if (uncertainty) {
     gg.weekly <- gg.weekly +
-      ggplot2::geom_ribbon(ggplot2::aes(ymin = weekly_lower,
-                                        ymax = weekly_upper),
+      ggplot2::geom_ribbon(ggplot2::aes_string(ymin = paste0(name, '_lower'),
+                                               ymax = paste0(name, '_upper')),
                            alpha = 0.2,
                            fill = "#0072B2",
                            na.rm = TRUE)
   }
-  if (m$seasonalities$weekly$mode == 'multiplicative') {
+  if (m$seasonalities[[name]]$mode == 'multiplicative') {
     gg.weekly <- (
       gg.weekly + ggplot2::scale_y_continuous(labels = scales::percent)
     )
@@ -252,11 +270,14 @@ plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0) {
 #' @param yearly_start Integer specifying the start day of the yearly
 #'  seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts by 1 day
 #'  to Jan 2, and so on.
+#' @param name Name of seasonality component if previously changed 
+#'  from default 'yearly'.
 #'
 #' @return A ggplot2 plot.
 #'
 #' @keywords internal
-plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0) {
+plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0, 
+                        name = 'yearly') {
   # Compute yearly seasonality for a Jan 1 - Dec 31 sequence of dates.
   days <- seq(set_date('2017-01-01'), by='d', length.out=365) + as.difftime(
     yearly_start, units = "days")
@@ -264,20 +285,20 @@ plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0) {
   seas <- predict_seasonal_components(m, df.y)
   seas$ds <- df.y$ds
 
-  gg.yearly <- ggplot2::ggplot(seas, ggplot2::aes(x = ds, y = yearly,
-                                                  group = 1)) +
+  gg.yearly <- ggplot2::ggplot(
+      seas, ggplot2::aes_string(x = 'ds', y = name, group = 1)) +
     ggplot2::geom_line(color = "#0072B2", na.rm = TRUE) +
     ggplot2::labs(x = "Day of year") +
     ggplot2::scale_x_datetime(labels = scales::date_format('%B %d'))
   if (uncertainty) {
     gg.yearly <- gg.yearly +
-      ggplot2::geom_ribbon(ggplot2::aes(ymin = yearly_lower,
-                                        ymax = yearly_upper),
+      ggplot2::geom_ribbon(ggplot2::aes_string(ymin = paste0(name, '_lower'),
+                                               ymax = paste0(name, '_upper')),
                            alpha = 0.2,
                            fill = "#0072B2",
                            na.rm = TRUE)
   }
-  if (m$seasonalities$yearly$mode == 'multiplicative') {
+  if (m$seasonalities[[name]]$mode == 'multiplicative') {
     gg.yearly <- (
       gg.yearly + ggplot2::scale_y_continuous(labels = scales::percent)
     )
