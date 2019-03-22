@@ -108,6 +108,12 @@ cross_validation <- function(
       }
     }
     columns <- c(columns, names(m$extra_regressors))
+    for (name in names(m$seasonalities)) {
+      condition.name = m$seasonalities[[name]]$condition.name
+      if (!is.null(condition.name)) {
+        columns <- c(columns, condition.name)
+      }
+    }
     future <- df.predict[columns]
     yhat <- stats::predict(m, future)
     # Merge yhat, y, and cutoff.
