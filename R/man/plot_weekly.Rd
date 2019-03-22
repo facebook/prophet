@@ -4,7 +4,7 @@
 \alias{plot_weekly}
 \title{Plot the weekly component of the forecast.}
 \usage{
-plot_weekly(m, uncertainty = TRUE, weekly_start = 0)
+plot_weekly(m, uncertainty = TRUE, weekly_start = 0, name = "weekly")
 }
 \arguments{
 \item{m}{Prophet model object}
@@ -14,6 +14,9 @@ plot_weekly(m, uncertainty = TRUE, weekly_start = 0)
 \item{weekly_start}{Integer specifying the start day of the weekly
 seasonality plot. 0 (default) starts the week on Sunday. 1 shifts by 1 day
 to Monday, and so on.}
+
+\item{name}{Name of seasonality component if previously changed 
+from default 'weekly'.}
 }
 \value{
 A ggplot2 plot.

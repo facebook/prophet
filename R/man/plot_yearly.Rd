@@ -4,7 +4,7 @@
 \alias{plot_yearly}
 \title{Plot the yearly component of the forecast.}
 \usage{
-plot_yearly(m, uncertainty = TRUE, yearly_start = 0)
+plot_yearly(m, uncertainty = TRUE, yearly_start = 0, name = "yearly")
 }
 \arguments{
 \item{m}{Prophet model object.}
@@ -14,6 +14,9 @@ plot_yearly(m, uncertainty = TRUE, yearly_start = 0)
 \item{yearly_start}{Integer specifying the start day of the yearly
 seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts by 1 day
 to Jan 2, and so on.}
+
+\item{name}{Name of seasonality component if previously changed 
+from default 'yearly'.}
 }
 \value{
 A ggplot2 plot.
