@@ -415,7 +415,8 @@ test_that("auto_weekly_seasonality", {
   m <- fit.prophet(m, train.w)
   expect_true('weekly' %in% names(m$seasonalities))
   true <- list(
-    period = 7, fourier.order = 3, prior.scale = 10, mode = 'additive')
+    period = 7, fourier.order = 3, prior.scale = 10, mode = 'additive',
+    condition.name = NULL)
   for (name in names(true)) {
     expect_equal(m$seasonalities$weekly[[name]], true[[name]])
   }
@@ -435,7 +436,8 @@ test_that("auto_weekly_seasonality", {
   expect_false('weekly' %in% names(m$seasonalities))
   m <- prophet(DATA, weekly.seasonality = 2, seasonality.prior.scale = 3)
   true <- list(
-    period = 7, fourier.order = 2, prior.scale = 3, mode = 'additive')
+    period = 7, fourier.order = 2, prior.scale = 3, mode = 'additive',
+    condition.name = NULL)
   for (name in names(true)) {
     expect_equal(m$seasonalities$weekly[[name]], true[[name]])
   }
@@ -449,7 +451,8 @@ test_that("auto_yearly_seasonality", {
   m <- fit.prophet(m, DATA)
   expect_true('yearly' %in% names(m$seasonalities))
   true <- list(
-    period = 365.25, fourier.order = 10, prior.scale = 10, mode = 'additive')
+    period = 365.25, fourier.order = 10, prior.scale = 10, mode = 'additive',
+    condition.name = NULL)
   for (name in names(true)) {
     expect_equal(m$seasonalities$yearly[[name]], true[[name]])
   }
@@ -462,7 +465,8 @@ test_that("auto_yearly_seasonality", {
   expect_true('yearly' %in% names(m$seasonalities))
   m <- prophet(DATA, yearly.seasonality = 7, seasonality.prior.scale = 3)
   true <- list(
-    period = 365.25, fourier.order = 7, prior.scale = 3, mode = 'additive')
+    period = 365.25, fourier.order = 7, prior.scale = 3, mode = 'additive',
+    condition.name = NULL)
   for (name in names(true)) {
     expect_equal(m$seasonalities$yearly[[name]], true[[name]])
   }
@@ -476,7 +480,8 @@ test_that("auto_daily_seasonality", {
   m <- fit.prophet(m, DATA2)
   expect_true('daily' %in% names(m$seasonalities))
   true <- list(
-    period = 1, fourier.order = 4, prior.scale = 10, mode = 'additive')
+    period = 1, fourier.order = 4, prior.scale = 10, mode = 'additive',
+    condition.name = NULL)
   for (name in names(true)) {
     expect_equal(m$seasonalities$daily[[name]], true[[name]])
   }
@@ -489,7 +494,8 @@ test_that("auto_daily_seasonality", {
   expect_true('daily' %in% names(m$seasonalities))
   m <- prophet(DATA2, daily.seasonality = 7, seasonality.prior.scale = 3)
   true <- list(
-    period = 1, fourier.order = 7, prior.scale = 3, mode = 'additive')
+    period = 1, fourier.order = 7, prior.scale = 3, mode = 'additive',
+    condition.name = NULL)
   for (name in names(true)) {
     expect_equal(m$seasonalities$daily[[name]], true[[name]])
   }
@@ -514,7 +520,8 @@ test_that("custom_seasonality", {
   m <- prophet(holidays=holidays)
   m <- add_seasonality(m, name='monthly', period=30, fourier.order=5)
   true <- list(
-    period = 30, fourier.order = 5, prior.scale = 10, mode = 'additive')
+    period = 30, fourier.order = 5, prior.scale = 10, mode = 'additive',
+    condition.name = NULL)
   for (name in names(true)) {
     expect_equal(m$seasonalities$monthly[[name]], true[[name]])
   }
