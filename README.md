@@ -16,6 +16,7 @@ Prophet is [open source software](https://code.facebook.com/projects/) released 
 - Prophet Python package: https://pypi.python.org/pypi/fbprophet/
 - Release blogpost: https://research.fb.com/prophet-forecasting-at-scale/
 - Prophet paper: Sean J. Taylor, Benjamin Letham (2018) Forecasting at scale. The American Statistician 72(1):37-45 (https://peerj.com/preprints/3190.pdf).
+- Ask user questions on stackoverflow: https://stackoverflow.com/questions/tagged/facebook-prophet
 
 ## Installation in R
 
