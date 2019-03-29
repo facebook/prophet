@@ -1334,31 +1334,34 @@ predict.prophet <- function(object, df = NULL, ...) {
     
     # Extract overall and trend predictions
     stan.predictions <- 
-      stan.fit$par[c("y_hat", "trend_hat")] %>%
+      stan.fit$par[c("y_hat", "trend_hat", "prediction_quantiles")] %>%
       as.data.frame() %>%
-      mutate(yhat = y_hat, trend = trend_hat)
-    
-    # Extract overall and trend intervals
-    stan.intervals <- predict_uncertainty(object, stan.fit)
+      dplyr::mutate(
+        yhat = y_hat, 
+        yhat_lower = prediction_quantiles.1, 
+        yhat_upper = prediction_quantiles.2,
+        trend = trend_hat, 
+        trend_lower = prediction_quantiles.3, 
+        trend_upper = prediction_quantiles.4,
+      )
   }
   
   df <- 
     cbind(
       ds = df$ds, 
-      stan.predictions, 
-      stan.intervals
+      stan.predictions
     ) %>% 
-    select( # Retain only overall and trend predictions
+    dplyr::select( # Retain only overall and trend predictions
       ds, 
       yhat, yhat_lower, yhat_upper, 
       trend, trend_lower, trend_upper
     ) %>% 
-    mutate_at( # Rescale overall and trend predictions and intervals
+    dplyr::mutate_at( # Rescale overall and trend predictions and intervals
       c(
         "yhat", "yhat_lower", "yhat_upper",
         "trend", "trend_lower", "trend_upper"
       ),
-      funs(. * object$y.scale + df$floor)
+      dplyr::funs(. * object$y.scale + df$floor)
     ) %>% # Now add seasonal breakdowns and intervals
     cbind(
       predict_seasonal_components(object, df)
@@ -1408,7 +1411,8 @@ data_for_stan <- function(
     tau = m$changepoint.prior.scale,
     trend_indicator = as.numeric(m$growth == 'logistic'),
     s_a = array(component.cols$additive_terms),
-    s_m = array(component.cols$multiplicative_terms)
+    s_m = array(component.cols$multiplicative_terms),
+    q_probs = round(c((1 - m$interval.width)/2, (1 + m$interval.width)/2) * 100)
   )
   
   if (type == "fit") {
@@ -1439,30 +1443,6 @@ data_for_stan <- function(
 }
 
 
-
-#' Predict trend using the prophet model.
-#'
-#' @param model Prophet object.
-#' @param df Prediction dataframe.
-#'
-#' @return Vector with trend on prediction dates.
-#'
-#' @keywords internal
-predict_trend <- function(model, df) {
-  k <- mean(model$params$k, na.rm = TRUE)
-  param.m <- mean(model$params$m, na.rm = TRUE)
-  deltas <- colMeans(model$params$delta, na.rm = TRUE)
-  
-  t <- df$t
-  if (model$growth == 'linear') {
-    trend <- piecewise_linear(t, deltas, k, param.m, model$changepoints.t)
-  } else {
-    cap <- df$cap_scaled
-    trend <- piecewise_logistic(
-      t, cap, deltas, k, param.m, model$changepoints.t)
-  }
-  return(trend * model$y.scale + df$floor)
-}
 
 #' Predict seasonality components, holidays, and added regressors.
 #'

@@ -54,7 +54,7 @@ functions {
   }
 
   // Linear trend function
-
+  
   vector linear_trend(
     real k, real m, vector delta, vector t, matrix A, vector t_change
   ) {
@@ -73,7 +73,93 @@ functions {
       return logistic_trend(k, m, delta, t, cap, A, t_change, S);
     }
   }
-}
+  
+  // Estimate quantiles from a series
+  
+  row_vector quantile(row_vector unordered_x, int[] q_probs) {
+    int num_q_probs = num_elements(q_probs);
+    int sample_size = num_elements(unordered_x);
+    row_vector[sample_size] ordered_x = sort_asc(unordered_x);
+    
+    row_vector[num_q_probs] h = (sample_size - 1) * (to_row_vector(q_probs) / 100) + 1;  
+    row_vector[num_q_probs] Q;
+    
+    for (quant_index in 1:num_q_probs) {
+      int h_floor = (((sample_size - 1) * q_probs[quant_index]) / 100) + 1;  
+      
+      Q[quant_index] = ordered_x[h_floor] + (h[quant_index] - h_floor) * (ordered_x[h_floor + 1] - ordered_x[h_floor]);
+    }
+   
+    return(Q); 
+  }
+  
+  // predictions and  trend quantiles
+  
+  matrix get_prediction_quantiles_rng(
+    real k, real m, vector delta, vector t_pred, vector cap_pred, 
+    vector t_change, int S, int S_pred, int T_pred, int n_samp, int trend_indicator, 
+    vector mul_seas_hat, vector add_seas_hat, real sigma_obs, int[] q_probs
+  ) {
+    
+    real lambda;
+    vector[S + S_pred] t_change_sim;
+    vector[S + S_pred] delta_sim;
+    matrix[T_pred, S + S_pred] A_sim;
+    vector[T_pred] error_sim;
+    matrix[T_pred, n_samp] trend_samples;
+    matrix[T_pred, n_samp] yhat_samples;
+    matrix[T_pred, 4] trend_and_yhat_quantiles;
+
+
+    // Set the first S changepoints as fitted
+    for (i in 1:S) {
+      t_change_sim[i] = t_change[i];
+      delta_sim[i] = delta[i];
+    }
+    // Get the Laplace scale
+    lambda = mean(fabs(delta)) + 1e-8;
+
+    // trend  and yhat Samples
+    for (i in 1:n_samp) {
+      if (S_pred > 0) {
+        // Sample new changepoints from a Poisson process with rate S
+        // Sample changepoint deltas from Laplace(lambda)
+        t_change_sim[S + 1] = 1 + exponential_rng(S);
+        for (j in (S + 2):(S + S_pred)) {
+          t_change_sim[j] = t_change_sim[j - 1] + exponential_rng(S);
+        }
+        for (j in (S + 1):(S + S_pred)) {
+          delta_sim[j] = double_exponential_rng(0, lambda);
+        }
+      }
+      // Compute trend with these changepoints
+      A_sim = get_changepoint_matrix(t_pred, t_change_sim, T_pred, S + S_pred);
+      
+      // Sample Trend
+      trend_samples[:, i] = 
+      get_trend(
+        k, m, delta_sim, t_pred, cap_pred, A_sim, t_change_sim, S + S_pred, trend_indicator
+        );
+     
+      // Sample Errors  
+      for (j in 1:T_pred) { error_sim[j] = normal_rng(0, sigma_obs); }
+      
+      // Sample Predictions
+      yhat_samples[:, i] = 
+        trend_samples[:, i] .* (1 + mul_seas_hat) + add_seas_hat + error_sim;
+    } 
+    
+    // Calculate quantiles for predictions and trend; and
+    // store them in a 4 column matrix
+    for (i in 1:T_pred) {
+      trend_and_yhat_quantiles[i, 1:2] = quantile(yhat_samples[i, :], q_probs);
+      trend_and_yhat_quantiles[i, 3:4] = quantile(trend_samples[i, :], q_probs);
+    }
+    
+    return(trend_and_yhat_quantiles);
+  }
+  
+} //functions
 
 data {
   int T;                    // Number of time periods
@@ -90,6 +176,7 @@ data {
   vector[K] s_a;            // Indicator of additive features
   vector[K] s_m;            // Indicator of multiplicative features
 
+  int q_probs[2];
   int T_pred;               // Number of prediction time periods
   vector[T_pred] t_pred;    // Times for predictions
   vector[T_pred] cap_pred;  // Predictive capacities
@@ -136,14 +223,8 @@ generated quantities {
   vector[T_pred] add_seas_hat;
   vector[T_pred] trend_hat;
   matrix[T_pred, S] A_pred;
-  matrix[T_pred, n_samp] trend_samples;
-  matrix[T_pred, n_samp] yhat_samples;
-  vector[S + S_pred] t_change_sim;
-  vector[S + S_pred] delta_sim;
-  real lambda;
-  matrix[T_pred, S + S_pred] A_sim;
-  vector[T_pred] error_sim;
-
+  matrix[T_pred, 4] prediction_quantiles;
+  
   if (T_pred > 0) {
     // Get the main estimate
     mul_seas_hat = X_pred * (beta .* s_m);
@@ -156,42 +237,11 @@ generated quantities {
     y_hat = trend_hat .* (1 + mul_seas_hat) + add_seas_hat;
 
     // Estimate uncertainty with the generative model
-
-    // Set the first S changepoints as fitted
-    for (i in 1:S) {
-      t_change_sim[i] = t_change[i];
-      delta_sim[i] = delta[i];
-    }
-    // Get the Laplace scale
-    lambda = mean(fabs(delta)) + 1e-8;
-
-    for (i in 1:n_samp) {
-      if (S_pred > 0) {
-        // Sample new changepoints from a Poisson process with rate S
-        // Sample changepoint deltas from Laplace(lambda)
-        t_change_sim[S + 1] = 1 + exponential_rng(S);
-        for (j in (S + 2):(S + S_pred)) {
-          t_change_sim[j] = t_change_sim[j - 1] + exponential_rng(S);
-        }
-        for (j in (S + 1):(S + S_pred)) {
-          delta_sim[j] = double_exponential_rng(0, lambda);
-        }
-      }
-      // Compute trend with these changepoints
-      A_sim = get_changepoint_matrix(t_pred, t_change_sim, T_pred, S + S_pred);
-      trend_samples[:, i] = 
-      get_trend(
-        k, m, delta_sim, t_pred, cap_pred, A_sim, t_change_sim, S + S_pred, trend_indicator
-        );
-      
-      # Sample Errors  
-      for (j in 1:T_pred) {
-        error_sim[j] = normal_rng(0, sigma_obs);
-      }    
-      yhat_samples[:, i] = trend_samples[:, i] .* (1 + mul_seas_hat) 
-                           + add_seas_hat 
-                           + error_sim;
-      
-    }
+    prediction_quantiles = get_prediction_quantiles_rng(
+      k, m, delta, t_pred, cap_pred, 
+      t_change, S, S_pred, T_pred, n_samp, trend_indicator, 
+      mul_seas_hat, add_seas_hat, sigma_obs, q_probs
+    );
+    
   }
 }
