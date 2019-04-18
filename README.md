@@ -50,6 +50,10 @@ After installation, you can [get started!](https://facebook.github.io/prophet/do
 
 If you upgrade the version of PyStan installed on your system, you may need to reinstall fbprophet ([see here](https://github.com/facebook/prophet/issues/324)).
 
+### Anaconda
+
+Use `conda install gcc` to set up gcc. The easiest way to install Prophet is through conda-forge: `conda install -c conda-forge fbprophet`.
+
 ### Windows
 
 On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html). The key step is installing a recent [C++ compiler](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
@@ -57,10 +61,6 @@ On Windows, PyStan requires a compiler so you'll need to [follow the instruction
 ### Linux
 
 Make sure compilers (gcc, g++, build-essential) and Python development tools (python-dev, python3-dev) are installed. In Red Hat systems, install the packages gcc64 and gcc64-c++. If you are using a VM, be aware that you will need at least 4GB of memory to install fbprophet, and at least 2GB of memory to use fbprophet.
-
-### Anaconda
-
-Use `conda install gcc` to set up gcc. The easiest way to install Prophet is through conda-forge: `conda install -c conda-forge fbprophet`.
 
 ## Changelog
 
