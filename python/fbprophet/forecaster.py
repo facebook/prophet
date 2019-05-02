@@ -1147,6 +1147,9 @@ class Prophet(object):
         -------
         A pd.DataFrame with the forecast components.
         """
+        if self.history is None:
+            raise Exception('Model must be fit before predictions can be made.')
+
         if df is None:
             df = self.history.copy()
         else:

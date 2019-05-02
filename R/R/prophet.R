@@ -1305,6 +1305,9 @@ fit.prophet <- function(m, df, ...) {
 #'
 #' @export
 predict.prophet <- function(object, df = NULL, ...) {
+  if (is.null(object$history)) {
+    stop("Model must be fit before predictions can be made.")
+  }
   if (is.null(df)) {
     df <- object$history
   } else {
