@@ -42,8 +42,10 @@ def generate_cutoffs(df, horizon, initial, period):
         # If data does not exist in data range (cutoff, cutoff + horizon]
         if not (((df['ds'] > cutoff) & (df['ds'] <= cutoff + horizon)).any()):
             # Next cutoff point is 'last date before cutoff in data - horizon'
-            closest_date = df[df['ds'] <= cutoff].max()['ds']
-            cutoff = closest_date - horizon
+            if cutoff > df['ds'].min():
+                closest_date = df[df['ds'] <= cutoff].max()['ds']
+                cutoff = closest_date - horizon
+            # else no data left, leave cutoff as is, it will be dropped.
         result.append(cutoff)
     result = result[:-1]
     if len(result) == 0:
@@ -82,11 +84,24 @@ def cross_validation(model, horizon, period=None, initial=None):
     A pd.DataFrame with the forecast, actual value and cutoff.
     """
     df = model.history.copy().reset_index(drop=True)
-    te = df['ds'].max()
-    ts = df['ds'].min()
     horizon = pd.Timedelta(horizon)
+    # Set period
     period = 0.5 * horizon if period is None else pd.Timedelta(period)
-    initial = 3 * horizon if initial is None else pd.Timedelta(initial)
+    # Identify largest seasonality period
+    period_max = 0.
+    for s in model.seasonalities.values():
+        period_max = max(period_max, s['period'])
+    seasonality_dt = pd.Timedelta(str(period_max) + ' days')
+    # Set initial
+    if initial is None:
+        initial = max(3 * horizon, seasonality_dt)
+    else:
+        initial = pd.Timedelta(initial)
+        if initial < seasonality_dt:
+            msg = 'Seasonality has period of {} days '.format(period_max)
+            msg += 'which is larger than initial window. '
+            msg += 'Consider increasing initial.'
+            logger.warning(msg)
 
     cutoffs = generate_cutoffs(df, horizon, initial, period)
     predicts = []

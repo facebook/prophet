@@ -29,8 +29,11 @@ generate_cutoffs <- function(df, horizon, initial, period) {
     # If data does not exist in data range (cutoff, cutoff + horizon]
     if (!any((df$ds > cutoff) & (df$ds <= cutoff + horizon))) {
         # Next cutoff point is 'closest date before cutoff in data - horizon'
-        closest.date <- max(df$ds[df$ds <= cutoff])
-        cutoff <- closest.date - horizon
+        if (cutoff > min(df$ds)) {
+          closest.date <- max(df$ds[df$ds <= cutoff])
+          cutoff <- closest.date - horizon
+        }
+        # else no data left, leave cutoff as is, it will be dropped.
     }
     result <- c(result, cutoff)
   }
@@ -73,19 +76,34 @@ generate_cutoffs <- function(df, horizon, initial, period) {
 cross_validation <- function(
     model, horizon, units, period = NULL, initial = NULL) {
   df <- model$history
-  te <- max(df$ds)
-  ts <- min(df$ds)
+  horizon.dt <- as.difftime(horizon, units = units)
+  # Set period
   if (is.null(period)) {
     period <- 0.5 * horizon
   }
-  if (is.null(initial)) {
-    initial <- 3 * horizon
-  }
-  horizon.dt <- as.difftime(horizon, units = units)
-  initial.dt <- as.difftime(initial, units = units)
   period.dt <- as.difftime(period, units = units)
+  # Identify largest seasonality period
+  period.max <- 0
+  for (s in model$seasonalities) {
+    period.max <- max(period.max, s$period)
+  }
+  seasonality.dt <- as.difftime(period.max, units = 'days')
+  # Set initial
+  if (is.null(initial)) {
+    initial.dt <- max(
+      as.difftime(3 * horizon, units = units),
+      seasonality.dt
+    )
+  } else {
+    initial.dt <- as.difftime(initial, units = units)
+    if (initial.dt < seasonality.dt) {
+      warning(paste0('Seasonality has period of ', period.max, ' days which ',
+        'is larger than initial window. Consider increasing initial.'))
+    }
+  }
 
   cutoffs <- generate_cutoffs(df, horizon.dt, initial.dt, period.dt)
+
   predicts <- data.frame()
   for (i in 1:length(cutoffs)) {
     cutoff <- cutoffs[i]
