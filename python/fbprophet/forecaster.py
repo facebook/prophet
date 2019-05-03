@@ -129,7 +129,7 @@ class Prophet(object):
         self.logistic_floor = False
         self.t_scale = None
         self.changepoints_t = None
-        self.seasonalities = {}
+        self.seasonalities = OrderedDict({})
         self.extra_regressors = OrderedDict({})
         self.country_holidays = None
         self.stan_fit = None
