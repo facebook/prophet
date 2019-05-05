@@ -27,7 +27,6 @@ except ImportError:
 
 try:
     import plotly.graph_objs as go
-    import plotly.offline
 except ImportError:
     logger.error('Importing plotly failed. Interactive plots will not work.')
 
@@ -507,7 +506,12 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
                 changepoints_threshold=0.01, xlabel='ds', ylabel='y'):
     """Plot the Prophet forecast with Plotly offline.
 
-    Requires plotly.offline.init_notebook_mode() to have been run,
+    Plotting in Jupyter Notebook requires initializing plotly.offline.init_notebook_mode():
+    >>> import plotly.offline as py
+    >>> py.init_notebook_mode()
+    Then the figure can be displayed using plotly.offline.iplot(...):
+    >>> fig = plot_plotly(m, fcst)
+    >>> py.iplot(fig)
     see https://plot.ly/python/offline/ for details
 
     Parameters
@@ -525,7 +529,7 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
 
     Returns
     -------
-    A Plotly plot.
+    A Plotly Figure.
     """
     prediction_color = '#0072B2'
     error_color = 'rgba(0, 114, 178, 0.2)'  # '#0072B2' with 0.2 opacity
@@ -649,4 +653,4 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
         ),
     )
     fig = go.Figure(data=data, layout=layout)
-    return plotly.offline.iplot(fig)
+    return fig
