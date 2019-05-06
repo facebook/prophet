@@ -236,6 +236,8 @@ class Prophet(object):
             df['y'] = pd.to_numeric(df['y'])
             if np.isinf(df['y'].values).any():
                 raise ValueError('Found infinity in column y.')
+        if df['ds'].dtype == np.int64:
+            df['ds'] = df['ds'].astype(str)
         df['ds'] = pd.to_datetime(df['ds'])
         if df['ds'].isnull().any():
             raise ValueError('Found NaN in column ds.')
