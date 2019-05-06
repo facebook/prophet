@@ -1119,7 +1119,9 @@ class Prophet(object):
                 params = model.optimizing(**args)
             except RuntimeError:
                 # Fall back on Newton
-                logger.warning('Default optimization returns with an error. Falling back to Newton method.')
+                logger.warning(
+                    'Optimization terminated abnormally. Falling back to Newton.'
+                )
                 args['algorithm'] = 'Newton'
                 params = model.optimizing(**args)
 

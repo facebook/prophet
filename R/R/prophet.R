@@ -1262,6 +1262,13 @@ fit.prophet <- function(m, df, ...) {
     )
     args <- utils::modifyList(args, list(...))
     stan.fit <- do.call(rstan::optimizing, args)
+    if (stan.fit$return_code != 0) {
+      message(
+        'Optimization terminated abnormally. Falling back to Newton optimizer.'
+      )
+      args$algorithm = 'Newton'
+      stan.fit <- do.call(rstan::optimizing, args)
+    }
     m$params <- stan.fit$par
     n.iteration <- 1
   }
