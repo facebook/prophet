@@ -503,7 +503,7 @@ def plot_cross_validation_metric(
 
 
 def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoints=False,
-                changepoints_threshold=0.01, xlabel='ds', ylabel='y'):
+                changepoints_threshold=0.01, xlabel='ds', ylabel='y', figsize=(900, 600)):
     """Plot the Prophet forecast with Plotly offline.
 
     Plotting in Jupyter Notebook requires initializing plotly.offline.init_notebook_mode():
@@ -620,6 +620,8 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
 
     layout = dict(
         showlegend=False,
+        width=figsize[0],
+        height=figsize[1],
         yaxis=dict(
             title=ylabel
         ),
