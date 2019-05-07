@@ -1114,6 +1114,7 @@ class Prophet(object):
             args = dict(
                 data=dat,
                 init=stan_init,
+                algorithm='Newton' if dat['T'] < 100 else 'LBFGS',
                 iter=1e4,
             )
             args.update(kwargs)

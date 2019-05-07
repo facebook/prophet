@@ -1257,6 +1257,7 @@ fit.prophet <- function(m, df, ...) {
       object = model,
       data = dat,
       init = stan_init,
+      algorithm = if(dat$T < 100) {'Newton'} else {'LBFGS'},
       iter = 1e4,
       as_vector = FALSE
     )
