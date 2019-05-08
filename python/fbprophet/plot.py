@@ -465,7 +465,7 @@ def plot_cross_validation_metric(
     else:
         fig = ax.get_figure()
     # Get the metric at the level of individual predictions, and with the rolling window.
-    df_none = performance_metrics(df_cv, metrics=[metric], rolling_window=0)
+    df_none = performance_metrics(df_cv, metrics=[metric], rolling_window=-1)
     df_h = performance_metrics(df_cv, metrics=[metric], rolling_window=rolling_window)
 
     # Some work because matplotlib does not handle timedelta

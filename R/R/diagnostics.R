@@ -207,14 +207,18 @@ prophet_copy <- function(m, cutoff = NULL) {
 #' `metrics` argument.
 #'
 #' Metrics are calculated over a rolling window of cross validation
-#' predictions, after sorting by horizon. The size of that window (number of
-#' simulated forecast points) is determined by the rolling_window argument,
-#' which specifies a proportion of simulated forecast points to include in
-#' each window. rolling_window=0 will compute it separately for each simulated
-#' forecast point (i.e., 'mse' will actually be squared error with no mean).
-#' The default of rolling_window=0.1 will use 10% of the rows in df in each
-#' window. rolling_window=1 will compute the metric across all simulated
-#' forecast points. The results are set to the right edge of the window.
+#' predictions, after sorting by horizon. Averaging is first done within each
+#' value of the horizon, and then across horizons as needed to reach the
+#' window size. The size of that window (number of simulated forecast points)
+#' is determined by the rolling_window argument, which specifies a proportion
+#' of simulated forecast points to include in each window. rolling_window=0
+#' will compute it separately for each horizon. The default of
+#' rolling_window=0.1 will use 10% of the rows in df in each window.
+#' rolling_window=1 will compute the metric across all simulated forecast
+#' points. The results are set to the right edge of the window.
+#'
+#' If rolling_window < 0, then metrics are computed at each datapoint with no
+#' averaging (i.e., 'mse' will actually be squared error with no mean).
 #'
 #' The output is a dataframe containing column 'horizon' along with columns
 #' for each of the metrics computed.
@@ -223,7 +227,7 @@ prophet_copy <- function(m, cutoff = NULL) {
 #' @param metrics An array of performance metrics to compute. If not provided,
 #'  will use c('mse', 'rmse', 'mae', 'mape', 'coverage').
 #' @param rolling_window Proportion of data to use in each rolling window for
-#'  computing the metrics. Should be in [0, 1].
+#'  computing the metrics. Should be in [0, 1] to average.
 #'
 #' @return A dataframe with a column for each metric, and column 'horizon'.
 #'
@@ -244,39 +248,89 @@ performance_metrics <- function(df, metrics = NULL, rolling_window = 0.1) {
   df_m <- df
   df_m$horizon <- df_m$ds - df_m$cutoff
   df_m <- df_m[order(df_m$horizon),]
-  # Window size
-  w <- as.integer(rolling_window * nrow(df_m))
-  w <- max(w, 1)
-  w <- min(w, nrow(df_m))
-  cols <- c('horizon')
-  for (metric in metrics) {
-    df_m[[metric]] <- get(metric)(df_m, w)
-    cols <- c(cols, metric)
+  if (('mape' %in% metrics) & (min(abs(df_m$y)) < 1e-8)) {
+    message('Skipping MAPE because y close to 0')
+    metrics <- metrics[metrics != 'mape']
   }
-  df_m <- df_m[cols]
-  return(stats::na.omit(df_m))
+  if (length(metrics) == 0) {
+    return(NULL)
+  }
+  w <- as.integer(rolling_window * nrow(df_m))
+  if (w >= 0) {
+    w <- max(w, 1)
+    w <- min(w, nrow(df_m))
+  }
+  # Compute all metrics
+  dfs = list()
+  for (metric in metrics) {
+    dfs[[metric]] <- get(metric)(df_m, w)
+  }
+  res <- dfs[[metrics[1]]]
+  for (i in 2:length(metrics)) {
+    res_m <- dfs[[metrics[i]]]
+    stopifnot(res$horizon == res_m$horizon)
+    res[[metrics[i]]] = res_m[[metrics[i]]]
+  }
+  return(res)
 }
 
-#' Compute a rolling mean of x
+#' Compute a rolling mean of x, after first aggregating by h
 #'
-#' Right-aligned. Padded with NAs on the front so the output is the same
-#' size as x.
+#' Right-aligned. Computes a single mean for each unique value of h. Each mean
+#' is over at least w samples.
 #'
 #' @param x Array.
+#' @param h Array of horizon for each value in x.
 #' @param w Integer window size (number of elements).
+#' @param name String name for metric in result dataframe.
 #'
-#' @return Rolling mean of x with window size w.
+#' @return Dataframe with columns horizon and name, the rolling mean of x.
 #'
+#' @importFrom dplyr "%>%"
 #' @keywords internal
-rolling_mean <- function(x, w) {
-  s <- cumsum(c(0, x))
-  prefix <- rep(NA, w - 1)
-  return(c(prefix, (s[(w + 1):length(s)] - s[1:(length(s) - w)]) / w))
+rolling_mean_by_h <- function(x, h, w, name) {
+  # Aggregate over h
+  df <- data.frame(x=x, h=h)
+  df2 <- df %>%
+    dplyr::group_by(h) %>%
+    dplyr::summarise(mean = mean(x), n = dplyr::n())
+
+  xm <- df2$mean
+  ns <- df2$n
+  hs <- df2$h
+
+  res <- data.frame(horizon=c())
+  res[[name]] <- c()
+  # Start from the right and work backwards
+  i <- length(hs)
+  while (i > 0) {
+    # Construct a mean of at least w samples
+    n <- ns[i]
+    xbar <- xm[i]
+    j <- i - 1
+    while ((n < w) & (j > 0)) {
+      # Include points from the previous horizon. All of them if still less
+      # than w, otherwise just enough to get to w.
+      n2 <- min(w - n, ns[j])
+      xbar <- xbar * (n / (n + n2)) + xm[j] * (n2 / (n + n2))
+      n <- n + n2
+      j <- j - 1
+    }
+    if (n < w) {
+      # Ran out of horizons before enough points.
+      break
+    }
+    res.i <- data.frame(horizon=hs[i])
+    res.i[[name]] <- xbar
+    res <- rbind(res.i, res)
+    i <- i - 1
+  }
+  return(res)
 }
 
 # The functions below specify performance metrics for cross-validation results.
 # Each takes as input the output of cross_validation, and returns the statistic
-# as an array, given a window size for rolling aggregation.
+# as a dataframe, given a window size for rolling aggregation.
 
 #' Mean squared error
 #'
@@ -288,7 +342,10 @@ rolling_mean <- function(x, w) {
 #' @keywords internal
 mse <- function(df, w) {
   se <- (df$y - df$yhat) ** 2
-  return(rolling_mean(se, w))
+  if (w < 0) {
+    return(data.frame(horizon = df$horizon, mse = se))
+  }
+  return(rolling_mean_by_h(x = se, h = df$horizon, w = w, name = 'mse'))
 }
 
 #' Root mean squared error
@@ -300,7 +357,10 @@ mse <- function(df, w) {
 #'
 #' @keywords internal
 rmse <- function(df, w) {
-  return(sqrt(mse(df, w)))
+  res <- mse(df, w)
+  res$mse <- sqrt(res$mse)
+  names(res)[names(res) == 'mse'] <- 'rmse'
+  return(res)
 }
 
 #' Mean absolute error
@@ -313,7 +373,10 @@ rmse <- function(df, w) {
 #' @keywords internal
 mae <- function(df, w) {
   ae <- abs(df$y - df$yhat)
-  return(rolling_mean(ae, w))
+  if (w < 0) {
+    return(data.frame(horizon = df$horizon, mae = ae))
+  }
+  return(rolling_mean_by_h(x = ae, h = df$horizon, w = w, name = 'mae'))
 }
 
 #' Mean absolute percent error
@@ -326,7 +389,10 @@ mae <- function(df, w) {
 #' @keywords internal
 mape <- function(df, w) {
   ape <- abs((df$y - df$yhat) / df$y)
-  return(rolling_mean(ape, w))
+  if (w < 0) {
+    return(data.frame(horizon = df$horizon, mape = ape))
+  }
+  return(rolling_mean_by_h(x = ape, h = df$horizon, w = w, name = 'mape'))
 }
 
 #' Coverage
@@ -339,5 +405,10 @@ mape <- function(df, w) {
 #' @keywords internal
 coverage <- function(df, w) {
   is_covered <- (df$y >= df$yhat_lower) & (df$y <= df$yhat_upper)
-  return(rolling_mean(is_covered, w))
+  if (w < 0) {
+    return(data.frame(horizon = df$horizon, coverage = is_covered))
+  }
+  return(
+    rolling_mean_by_h(x = is_covered, h = df$horizon, w = w, name = 'coverage')
+  )
 }

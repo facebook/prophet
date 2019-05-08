@@ -113,21 +113,25 @@ class TestDiagnostics(TestCase):
         df_cv = diagnostics.cross_validation(
             m, horizon='4 days', period='10 days', initial='90 days')
         # Aggregation level none
-        df_none = diagnostics.performance_metrics(df_cv, rolling_window=0)
+        df_none = diagnostics.performance_metrics(df_cv, rolling_window=-1)
         self.assertEqual(
             set(df_none.columns),
             {'horizon', 'coverage', 'mae', 'mape', 'mse', 'rmse'},
         )
         self.assertEqual(df_none.shape[0], 16)
+        # Aggregation level 0
+        df_0 = diagnostics.performance_metrics(df_cv, rolling_window=0)
+        self.assertEqual(len(df_0), 4)
+        self.assertEqual(len(df_0['horizon'].unique()), 4)
         # Aggregation level 0.2
         df_horizon = diagnostics.performance_metrics(df_cv, rolling_window=0.2)
+        self.assertEqual(len(df_horizon), 4)
         self.assertEqual(len(df_horizon['horizon'].unique()), 4)
-        self.assertEqual(df_horizon.shape[0], 14)
         # Aggregation level all
         df_all = diagnostics.performance_metrics(df_cv, rolling_window=1)
         self.assertEqual(df_all.shape[0], 1)
         for metric in ['mse', 'mape', 'mae', 'coverage']:
-            self.assertEqual(df_all[metric].values[0], df_none[metric].mean())
+            self.assertAlmostEqual(df_all[metric].values[0], df_none[metric].mean())
         # Custom list of metrics
         df_horizon = diagnostics.performance_metrics(
             df_cv, metrics=['coverage', 'mse'],
@@ -136,6 +140,41 @@ class TestDiagnostics(TestCase):
             set(df_horizon.columns),
             {'coverage', 'mse', 'horizon'},
         )
+        # Skip MAPE
+        df_cv.loc[0, 'y'] = 0.
+        df_horizon = diagnostics.performance_metrics(
+            df_cv, metrics=['coverage', 'mape'],
+        )
+        self.assertEqual(
+            set(df_horizon.columns),
+            {'coverage', 'horizon'},
+        )
+        df_horizon = diagnostics.performance_metrics(
+            df_cv, metrics=['mape'],
+        )
+        self.assertIsNone(df_horizon)
+
+    def test_rolling_mean(self):
+        x = np.arange(10)
+        h = np.arange(10)
+        df = diagnostics.rolling_mean_by_h(x=x, h=h, w=1, name='x')
+        self.assertTrue(np.array_equal(x, df['x'].values))
+        self.assertTrue(np.array_equal(h, df['horizon'].values))
+
+        df = diagnostics.rolling_mean_by_h(x, h, w=4, name='x')
+        self.assertTrue(np.allclose(x[3:] - 1.5, df['x'].values))
+        self.assertTrue(np.array_equal(np.arange(3, 10), df['horizon'].values))
+
+        h = np.array([1., 2., 3., 4., 4., 4., 4., 4., 7., 7.])
+        x_true = np.array([1.0, 5.0 , 22. / 3])
+        h_true = np.array([3., 4., 7.])
+        df = diagnostics.rolling_mean_by_h(x, h, w=3, name='x')
+        self.assertTrue(np.allclose(x_true, df['x'].values))
+        self.assertTrue(np.array_equal(h_true, df['horizon'].values))
+
+        df = diagnostics.rolling_mean_by_h(x, h, w=10, name='x')
+        self.assertTrue(np.allclose(np.array([7.]), df['horizon'].values))
+        self.assertTrue(np.allclose(np.array([4.5]), df['x'].values))
 
     def test_copy(self):
         df = DATA_all.copy()

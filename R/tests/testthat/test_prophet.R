@@ -425,11 +425,9 @@ test_that("auto_weekly_seasonality", {
   train.w <- DATA[1:N.w, ]
   m <- prophet(train.w)
   expect_false('weekly' %in% names(m$seasonalities))
-  expect_warning({
-    # prophet warning: non-zero return code in optimizing
-    m <- prophet(train.w, weekly.seasonality = TRUE)
-    expect_true('weekly' %in% names(m$seasonalities))
-  })
+  # prophet warning: non-zero return code in optimizing
+  m <- prophet(train.w, weekly.seasonality = TRUE)
+  expect_true('weekly' %in% names(m$seasonalities))
   # Should be False due to weekly spacing
   train.w <- DATA[seq(1, nrow(DATA), 7), ]
   m <- prophet(train.w)

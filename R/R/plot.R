@@ -489,7 +489,7 @@ dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
 #'
 #' @export
 plot_cross_validation_metric <- function(df_cv, metric, rolling_window=0.1) {
-  df_none <- performance_metrics(df_cv, metrics = metric, rolling_window = 0)
+  df_none <- performance_metrics(df_cv, metrics = metric, rolling_window = -1)
   df_h <- performance_metrics(
     df_cv, metrics = metric, rolling_window = rolling_window
   )
