@@ -239,6 +239,11 @@ class Prophet(object):
         if df['ds'].dtype == np.int64:
             df['ds'] = df['ds'].astype(str)
         df['ds'] = pd.to_datetime(df['ds'])
+        if df['ds'].dt.tz is not None:
+            raise ValueError(
+                'Column ds has timezone specified, which is not supported. '
+                'Remove timezone.'
+            )
         if df['ds'].isnull().any():
             raise ValueError('Found NaN in column ds.')
         for name in self.extra_regressors:
