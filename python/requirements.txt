@@ -1,5 +1,5 @@
 Cython>=0.22
-pystan>=2.14,<=2.18.1
+pystan>=2.14
 numpy>=1.10.0
 pandas>=0.23.4
 matplotlib>=2.0.0
