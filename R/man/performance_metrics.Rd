@@ -13,7 +13,7 @@ performance_metrics(df, metrics = NULL, rolling_window = 0.1)
 will use c('mse', 'rmse', 'mae', 'mape', 'coverage').}
 
 \item{rolling_window}{Proportion of data to use in each rolling window for
-computing the metrics. Should be in [0, 1].}
+computing the metrics. Should be in [0, 1] to average.}
 }
 \value{
 A dataframe with a column for each metric, and column 'horizon'.
@@ -32,14 +32,18 @@ A subset of these can be specified by passing a list of names as the
 `metrics` argument.
 
 Metrics are calculated over a rolling window of cross validation
-predictions, after sorting by horizon. The size of that window (number of
-simulated forecast points) is determined by the rolling_window argument,
-which specifies a proportion of simulated forecast points to include in
-each window. rolling_window=0 will compute it separately for each simulated
-forecast point (i.e., 'mse' will actually be squared error with no mean).
-The default of rolling_window=0.1 will use 10% of the rows in df in each
-window. rolling_window=1 will compute the metric across all simulated
-forecast points. The results are set to the right edge of the window.
+predictions, after sorting by horizon. Averaging is first done within each
+value of the horizon, and then across horizons as needed to reach the
+window size. The size of that window (number of simulated forecast points)
+is determined by the rolling_window argument, which specifies a proportion
+of simulated forecast points to include in each window. rolling_window=0
+will compute it separately for each horizon. The default of
+rolling_window=0.1 will use 10% of the rows in df in each window.
+rolling_window=1 will compute the metric across all simulated forecast
+points. The results are set to the right edge of the window.
+
+If rolling_window < 0, then metrics are computed at each datapoint with no
+averaging (i.e., 'mse' will actually be squared error with no mean).
 
 The output is a dataframe containing column 'horizon' along with columns
 for each of the metrics computed.
