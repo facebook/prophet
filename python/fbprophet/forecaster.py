@@ -274,6 +274,10 @@ class Prophet(object):
                     "Capacities must be supplied for logistic growth in "
                     "column 'cap'"
                 )
+            if (df['cap'] <= df['floor']).any():
+                raise ValueError(
+                    'cap must be greater than floor (which defaults to 0).'
+                )
             df['cap_scaled'] = (df['cap'] - df['floor']) / self.y_scale
 
         df['t'] = (df['ds'] - self.start) / self.t_scale

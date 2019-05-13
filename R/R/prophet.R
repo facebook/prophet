@@ -393,6 +393,9 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
     if (!(exists('cap', where=df))) {
       stop('Capacities must be supplied for logistic growth.')
     }
+    if (any(df$cap <= df$floor)) {
+      stop('cap must be greater than floor (which defaults to 0).')
+    }
     df <- df %>%
       dplyr::mutate(cap_scaled = (cap - floor) / m$y.scale)
   }
