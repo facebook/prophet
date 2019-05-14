@@ -20,8 +20,16 @@ logger = logging.getLogger('fbprophet')
 
 try:
     from matplotlib import pyplot as plt
-    from matplotlib.dates import MonthLocator, num2date
+    from matplotlib.dates import (
+        MonthLocator,
+        num2date,
+        AutoDateLocator,
+        AutoDateFormatter,
+    )
     from matplotlib.ticker import FuncFormatter
+
+    from pandas.plotting import deregister_matplotlib_converters
+    deregister_matplotlib_converters()
 except ImportError:
     logger.error('Importing matplotlib failed. Plotting will not work.')
 
@@ -68,6 +76,11 @@ def plot(
     if uncertainty:
         ax.fill_between(fcst_t, fcst['yhat_lower'], fcst['yhat_upper'],
                         color='#0072B2', alpha=0.2)
+    # Specify formatting to workaround matplotlib issue #12925
+    locator = AutoDateLocator(interval_multiples=False)
+    formatter = AutoDateFormatter(locator)
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(formatter)
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
@@ -207,6 +220,11 @@ def plot_forecast_component(
         artists += [ax.fill_between(
             fcst_t, fcst[name + '_lower'], fcst[name + '_upper'],
             color='#0072B2', alpha=0.2)]
+    # Specify formatting to workaround matplotlib issue #12925
+    locator = AutoDateLocator(interval_multiples=False)
+    formatter = AutoDateFormatter(locator)
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(formatter)
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
     ax.set_xlabel('ds')
     ax.set_ylabel(name)
