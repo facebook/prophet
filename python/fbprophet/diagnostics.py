@@ -317,6 +317,55 @@ def rolling_mean_by_h(x, h, w, name):
     return pd.DataFrame({'horizon': res_h, name: res_x})
 
 
+def rolling_median_by_h(x, h, w, name):
+    """Compute a rolling median of x, after first aggregating by h.
+
+    Right-aligned. Computes a single median for each unique value of h. Each
+    median is over at least w samples.
+
+    For each h where there are fewer than w samples, we take samples from the previous h,
+    moving backwards. (In other words, we ~ assume that the x's are shuffled within each h.)
+
+    Parameters
+    ----------
+    x: Array.
+    h: Array of horizon for each value in x.
+    w: Integer window size (number of elements).
+    name: Name for metric in result dataframe
+
+    Returns
+    -------
+    Dataframe with columns horizon and name, the rolling median of x.
+    """
+    # Aggregate over h
+    df = pd.DataFrame({'x': x, 'h': h})
+    grouped = df.groupby('h')
+    df2 = grouped.size().reset_index().sort_values('h')
+    hs = df2['h'].values
+
+    res_h = []
+    res_x = []
+    # Start from the right and work backwards
+    i = len(hs) - 1
+    while i >= 0:
+        h_i = hs[i]
+        xs = grouped.get_group(h_i).x.tolist()
+        j = i - 1
+        while (len(xs) < w) and (j >= 0):
+            # Include points from the previous horizon. All of them if still
+            # less than w, otherwise just enough to get to w.
+            xs.append(x[j])
+            j -= 1
+        if len(xs) < w:
+            # Ran out of horizons before enough points.
+            break
+        res_h.append(hs[i])
+        res_x.append(np.median(xs))
+        i -= 1
+    res_h.reverse()
+    res_x.reverse()
+    return pd.DataFrame({'horizon': res_h, name: res_x})
+
 
 # The functions below specify performance metrics for cross-validation results.
 # Each takes as input the output of cross_validation, and returns the statistic

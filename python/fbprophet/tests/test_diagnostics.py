@@ -174,6 +174,29 @@ class TestDiagnostics(TestCase):
         self.assertTrue(np.allclose(np.array([7.]), df['horizon'].values))
         self.assertTrue(np.allclose(np.array([4.5]), df['x'].values))
 
+    def test_rolling_median(self):
+        x = np.arange(10)
+        h = np.arange(10)
+        df = diagnostics.rolling_median_by_h(x=x, h=h, w=1, name='x')
+        self.assertTrue(np.array_equal(x, df['x'].values))
+        self.assertTrue(np.array_equal(h, df['horizon'].values))
+
+        df = diagnostics.rolling_median_by_h(x, h, w=4, name='x')
+        x_true = x[3:] - 1.5
+        self.assertTrue(np.allclose(x_true, df['x'].values))
+        self.assertTrue(np.array_equal(np.arange(3, 10), df['horizon'].values))
+
+        h = np.array([1., 2., 3., 4., 4., 4., 4., 4., 7., 7.])
+        x_true = np.array([1.0, 5.0, 8.0])
+        h_true = np.array([3., 4., 7.])
+        df = diagnostics.rolling_median_by_h(x, h, w=3, name='x')
+        self.assertTrue(np.allclose(x_true, df['x'].values))
+        self.assertTrue(np.array_equal(h_true, df['horizon'].values))
+
+        df = diagnostics.rolling_median_by_h(x, h, w=10, name='x')
+        self.assertTrue(np.allclose(np.array([7.]), df['horizon'].values))
+        self.assertTrue(np.allclose(np.array([4.5]), df['x'].values))
+
     def test_copy(self):
         df = DATA_all.copy()
         df['cap'] = 200.
