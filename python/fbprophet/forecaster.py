@@ -1498,7 +1498,7 @@ class Prophet(object):
         return pd.DataFrame({'ds': dates})
 
     def plot(self, fcst, ax=None, uncertainty=True, plot_cap=True, xlabel='ds',
-             ylabel='y'):
+             ylabel='y', figsize=(10, 6)):
         """Plot the Prophet forecast.
 
         Parameters
@@ -1510,6 +1510,7 @@ class Prophet(object):
             in the figure, if available.
         xlabel: Optional label name on X-axis
         ylabel: Optional label name on Y-axis
+        figsize: Optional tuple width, height in inches.
 
         Returns
         -------
@@ -1518,10 +1519,11 @@ class Prophet(object):
         return plot(
             m=self, fcst=fcst, ax=ax, uncertainty=uncertainty,
             plot_cap=plot_cap, xlabel=xlabel, ylabel=ylabel,
+            figsize=figsize
         )
 
     def plot_components(self, fcst, uncertainty=True, plot_cap=True,
-                        weekly_start=0, yearly_start=0):
+                        weekly_start=0, yearly_start=0, figsize=None):
         """Plot the Prophet forecast components.
 
         Will plot whichever are available of: trend, holidays, weekly
@@ -1539,6 +1541,7 @@ class Prophet(object):
         yearly_start: Optional int specifying the start day of the yearly
             seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts
             by 1 day to Jan 2, and so on.
+        figsize: Optional tuple width, height in inches.
 
         Returns
         -------
@@ -1547,4 +1550,5 @@ class Prophet(object):
         return plot_components(
             m=self, fcst=fcst, uncertainty=uncertainty, plot_cap=plot_cap,
             weekly_start=weekly_start, yearly_start=yearly_start,
+            figsize=figsize
         )
