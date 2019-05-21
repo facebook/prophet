@@ -66,6 +66,7 @@ Make sure compilers (gcc, g++, build-essential) and Python development tools (py
 ### Version 0.5 (2019.05.14)
 
 - Conditional seasonalities
+- Improved cross validation estimates
 - Plotly plot in Python
 - Bugfixes
 
