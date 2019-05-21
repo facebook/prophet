@@ -109,4 +109,4 @@ Make sure compilers (gcc, g++, build-essential) and Python development tools (py
 
 ## License
 
-Ax is licensed under the [MIT license](LICENSE.md).
+Prophet is licensed under the [MIT license](LICENSE.md).
