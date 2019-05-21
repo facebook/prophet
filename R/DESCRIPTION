@@ -31,7 +31,7 @@ Suggests:
     knitr,
     testthat,
     readr
-License: BSD_3_clause + file LICENSE
+License: MIT + file LICENSE
 URL: https://github.com/facebook/prophet
 BugReports: https://github.com/facebook/prophet/issues
 LazyData: true
