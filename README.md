@@ -19,11 +19,11 @@ Prophet is [open source software](https://code.facebook.com/projects/) released 
 
 ## Installation in R
 
-Prophet is a [CRAN package](https://cran.r-project.org/package=prophet) so you can use `install.packages`:
+Prophet is a [CRAN package](https://cran.r-project.org/package=prophet) so you can use `install.packages`. For OSX, be sure to specify a source install:
 
 ```
 # R
-> install.packages('prophet')
+> install.packages('prophet', type="source")
 ```
 
 After installation, you can [get started!](https://facebook.github.io/prophet/docs/quick_start.html#r-api)

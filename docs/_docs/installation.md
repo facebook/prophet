@@ -16,11 +16,11 @@ Prophet has two implementations: [R](#installation-in-r) and [Python](#installat
 
 ## Installation in R
 
-Prophet is a [CRAN package](https://cran.r-project.org/package=prophet) and you can use `install.packages`:
+Prophet is a [CRAN package](https://cran.r-project.org/package=prophet) and you can use `install.packages`. For OSX, be sure to choose a source install:
 
 ```
 # R
-> install.packages('prophet')
+> install.packages('prophet', type="source")
 ```
 
 After installation, you can [get started!](quick_start.html#r-api)
