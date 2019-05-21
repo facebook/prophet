@@ -262,7 +262,7 @@ fig2 = m.plot_components(forecast)
 ![png](/prophet/static/quick_start_files/quick_start_14_0.png) 
 
 
-An interactive figure of the forecast can be created with plotly:
+An interactive figure of the forecast can be created with plotly. You will need to install plotly separately, as it will not by default be installed with fbprophet.
 
 
 ```python
