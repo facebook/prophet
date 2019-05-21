@@ -202,37 +202,37 @@ forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail()
     <tr>
       <th>3265</th>
       <td>2017-01-15</td>
-      <td>8.199274</td>
-      <td>7.489884</td>
-      <td>8.969065</td>
+      <td>8.212942</td>
+      <td>7.463560</td>
+      <td>8.937215</td>
     </tr>
     <tr>
       <th>3266</th>
       <td>2017-01-16</td>
-      <td>8.524244</td>
-      <td>7.790682</td>
-      <td>9.266504</td>
+      <td>8.537993</td>
+      <td>7.790259</td>
+      <td>9.267492</td>
     </tr>
     <tr>
       <th>3267</th>
       <td>2017-01-17</td>
-      <td>8.311615</td>
-      <td>7.553025</td>
-      <td>9.049803</td>
+      <td>8.325428</td>
+      <td>7.525675</td>
+      <td>9.059391</td>
     </tr>
     <tr>
       <th>3268</th>
       <td>2017-01-18</td>
-      <td>8.144232</td>
-      <td>7.428174</td>
-      <td>8.864747</td>
+      <td>8.158059</td>
+      <td>7.433634</td>
+      <td>8.883627</td>
     </tr>
     <tr>
       <th>3269</th>
       <td>2017-01-19</td>
-      <td>8.156091</td>
-      <td>7.395160</td>
-      <td>8.883232</td>
+      <td>8.170046</td>
+      <td>7.431801</td>
+      <td>8.840703</td>
     </tr>
   </tbody>
 </table>
@@ -262,6 +262,18 @@ fig2 = m.plot_components(forecast)
 ![png](/prophet/static/quick_start_files/quick_start_14_0.png) 
 
 
+An interactive figure of the forecast can be created with plotly:
+
+
+```python
+# Python
+from fbprophet.plot import plot_plotly
+import plotly.offline as py
+py.init_notebook_mode()
+
+fig = plot_plotly(m, forecast)  # This returns a plotly Figure
+py.iplot(fig)
+```
 More details about the options available for each method are available in the docstrings, for example, via `help(Prophet)` or `help(Prophet.fit)`. The [R reference manual](https://cran.r-project.org/web/packages/prophet/prophet.pdf) on CRAN provides a concise list of all of the available functions, each of which has a Python equivalent.
 
 
@@ -338,7 +350,7 @@ You can use the generic `plot` function to plot the forecast, by passing in the 
 plot(m, forecast)
 ```
  
-![png](/prophet/static/quick_start_files/quick_start_27_0.png) 
+![png](/prophet/static/quick_start_files/quick_start_29_0.png) 
 
 
 You can use the `prophet_plot_components` function to see the forecast broken down into trend, weekly seasonality, and yearly seasonality.
@@ -349,7 +361,7 @@ You can use the `prophet_plot_components` function to see the forecast broken do
 prophet_plot_components(m, forecast)
 ```
  
-![png](/prophet/static/quick_start_files/quick_start_29_0.png) 
+![png](/prophet/static/quick_start_files/quick_start_31_0.png) 
 
 
 An interactive plot of the forecast using Dygraphs can be made with the command `dyplot.prophet(m, forecast)`.

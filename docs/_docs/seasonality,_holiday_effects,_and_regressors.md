@@ -12,6 +12,8 @@ subsections:
     id: fourier-order-for-seasonalities
   - title: Specifying Custom Seasonalities
     id: specifying-custom-seasonalities
+  - title: Seasonalities that depend on other factors
+    id: seasonalities-that-depend-on-other-factors
   - title: Prior scale for holidays and seasonality
     id: prior-scale-for-holidays-and-seasonality
   - title: Additional regressors
@@ -135,62 +137,62 @@ forecast[(forecast['playoff'] + forecast['superbowl']).abs() > 0][
     <tr>
       <th>2190</th>
       <td>2014-02-02</td>
-      <td>1.229999</td>
-      <td>1.176410</td>
+      <td>1.217571</td>
+      <td>1.230312</td>
     </tr>
     <tr>
       <th>2191</th>
       <td>2014-02-03</td>
-      <td>1.900543</td>
-      <td>1.486962</td>
+      <td>1.898042</td>
+      <td>1.466063</td>
     </tr>
     <tr>
       <th>2532</th>
       <td>2015-01-11</td>
-      <td>1.229999</td>
+      <td>1.217571</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>2533</th>
       <td>2015-01-12</td>
-      <td>1.900543</td>
+      <td>1.898042</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>2901</th>
       <td>2016-01-17</td>
-      <td>1.229999</td>
+      <td>1.217571</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>2902</th>
       <td>2016-01-18</td>
-      <td>1.900543</td>
+      <td>1.898042</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>2908</th>
       <td>2016-01-24</td>
-      <td>1.229999</td>
+      <td>1.217571</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>2909</th>
       <td>2016-01-25</td>
-      <td>1.900543</td>
+      <td>1.898042</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>2922</th>
       <td>2016-02-07</td>
-      <td>1.229999</td>
-      <td>1.176410</td>
+      <td>1.217571</td>
+      <td>1.230312</td>
     </tr>
     <tr>
       <th>2923</th>
       <td>2016-02-08</td>
-      <td>1.900543</td>
-      <td>1.486962</td>
+      <td>1.898042</td>
+      <td>1.466063</td>
     </tr>
   </tbody>
 </table>
@@ -252,7 +254,7 @@ m$train.holiday.names
      [9] "Columbus Day"                "Veterans Day"               
     [11] "Veterans Day (Observed)"     "Thanksgiving"               
     [13] "Christmas Day"               "Independence Day (Observed)"
-    [15] "New Year's Day (Observed)"   "Christmas Day (Observed)"   
+    [15] "Christmas Day (Observed)"    "New Year's Day (Observed)"  
 
 
 
@@ -263,21 +265,21 @@ m.train_holiday_names
 
 
 
-    0                  New Year's Day
+    0                         playoff
     1                       superbowl
-    2                    Thanksgiving
-    3         Veterans Day (Observed)
-    4                    Veterans Day
-    5           Washington's Birthday
-    6     Martin Luther King, Jr. Day
-    7                   Christmas Day
-    8     Independence Day (Observed)
-    9                    Memorial Day
-    10               Independence Day
-    11                      Labor Day
+    2                  New Year's Day
+    3     Martin Luther King, Jr. Day
+    4           Washington's Birthday
+    5                    Memorial Day
+    6                Independence Day
+    7                       Labor Day
+    8                    Columbus Day
+    9                    Veterans Day
+    10                   Thanksgiving
+    11                  Christmas Day
     12       Christmas Day (Observed)
-    13                   Columbus Day
-    14                        playoff
+    13        Veterans Day (Observed)
+    14    Independence Day (Observed)
     15      New Year's Day (Observed)
     dtype: object
 
@@ -299,10 +301,6 @@ As above, the country-level holidays will then show up in the components plot:
 forecast <- predict(m, future)
 prophet_plot_components(m, forecast)
 ```
- 
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_22_0.png) 
-
-
 ```python
 # Python
 forecast = m.predict(future)
@@ -392,6 +390,73 @@ fig = m.plot_components(forecast)
 ```
  
 ![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_32_0.png) 
+
+
+<a id="seasonalities-that-depend-on-other-factors"> </a>
+
+### Seasonalities that depend on other factors
+
+In some instances the seasonality may depend on other factors, such as a weekly seasonal pattern that is different during the summer than it is during the rest of the year, or a daily seasonal pattern that is different on weekends vs. on weekdays. These types of seasonalities can be modeled using conditional seasonalities.
+
+
+
+Consider the Peyton Manning example from the Quickstart. The default weekly seasonality assumes that the pattern of weekly seasonality is the same throughout the year, but we'd expect the pattern of weekly seasonality to be different during the on-season (when there are games every Sunday) and the off-season. We can use conditional seasonalities to construct separate on-season and off-season weekly seasonalities.
+
+
+
+First we add a boolean column to the dataframe that indicates whether each date is during the on-season or the off-season:
+
+
+```R
+# R
+is_nfl_season <- function(ds) {
+  dates <- as.Date(ds)
+  month <- as.numeric(format(dates, '%m'))
+  return(month > 8 | month < 2)
+}
+df$on_season <- is_nfl_season(df$ds)
+df$off_season <- !is_nfl_season(df$ds)
+```
+```python
+# Python
+def is_nfl_season(ds):
+    date = pd.to_datetime(ds)
+    return (date.month > 8 or date.month < 2)
+
+df['on_season'] = df['ds'].apply(is_nfl_season)
+df['off_season'] = ~df['ds'].apply(is_nfl_season)
+```
+Then we disable the built-in weekly seasonality, and replace it with two weekly seasonalities that have these columns specified as a condition. This means that the seasonality will only be applied to dates where the `condition_name` column is `True`. We must also add the column to the `future` dataframe for which we are making predictions.
+
+
+```R
+# R
+m <- prophet(weekly.seasonality=FALSE)
+m <- add_seasonality(m, name='weekly_on_season', period=7, fourier.order=3, condition.name='on_season')
+m <- add_seasonality(m, name='weekly_off_season', period=7, fourier.order=3, condition.name='off_season')
+m <- fit.prophet(m, df)
+
+future$on_season <- is_nfl_season(future$ds)
+future$off_season <- !is_nfl_season(future$ds)
+forecast <- predict(m, future)
+prophet_plot_components(m, forecast)
+```
+```python
+# Python
+m = Prophet(weekly_seasonality=False)
+m.add_seasonality(name='weekly_on_season', period=7, fourier_order=3, condition_name='on_season')
+m.add_seasonality(name='weekly_off_season', period=7, fourier_order=3, condition_name='off_season')
+
+future['on_season'] = future['ds'].apply(is_nfl_season)
+future['off_season'] = ~future['ds'].apply(is_nfl_season)
+forecast = m.fit(df).predict(future)
+fig = m.plot_components(forecast)
+```
+ 
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_38_0.png) 
+
+
+Both of the seasonalities now show up in the components plots above. We can see that during the on-season when games are played every Sunday, there are large increases on Sunday and Monday that are completely absent during the off-season.
 
 
 <a id="prior-scale-for-holidays-and-seasonality"> </a>
@@ -576,10 +641,14 @@ forecast = m.predict(future)
 fig = m.plot_components(forecast)
 ```
  
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_41_0.png) 
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_48_0.png) 
 
 
 NFL Sundays could also have been handled using the "holidays" interface described above, by creating a list of past and future NFL Sundays. The `add_regressor` function provides a more general interface for defining extra linear regressors, and in particular does not require that the regressor be a binary indicator. Another time series could be used as a regressor, although its future values would have to be known.
+
+
+
+[This notebook](https://nbviewer.jupyter.org/github/nicolasfauchereau/Auckland_Cycling/blob/master/notebooks/Auckland_cycling_and_weather.ipynb) shows an example of using weather factors as extra regressors in a forecast of bicycle usage, and provides an excellent illustration of how other time series can be included as extra regressors.
 
 
 

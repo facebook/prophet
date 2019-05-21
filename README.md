@@ -63,6 +63,12 @@ Make sure compilers (gcc, g++, build-essential) and Python development tools (py
 
 ## Changelog
 
+### Version 0.5 (2019.05.14)
+
+- Conditional seasonalities
+- Plotly plot in Python
+- Bugfixes
+
 ### Version 0.4 (2018.12.18)
 
 - Added holidays functionality
