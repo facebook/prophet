@@ -557,6 +557,12 @@ class TestProphet(TestCase):
         with self.assertRaises(ValueError):
             m.add_seasonality(name='trend', period=30, fourier_order=5)
         m.add_seasonality(name='weekly', period=30, fourier_order=5)
+        # Test fourier order <= 0
+        m = Prophet()
+        with self.assertRaises(ValueError):
+            m.add_seasonality(name='weekly', period=7, fourier_order=0)
+        with self.assertRaises(ValueError):
+            m.add_seasonality(name='weekly', period=7, fourier_order=-1)
         # Test priors
         m = Prophet(
             holidays=holidays, yearly_seasonality=False,

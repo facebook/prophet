@@ -647,6 +647,8 @@ class Prophet(object):
             ps = float(prior_scale)
         if ps <= 0:
             raise ValueError('Prior scale must be > 0')
+        if fourier_order <= 0:
+            raise ValueError('Fourier Order must be > 0')
         if mode is None:
             mode = self.seasonality_mode
         if mode not in ['additive', 'multiplicative']:
