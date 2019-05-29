@@ -1,0 +1,10 @@
+version: "3"
+services:
+  package:
+    image: facebook/prophet
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    volumes:
+      - .:/usr/src/app
