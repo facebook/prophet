@@ -27,6 +27,12 @@ Note:  Installation requires PyStan, which has its [own installation instruction
 On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html).
  The key step is installing a recent [C++ compiler](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
 
+## Installation using Docker and docker-compose (via Makefile)
+
+Simply type `make build` and if everything is fine you should be able to `make shell` or alternative jump directly to `make py-shell`. 
+
+To run the tests, inside the container `cd python/fbprophet` and then `python -m unittest`
+
 ### Example usage
 
 ```python
