@@ -502,18 +502,20 @@ def plot_cross_validation_metric(
         10 ** 3,
         1.,
     ]
+    dt_coversion = dt_name = None
     for i, dt in enumerate(dts):
         if np.timedelta64(1, dt) < np.timedelta64(tick_w, 'ns'):
+            dt_coversion, dt_name = dt_conversions[i], dt_names[i]
             break
 
-    x_plt = df_none['horizon'].astype('timedelta64[ns]').astype(np.int64) / float(dt_conversions[i])
-    x_plt_h = df_h['horizon'].astype('timedelta64[ns]').astype(np.int64) / float(dt_conversions[i])
+    x_plt = df_none['horizon'].astype('timedelta64[ns]').astype(np.int64) / float(dt_coversion)
+    x_plt_h = df_h['horizon'].astype('timedelta64[ns]').astype(np.int64) / float(dt_coversion)
 
     ax.plot(x_plt, df_none[metric], '.', alpha=0.5, c='gray')
     ax.plot(x_plt_h, df_h[metric], '-', c='b')
     ax.grid(True)
 
-    ax.set_xlabel('Horizon ({})'.format(dt_names[i]))
+    ax.set_xlabel('Horizon ({})'.format(dt_name))
     ax.set_ylabel(metric)
     return fig
 

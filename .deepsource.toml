@@ -1,0 +1,13 @@
+version = 1
+
+test_patterns = [
+  'python/fbprophet/tests/**'
+]
+
+[[analyzers]]
+name = 'python'
+enabled = true
+runtime_version = '2.x.x'
+dependency_file_paths = [
+  'python/requirements.txt'
+]

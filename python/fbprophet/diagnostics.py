@@ -46,7 +46,7 @@ def generate_cutoffs(df, horizon, initial, period):
             # else no data left, leave cutoff as is, it will be dropped.
         result.append(cutoff)
     result = result[:-1]
-    if len(result) == 0:
+    if not result:
         raise ValueError(
             'Less data than horizon after initial window. '
             'Make horizon or initial shorter.'
@@ -246,7 +246,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     if 'mape' in metrics and df_m['y'].abs().min() < 1e-8:
         logger.info('Skipping MAPE because y close to 0')
         metrics.remove('mape')
-    if len(metrics) == 0:
+    if not metrics:
         return None
     w = int(rolling_window * df_m.shape[0])
     if w >= 0:
@@ -255,7 +255,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     # Compute all metrics
     dfs = {}
     for metric in metrics:
-        dfs[metric] = eval(metric)(df_m, w)
+        dfs[metric] = globals()[metric](df_m, w)
     res = dfs[metrics[0]]
     for i in range(1, len(metrics)):
         res_m = dfs[metrics[i]]
