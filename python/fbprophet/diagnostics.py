@@ -233,7 +233,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     -------
     Dataframe with a column for each metric, and column 'horizon'
     """
-    valid_metrics = ['mse', 'rmse', 'mae', 'mape', 'coverage']
+    valid_metrics = ['mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage']
     if metrics is None:
         metrics = valid_metrics
     if len(set(metrics)) != len(metrics):
@@ -343,7 +343,7 @@ def rolling_median_by_h(x, h, w, name):
     df = pd.DataFrame({'x': x, 'h': h})
     grouped = df.groupby('h')
     df2 = grouped.size().reset_index().sort_values('h')
-    hs = df2['h'].values
+    hs = df2['h']
 
     res_h = []
     res_x = []
@@ -352,14 +352,16 @@ def rolling_median_by_h(x, h, w, name):
     while i >= 0:
         h_i = hs[i]
         xs = grouped.get_group(h_i).x.tolist()
-        j = i - 1
-        while (len(xs) < w) and (j >= 0):
+
+        # wrap in array so this works if h is pandas Series with custom index or numpy array
+        next_idx_to_add = np.array(h == h_i).argmax() - 1
+        while (len(xs) < w) and (next_idx_to_add >= 0):
             # Include points from the previous horizon. All of them if still
             # less than w, otherwise just enough to get to w.
-            xs.append(x[j])
-            j -= 1
+            xs.append(x[next_idx_to_add])
+            next_idx_to_add -= 1
         if len(xs) < w:
-            # Ran out of horizons before enough points.
+            # Ran out of points before getting enough.
             break
         res_h.append(hs[i])
         res_x.append(np.median(xs))
@@ -449,6 +451,26 @@ def mape(df, w):
         return pd.DataFrame({'horizon': df['horizon'], 'mape': ape})
     return rolling_mean_by_h(
         x=ape.values, h=df['horizon'].values, w=w, name='mape'
+    )
+
+
+def mdape(df, w):
+    """Median absolute percent error
+
+    Parameters
+    ----------
+    df: Cross-validation results dataframe.
+    w: Aggregation window size.
+
+    Returns
+    -------
+    Dataframe with columns horizon and mdape.
+    """
+    ape = np.abs((df['y'] - df['yhat']) / df['y'])
+    if w < 0:
+        return pd.DataFrame({'horizon': df['horizon'], 'mdape': ape})
+    return rolling_median_by_h(
+        x=ape.values, h=df['horizon'], w=w, name='mdape'
     )
 
 
