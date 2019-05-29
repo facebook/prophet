@@ -15,3 +15,5 @@ build/
 .ipynb_checkpoints
 
 *.*~
+
+*.idea
