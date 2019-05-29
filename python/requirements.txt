@@ -7,4 +7,3 @@ lunardate>=0.1.5
 convertdate>=2.1.2
 holidays>=0.9.5
 setuptools-git>=1.2
-ipython==7.5.0
