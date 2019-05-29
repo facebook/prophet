@@ -6,6 +6,3 @@ py-shell:
 
 shell:
 	docker-compose run package bash
-
-test:
-	docker-compose run package python -m unittest
