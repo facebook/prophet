@@ -697,7 +697,7 @@ add_regressor <- function(
     mode <- m$seasonality.mode
   }
   if(prior.scale <= 0) {
-    stop("Prior scale must be > 0")
+    stop("Prior scale must be > 0.")
   }
   if (!(mode %in% c('additive', 'multiplicative'))) {
     stop("mode must be 'additive' or 'multiplicative'")
@@ -760,7 +760,10 @@ add_seasonality <- function(
     ps <- prior.scale
   }
   if (ps <= 0) {
-    stop('Prior scale must be > 0')
+    stop('Prior scale must be > 0.')
+  }
+  if (fourier.order <= 0) {
+    stop('Fourier order must be > 0.')
   }
   if (is.null(mode)) {
     mode <- m$seasonality.mode
