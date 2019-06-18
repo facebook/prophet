@@ -521,6 +521,10 @@ test_that("custom_seasonality", {
                          holiday = c('special_day'),
                          prior_scale = c(4))
   m <- prophet(holidays=holidays)
+  expect_error(
+    add_seasonality(m, name="incorrect.fourier.order", period=30, fourier.order=-10),
+    "Fourier order must be > 0."
+  )
   m <- add_seasonality(m, name='monthly', period=30, fourier.order=5)
   true <- list(
     period = 30, fourier.order = 5, prior.scale = 10, mode = 'additive',
@@ -529,10 +533,12 @@ test_that("custom_seasonality", {
     expect_equal(m$seasonalities$monthly[[name]], true[[name]])
   }
   expect_error(
-    add_seasonality(m, name='special_day', period=30, fourier_order=5)
+    add_seasonality(m, name='special_day', period=30, fourier.order=5),
+    "already used for a holiday."
   )
   expect_error(
-    add_seasonality(m, name='trend', period=30, fourier_order=5)
+    add_seasonality(m, name='trend', period=30, fourier.order=5),
+    "is reserved."
   )
   m <- add_seasonality(m, name='weekly', period=30, fourier.order=5)
   # Test priors
