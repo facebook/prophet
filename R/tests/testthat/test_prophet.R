@@ -88,6 +88,18 @@ test_that("setup_dataframe", {
   expect_equal(max(history$y_scaled), 1)
 })
 
+test_that("setup_names_errors", {
+  m <- prophet()
+  expect_error(
+    m <- add_seasonality(m, "3monthly"),
+    "You have provided a name that is not syntactically valid in R, 3monthly"
+  )
+  expect_error(
+    m <- add_regressor(m, "2monthsale"),
+    "You have provided a name that is not syntactically valid in R, 2monthsale"
+  )
+})
+
 test_that("logistic_floor", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   skip_on_os('mac')  # Resolves mysterious CRAN build issue
