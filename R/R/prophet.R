@@ -689,6 +689,11 @@ add_regressor <- function(
   if (!is.null(m$history)) {
     stop('Regressors must be added prior to model fitting.')
   }
+  if (make.names(name, allow_ = TRUE) != name) {
+    stop("You have provided a name that is not syntactically valid in R, ", name, ". ",
+         "A syntactically valid name consists of letters, numbers and the dot or underline, ",
+         "characters and starts with a letter or the dot not followed by a number.")
+  }
   validate_column_name(m, name, check_regressors = FALSE)
   if (is.null(prior.scale)) {
     prior.scale <- m$holidays.prior.scale
@@ -752,6 +757,11 @@ add_seasonality <- function(
   }
   if (!(name %in% c('daily', 'weekly', 'yearly'))) {
     # Allow overriding built-in seasonalities
+    if (make.names(name, allow_ = TRUE) != name) {
+      stop("You have provided a name that is not syntactically valid in R, ", name, ". ",
+           "A syntactically valid name consists of letters, numbers and the dot or underline, ",
+           "characters and starts with a letter or the dot not followed by a number.")
+    }
     validate_column_name(m, name, check_seasonalities = FALSE)
   }
   if (is.null(prior.scale)) {
