@@ -33,6 +33,7 @@ except ImportError:
 
 try:
     import plotly.graph_objs as go
+    from plotly import tools as plotly_tools
 except ImportError:
     logger.error('Importing plotly failed. Interactive plots will not work.')
 
@@ -672,3 +673,303 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
     )
     fig = go.Figure(data=data, layout=layout)
     return fig
+
+
+def plot_components_plotly(
+        m, fcst, uncertainty=True, plot_cap=True, figsize=(900, 200)):
+    """Plot the Prophet forecast components using Plotly.
+    See plot_plotly() for Plotly setup instructions
+
+    Will plot whichever are available of: trend, holidays, weekly
+    seasonality, yearly seasonality, and additive and multiplicative extra
+    regressors.
+
+    Parameters
+    ----------
+    m: Prophet model.
+    fcst: pd.DataFrame output of m.predict.
+    uncertainty: Optional boolean to plot uncertainty intervals.
+    plot_cap: Optional boolean indicating if the capacity should be shown
+        in the figure, if available.
+    figsize: Set the size for the subplots (in px).
+
+    Returns
+    -------
+    A Plotly Figure.
+    """
+
+    # Identify components to plot and get their Plotly props
+    components = {}
+    components['trend'] = get_forecast_component_plotly_props(
+        m, fcst, 'trend', uncertainty, plot_cap)
+    if m.train_holiday_names is not None and 'holidays' in fcst:
+        components['holidays'] = get_forecast_component_plotly_props(
+            m, fcst, 'holidays', uncertainty)
+
+    regressors = {'additive': False, 'multiplicative': False}
+    for name, props in m.extra_regressors.items():
+        regressors[props['mode']] = True
+    for mode in ['additive', 'multiplicative']:
+        if regressors[mode] and 'extra_regressors_{}'.format(mode) in fcst:
+            components['extra_regressors_{}'.format(mode)] = get_forecast_component_plotly_props(
+                m, fcst, 'extra_regressors_{}'.format(mode))
+    for seasonality in m.seasonalities:
+        components[seasonality] = get_seasonality_plotly_props(m, seasonality)
+
+    # Create Plotly subplot figure and add the components to it
+    fig = plotly_tools.make_subplots(rows=len(components), cols=1, print_grid=False)
+    fig['layout'].update(go.Layout(
+        showlegend=False,
+        width=figsize[0],
+        height=figsize[1] * len(components)
+    ))
+    for i, name in enumerate(components):
+        if i == 0:
+            xaxis = fig['layout']['xaxis']
+            yaxis = fig['layout']['yaxis']
+        else:
+            xaxis = fig['layout']['xaxis{}'.format(i + 1)]
+            yaxis = fig['layout']['yaxis{}'.format(i + 1)]
+        xaxis.update(components[name]['xaxis'])
+        yaxis.update(components[name]['yaxis'])
+        for trace in components[name]['traces']:
+            fig.append_trace(trace, i + 1, 1)
+    return fig
+
+
+def plot_forecast_component_plotly(m, fcst, name, uncertainty=True, plot_cap=False, figsize=(900, 300)):
+    """Plot an particular component of the forecast using Plotly.
+    See plot_plotly() for Plotly setup instructions
+
+    Parameters
+    ----------
+    m: Prophet model.
+    fcst: pd.DataFrame output of m.predict.
+    name: Name of the component to plot.
+    uncertainty: Optional boolean to plot uncertainty intervals.
+    plot_cap: Optional boolean indicating if the capacity should be shown
+        in the figure, if available.
+    figsize: The plot's size (in px).
+
+    Returns
+    -------
+    A Plotly Figure.
+    """
+    props = get_forecast_component_plotly_props(m, fcst, name, uncertainty, plot_cap)
+    layout = go.Layout(
+        width=figsize[0],
+        height=figsize[1],
+        showlegend=False,
+        xaxis=props['xaxis'],
+        yaxis=props['yaxis']
+    )
+    fig = go.Figure(data=props['traces'], layout=layout)
+    return fig
+
+
+def plot_seasonality_plotly(m, name, uncertainty=True, figsize=(900, 300)):
+    """Plot a custom seasonal component using Plotly.
+    See plot_plotly() for Plotly setup instructions
+
+    Parameters
+    ----------
+    m: Prophet model.
+    name: Seasonality name, like 'daily', 'weekly'.
+    uncertainty: Optional boolean to plot uncertainty intervals.
+    figsize: Set the plot's size (in px).
+
+    Returns
+    -------
+    A Plotly Figure.
+    """
+    props = get_seasonality_plotly_props(m, name, uncertainty)
+    layout = go.Layout(
+        width=figsize[0],
+        height=figsize[1],
+        showlegend=False,
+        xaxis=props['xaxis'],
+        yaxis=props['yaxis']
+    )
+    fig = go.Figure(data=props['traces'], layout=layout)
+    return fig
+
+
+def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_cap=False):
+    """Prepares a dictionary for plotting the selected forecast component with Plotly
+
+    Parameters
+    ----------
+    m: Prophet model.
+    fcst: pd.DataFrame output of m.predict.
+    name: Name of the component to plot.
+    uncertainty: Optional boolean to plot uncertainty intervals.
+    plot_cap: Optional boolean indicating if the capacity should be shown
+        in the figure, if available.
+
+    Returns
+    -------
+    A dictionary with Plotly traces, xaxis and yaxis
+    """
+    prediction_color = '#0072B2'
+    error_color = 'rgba(0, 114, 178, 0.2)'  # '#0072B2' with 0.2 opacity
+    cap_color = 'black'
+    zeroline_color = '#AAA'
+    line_width = 2
+
+    range_margin = (fcst['ds'].max() - fcst['ds'].min()) * 0.05
+    range_x = [fcst['ds'].min() - range_margin, fcst['ds'].max() + range_margin]
+
+    text = None
+    mode = 'lines'
+    if name == 'holidays':
+        fcst = fcst[fcst[name] != 0].copy()
+        text = fcst.merge(m.holidays, how='left', on='ds')['holiday']
+        mode = 'markers'
+
+    traces = []
+    traces.append(go.Scatter(
+        name=name,
+        x=fcst['ds'],
+        y=fcst[name],
+        mode=mode,
+        line=go.scatter.Line(color=prediction_color, width=line_width),
+        text=text,
+    ))
+    if uncertainty and (fcst[name + '_upper'] != fcst[name + '_lower']).any():
+        if mode == 'markers':
+            traces[0].update(
+                error_y=dict(
+                    type='data',
+                    symmetric=False,
+                    array=fcst[name + '_upper'],
+                    arrayminus=fcst[name + '_lower'],
+                    width=0,
+                    color=error_color
+                )
+            )
+        else:
+            traces.append(go.Scatter(
+                name=name + '_upper',
+                x=fcst['ds'],
+                y=fcst[name + '_upper'],
+                mode=mode,
+                line=go.scatter.Line(width=0, color=error_color)
+            ))
+            traces.append(go.Scatter(
+                name=name + '_lower',
+                x=fcst['ds'],
+                y=fcst[name + '_lower'],
+                mode=mode,
+                line=go.scatter.Line(width=0, color=error_color),
+                fillcolor=error_color,
+                fill='tonexty'
+            ))
+    if 'cap' in fcst and plot_cap:
+        traces.append(go.Scatter(
+            name='Cap',
+            x=fcst['ds'],
+            y=fcst['cap'],
+            mode='lines',
+            line=go.scatter.Line(color=cap_color, dash='dash', width=line_width),
+        ))
+    if m.logistic_floor and 'floor' in fcst and plot_cap:
+        traces.append(go.Scatter(
+            name='Floor',
+            x=fcst['ds'],
+            y=fcst['floor'],
+            mode='lines',
+            line=go.scatter.Line(color=cap_color, dash='dash', width=line_width),
+        ))
+
+    xaxis = go.layout.XAxis(
+        type='date',
+        range=range_x)
+    yaxis = go.layout.YAxis(rangemode='normal' if name == 'trend' else 'tozero',
+                            title=go.layout.yaxis.Title(text=name),
+                            zerolinecolor=zeroline_color)
+    if name in m.component_modes['multiplicative']:
+        yaxis.update(tickformat='%', hoverformat='.2%')
+    return {'traces': traces, 'xaxis': xaxis, 'yaxis': yaxis}
+
+
+def get_seasonality_plotly_props(m, name, uncertainty=True):
+    """Prepares a dictionary for plotting the selected seasonality with Plotly
+
+    Parameters
+    ----------
+    m: Prophet model.
+    name: Name of the component to plot.
+    uncertainty: Optional boolean to plot uncertainty intervals.
+
+    Returns
+    -------
+    A dictionary with Plotly traces, xaxis and yaxis
+    """
+    prediction_color = '#0072B2'
+    error_color = 'rgba(0, 114, 178, 0.2)'  # '#0072B2' with 0.2 opacity
+    line_width = 2
+    zeroline_color = '#AAA'
+
+    # Compute seasonality from Jan 1 through a single period.
+    start = pd.to_datetime('2017-01-01 0000')
+    period = m.seasonalities[name]['period']
+    end = start + pd.Timedelta(days=period)
+    if (m.history['ds'].dt.hour == 0).all():  # Day Precision
+        plot_points = np.floor(period).astype(int)
+    elif (m.history['ds'].dt.minute == 0).all():  # Hour Precision
+        plot_points = np.floor(period * 24).astype(int)
+    else:  # Minute Precision
+        plot_points = np.floor(period * 24 * 60).astype(int)
+    days = pd.to_datetime(np.linspace(start.value, end.value, plot_points, endpoint=False))
+    df_y = seasonality_plot_df(m, days)
+    seas = m.predict_seasonal_components(df_y)
+
+    traces = []
+    traces.append(go.Scatter(
+        name=name,
+        x=df_y['ds'],
+        y=seas[name],
+        mode='lines',
+        line=go.scatter.Line(color=prediction_color, width=line_width)
+    ))
+    if uncertainty and (seas[name + '_upper'] != seas[name + '_lower']).any():
+        traces.append(go.Scatter(
+            name=name + '_upper',
+            x=df_y['ds'],
+            y=seas[name + '_upper'],
+            mode='lines',
+            line=go.scatter.Line(width=0, color=error_color)
+        ))
+        traces.append(go.Scatter(
+            name=name + '_lower',
+            x=df_y['ds'],
+            y=seas[name + '_lower'],
+            mode='lines',
+            line=go.scatter.Line(width=0, color=error_color),
+            fillcolor=error_color,
+            fill='tonexty'
+        ))
+
+    # Set tick formats (examples are based on 2017-01-06 21:15)
+    if period <= 2:
+        tickformat = '%H:%M'  # "21:15"
+    elif period < 7:
+        tickformat = '%A %H:%M'  # "Friday 21:15"
+    elif period < 14:
+        tickformat = '%A'  # "Friday"
+    else:
+        tickformat = '%B %e'  # "January  6"
+
+    range_margin = (df_y['ds'].max() - df_y['ds'].min()) * 0.05
+    xaxis = go.layout.XAxis(
+        tickformat=tickformat,
+        type='date',
+        range=[df_y['ds'].min() - range_margin, df_y['ds'].max() + range_margin]
+    )
+
+    yaxis = go.layout.YAxis(title=go.layout.yaxis.Title(text=name),
+                            zerolinecolor=zeroline_color)
+    if m.seasonalities[name]['mode'] == 'multiplicative':
+        yaxis.update(tickformat='%', hoverformat='.2%')
+
+    return {'traces': traces, 'xaxis': xaxis, 'yaxis': yaxis}
