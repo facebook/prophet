@@ -136,7 +136,7 @@ def cross_validation(model, horizon, period=None, initial=None):
         ], axis=1))
 
     # Combine all predicted pd.DataFrame into one pd.DataFrame
-    return reduce(lambda x, y: x.append(y), predicts).reset_index(drop=True)
+    return pd.concat(predicts, axis=0).reset_index(drop=True)
 
 def prophet_copy(m, cutoff=None):
     """Copy Prophet object
