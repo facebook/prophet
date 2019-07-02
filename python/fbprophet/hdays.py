@@ -1372,7 +1372,7 @@ class Korea(HolidayBase):
 
         # Buddha's Birthday
         name = "Buddha's Birthday"
-	for offset in range(-1, 2, 1):
+        for offset in range(-1, 2, 1):
             ds = LunarDate(year + offset, 4, 8).toSolarDate()
             if ds.year == year:
                 self[ds] = name
@@ -1391,7 +1391,7 @@ class Korea(HolidayBase):
 
         # Chuseok
         name = "Chuseok"
-	for offset in range(-1, 2, 1):
+        for offset in range(-1, 2, 1):
             ds = LunarDate(year + offset, 8, 15).toSolarDate()
             if ds.year == year:
                 self[ds] = name
