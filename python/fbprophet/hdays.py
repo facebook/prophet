@@ -1361,7 +1361,7 @@ class Korea(HolidayBase):
 
         # New Year's Day by the Lunar
         name = "New Year's Day by the Lunar"
-	for offset in range(-1, 2, 1):
+        for offset in range(-1, 2, 1):
             ds = LunarDate(year + offset, 1, 1).toSolarDate()
             if ds.year == year:
                 self[ds] = name
