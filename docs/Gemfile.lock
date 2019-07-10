@@ -101,7 +101,7 @@ GEM
       rouge (>= 1.7, < 4)
       safe_yaml (~> 1.0)
     jekyll-avatar (0.6.0)
-      jekyll (~> 3.0)
+      jekyll (~> 3.8)
     jekyll-coffeescript (1.1.1)
       coffee-script (~> 2.2)
       coffee-script-source (~> 1.11.1)
