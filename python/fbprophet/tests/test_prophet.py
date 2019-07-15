@@ -44,7 +44,7 @@ class TestProphet(TestCase):
             parse_dates=['ds'],
         )
 
-        assert_frame_equal(future, expected, check_less_precise=5)
+        assert_frame_equal(future, expected, check_less_precise=2)
 
     def test_fit_sampling_predict(self):
         N = DATA.shape[0]
@@ -61,7 +61,7 @@ class TestProphet(TestCase):
             parse_dates=['ds'],
         )
 
-        assert_frame_equal(future, expected, check_less_precise=5)
+        assert_frame_equal(future, expected, check_less_precise=2)
 
 
     def test_fit_predict_no_seasons(self):

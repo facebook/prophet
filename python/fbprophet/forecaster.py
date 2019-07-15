@@ -1097,6 +1097,31 @@ class Prophet(object):
                 'sigma_obs': 1,
             }
 
+        cmdstanpy_data = {
+            'T': dat['T'],
+            'S': dat['S'],
+            'K': dat['K'],
+            'tau': dat['tau'],
+            'trend_indicator': dat['trend_indicator'],
+            'y': dat['y'].tolist(),
+            't': dat['t'].tolist(),
+            'cap': dat['cap'].tolist(),
+            't_change': dat['t_change'].tolist(),
+            's_a': dat['s_a'].tolist(),
+            's_m': dat['s_m'].tolist(),
+            'X': dat['X'].to_numpy().tolist(),
+            'sigmas': dat['sigmas']
+        }
+
+        init = stan_init()
+        cmdstanpy_init = {
+            'k': init['k'],
+            'm': init['m'],
+            'delta': init['delta'].tolist(),
+            'beta': init['beta'].tolist(),
+            'sigma_obs': 1
+        }
+
         if (
                 (history['y'].min() == history['y'].max())
                 and self.growth == 'linear'
@@ -1107,78 +1132,38 @@ class Prophet(object):
             for par in self.params:
                 self.params[par] = np.array([self.params[par]])
         elif self.mcmc_samples > 0:
-            raise RuntimeError("sampling not done yet!")
-            args = dict(
-                data=dat,
-                init=stan_init,
-                iter=self.mcmc_samples,
-            )
-            args.update(kwargs)
-            stan_fit = model.sampling(**args)
-            for par in stan_fit.model_pars:
-                self.params[par] = stan_fit[par]
+            stan_fit = model.sample(data=cmdstanpy_data,
+                                    inits=cmdstanpy_init,
+                                    sampling_iters=self.mcmc_samples,
+                                    chains = 1,
+                                    **kwargs)
+            params = self.stan_to_dict_numpy(stan_fit.column_names, stan_fit.optimized_params_np)
+
+            for par in params:
+                self.params[par] = params[par]
                 # Shape vector parameters
                 if par in ['delta', 'beta'] and len(self.params[par].shape) < 2:
                     self.params[par] = self.params[par].reshape((-1, 1))
 
         else:
-            args = dict(
-                data=dat,
-                init=stan_init,
-                algorithm='Newton' if dat['T'] < 100 else 'LBFGS',
-                iter=1e4,
-            )
-            args.update(kwargs)
-
-
-
-            args['seed'] = 2873654287
-            data = args['data']
-            optimize_data = {
-                'T': data['T'],
-                'S': data['S'],
-                'K': data['K'],
-                'tau': data['tau'],
-                'trend_indicator': data['trend_indicator'],
-                'y': data['y'].tolist(),
-                't': data['t'].tolist(),
-                'cap': data['cap'].tolist(),
-                't_change': data['t_change'].tolist(),
-                's_a': data['s_a'].tolist(),
-                's_m': data['s_m'].tolist(),
-                'X': data['X'].to_numpy().tolist(),
-                'sigmas': data['sigmas']
-            }
-            init = stan_init()
-            optimize_init = {
-                'k': init['k'],
-                'm': init['m'],
-                'delta': init['delta'].tolist(),
-                'beta': init['beta'].tolist(),
-                'sigma_obs': 1
-            }
+            algorithm = 'Newton' if dat['T'] < 100 else 'LBFGS'
             iterations = int(1e4)
-            print(optimize_data, optimize_init)
-            # ./prophet optimize algorithm=bfgs random seed=1906866369 data file=/tmp/stan_data.json init=/tmp/stan_init.json output file=out.json
-            import json
-            with open("/tmp/data.json", "w") as f:
-                json.dump(optimize_data, f)
-            with open("/tmp/inits.json","w") as f:
-                json.dump(optimize_init, f)
-
             try:
-                stan_fit = model.optimize(data=optimize_data, inits=optimize_init, # algorithm=args['algorithm'],
-                                        iter=iterations,
-                                        seed=1906866369)
-                # params = model.optimizing(**args)
+                stan_fit = model.optimize(data=cmdstanpy_data,
+                                          inits=cmdstanpy_init,
+                                          algorithm=algorithm,
+                                          iter=iterations,
+                                          **kwargs)
             except RuntimeError:
                 # Fall back on Newton
                 logger.warning(
                     'Optimization terminated abnormally. Falling back to Newton.'
                 )
-                stan_fit = model.optimize(data=optimize_data, inits=optimize_init, algorithm='Newton',
-                                        iter=iterations,
-                                        seed=1906866369)
+                stan_fit = model.optimize(data=cmdstanpy_data,
+                                          inits=cmdstanpy_init,
+                                          algorithm='Newton',
+                                          iter=iterations,
+                                          **kwargs)
 
             params = self.stan_to_dict_numpy(stan_fit.column_names, stan_fit.optimized_params_np)
             for par in params:
@@ -1191,7 +1176,6 @@ class Prophet(object):
             self.params['delta'] = np.zeros(self.params['delta'].shape)
 
         return self
-
 
     def stan_to_dict_numpy(self, column_names: Tuple[str, ...], data: np.array):
         output = OrderedDict()
