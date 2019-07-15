@@ -1135,23 +1135,23 @@ class Prophet(object):
             stan_fit = model.sample(data=cmdstanpy_data,
                                     inits=cmdstanpy_init,
                                     sampling_iters=self.mcmc_samples,
-                                    chains = 1,
+                                    chains=1,
                                     **kwargs)
-            params = self.stan_to_dict_numpy(stan_fit.column_names, stan_fit.optimized_params_np)
 
+            params = self.stan_to_dict_numpy(stan_fit.column_names, stan_fit.sample.transpose())
             for par in params:
-                self.params[par] = params[par]
+                (dim, _, samples) = params[par].shape
+                self.params[par] = params[par].reshape((dim, samples)).transpose()
                 # Shape vector parameters
                 if par in ['delta', 'beta'] and len(self.params[par].shape) < 2:
                     self.params[par] = self.params[par].reshape((-1, 1))
-
         else:
-            algorithm = 'Newton' if dat['T'] < 100 else 'LBFGS'
+            if 'algorithm' not in kwargs:
+                kwargs['algorithm'] = 'Newton' if dat['T'] < 100 else 'LBFGS'
             iterations = int(1e4)
             try:
                 stan_fit = model.optimize(data=cmdstanpy_data,
                                           inits=cmdstanpy_init,
-                                          algorithm=algorithm,
                                           iter=iterations,
                                           **kwargs)
             except RuntimeError:
@@ -1177,7 +1177,8 @@ class Prophet(object):
 
         return self
 
-    def stan_to_dict_numpy(self, column_names: Tuple[str, ...], data: np.array):
+    @staticmethod
+    def stan_to_dict_numpy(column_names: Tuple[str, ...], data: np.array):
         output = OrderedDict()
 
         prev = None
@@ -1198,8 +1199,6 @@ class Prophet(object):
                         "Found repeated column name"
                     )
                 output[prev] = np.array(data[start:end])
-                if end - start == 1:
-                    output[prev] = output[prev].reshape(())
                 prev = curr
                 start = end
                 end += 1
