@@ -6,19 +6,17 @@
 
 from __future__ import absolute_import, division, print_function
 
-import pickle
-
+import cmdstanpy
 import pkg_resources
 
 
-def get_prophet_stan_model():
+def get_prophet_stan_model() -> cmdstanpy.Model:
     """Load compiled Stan model"""
     model_file = pkg_resources.resource_filename(
         'fbprophet',
-        'stan_model/prophet_model.pkl',
+        'stan_model/prophet_model.bin',
     )
-    with open(model_file, 'rb') as f:
-        return pickle.load(f)
+    return cmdstanpy.Model(exe_file=model_file)
 
 
-prophet_stan_model = get_prophet_stan_model()
+prophet_stan_model: cmdstanpy.Model = get_prophet_stan_model()

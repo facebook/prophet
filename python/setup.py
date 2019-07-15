@@ -29,15 +29,14 @@ MODEL_TARGET_DIR = os.path.join('fbprophet', 'stan_model')
 
 
 def build_stan_model(target_dir, model_dir=MODEL_DIR):
-    from pystan import StanModel
+    from cmdstanpy import Model
+    from shutil import copy
     model_name = 'prophet.stan'
-    target_name = 'prophet_model.pkl'
-    with open(os.path.join(model_dir, model_name)) as f:
-        model_code = f.read()
-    sm = StanModel(model_code=model_code)
-    with open(os.path.join(target_dir, target_name), 'wb') as f:
-        pickle.dump(sm, f, protocol=pickle.HIGHEST_PROTOCOL)
+    target_name = 'prophet_model.bin'
 
+    sm = Model(stan_file=os.path.join(model_dir, model_name))
+    sm.compile()
+    copy(sm.exe_file, os.path.join(target_dir, target_name))
 
 class BuildPyCommand(build_py):
     """Custom build command to pre-compile Stan models."""

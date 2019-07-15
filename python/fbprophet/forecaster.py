@@ -20,7 +20,7 @@ from fbprophet.models import prophet_stan_model
 from fbprophet.plot import (plot, plot_components, plot_forecast_component,
                             plot_seasonality, plot_weekly, plot_yearly,
                             seasonality_plot_df)
-
+from typing import Tuple
 logger = logging.getLogger('fbprophet')
 logger.addHandler(logging.NullHandler())
 if len(logger.handlers) == 1:
@@ -1107,6 +1107,7 @@ class Prophet(object):
             for par in self.params:
                 self.params[par] = np.array([self.params[par]])
         elif self.mcmc_samples > 0:
+            raise RuntimeError("sampling not done yet!")
             args = dict(
                 data=dat,
                 init=stan_init,
@@ -1119,6 +1120,7 @@ class Prophet(object):
                 # Shape vector parameters
                 if par in ['delta', 'beta'] and len(self.params[par].shape) < 2:
                     self.params[par] = self.params[par].reshape((-1, 1))
+
         else:
             args = dict(
                 data=dat,
@@ -1127,16 +1129,58 @@ class Prophet(object):
                 iter=1e4,
             )
             args.update(kwargs)
+
+
+
+            args['seed'] = 2873654287
+            data = args['data']
+            optimize_data = {
+                'T': data['T'],
+                'S': data['S'],
+                'K': data['K'],
+                'tau': data['tau'],
+                'trend_indicator': data['trend_indicator'],
+                'y': data['y'].tolist(),
+                't': data['t'].tolist(),
+                'cap': data['cap'].tolist(),
+                't_change': data['t_change'].tolist(),
+                's_a': data['s_a'].tolist(),
+                's_m': data['s_m'].tolist(),
+                'X': data['X'].to_numpy().tolist(),
+                'sigmas': data['sigmas']
+            }
+            init = stan_init()
+            optimize_init = {
+                'k': init['k'],
+                'm': init['m'],
+                'delta': init['delta'].tolist(),
+                'beta': init['beta'].tolist(),
+                'sigma_obs': 1
+            }
+            iterations = int(1e4)
+            print(optimize_data, optimize_init)
+            # ./prophet optimize algorithm=bfgs random seed=1906866369 data file=/tmp/stan_data.json init=/tmp/stan_init.json output file=out.json
+            import json
+            with open("/tmp/data.json", "w") as f:
+                json.dump(optimize_data, f)
+            with open("/tmp/inits.json","w") as f:
+                json.dump(optimize_init, f)
+
             try:
-                params = model.optimizing(**args)
+                stan_fit = model.optimize(data=optimize_data, inits=optimize_init, # algorithm=args['algorithm'],
+                                        iter=iterations,
+                                        seed=1906866369)
+                # params = model.optimizing(**args)
             except RuntimeError:
                 # Fall back on Newton
                 logger.warning(
                     'Optimization terminated abnormally. Falling back to Newton.'
                 )
-                args['algorithm'] = 'Newton'
-                params = model.optimizing(**args)
+                stan_fit = model.optimize(data=optimize_data, inits=optimize_init, algorithm='Newton',
+                                        iter=iterations,
+                                        seed=1906866369)
 
+            params = self.stan_to_dict_numpy(stan_fit.column_names, stan_fit.optimized_params_np)
             for par in params:
                 self.params[par] = params[par].reshape((1, -1))
 
@@ -1147,6 +1191,43 @@ class Prophet(object):
             self.params['delta'] = np.zeros(self.params['delta'].shape)
 
         return self
+
+
+    def stan_to_dict_numpy(self, column_names: Tuple[str, ...], data: np.array):
+        output = OrderedDict()
+
+        prev = None
+
+        start = 0
+        end = 0
+
+        for cname in column_names:
+            parsed = cname.split(".")
+
+            curr = parsed[0]
+            if prev is None:
+                prev = curr
+
+            if curr != prev:
+                if prev in output:
+                    raise RuntimeError(
+                        "Found repeated column name"
+                    )
+                output[prev] = np.array(data[start:end])
+                if end - start == 1:
+                    output[prev] = output[prev].reshape(())
+                prev = curr
+                start = end
+                end += 1
+            else:
+                end += 1
+
+        if prev in output:
+            raise RuntimeError(
+                "Found repeated column name"
+            )
+        output[prev] = np.array(data[start:end])
+        return output
 
     def predict(self, df=None):
         """Predict using the prophet model.
