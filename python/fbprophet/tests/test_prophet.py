@@ -36,15 +36,15 @@ class TestProphet(TestCase):
         forecaster = Prophet()
         forecaster.fit(train, seed=1237861298)
         np.random.seed(876543987)
-        future = forecaster.make_future_dataframe(N // 2 ,include_history=False)
+        future = forecaster.make_future_dataframe(N // 2, include_history=False)
         future = forecaster.predict(future)
-        future = future[['ds','yhat', 'yhat_upper', 'yhat_lower']]
+        future = future[['ds', 'yhat', 'yhat_upper', 'yhat_lower']]
         expected = pd.read_csv(
             os.path.join(os.path.dirname(__file__), 'data_predictions_optimizing.csv'),
             parse_dates=['ds'],
         )
 
-        assert_frame_equal(future, expected)
+        assert_frame_equal(future, expected, check_less_precise=5)
 
     def test_fit_sampling_predict(self):
         N = DATA.shape[0]
@@ -60,8 +60,8 @@ class TestProphet(TestCase):
             os.path.join(os.path.dirname(__file__), 'data_predictions_sampling.csv'),
             parse_dates=['ds'],
         )
-        from pandas.util.testing import assert_frame_equal
-        assert_frame_equal(future, expected)
+
+        assert_frame_equal(future, expected, check_less_precise=5)
 
 
     def test_fit_predict_no_seasons(self):
