@@ -1132,17 +1132,19 @@ class Prophet(object):
             for par in self.params:
                 self.params[par] = np.array([self.params[par]])
         elif self.mcmc_samples > 0:
+            if 'chains' not in kwargs:
+                kwargs['chains'] = 4
+
             stan_fit = model.sample(data=cmdstanpy_data,
                                     inits=cmdstanpy_init,
                                     sampling_iters=self.mcmc_samples,
-                                    chains=1,
                                     **kwargs)
-
-            params = self.stan_to_dict_numpy(stan_fit.column_names, stan_fit.sample.transpose())
+            res = stan_fit.sample
+            (samples, c, columns) = res.shape
+            params = self.stan_to_dict_numpy(stan_fit.column_names, res.reshape((samples * c, columns)))
             for par in params:
-                (dim, _, samples) = params[par].shape
-                self.params[par] = params[par].reshape((dim, samples)).transpose()
-                # Shape vector parameters
+                print(params[par].shape)
+                self.params[par] = params[par]
                 if par in ['delta', 'beta'] and len(self.params[par].shape) < 2:
                     self.params[par] = self.params[par].reshape((-1, 1))
         else:
@@ -1185,7 +1187,7 @@ class Prophet(object):
 
         start = 0
         end = 0
-
+        two_dims = True if len(data.shape) > 1 else False
         for cname in column_names:
             parsed = cname.split(".")
 
@@ -1198,7 +1200,10 @@ class Prophet(object):
                     raise RuntimeError(
                         "Found repeated column name"
                     )
-                output[prev] = np.array(data[start:end])
+                if two_dims:
+                    output[prev] = np.array(data[:, start:end])
+                else:
+                    output[prev] = np.array(data[start:end])
                 prev = curr
                 start = end
                 end += 1

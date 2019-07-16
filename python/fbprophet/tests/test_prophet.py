@@ -50,8 +50,18 @@ class TestProphet(TestCase):
         N = DATA.shape[0]
         train = DATA.head(N // 2)
 
+        from timeit import default_timer
+
         forecaster = Prophet(mcmc_samples=500)
-        forecaster.fit(train, seed=1237861298)
+        import time
+
+        t = default_timer()
+        # do some stuff
+
+        forecaster.fit(train, seed=1237861298, chains=4, cores=4)
+        elapsed_time = default_timer() - t
+        print("TIME: {}".format(elapsed_time))
+
         np.random.seed(876543987)
         future = forecaster.make_future_dataframe(N // 2, include_history=False)
         future = forecaster.predict(future)
