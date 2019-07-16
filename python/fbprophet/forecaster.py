@@ -1134,6 +1134,8 @@ class Prophet(object):
         elif self.mcmc_samples > 0:
             if 'chains' not in kwargs:
                 kwargs['chains'] = 4
+            if 'warmup_iters' not in kwargs:
+                kwargs['warmup_iters'] = self.mcmc_samples // 2
 
             stan_fit = model.sample(data=cmdstanpy_data,
                                     inits=cmdstanpy_init,
@@ -1141,12 +1143,17 @@ class Prophet(object):
                                     **kwargs)
             res = stan_fit.sample
             (samples, c, columns) = res.shape
-            params = self.stan_to_dict_numpy(stan_fit.column_names, res.reshape((samples * c, columns)))
+            res = res.reshape((samples * c, columns))
+            params = self.stan_to_dict_numpy(stan_fit.column_names, res)
             for par in params:
-                print(params[par].shape)
                 self.params[par] = params[par]
-                if par in ['delta', 'beta'] and len(self.params[par].shape) < 2:
+                s = params[par].shape
+                if s[1] == 1:
+                    self.params[par] = params[par].reshape((s[0],))
+
+                if par in ['delta', 'beta'] and len(s) < 2:
                     self.params[par] = self.params[par].reshape((-1, 1))
+
         else:
             if 'algorithm' not in kwargs:
                 kwargs['algorithm'] = 'Newton' if dat['T'] < 100 else 'LBFGS'
@@ -1214,7 +1221,10 @@ class Prophet(object):
             raise RuntimeError(
                 "Found repeated column name"
             )
-        output[prev] = np.array(data[start:end])
+        if two_dims:
+            output[prev] = np.array(data[:, start:end])
+        else:
+            output[prev] = np.array(data[start:end])
         return output
 
     def predict(self, df=None):
