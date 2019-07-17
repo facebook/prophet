@@ -15,7 +15,6 @@ import numpy as np
 import pandas as pd
 
 from fbprophet import Prophet
-from pandas.util.testing import assert_frame_equal
 
 DATA = pd.read_csv(
     os.path.join(os.path.dirname(__file__), 'data.csv'),
