@@ -29,40 +29,37 @@ DATA2 = pd.read_csv(
 
 class TestProphet(TestCase):
 
+    @staticmethod
+    def rmse(predictions, targets):
+        return np.sqrt(np.mean((predictions - targets) ** 2))
+
     def test_fit_predict(self):
+        days = 30
         N = DATA.shape[0]
-        train = DATA.head(N // 2)
+        train = DATA.head(N - days)
+        test = DATA.tail(days)
+        test.reset_index(inplace=True)
 
         forecaster = Prophet()
         forecaster.fit(train, seed=1237861298)
         np.random.seed(876543987)
-        future = forecaster.make_future_dataframe(N // 2, include_history=False)
+        future = forecaster.make_future_dataframe(days, include_history=False)
         future = forecaster.predict(future)
-        future = future[['ds', 'yhat', 'yhat_upper', 'yhat_lower']]
-        expected = pd.read_csv(
-            os.path.join(os.path.dirname(__file__), 'data_predictions_optimizing.csv'),
-            parse_dates=['ds'],
-        )
-
-        assert_frame_equal(future, expected, check_less_precise=5)
+        self.assertAlmostEqual(self.rmse(future['yhat'],test['y']), 10.64, places=2)
 
     def test_fit_sampling_predict(self):
+        days = 30
         N = DATA.shape[0]
-        train = DATA.head(N // 2)
+        train = DATA.head(N - days)
+        test = DATA.tail(days)
+        test.reset_index(inplace=True)
 
         forecaster = Prophet(mcmc_samples=500)
         forecaster.fit(train, seed=1237861298)
         np.random.seed(876543987)
-        future = forecaster.make_future_dataframe(N // 2, include_history=False)
+        future = forecaster.make_future_dataframe(days, include_history=False)
         future = forecaster.predict(future)
-        future = future[['ds', 'yhat', 'yhat_upper', 'yhat_lower']]
-        expected = pd.read_csv(
-            os.path.join(os.path.dirname(__file__), 'data_predictions_sampling.csv'),
-            parse_dates=['ds'],
-        )
-
-        assert_frame_equal(future, expected, check_less_precise=5)
-
+        self.assertAlmostEqual(self.rmse(future['yhat'], test['y']), 215.777, places=2)
 
     def test_fit_predict_no_seasons(self):
         N = DATA.shape[0]
