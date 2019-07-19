@@ -1163,16 +1163,19 @@ class Prophet(object):
                                           inits=cmdstanpy_init,
                                           iter=iterations,
                                           **kwargs)
-            except RuntimeError:
+            except RuntimeError as e:
                 # Fall back on Newton
-                logger.warning(
-                    'Optimization terminated abnormally. Falling back to Newton.'
-                )
-                stan_fit = model.optimize(data=cmdstanpy_data,
-                                          inits=cmdstanpy_init,
-                                          algorithm='Newton',
-                                          iter=iterations,
-                                          **kwargs)
+                if kwargs['algorithm'] != 'Newton':
+                    logger.warning(
+                        'Optimization terminated abnormally. Falling back to Newton.'
+                    )
+                    kwargs['algorithm'] = 'Newton'
+                    stan_fit = model.optimize(data=cmdstanpy_data,
+                                              inits=cmdstanpy_init,
+                                              iter=iterations,
+                                              **kwargs)
+                else:
+                    raise e
 
             params = self.stan_to_dict_numpy(stan_fit.column_names, stan_fit.optimized_params_np)
             for par in params:
