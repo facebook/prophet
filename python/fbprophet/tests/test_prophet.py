@@ -45,8 +45,24 @@ class TestProphet(TestCase):
         future = forecaster.make_future_dataframe(days, include_history=False)
         future = forecaster.predict(future)
         # this gives ~ 10.64
-        res = self.rmse(future['yhat'],test['y'])
+        res = self.rmse(future['yhat'], test['y'])
         self.assertTrue(15 > res > 5)
+
+    def test_fit_predict_newton(self):
+        days = 30
+        N = DATA.shape[0]
+        train = DATA.head(N - days)
+        test = DATA.tail(days)
+        test.reset_index(inplace=True)
+
+        forecaster = Prophet()
+        forecaster.fit(train, seed=1237861298, algorithm='Newton')
+        np.random.seed(876543987)
+        future = forecaster.make_future_dataframe(days, include_history=False)
+        future = forecaster.predict(future)
+        # this gives ~ 10.64
+        res = self.rmse(future['yhat'], test['y'])
+        self.assertAlmostEqual(res, 23.44, places=2)
 
     def test_fit_sampling_predict(self):
         days = 30
