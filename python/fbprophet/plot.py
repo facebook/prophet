@@ -49,7 +49,8 @@ def plot(
     m: Prophet model.
     fcst: pd.DataFrame output of m.predict.
     ax: Optional matplotlib axes on which to plot.
-    uncertainty: Optional boolean to plot uncertainty intervals.
+    uncertainty: Optional boolean to plot uncertainty intervals, which will
+        only be done if m.uncertainty_samples > 0.
     plot_cap: Optional boolean indicating if the capacity should be shown
         in the figure, if available.
     xlabel: Optional label name on X-axis
@@ -72,7 +73,7 @@ def plot(
         ax.plot(fcst_t, fcst['cap'], ls='--', c='k')
     if m.logistic_floor and 'floor' in fcst and plot_cap:
         ax.plot(fcst_t, fcst['floor'], ls='--', c='k')
-    if uncertainty:
+    if uncertainty and m.uncertainty_samples:
         ax.fill_between(fcst_t, fcst['yhat_lower'], fcst['yhat_upper'],
                         color='#0072B2', alpha=0.2)
     # Specify formatting to workaround matplotlib issue #12925
@@ -101,7 +102,8 @@ def plot_components(
     ----------
     m: Prophet model.
     fcst: pd.DataFrame output of m.predict.
-    uncertainty: Optional boolean to plot uncertainty intervals.
+    uncertainty: Optional boolean to plot uncertainty intervals, which will
+        only be done if m.uncertainty_samples > 0.
     plot_cap: Optional boolean indicating if the capacity should be shown
         in the figure, if available.
     weekly_start: Optional int specifying the start day of the weekly
@@ -196,7 +198,8 @@ def plot_forecast_component(
     fcst: pd.DataFrame output of m.predict.
     name: Name of the component to plot.
     ax: Optional matplotlib Axes to plot on.
-    uncertainty: Optional boolean to plot uncertainty intervals.
+    uncertainty: Optional boolean to plot uncertainty intervals, which will
+        only be done if m.uncertainty_samples > 0.
     plot_cap: Optional boolean indicating if the capacity should be shown
         in the figure, if available.
     figsize: Optional tuple width, height in inches.
@@ -215,7 +218,7 @@ def plot_forecast_component(
         artists += ax.plot(fcst_t, fcst['cap'], ls='--', c='k')
     if m.logistic_floor and 'floor' in fcst and plot_cap:
         ax.plot(fcst_t, fcst['floor'], ls='--', c='k')
-    if uncertainty:
+    if uncertainty and m.uncertainty_samples:
         artists += [ax.fill_between(
             fcst_t, fcst[name + '_lower'], fcst[name + '_upper'],
             color='#0072B2', alpha=0.2)]
@@ -264,7 +267,8 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), n
     m: Prophet model.
     ax: Optional matplotlib Axes to plot on. One will be created if this
         is not provided.
-    uncertainty: Optional boolean to plot uncertainty intervals.
+    uncertainty: Optional boolean to plot uncertainty intervals, which will
+        only be done if m.uncertainty_samples > 0.
     weekly_start: Optional int specifying the start day of the weekly
         seasonality plot. 0 (default) starts the week on Sunday. 1 shifts
         by 1 day to Monday, and so on.
@@ -287,7 +291,7 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), n
     days = days.weekday_name
     artists += ax.plot(range(len(days)), seas[name], ls='-',
                     c='#0072B2')
-    if uncertainty:
+    if uncertainty and m.uncertainty_samples:
         artists += [ax.fill_between(range(len(days)),
                                     seas[name + '_lower'], seas[name + '_upper'],
                                     color='#0072B2', alpha=0.2)]
@@ -309,7 +313,8 @@ def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6), n
     m: Prophet model.
     ax: Optional matplotlib Axes to plot on. One will be created if
         this is not provided.
-    uncertainty: Optional boolean to plot uncertainty intervals.
+    uncertainty: Optional boolean to plot uncertainty intervals, which will
+        only be done if m.uncertainty_samples > 0.
     yearly_start: Optional int specifying the start day of the yearly
         seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts
         by 1 day to Jan 2, and so on.
@@ -331,7 +336,7 @@ def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6), n
     seas = m.predict_seasonal_components(df_y)
     artists += ax.plot(
         df_y['ds'].dt.to_pydatetime(), seas[name], ls='-', c='#0072B2')
-    if uncertainty:
+    if uncertainty and m.uncertainty_samples:
         artists += [ax.fill_between(
             df_y['ds'].dt.to_pydatetime(), seas[name + '_lower'],
             seas[name + '_upper'], color='#0072B2', alpha=0.2)]
@@ -356,7 +361,8 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
     name: Seasonality name, like 'daily', 'weekly'.
     ax: Optional matplotlib Axes to plot on. One will be created if
         this is not provided.
-    uncertainty: Optional boolean to plot uncertainty intervals.
+    uncertainty: Optional boolean to plot uncertainty intervals, which will
+        only be done if m.uncertainty_samples > 0.
     figsize: Optional tuple width, height in inches.
 
     Returns
@@ -377,7 +383,7 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
     seas = m.predict_seasonal_components(df_y)
     artists += ax.plot(df_y['ds'].dt.to_pydatetime(), seas[name], ls='-',
                         c='#0072B2')
-    if uncertainty:
+    if uncertainty and m.uncertainty_samples:
         artists += [ax.fill_between(
             df_y['ds'].dt.to_pydatetime(), seas[name + '_lower'],
             seas[name + '_upper'], color='#0072B2', alpha=0.2)]
@@ -566,7 +572,7 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
         mode='markers'
     ))
     # Add lower bound
-    if uncertainty:
+    if uncertainty and m.uncertainty_samples:
         data.append(go.Scatter(
             x=fcst['ds'],
             y=fcst['yhat_lower'],
@@ -582,10 +588,10 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
         mode='lines',
         line=dict(color=prediction_color, width=line_width),
         fillcolor=error_color,
-        fill='tonexty' if uncertainty else 'none'
+        fill='tonexty' if uncertainty and m.uncertainty_samples else 'none'
     ))
     # Add upper bound
-    if uncertainty:
+    if uncertainty and m.uncertainty_samples:
         data.append(go.Scatter(
             x=fcst['ds'],
             y=fcst['yhat_upper'],
@@ -688,7 +694,8 @@ def plot_components_plotly(
     ----------
     m: Prophet model.
     fcst: pd.DataFrame output of m.predict.
-    uncertainty: Optional boolean to plot uncertainty intervals.
+    uncertainty: Optional boolean to plot uncertainty intervals, which will
+        only be done if m.uncertainty_samples > 0.
     plot_cap: Optional boolean indicating if the capacity should be shown
         in the figure, if available.
     figsize: Set the size for the subplots (in px).
@@ -746,7 +753,8 @@ def plot_forecast_component_plotly(m, fcst, name, uncertainty=True, plot_cap=Fal
     m: Prophet model.
     fcst: pd.DataFrame output of m.predict.
     name: Name of the component to plot.
-    uncertainty: Optional boolean to plot uncertainty intervals.
+    uncertainty: Optional boolean to plot uncertainty intervals, which will
+        only be done if m.uncertainty_samples > 0.
     plot_cap: Optional boolean indicating if the capacity should be shown
         in the figure, if available.
     figsize: The plot's size (in px).
@@ -775,7 +783,8 @@ def plot_seasonality_plotly(m, name, uncertainty=True, figsize=(900, 300)):
     ----------
     m: Prophet model.
     name: Seasonality name, like 'daily', 'weekly'.
-    uncertainty: Optional boolean to plot uncertainty intervals.
+    uncertainty: Optional boolean to plot uncertainty intervals, which will
+        only be done if m.uncertainty_samples > 0.
     figsize: Set the plot's size (in px).
 
     Returns
@@ -802,7 +811,8 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
     m: Prophet model.
     fcst: pd.DataFrame output of m.predict.
     name: Name of the component to plot.
-    uncertainty: Optional boolean to plot uncertainty intervals.
+    uncertainty: Optional boolean to plot uncertainty intervals, which will
+        only be done if m.uncertainty_samples > 0.
     plot_cap: Optional boolean indicating if the capacity should be shown
         in the figure, if available.
 
@@ -842,7 +852,7 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
         line=go.scatter.Line(color=prediction_color, width=line_width),
         text=text,
     ))
-    if uncertainty and (fcst[name + '_upper'] != fcst[name + '_lower']).any():
+    if uncertainty and m.uncertainty_samples and (fcst[name + '_upper'] != fcst[name + '_lower']).any():
         if mode == 'markers':
             traces[0].update(
                 error_y=dict(
@@ -906,7 +916,8 @@ def get_seasonality_plotly_props(m, name, uncertainty=True):
     ----------
     m: Prophet model.
     name: Name of the component to plot.
-    uncertainty: Optional boolean to plot uncertainty intervals.
+    uncertainty: Optional boolean to plot uncertainty intervals, which will
+        only be done if m.uncertainty_samples > 0.
 
     Returns
     -------
@@ -939,7 +950,7 @@ def get_seasonality_plotly_props(m, name, uncertainty=True):
         mode='lines',
         line=go.scatter.Line(color=prediction_color, width=line_width)
     ))
-    if uncertainty and (seas[name + '_upper'] != seas[name + '_lower']).any():
+    if uncertainty and m.uncertainty_samples and (seas[name + '_upper'] != seas[name + '_lower']).any():
         traces.append(go.Scatter(
             name=name + '_upper',
             x=df_y['ds'],
