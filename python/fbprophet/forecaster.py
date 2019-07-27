@@ -188,7 +188,7 @@ class Prophet(object):
         reserved_names = [
             'trend', 'additive_terms', 'daily', 'weekly', 'yearly',
             'holidays', 'zeros', 'extra_regressors_additive', 'yhat',
-            'extra_regressors_multiplicative', 'multiplicative_terms',
+            'extra_regressors_multiplicative', 'multiplicative_terms'
         ]
         rn_l = [n + '_lower' for n in reserved_names]
         rn_u = [n + '_upper' for n in reserved_names]
