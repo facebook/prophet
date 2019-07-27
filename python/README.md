@@ -29,7 +29,7 @@ On Windows, PyStan requires a compiler so you'll need to [follow the instruction
 
 ## Installation using Docker and docker-compose (via Makefile)
 
-Simply type `make build` and if everything is fine you should be able to `make shell` or alternative jump directly to `make py-shell`. 
+Simply type `make build` and if everything is fine you should be able to `make shell` or alternative jump directly to `make py-shell`.
 
 To run the tests, inside the container `cd python/fbprophet` and then `python -m unittest`
 
@@ -38,7 +38,7 @@ To run the tests, inside the container `cd python/fbprophet` and then `python -m
 ```python
   >>> from fbprophet import Prophet
   >>> m = Prophet()
-  >>> m.fit(df)  # df is a pandas.DataFrame with 'y' and 'ds' columns
+  >>> m.fit(df)  # df is a pandas.DataFrame with 'Y' and 'DS' as columns
   >>> future = m.make_future_dataframe(periods=365)
   >>> m.predict(future)
   ```
