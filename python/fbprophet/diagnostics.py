@@ -238,7 +238,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     valid_metrics = ['mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage']
     if metrics is None:
         metrics = valid_metrics
-    if ('yhat_lower' not in df) or ('yhat_upper' not in df) and ('coverage' in metrics):
+    if ('yhat_lower' not in df or 'yhat_upper' not in df) and ('coverage' in metrics):
         metrics.remove('coverage')
     if len(set(metrics)) != len(metrics):
         raise ValueError('Input metrics must be a list of unique values')
