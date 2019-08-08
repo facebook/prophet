@@ -77,8 +77,7 @@ class Prophet(object):
         parameters, which will include uncertainty in seasonality.
     uncertainty_samples: Number of simulated draws used to estimate
         uncertainty intervals.
-    cmdstanpy_backend: bool, set to true in order to use CmdStanPy as a backend
-        rather than pystan
+    cmdstanpy_backend: str, set to "cmdstanpy" or "pystan" (default)
     """
 
     def __init__(
@@ -98,7 +97,7 @@ class Prophet(object):
             mcmc_samples=0,
             interval_width=0.80,
             uncertainty_samples=1000,
-            cmdstanpy_backend=False
+            stan_backend='pystan'
     ):
         self.growth = growth
 
@@ -142,7 +141,12 @@ class Prophet(object):
         self.component_modes = None
         self.train_holiday_names = None
         self.validate_inputs()
-        self.stan_backend = CmdStanPyBackend(logger) if cmdstanpy_backend else PyStanBackend(logger)
+        if stan_backend == 'cmdstanpy':
+            self.stan_backend = CmdStanPyBackend(logger)
+        elif stan_backend == 'pystan':
+            self.stan_backend = PyStanBackend(logger)
+        else:
+            raise ValueError("Unknown stan backend: {}".format(stan_backend))
 
     def validate_inputs(self):
         """Validates the inputs to Prophet."""
@@ -1092,11 +1096,11 @@ class Prophet(object):
             kinit = self.logistic_growth_init(history)
 
         stan_init = {
-                'k': kinit[0],
-                'm': kinit[1],
-                'delta': np.zeros(len(self.changepoints_t)),
-                'beta': np.zeros(seasonal_features.shape[1]),
-                'sigma_obs': 1,
+            'k': kinit[0],
+            'm': kinit[1],
+            'delta': np.zeros(len(self.changepoints_t)),
+            'beta': np.zeros(seasonal_features.shape[1]),
+            'sigma_obs': 1,
         }
 
         if (

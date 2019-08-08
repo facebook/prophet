@@ -83,10 +83,9 @@ class CmdStanPyBackend(IStanBackend):
                 raise e
 
         params = self.stan_to_dict_numpy(stan_fit.column_names, stan_fit.optimized_params_np)
-        out = dict()
         for par in params:
-            out[par] = params[par].reshape((1, -1))
-        return out
+            params[par] = params[par].reshape((1, -1))
+        return params
 
     def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
         (stan_init, stan_data) = self.prepare_data(stan_init, stan_data)
@@ -104,16 +103,16 @@ class CmdStanPyBackend(IStanBackend):
         (samples, c, columns) = res.shape
         res = res.reshape((samples * c, columns))
         params = self.stan_to_dict_numpy(stan_fit.column_names, res)
-        out = dict()
+
         for par in params:
-            out[par] = params[par]
             s = params[par].shape
             if s[1] == 1:
-                out[par] = out[par].reshape((s[0],))
+                params[par] = params[par].reshape((s[0],))
 
             if par in ['delta', 'beta'] and len(s) < 2:
-                out[par] = out[par].reshape((-1, 1))
-        return out
+                params[par] = params[par].reshape((-1, 1))
+
+        return params
 
     @staticmethod
     def prepare_data(init, data) -> Tuple[dict, dict]:
@@ -232,10 +231,11 @@ class PyStanBackend(IStanBackend):
             )
             args['algorithm'] = 'Newton'
             params = self.model.optimizing(**args)
-        out = dict()
+
         for par in params:
-            out[par] = params[par].reshape((1, -1))
-        return out
+            params[par] = params[par].reshape((1, -1))
+
+        return params
 
     def load_model(self):
         """Load compiled Stan model"""

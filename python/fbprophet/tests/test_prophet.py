@@ -39,15 +39,15 @@ class TestProphet(TestCase):
         test = DATA.tail(days)
         test.reset_index(inplace=True)
 
-        for cmdstanpy_backend in [False, True]:
-            forecaster = Prophet(cmdstanpy_backend=cmdstanpy_backend)
+        for backend in ["cmdstanpy", "pystan"]:
+            forecaster = Prophet(stan_backend=backend)
             forecaster.fit(train, seed=1237861298)
             np.random.seed(876543987)
             future = forecaster.make_future_dataframe(days, include_history=False)
             future = forecaster.predict(future)
             # this gives ~ 10.64
             res = self.rmse(future['yhat'], test['y'])
-            self.assertTrue(15 > res > 5, msg="cmdstanpy: {}".format(cmdstanpy_backend))
+            self.assertTrue(15 > res > 5, msg="backend: {}".format(backend))
 
     def test_fit_predict_newton(self):
         days = 30
@@ -56,15 +56,15 @@ class TestProphet(TestCase):
         test = DATA.tail(days)
         test.reset_index(inplace=True)
 
-        for cmdstanpy_backend in [False, True]:
-            forecaster = Prophet(cmdstanpy_backend=cmdstanpy_backend)
+        for backend in ["cmdstanpy", "pystan"]:
+            forecaster = Prophet(stan_backend=backend)
             forecaster.fit(train, seed=1237861298, algorithm='Newton')
             np.random.seed(876543987)
             future = forecaster.make_future_dataframe(days, include_history=False)
             future = forecaster.predict(future)
             # this gives ~ 10.64
             res = self.rmse(future['yhat'], test['y'])
-            self.assertAlmostEqual(res, 23.44, places=2, msg="cmdstanpy: {}".format(cmdstanpy_backend))
+            self.assertAlmostEqual(res, 23.44, places=2, msg="backend: {}".format(backend))
 
     def test_fit_sampling_predict(self):
         days = 30
@@ -73,8 +73,8 @@ class TestProphet(TestCase):
         test = DATA.tail(days)
         test.reset_index(inplace=True)
 
-        for cmdstanpy_backend in [False, True]:
-            forecaster = Prophet(cmdstanpy_backend=cmdstanpy_backend, mcmc_samples=500)
+        for backend in ["cmdstanpy", "pystan"]:
+            forecaster = Prophet(stan_backend=backend, mcmc_samples=500)
 
             forecaster.fit(train, seed=1237861298, chains=4)
             np.random.seed(876543987)
@@ -82,7 +82,7 @@ class TestProphet(TestCase):
             future = forecaster.predict(future)
             # this gives ~ 215.77
             res = self.rmse(future['yhat'], test['y'])
-            self.assertTrue(236 > res > 193, msg="cmdstanpy: {}".format(cmdstanpy_backend))
+            self.assertTrue(236 > res > 193, msg="backend: {}".format(backend))
 
     def test_fit_predict_no_seasons(self):
         N = DATA.shape[0]
