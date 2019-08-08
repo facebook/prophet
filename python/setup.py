@@ -18,7 +18,7 @@ from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
 from setuptools.command.test import test as test_command
-
+from fbprophet.models import PyStanBackend, CmdStanPyBackend
 
 PLATFORM = 'unix'
 if platform.platform().startswith('Win'):
@@ -28,15 +28,10 @@ MODEL_DIR = os.path.join('stan', PLATFORM)
 MODEL_TARGET_DIR = os.path.join('fbprophet', 'stan_model')
 
 
-def build_stan_model(target_dir, model_dir=MODEL_DIR):
-    from cmdstanpy import Model
-    from shutil import copy
-    model_name = 'prophet.stan'
-    target_name = 'prophet_model.bin'
+def build_models(target_dir):
+    CmdStanPyBackend.build_model(target_dir, MODEL_DIR)
+    PyStanBackend.build_model(target_dir, MODEL_DIR)
 
-    sm = Model(stan_file=os.path.join(model_dir, model_name))
-    sm.compile()
-    copy(sm.exe_file, os.path.join(target_dir, target_name))
 
 class BuildPyCommand(build_py):
     """Custom build command to pre-compile Stan models."""
@@ -45,7 +40,7 @@ class BuildPyCommand(build_py):
         if not self.dry_run:
             target_dir = os.path.join(self.build_lib, MODEL_TARGET_DIR)
             self.mkpath(target_dir)
-            build_stan_model(target_dir)
+            build_models(target_dir)
 
         build_py.run(self)
 
@@ -57,7 +52,7 @@ class DevelopCommand(develop):
         if not self.dry_run:
             target_dir = os.path.join(self.setup_path, MODEL_TARGET_DIR)
             self.mkpath(target_dir)
-            build_stan_model(target_dir)
+            build_models(target_dir)
 
         develop.run(self)
 
@@ -95,6 +90,7 @@ class TestCommand(test_command):
             sys.modules.clear()
             sys.modules.update(old_modules)
             working_set.__init__()
+
 
 with open('requirements.txt', 'r') as f:
     install_requires = f.read().splitlines()

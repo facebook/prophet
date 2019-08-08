@@ -16,11 +16,12 @@ import pystan  # noqa F401
 
 from fbprophet.diagnostics import prophet_copy
 from fbprophet.make_holidays import get_holiday_names, make_holidays_df
-from fbprophet.models import prophet_stan_model
+from fbprophet.models import *
 from fbprophet.plot import (plot, plot_components, plot_forecast_component,
                             plot_seasonality, plot_weekly, plot_yearly,
                             seasonality_plot_df)
 from typing import Tuple
+
 logger = logging.getLogger('fbprophet')
 logger.addHandler(logging.NullHandler())
 if len(logger.handlers) == 1:
@@ -76,6 +77,8 @@ class Prophet(object):
         parameters, which will include uncertainty in seasonality.
     uncertainty_samples: Number of simulated draws used to estimate
         uncertainty intervals.
+    cmdstanpy_backend: bool, set to true in order to use CmdStanPy as a backend
+        rather than pystan
     """
 
     def __init__(
@@ -95,6 +98,7 @@ class Prophet(object):
             mcmc_samples=0,
             interval_width=0.80,
             uncertainty_samples=1000,
+            cmdstanpy_backend=False
     ):
         self.growth = growth
 
@@ -138,6 +142,7 @@ class Prophet(object):
         self.component_modes = None
         self.train_holiday_names = None
         self.validate_inputs()
+        self.stan_backend = CmdStanPyBackend(logger) if cmdstanpy_backend else PyStanBackend(logger)
 
     def validate_inputs(self):
         """Validates the inputs to Prophet."""
@@ -148,9 +153,9 @@ class Prophet(object):
             raise ValueError("Parameter 'changepoint_range' must be in [0, 1]")
         if self.holidays is not None:
             if not (
-                isinstance(self.holidays, pd.DataFrame)
-                and 'ds' in self.holidays  # noqa W503
-                and 'holiday' in self.holidays  # noqa W503
+                    isinstance(self.holidays, pd.DataFrame)
+                    and 'ds' in self.holidays  # noqa W503
+                    and 'holiday' in self.holidays  # noqa W503
             ):
                 raise ValueError("holidays must be a DataFrame with 'ds' and "
                                  "'holiday' columns.")
@@ -1086,40 +1091,12 @@ class Prophet(object):
             dat['cap'] = history['cap_scaled']
             kinit = self.logistic_growth_init(history)
 
-        model = prophet_stan_model
-
-        def stan_init():
-            return {
+        stan_init = {
                 'k': kinit[0],
                 'm': kinit[1],
                 'delta': np.zeros(len(self.changepoints_t)),
                 'beta': np.zeros(seasonal_features.shape[1]),
                 'sigma_obs': 1,
-            }
-
-        cmdstanpy_data = {
-            'T': dat['T'],
-            'S': dat['S'],
-            'K': dat['K'],
-            'tau': dat['tau'],
-            'trend_indicator': dat['trend_indicator'],
-            'y': dat['y'].tolist(),
-            't': dat['t'].tolist(),
-            'cap': dat['cap'].tolist(),
-            't_change': dat['t_change'].tolist(),
-            's_a': dat['s_a'].tolist(),
-            's_m': dat['s_m'].tolist(),
-            'X': dat['X'].to_numpy().tolist(),
-            'sigmas': dat['sigmas']
-        }
-
-        init = stan_init()
-        cmdstanpy_init = {
-            'k': init['k'],
-            'm': init['m'],
-            'delta': init['delta'].tolist(),
-            'beta': init['beta'].tolist(),
-            'sigma_obs': 1
         }
 
         if (
@@ -1127,59 +1104,14 @@ class Prophet(object):
                 and self.growth == 'linear'
         ):
             # Nothing to fit.
-            self.params = stan_init()
+            self.params = stan_init
             self.params['sigma_obs'] = 1e-9
             for par in self.params:
                 self.params[par] = np.array([self.params[par]])
         elif self.mcmc_samples > 0:
-            if 'chains' not in kwargs:
-                kwargs['chains'] = 4
-            if 'warmup_iters' not in kwargs:
-                kwargs['warmup_iters'] = self.mcmc_samples // 2
-
-            stan_fit = model.sample(data=cmdstanpy_data,
-                                    inits=cmdstanpy_init,
-                                    sampling_iters=self.mcmc_samples,
-                                    **kwargs)
-            res = stan_fit.sample
-            (samples, c, columns) = res.shape
-            res = res.reshape((samples * c, columns))
-            params = self.stan_to_dict_numpy(stan_fit.column_names, res)
-            for par in params:
-                self.params[par] = params[par]
-                s = params[par].shape
-                if s[1] == 1:
-                    self.params[par] = params[par].reshape((s[0],))
-
-                if par in ['delta', 'beta'] and len(s) < 2:
-                    self.params[par] = self.params[par].reshape((-1, 1))
-
+            self.params = self.stan_backend.sampling(stan_init, dat, self.mcmc_samples, **kwargs)
         else:
-            if 'algorithm' not in kwargs:
-                kwargs['algorithm'] = 'Newton' if dat['T'] < 100 else 'LBFGS'
-            iterations = int(1e4)
-            try:
-                stan_fit = model.optimize(data=cmdstanpy_data,
-                                          inits=cmdstanpy_init,
-                                          iter=iterations,
-                                          **kwargs)
-            except RuntimeError as e:
-                # Fall back on Newton
-                if kwargs['algorithm'] != 'Newton':
-                    logger.warning(
-                        'Optimization terminated abnormally. Falling back to Newton.'
-                    )
-                    kwargs['algorithm'] = 'Newton'
-                    stan_fit = model.optimize(data=cmdstanpy_data,
-                                              inits=cmdstanpy_init,
-                                              iter=iterations,
-                                              **kwargs)
-                else:
-                    raise e
-
-            params = self.stan_to_dict_numpy(stan_fit.column_names, stan_fit.optimized_params_np)
-            for par in params:
-                self.params[par] = params[par].reshape((1, -1))
+            self.params = self.stan_backend.fit(stan_init, dat, **kwargs)
 
         # If no changepoints were requested, replace delta with 0s
         if len(self.changepoints) == 0:
@@ -1188,47 +1120,6 @@ class Prophet(object):
             self.params['delta'] = np.zeros(self.params['delta'].shape)
 
         return self
-
-    @staticmethod
-    def stan_to_dict_numpy(column_names: Tuple[str, ...], data: np.array):
-        output = OrderedDict()
-
-        prev = None
-
-        start = 0
-        end = 0
-        two_dims = True if len(data.shape) > 1 else False
-        for cname in column_names:
-            parsed = cname.split(".")
-
-            curr = parsed[0]
-            if prev is None:
-                prev = curr
-
-            if curr != prev:
-                if prev in output:
-                    raise RuntimeError(
-                        "Found repeated column name"
-                    )
-                if two_dims:
-                    output[prev] = np.array(data[:, start:end])
-                else:
-                    output[prev] = np.array(data[start:end])
-                prev = curr
-                start = end
-                end += 1
-            else:
-                end += 1
-
-        if prev in output:
-            raise RuntimeError(
-                "Found repeated column name"
-            )
-        if two_dims:
-            output[prev] = np.array(data[:, start:end])
-        else:
-            output[prev] = np.array(data[start:end])
-        return output
 
     def predict(self, df=None):
         """Predict using the prophet model.

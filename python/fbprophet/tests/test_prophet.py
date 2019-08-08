@@ -39,14 +39,15 @@ class TestProphet(TestCase):
         test = DATA.tail(days)
         test.reset_index(inplace=True)
 
-        forecaster = Prophet()
-        forecaster.fit(train, seed=1237861298)
-        np.random.seed(876543987)
-        future = forecaster.make_future_dataframe(days, include_history=False)
-        future = forecaster.predict(future)
-        # this gives ~ 10.64
-        res = self.rmse(future['yhat'], test['y'])
-        self.assertTrue(15 > res > 5)
+        for cmdstanpy_backend in [False, True]:
+            forecaster = Prophet(cmdstanpy_backend=cmdstanpy_backend)
+            forecaster.fit(train, seed=1237861298)
+            np.random.seed(876543987)
+            future = forecaster.make_future_dataframe(days, include_history=False)
+            future = forecaster.predict(future)
+            # this gives ~ 10.64
+            res = self.rmse(future['yhat'], test['y'])
+            self.assertTrue(15 > res > 5, msg="cmdstanpy: {}".format(cmdstanpy_backend))
 
     def test_fit_predict_newton(self):
         days = 30
@@ -55,14 +56,15 @@ class TestProphet(TestCase):
         test = DATA.tail(days)
         test.reset_index(inplace=True)
 
-        forecaster = Prophet()
-        forecaster.fit(train, seed=1237861298, algorithm='Newton')
-        np.random.seed(876543987)
-        future = forecaster.make_future_dataframe(days, include_history=False)
-        future = forecaster.predict(future)
-        # this gives ~ 10.64
-        res = self.rmse(future['yhat'], test['y'])
-        self.assertAlmostEqual(res, 23.44, places=2)
+        for cmdstanpy_backend in [False, True]:
+            forecaster = Prophet(cmdstanpy_backend=cmdstanpy_backend)
+            forecaster.fit(train, seed=1237861298, algorithm='Newton')
+            np.random.seed(876543987)
+            future = forecaster.make_future_dataframe(days, include_history=False)
+            future = forecaster.predict(future)
+            # this gives ~ 10.64
+            res = self.rmse(future['yhat'], test['y'])
+            self.assertAlmostEqual(res, 23.44, places=2, msg="cmdstanpy: {}".format(cmdstanpy_backend))
 
     def test_fit_sampling_predict(self):
         days = 30
@@ -71,16 +73,16 @@ class TestProphet(TestCase):
         test = DATA.tail(days)
         test.reset_index(inplace=True)
 
-        forecaster = Prophet(mcmc_samples=500)
-        # do some stuff
+        for cmdstanpy_backend in [False, True]:
+            forecaster = Prophet(cmdstanpy_backend=cmdstanpy_backend, mcmc_samples=500)
 
-        forecaster.fit(train, seed=1237861298, chains=4, cores=4)
-        np.random.seed(876543987)
-        future = forecaster.make_future_dataframe(days, include_history=False)
-        future = forecaster.predict(future)
-        # this gives ~ 215.77
-        res = self.rmse(future['yhat'], test['y'])
-        self.assertTrue(236 > res > 193)
+            forecaster.fit(train, seed=1237861298, chains=4)
+            np.random.seed(876543987)
+            future = forecaster.make_future_dataframe(days, include_history=False)
+            future = forecaster.predict(future)
+            # this gives ~ 215.77
+            res = self.rmse(future['yhat'], test['y'])
+            self.assertTrue(236 > res > 193, msg="cmdstanpy: {}".format(cmdstanpy_backend))
 
     def test_fit_predict_no_seasons(self):
         N = DATA.shape[0]
@@ -246,7 +248,7 @@ class TestProphet(TestCase):
         true_values = np.array([
             0.7818315, 0.6234898, 0.9749279, -0.2225209, 0.4338837, -0.9009689,
         ])
-        self.assertAlmostEqual(np.sum((mat[0] - true_values)**2), 0.0)
+        self.assertAlmostEqual(np.sum((mat[0] - true_values) ** 2), 0.0)
 
     def test_fourier_series_yearly(self):
         mat = Prophet.fourier_series(DATA['ds'], 365.25, 3)
@@ -254,7 +256,7 @@ class TestProphet(TestCase):
         true_values = np.array([
             0.7006152, -0.7135393, -0.9998330, 0.01827656, 0.7262249, 0.6874572,
         ])
-        self.assertAlmostEqual(np.sum((mat[0] - true_values)**2), 0.0)
+        self.assertAlmostEqual(np.sum((mat[0] - true_values) ** 2), 0.0)
 
     def test_growth_init(self):
         model = Prophet(growth='logistic')
@@ -672,7 +674,6 @@ class TestProphet(TestCase):
         self.assertTrue(np.array_equal((seasonal_features[conditional_weekly_columns] != 0).any(axis=1).values,
                                        df['is_conditional_week'].values))
 
-
     def test_added_regressors(self):
         m = Prophet()
         m.add_regressor('binary_feature', prior_scale=0.2)
@@ -758,7 +759,7 @@ class TestProphet(TestCase):
         self.assertAlmostEqual(
             fcst['additive_terms'][0],
             fcst['yearly'][0] + fcst['weekly'][0]
-                + fcst['extra_regressors_additive'][0],
+            + fcst['extra_regressors_additive'][0],
         )
         self.assertAlmostEqual(
             fcst['multiplicative_terms'][0],
@@ -767,7 +768,7 @@ class TestProphet(TestCase):
         self.assertAlmostEqual(
             fcst['yhat'][0],
             fcst['trend'][0] * (1 + fcst['multiplicative_terms'][0])
-                + fcst['additive_terms'][0],
+            + fcst['additive_terms'][0],
         )
         # Check works if constant extra regressor at 0
         df['constant_feature'] = 0
@@ -818,5 +819,5 @@ class TestProphet(TestCase):
             {'weekly', 'yearly', 'xmas', 'numeric_feature',
              'multiplicative_terms', 'extra_regressors_multiplicative',
              'holidays',
-            },
+             },
         )
