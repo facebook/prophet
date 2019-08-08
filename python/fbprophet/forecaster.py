@@ -77,7 +77,7 @@ class Prophet(object):
         parameters, which will include uncertainty in seasonality.
     uncertainty_samples: Number of simulated draws used to estimate
         uncertainty intervals.
-    cmdstanpy_backend: str, set to "cmdstanpy" or "pystan" (default)
+    stan_backend: str, set to "cmdstanpy" or "pystan" (default)
     """
 
     def __init__(
