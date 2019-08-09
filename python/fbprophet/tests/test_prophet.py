@@ -9,7 +9,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-from unittest import TestCase
+import sys
+from unittest import TestCase, skipUnless
 
 import numpy as np
 import pandas as pd
@@ -66,6 +67,7 @@ class TestProphet(TestCase):
             res = self.rmse(future['yhat'], test['y'])
             self.assertAlmostEqual(res, 23.44, places=2, msg="backend: {}".format(backend))
 
+    @skipUnless("--test-slow" in sys.argv, "Skipped due to the lack of '--test-slow' argument")
     def test_fit_sampling_predict(self):
         days = 30
         N = DATA.shape[0]

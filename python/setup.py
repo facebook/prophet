@@ -17,7 +17,7 @@ from pkg_resources import (
 from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
-from setuptools.command.test import test as test_command
+from setuptools.command.test import test as test_command, NonDataProperty
 from fbprophet.models import PyStanBackend, CmdStanPyBackend
 
 PLATFORM = 'unix'
@@ -58,6 +58,23 @@ class DevelopCommand(develop):
 
 
 class TestCommand(test_command):
+    user_options = [
+        ('test-module=', 'm', "Run 'test_suite' in specified module"),
+        ('test-suite=', 's',
+         "Run single test, case or suite (e.g. 'module.test_suite')"),
+        ('test-runner=', 'r', "Test runner to use"),
+        ('test-slow', 'w', "Test slow suites (default off)"),
+    ]
+
+    def initialize_options(self):
+        super(TestCommand, self).initialize_options()
+        self.test_slow = False
+
+    def finalize_options(self):
+        super(TestCommand, self).finalize_options()
+        if self.test_slow is None:
+            self.test_slow = getattr(self.distribution, 'test_slow', False)
+
     """We must run tests on the build directory, not source."""
 
     def with_project_on_sys_path(self, func):
