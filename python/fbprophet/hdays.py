@@ -12,8 +12,7 @@ from datetime import date, timedelta
 
 from convertdate.islamic import from_gregorian, to_gregorian
 from holidays import WEEKEND, HolidayBase, easter, rd
-from lunardate import LunarDate
-
+from lunarcalendar import Lunar, Converter
 
 # Official public holidays at a country level
 # ------------ Holidays in Brazil---------------------
@@ -88,7 +87,7 @@ class Indonesia(HolidayBase):
         # Chinese New Year/ Spring Festival
         name = "Chinese New Year"
         for offset in range(-1, 2, 1):
-            ds = LunarDate(year + offset, 1, 1).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 1, 1)).to_date()
             if ds.year == year:
                 self[ds] = name
 
@@ -148,7 +147,7 @@ class Indonesia(HolidayBase):
         # Buddha's Birthday
         name = "Buddha's Birthday"
         for offset in range(-1, 2, 1):
-            ds = LunarDate(year + offset, 4, 15).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 4, 15)).to_date()
             if ds.year == year:
                 self[ds] = name
 
@@ -467,7 +466,7 @@ class Malaysia(HolidayBase):
         # Chinese New Year
         name = "Chinese New Year"
         for offset in range(-1, 2, 1):
-            ds = LunarDate(year + offset, 1, 1).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 1, 1)).to_date()
             if ds.year == year:
                 self[ds] = name
 
@@ -492,7 +491,7 @@ class Malaysia(HolidayBase):
         # Buddha's Birthday
         name = "Wesak Day"
         for offset in range(-1, 2, 1):
-            ds = LunarDate(year + offset, 4, 15).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 4, 15)).to_date()
             if ds.year == year:
                 self[ds] = name
 
@@ -584,31 +583,31 @@ class Vietnam(HolidayBase):
         name = "Vietnamese New Year"
         for offset in range(-1, 2, 1):
             try:
-                ds = LunarDate(year - 1 + offset, 12, 30).toSolarDate()
+                ds = Converter.Lunar2Solar(Lunar(year - 1 + offset, 12, 30)).to_date()
             except ValueError:
-                ds = LunarDate(year - 1 + offset, 12, 29).toSolarDate()
+                ds = Converter.Lunar2Solar(Lunar(year - 1 + offset, 12, 29)).to_date()
             if ds.year == year:
                 self[ds] = name
-            ds = LunarDate(year + offset, 1, 1).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 1, 1)).to_date()
             if ds.year == year:
                 self[ds] = name
-            ds = LunarDate(year + offset, 1, 2).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 1, 2)).to_date()
             if ds.year == year:
                 self[ds] = name
-            ds = LunarDate(year + offset, 1, 3).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 1, 3)).to_date()
             if ds.year == year:
                 self[ds] = name
-            ds = LunarDate(year + offset, 1, 4).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 1, 4)).to_date()
             if ds.year == year:
                 self[ds] = name
-            ds = LunarDate(year + offset, 1, 5).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 1, 5)).to_date()
             if ds.year == year:
                 self[ds] = name
 
         # Hung Kings Commemorations
         name = "Hung Kings Commemorations"
         for offset in range(-1, 2, 1):
-            ds = LunarDate(year + offset, 3, 10).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 3, 10)).to_date()
             if ds.year == year:
                 self[ds] = name
 
@@ -685,7 +684,7 @@ class Thailand(HolidayBase):
         # Buddha's Birthday
         name = "Buddha's Birthday"
         for offset in range(-1, 2, 1):
-            ds = LunarDate(year + offset, 4, 15).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 4, 15)).to_date()
             if ds.year == year:
                 self[ds] = name
 
@@ -1245,7 +1244,7 @@ class China(HolidayBase):
         # Chinese New Year/ Spring Festival
         name = "Chinese New Year"
         for offset in range(-1, 2, 1):
-            ds = LunarDate(year + offset, 1, 1).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 1, 1)).to_date()
             if ds.year == year:
                 self[ds] = name
 
@@ -1261,14 +1260,14 @@ class China(HolidayBase):
         # Dragon Boat Festival
         name = "Dragon Boat Festival"
         for offset in range(-1, 2, 1):
-            ds = LunarDate(year + offset, 5, 5).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 5, 5)).to_date()
             if ds.year == year:
                 self[ds] = name
 
         # Mid-Autumn Festival
         name = "Mid-Autumn Festival"
         for offset in range(-1, 2, 1):
-            ds = LunarDate(year + offset, 8, 15).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 8, 15)).to_date()
             if ds.year == year:
                 self[ds] = name
 
@@ -1362,7 +1361,7 @@ class Korea(HolidayBase):
         # New Year's Day by the Lunar
         name = "New Year's Day by the Lunar"
         for offset in range(-1, 2, 1):
-            ds = LunarDate(year + offset, 1, 1).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 1, 1)).to_date()
             if ds.year == year:
                 self[ds] = name
 
@@ -1373,7 +1372,7 @@ class Korea(HolidayBase):
         # Buddha's Birthday
         name = "Buddha's Birthday"
         for offset in range(-1, 2, 1):
-            ds = LunarDate(year + offset, 4, 8).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 4, 8)).to_date()
             if ds.year == year:
                 self[ds] = name
 
@@ -1392,7 +1391,7 @@ class Korea(HolidayBase):
         # Chuseok
         name = "Chuseok"
         for offset in range(-1, 2, 1):
-            ds = LunarDate(year + offset, 8, 15).toSolarDate()
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 8, 15)).to_date()
             if ds.year == year:
                 self[ds] = name
 
