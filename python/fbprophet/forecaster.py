@@ -159,9 +159,9 @@ class Prophet(object):
             raise ValueError("Parameter 'changepoint_range' must be in [0, 1]")
         if self.holidays is not None:
             if not (
-                    isinstance(self.holidays, pd.DataFrame)
-                    and 'ds' in self.holidays  # noqa W503
-                    and 'holiday' in self.holidays  # noqa W503
+                isinstance(self.holidays, pd.DataFrame)
+                and 'ds' in self.holidays  # noqa W503
+                and 'holiday' in self.holidays  # noqa W503
             ):
                 raise ValueError("holidays must be a DataFrame with 'ds' and "
                                  "'holiday' columns.")
