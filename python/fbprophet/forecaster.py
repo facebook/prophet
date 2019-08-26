@@ -16,7 +16,7 @@ import pystan  # noqa F401
 
 from fbprophet.diagnostics import prophet_copy
 from fbprophet.make_holidays import get_holiday_names, make_holidays_df
-from fbprophet.models import *
+from fbprophet.models import CmdStanPyBackend, PyStanBackend
 from fbprophet.plot import (plot, plot_components, plot_forecast_component,
                             plot_seasonality, plot_weekly, plot_yearly,
                             seasonality_plot_df)
