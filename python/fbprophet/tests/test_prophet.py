@@ -102,6 +102,14 @@ class TestProphet(TestCase):
 
         self.assertTrue('y_scaled' in history)
         self.assertEqual(history['y_scaled'].max(), 1.0)
+    
+    def test_setup_dataframe_ds_column(self):
+        "Test case where 'ds' exists as an index name and column"
+        df = DATA.copy()
+        df.index = df.loc[:, 'ds']
+        m = Prophet()
+        m.fit(df)
+
 
     def test_logistic_floor(self):
         m = Prophet(growth='logistic')
