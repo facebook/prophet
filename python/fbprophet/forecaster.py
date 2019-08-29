@@ -262,8 +262,10 @@ class Prophet(object):
                     raise ValueError('Found non-boolean in column ' + condition_name)
                 df[condition_name] = df[condition_name].astype('bool')
 
-        df = df.reset_index(drop=True)
+        if df.index.name == 'ds':
+            df.index.name = None
         df = df.sort_values('ds')
+        df = df.reset_index(drop=True)
 
         self.initialize_scales(initialize_scales, df)
 
