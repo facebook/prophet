@@ -1263,8 +1263,8 @@ fit.prophet <- function(m, df, ...) {
       iter = m$mcmc.samples
     )
     args <- utils::modifyList(args, list(...))
-    stan.fit <- do.call(rstan::sampling, args)
-    m$params <- rstan::extract(stan.fit)
+    m$stan.fit <- do.call(rstan::sampling, args)
+    m$params <- rstan::extract(m$stan.fit)
     n.iteration <- length(m$params$k)
   } else {
     args <- list(
@@ -1276,15 +1276,15 @@ fit.prophet <- function(m, df, ...) {
       as_vector = FALSE
     )
     args <- utils::modifyList(args, list(...))
-    stan.fit <- do.call(rstan::optimizing, args)
-    if (stan.fit$return_code != 0) {
+    m$stan.fit <- do.call(rstan::optimizing, args)
+    if (m$stan.fit$return_code != 0) {
       message(
         'Optimization terminated abnormally. Falling back to Newton optimizer.'
       )
       args$algorithm = 'Newton'
-      stan.fit <- do.call(rstan::optimizing, args)
+      m$stan.fit <- do.call(rstan::optimizing, args)
     }
-    m$params <- stan.fit$par
+    m$params <- m$stan.fit$par
     n.iteration <- 1
   }
   

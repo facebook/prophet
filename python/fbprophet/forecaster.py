@@ -1131,17 +1131,17 @@ class Prophet(object):
             )
             args.update(kwargs)
             try:
-                params = model.optimizing(**args)
+                self.stan_fit = model.optimizing(**args)
             except RuntimeError:
                 # Fall back on Newton
                 logger.warning(
                     'Optimization terminated abnormally. Falling back to Newton.'
                 )
                 args['algorithm'] = 'Newton'
-                params = model.optimizing(**args)
+                self.stan_fit = model.optimizing(**args)
 
-            for par in params:
-                self.params[par] = params[par].reshape((1, -1))
+            for par in self.stan_fit:
+                self.params[par] = self.stan_fit[par].reshape((1, -1))
 
         # If no changepoints were requested, replace delta with 0s
         if len(self.changepoints) == 0:
