@@ -1116,9 +1116,9 @@ class Prophet(object):
                 iter=self.mcmc_samples,
             )
             args.update(kwargs)
-            stan_fit = model.sampling(**args)
-            for par in stan_fit.model_pars:
-                self.params[par] = stan_fit[par]
+            self.stan_fit = model.sampling(**args)
+            for par in self.stan_fit.model_pars:
+                self.params[par] = self.stan_fit[par]
                 # Shape vector parameters
                 if par in ['delta', 'beta'] and len(self.params[par].shape) < 2:
                     self.params[par] = self.params[par].reshape((-1, 1))
