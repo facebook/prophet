@@ -1562,3 +1562,30 @@ class Prophet(object):
             weekly_start=weekly_start, yearly_start=yearly_start,
             figsize=figsize
         )
+      
+       def plot_forecast_component(self, fcst, name, ax=None, uncertainty=True, plot_cap=False, figsize=(10, 6)):
+        """Plot a particular component of the forecast.
+
+        Parameters
+        ----------
+        m: Prophet model.
+        fcst: pd.DataFrame output of m.predict.
+        name: Name of the component to plot.
+        ax: Optional matplotlib Axes to plot on.
+        uncertainty: Optional boolean to plot uncertainty intervals, which will
+            only be done if m.uncertainty_samples > 0.
+        plot_cap: Optional boolean indicating if the capacity should be shown
+            in the figure, if available.
+        figsize: Optional tuple width, height in inches.
+
+        Returns
+
+        -------
+
+        A matplotlib figure.
+        
+        """
+        return plot_forecast_component(
+            self, fcst, name, ax=ax, uncertainty=uncertainty, plot_cap=plot_cap, figsize=figsize
+        )
+
