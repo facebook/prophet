@@ -77,7 +77,7 @@ def cross_validation(model, horizon, period=None, initial=None, fit_kwargs=None)
     initial: string with pd.Timedelta compatible style. The first training
         period will begin here. If not provided, 3 * horizon is used.
     fit_kwargs: Additional arguments passed to the optimizing or sampling functions in Stan.
-        If it is not 'None' it replaces the fit_kwargs if the model.
+        If it is not 'None' it replaces the fit_kwargs of the model.
 
     Returns
     -------
@@ -112,7 +112,7 @@ def cross_validation(model, horizon, period=None, initial=None, fit_kwargs=None)
     for cutoff in cutoffs:
         # Generate new object with copying fitting options
         m = prophet_copy(model, cutoff)
-        # Replace the fit_kwargs from the model
+        # Replace the fit_kwargs of the model
         if fit_kwargs is not None:
             m.fit_kwargs = fit_kwargs
         # Train model

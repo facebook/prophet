@@ -77,7 +77,8 @@ class Prophet(object):
     uncertainty_samples: Number of simulated draws used to estimate
         uncertainty intervals. Settings this value to 0 or False will disable
         uncertainty estimation and speed up the calculation.
-    fit_kwargs: Additional arguments passed to the optimizing or sampling functions in Stan.
+    fit_kwargs: Additional arguments passed to the optimizing or
+        sampling functions of the StanModel.
     """
 
     def __init__(
@@ -1106,14 +1107,31 @@ class Prophet(object):
             }
 
         def add_fit_kwargs(args, fit_kwargs, valid_args):
-            args.update({k: v for k, v in self.fit_kwargs.items() if k in valid_args and k not in args.keys()})
+            args.update({k: v for k, v in self.fit_kwargs.items()
+                         if k in valid_args and k not in args.keys()})
 
-        # From https://pystan.readthedocs.io/en/latest/_modules/pystan/model.html
-        optimizing_valid_args = {"iter", "save_iterations", "refresh",
-                      "init_alpha", "tol_obj", "tol_grad", "tol_param",
-                      "tol_rel_obj", "tol_rel_grad", "history_size"}
+        # From the pystan model
+        # https://pystan.readthedocs.io/en/latest/_modules/pystan/model.html
+        # Optimizing function parameters
+        optimizing_valid_args = {"seed", "sample_file", "verbose"}
 
-        sampling_valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "refresh", "control"}
+        # Optimizing function additional parameters
+        optimizing_extra_args = {"iter", "save_iterations", "refresh",
+                                 "init_alpha", "tol_obj", "tol_grad",
+                                 "tol_param", "tol_rel_obj", "tol_rel_grad",
+                                 "history_size"}
+
+        optimizing_valid_args = optimizing_valid_args.union(optimizing_extra_args)
+
+        # Sampling function parameters
+        sampling_valid_args = {"chains", "warmup", "thin", "seed",
+                               "sample_file", "diagnostic_file",
+                               "verbose", "n_jobs"}
+
+        sampling_extra_args = {"chain_id", "init_r", "test_grad",
+                               "append_samples", "refresh", "control"}
+        # Sampling function additional parameters
+        sampling_valid_args = sampling_valid_args.union(sampling_extra_args)
 
         if (
                 (history['y'].min() == history['y'].max())

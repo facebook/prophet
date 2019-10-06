@@ -786,9 +786,8 @@ class TestProphet(TestCase):
 
     def test_fit_kwargs(self):
         df = DATA.copy()
-        fit_kwargs = {"history_size": 10}
-        m = Prophet(fit_kwargs=fit_kwargs)
+        fit_kwargs = {"n_jobs": 1}
+        m = Prophet(mcmc_samples=100, fit_kwargs=fit_kwargs)
         res = m.fit(df)
         # Check that the n_jobs parameters was used
-        print(res.params)
-        self.assertTrue(res.stan_args["history_size"] == fit_kwargs["history_size"])
+        self.assertTrue(res.stan_args["n_jobs"] == fit_kwargs["n_jobs"])
