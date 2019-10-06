@@ -77,6 +77,7 @@ class Prophet(object):
     uncertainty_samples: Number of simulated draws used to estimate
         uncertainty intervals. Settings this value to 0 or False will disable
         uncertainty estimation and speed up the calculation.
+    fit_kwargs: Additional arguments passed to the optimizing or sampling functions in Stan.
     """
 
     def __init__(
@@ -96,6 +97,7 @@ class Prophet(object):
             mcmc_samples=0,
             interval_width=0.80,
             uncertainty_samples=1000,
+            fit_kwargs={},
     ):
         self.growth = growth
 
@@ -122,6 +124,8 @@ class Prophet(object):
         self.interval_width = interval_width
         self.uncertainty_samples = uncertainty_samples
 
+        self.fit_kwargs = fit_kwargs
+
         # Set during fitting or by other methods
         self.start = None
         self.y_scale = None
@@ -132,6 +136,7 @@ class Prophet(object):
         self.extra_regressors = OrderedDict({})
         self.country_holidays = None
         self.stan_fit = None
+        self.stan_args = None
         self.params = {}
         self.history = None
         self.history_dates = None
@@ -1100,6 +1105,16 @@ class Prophet(object):
                 'sigma_obs': 1,
             }
 
+        def add_fit_kwargs(args, fit_kwargs, valid_args):
+            args.update({k: v for k, v in self.fit_kwargs.items() if k in valid_args and k not in args.keys()})
+
+        # From https://pystan.readthedocs.io/en/latest/_modules/pystan/model.html
+        optimizing_valid_args = {"iter", "save_iterations", "refresh",
+                      "init_alpha", "tol_obj", "tol_grad", "tol_param",
+                      "tol_rel_obj", "tol_rel_grad", "history_size"}
+
+        sampling_valid_args = {"chain_id", "init_r", "test_grad", "append_samples", "refresh", "control"}
+
         if (
                 (history['y'].min() == history['y'].max())
                 and self.growth == 'linear'
@@ -1116,6 +1131,9 @@ class Prophet(object):
                 iter=self.mcmc_samples,
             )
             args.update(kwargs)
+            # Adds additional parameters for StanModel.sampling
+            add_fit_kwargs(args, self.fit_kwargs, sampling_valid_args)
+            self.stan_args = args
             stan_fit = model.sampling(**args)
             for par in stan_fit.model_pars:
                 self.params[par] = stan_fit[par]
@@ -1130,6 +1148,9 @@ class Prophet(object):
                 iter=1e4,
             )
             args.update(kwargs)
+            # Adds additional parameters for StanModel.optimizing
+            add_fit_kwargs(args, self.fit_kwargs, optimizing_valid_args)
+            self.stan_args = args
             try:
                 params = model.optimizing(**args)
             except RuntimeError:
@@ -1148,7 +1169,6 @@ class Prophet(object):
             # Fold delta into the base rate k
             self.params['k'] = self.params['k'] + self.params['delta']
             self.params['delta'] = np.zeros(self.params['delta'].shape)
-
         return self
 
     def predict(self, df=None):

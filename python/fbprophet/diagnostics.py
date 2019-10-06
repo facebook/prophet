@@ -57,7 +57,7 @@ def generate_cutoffs(df, horizon, initial, period):
     return reversed(result)
 
 
-def cross_validation(model, horizon, period=None, initial=None):
+def cross_validation(model, horizon, period=None, initial=None, fit_kwargs=None):
     """Cross-Validation for time series.
 
     Computes forecasts from historical cutoff points. Beginning from
@@ -76,6 +76,8 @@ def cross_validation(model, horizon, period=None, initial=None):
         be done at every this period. If not provided, 0.5 * horizon is used.
     initial: string with pd.Timedelta compatible style. The first training
         period will begin here. If not provided, 3 * horizon is used.
+    fit_kwargs: Additional arguments passed to the optimizing or sampling functions in Stan.
+        If it is not 'None' it replaces the fit_kwargs if the model.
 
     Returns
     -------
@@ -110,6 +112,9 @@ def cross_validation(model, horizon, period=None, initial=None):
     for cutoff in cutoffs:
         # Generate new object with copying fitting options
         m = prophet_copy(model, cutoff)
+        # Replace the fit_kwargs from the model
+        if fit_kwargs is not None:
+            m.fit_kwargs = fit_kwargs
         # Train model
         history_c = df[df['ds'] <= cutoff]
         if history_c.shape[0] < 2:
@@ -185,6 +190,7 @@ def prophet_copy(m, cutoff=None):
         mcmc_samples=m.mcmc_samples,
         interval_width=m.interval_width,
         uncertainty_samples=m.uncertainty_samples,
+        fit_kwargs=m.fit_kwargs,
     )
     m2.extra_regressors = deepcopy(m.extra_regressors)
     m2.seasonalities = deepcopy(m.seasonalities)
