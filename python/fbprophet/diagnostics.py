@@ -16,7 +16,7 @@ import pandas as pd
 logger = logging.getLogger('fbprophet')
 
 
-def generate_cutoffs(df, horizon, initial, period):
+def generate_cutoffs(df, horizon, initial, period, folds=None):
     """Generate cutoff dates
 
     Parameters
@@ -25,6 +25,7 @@ def generate_cutoffs(df, horizon, initial, period):
     horizon: pd.Timedelta forecast horizon.
     initial: pd.Timedelta window of the initial forecast period.
     period: pd.Timedelta simulated forecasts are done with this period.
+    folds: Number of most recent cutoffs; if None, generate all posible cutoffs.
 
     Returns
     -------
@@ -54,10 +55,10 @@ def generate_cutoffs(df, horizon, initial, period):
     logger.info('Making {} forecasts with cutoffs between {} and {}'.format(
         len(result), result[-1], result[0]
     ))
-    return reversed(result)
+    return reversed(result[:folds])
 
 
-def cross_validation(model, horizon, period=None, initial=None):
+def cross_validation(model, horizon, period=None, initial=None, folds=None):
     """Cross-Validation for time series.
 
     Computes forecasts from historical cutoff points. Beginning from
@@ -76,6 +77,8 @@ def cross_validation(model, horizon, period=None, initial=None):
         be done at every this period. If not provided, 0.5 * horizon is used.
     initial: string with pd.Timedelta compatible style. The first training
         period will begin here. If not provided, 3 * horizon is used.
+    folds: Number of most recent cutoffs; if None, validate on all posible
+        cutoffs, otherwise use it to limit the quantity of folds.
 
     Returns
     -------
@@ -105,7 +108,7 @@ def cross_validation(model, horizon, period=None, initial=None):
     if model.uncertainty_samples:
         predict_columns.extend(['yhat_lower', 'yhat_upper'])
 
-    cutoffs = generate_cutoffs(df, horizon, initial, period)
+    cutoffs = generate_cutoffs(df, horizon, initial, period, folds)
     predicts = []
     for cutoff in cutoffs:
         # Generate new object with copying fitting options
