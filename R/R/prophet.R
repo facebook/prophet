@@ -1343,7 +1343,7 @@ predict.prophet <- function(object, df = NULL, ...) {
 
   df$trend <- predict_trend(object, df)
   seasonal.components <- predict_seasonal_components(object, df)
-  if (uncertainty.samples) {
+  if (object$uncertainty.samples) {
     intervals <- predict_uncertainty(object, df)
   } else {
     intervals <- NULL
@@ -1458,7 +1458,7 @@ predict_seasonal_components <- function(m, df) {
   m <- out$m
   seasonal.features <- out$seasonal.features
   component.cols <- out$component.cols
-  if (uncertainty.samples){
+  if (m$uncertainty.samples){
     lower.p <- (1 - m$interval.width)/2
     upper.p <- (1 + m$interval.width)/2
   }
@@ -1473,7 +1473,7 @@ predict_seasonal_components <- function(m, df) {
       comp <- comp * m$y.scale
     }
     component.predictions[[component]] <- rowMeans(comp, na.rm = TRUE)
-    if (uncertainty.samples){
+    if (m$uncertainty.samples){
       component.predictions[[paste0(component, '_lower')]] <- apply(
         comp, 1, stats::quantile, lower.p, na.rm = TRUE)
       component.predictions[[paste0(component, '_upper')]] <- apply(
