@@ -405,7 +405,7 @@ add_changepoints_to_plot <- function(m, threshold = 0.01, cp_color = "red",
 #' @param uncertainty Optional boolean indicating if the uncertainty interval for yhat
 #'  should be plotted, which will only be done if x$uncertainty.samples > 0. Must be
 #'  present in fcst as yhat_lower and yhat_upper.
-#' @param ... additional arguments
+#' @param ... additional arguments passed to dygraph::dygraph
 #' @importFrom dplyr "%>%"
 #' @return A dygraph plot.
 #'
