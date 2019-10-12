@@ -100,6 +100,19 @@ class TestCommand(test_command):
 with open('requirements.txt', 'r') as f:
     install_requires = f.read().splitlines()
 
+try:
+    from numpy import __version__ as numpy_build_version
+    from Cython import __version__ as Cython_build_version
+    from pystan import  __version__ as pystan_build_version
+    install_requires.extend([
+        "numpy=={}".format(numpy_build_version),
+        "Cython=={}".format(Cython_build_version),
+        "pystan=={}".format(pystan_build_version),
+    ])
+except ImportError:
+    print("How could this happen???")
+    raise
+
 setup(
     name='fbprophet',
     version='0.5',
