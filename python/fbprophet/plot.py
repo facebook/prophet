@@ -902,7 +902,7 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
         type='date',
         range=range_x)
     yaxis = go.layout.YAxis(rangemode='normal' if name == 'trend' else 'tozero',
-                            title=go.layout.yaxis.Title(text=name),
+                            title=name,
                             zerolinecolor=zeroline_color)
     if name in m.component_modes['multiplicative']:
         yaxis.update(tickformat='%', hoverformat='.2%')
@@ -985,7 +985,7 @@ def get_seasonality_plotly_props(m, name, uncertainty=True):
         range=[df_y['ds'].min() - range_margin, df_y['ds'].max() + range_margin]
     )
 
-    yaxis = go.layout.YAxis(title=go.layout.yaxis.Title(text=name),
+    yaxis = go.layout.YAxis(title=name,
                             zerolinecolor=zeroline_color)
     if m.seasonalities[name]['mode'] == 'multiplicative':
         yaxis.update(tickformat='%', hoverformat='.2%')
