@@ -101,7 +101,7 @@ cross_validation <- function(
   }
   
   predict_columns <- c('ds', 'yhat')
-  if (model$uncertainty_samples){
+  if (model$uncertainty.samples){
     predict_columns <- append(predict_columns, c('yhat_lower', 'yhat_upper'))
   }
 
