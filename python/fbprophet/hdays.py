@@ -51,7 +51,7 @@ class Brazil(HolidayBase):
         self[date(year, 11, 2)] = "All Souls' Day"
 
         # Republic Proclamation Day
-        self[date(year, 11, 5)] = "Republic Proclamation Day"
+        self[date(year, 11, 15)] = "Republic Proclamation Day"
 
         # Christmas
         self[date(year, 12, 25)] = "Christmas"
