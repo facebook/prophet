@@ -1146,8 +1146,8 @@ class Prophet(object):
         # If no changepoints were requested, replace delta with 0s
         if len(self.changepoints) == 0:
             # Fold delta into the base rate k
-            self.params['k'] = self.params['k'] + self.params['delta']
-            self.params['delta'] = np.zeros(self.params['delta'].shape)
+            self.params['k'] = self.params['k'] + self.params['delta'].reshape(-1)
+            self.params['delta'] = np.zeros(self.params['delta'].shape).reshape((-1, 1))
 
         return self
 
