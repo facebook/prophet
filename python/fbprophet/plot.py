@@ -441,7 +441,7 @@ def add_changepoints_to_plot(
         artists.append(ax.plot(fcst['ds'], fcst['trend'], c=cp_color))
     signif_changepoints = m.changepoints[
         np.abs(np.nanmean(m.params['delta'], axis=0)) >= threshold
-    ]
+    ] if len(m.changepoints) > 0 else []
     for cp in signif_changepoints:
         artists.append(ax.axvline(x=cp, c=cp_color, ls=cp_linestyle))
     return artists
@@ -628,7 +628,7 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
             line=dict(color=trend_color, width=line_width),
         ))
     # Add changepoints
-    if changepoints:
+    if changepoints and len(m.changepoints) > 0:
         signif_changepoints = m.changepoints[
             np.abs(np.nanmean(m.params['delta'], axis=0)) >= changepoints_threshold
         ]
