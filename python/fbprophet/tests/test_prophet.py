@@ -55,6 +55,10 @@ class TestProphet(TestCase):
         forecaster.fit(train)
         forecaster.predict(future)
 
+        forecaster = Prophet(n_changepoints=0, mcmc_samples=100)
+        forecaster.fit(train)
+        forecaster.predict(future)
+
     def test_fit_changepoint_not_in_history(self):
         train = DATA[(DATA['ds'] < '2013-01-01') | (DATA['ds'] > '2014-01-01')]
         future = pd.DataFrame({'ds': DATA['ds']})
