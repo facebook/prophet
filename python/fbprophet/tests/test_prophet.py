@@ -89,6 +89,19 @@ class TestProphet(TestCase):
         fcst = m.predict(future)
         self.assertEqual(fcst['yhat'].values[-1], 0)
 
+    def test_fit_predict_uncertainty_disabled(self):
+        N = DATA.shape[0]
+        train = DATA.head(N // 2)
+        future = DATA.tail(N // 2)
+
+        m = Prophet(uncertainty_samples=0)
+        m.fit(train)
+        fcst = m.predict(future)
+        self.assertNotIn('yhat_lower', list(fcst.columns))
+        self.assertNotIn('yhat_upper', list(fcst.columns))
+        self.assertNotIn('trend_lower', list(fcst.columns))
+        self.assertNotIn('trend_upper', list(fcst.columns))
+
     def test_setup_dataframe(self):
         m = Prophet()
         N = DATA.shape[0]
