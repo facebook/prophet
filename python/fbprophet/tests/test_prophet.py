@@ -101,10 +101,9 @@ class TestProphet(TestCase):
         m = Prophet(uncertainty_samples=0)
         m.fit(train)
         fcst = m.predict(future)
-        self.assertNotIn('yhat_lower', list(fcst.columns))
-        self.assertNotIn('yhat_upper', list(fcst.columns))
-        self.assertNotIn('trend_lower', list(fcst.columns))
-        self.assertNotIn('trend_upper', list(fcst.columns))
+        self.assertListEqual(['ds', 'trend', 'additive_terms', 'weekly',
+                              'multiplicative_terms', 'yhat'], fcst.columns.tolist())
+
 
     def test_setup_dataframe(self):
         m = Prophet()
