@@ -94,12 +94,13 @@ class TestProphet(TestCase):
         train = DATA.head(N // 2)
         future = DATA.tail(N // 2)
 
-        m = Prophet(uncertainty_samples=0)
-        m.fit(train)
-        fcst = m.predict(future)
-        self.assertListEqual(['ds', 'trend', 'additive_terms', 'weekly',
-                              'multiplicative_terms', 'yhat'], fcst.columns.tolist())
-
+        for uncertainty in [0, False]:
+            m = Prophet(uncertainty_samples=uncertainty)
+            m.fit(train)
+            fcst = m.predict(future)
+            self.assertListEqual(['ds', 'trend', 'additive_terms', 'weekly',
+                                  'multiplicative_terms', 'yhat'],
+                                 fcst.columns.tolist())
 
     def test_setup_dataframe(self):
         m = Prophet()
