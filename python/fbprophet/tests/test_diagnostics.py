@@ -107,11 +107,12 @@ class TestDiagnostics(TestCase):
 
     def test_cross_validation_uncertainty_disabled(self):
         df = self.__df.copy()
-        m = Prophet(uncertainty_samples=0)
-        m.fit(df)
-        df_cv = diagnostics.cross_validation(
-            m, horizon='4 days', period='4 days', initial='115 days')
-        self.assertListEqual(['ds', 'yhat', 'y', 'cutoff'], df_cv.columns.tolist())
+        for uncertainty in [0, False]:
+            m = Prophet(uncertainty_samples=uncertainty)
+            m.fit(df)
+            df_cv = diagnostics.cross_validation(
+                m, horizon='4 days', period='4 days', initial='115 days')
+            self.assertListEqual(['ds', 'yhat', 'y', 'cutoff'], df_cv.columns.tolist())
 
     def test_performance_metrics(self):
         m = Prophet()
