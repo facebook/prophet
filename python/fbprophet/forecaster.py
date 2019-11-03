@@ -1494,7 +1494,7 @@ class Prophet(object):
         """
         if self.history_dates is None:
             raise Exception('Model must be fit before this can be used.')
-        last_date = self.history_dates.max()
+        last_date = pd.to_datetime(self.history_dates.max(), unit='D')
         dates = pd.date_range(
             start=last_date,
             periods=periods + 1,  # An extra in case we include start
