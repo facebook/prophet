@@ -112,7 +112,8 @@ class TestDiagnostics(TestCase):
             m.fit(df)
             df_cv = diagnostics.cross_validation(
                 m, horizon='4 days', period='4 days', initial='115 days')
-            self.assertListEqual(['ds', 'yhat', 'y', 'cutoff'], df_cv.columns.tolist())
+            expected_cols = ['ds', 'yhat', 'y', 'cutoff']
+            self.assertTrue(all(col in expected_cols for col in df_cv.columns.tolist()))
 
     def test_performance_metrics(self):
         m = Prophet()
