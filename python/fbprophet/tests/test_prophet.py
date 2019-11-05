@@ -98,9 +98,8 @@ class TestProphet(TestCase):
             m = Prophet(uncertainty_samples=uncertainty)
             m.fit(train)
             fcst = m.predict(future)
-            self.assertListEqual(['ds', 'trend', 'additive_terms', 'weekly',
-                                  'multiplicative_terms', 'yhat'],
-                                 fcst.columns.tolist())
+            expected_cols = ['ds', 'trend', 'additive_terms', 'multiplicative_terms', 'weekly', 'yhat']
+            self.assertTrue(all(col in expected_cols for col in fcst.columns.tolist()))
 
     def test_setup_dataframe(self):
         m = Prophet()
