@@ -430,7 +430,7 @@ dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
   df <- df_for_plotting(x, fcst)
   
   # build variables to include, or not, the uncertainty data
-  if(uncertainty && x$uncertainty.sampes && exists("yhat_lower", where = df))
+  if(uncertainty && x$uncertainty.samples && exists("yhat_lower", where = df))
   {
     colsToKeep <- c('y', 'yhat', 'yhat_lower', 'yhat_upper')
     forecastCols <- c('yhat_lower', 'yhat', 'yhat_upper')
