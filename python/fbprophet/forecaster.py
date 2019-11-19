@@ -212,7 +212,7 @@ class Prophet(object):
                 f'Name "{name}" already used for a seasonality.')
         if check_regressors and name in self.extra_regressors:
             raise ValueError(
-                'Name "{name}" already used for an added regressor.')
+                f'Name "{name}" already used for an added regressor.')
 
     def setup_dataframe(self, df, initialize_scales=False):
         """Prepare dataframe for fitting or predicting.
@@ -231,9 +231,10 @@ class Prophet(object):
         -------
         pd.DataFrame prepared for fitting or predicting.
         """
-        df['y'] = pd.to_numeric(df['y'])
-        if np.isinf(df['y'].values).any():
-            raise ValueError('Found infinity in column y.')
+        if 'y' in df:  # 'y' will be in training data
+            df['y'] = pd.to_numeric(df['y'])
+            if np.isinf(df['y'].values).any():
+                raise ValueError('Found infinity in column y.')
         if df['ds'].dtype == np.int64:
             df['ds'] = df['ds'].astype(str)
         df['ds'] = pd.to_datetime(df['ds'])
@@ -256,7 +257,7 @@ class Prophet(object):
             if condition_name is not None:
                 if condition_name not in df:
                     raise ValueError(
-                        f'Condition "{condition}" missing from dataframe')
+                        f'Condition "{condition_name}" missing from dataframe')
                 if not df[condition_name].isin([True, False]).all():
                     raise ValueError(
                         f'Found non-boolean in column {condition_name}')
@@ -287,7 +288,8 @@ class Prophet(object):
             df['cap_scaled'] = (df['cap'] - df['floor']) / self.y_scale
 
         df['t'] = (df['ds'] - self.start) / self.t_scale
-        df['y_scaled'] = (df['y'] - df['floor']) / self.y_scale
+        if 'y' in df:
+            df['y_scaled'] = (df['y'] - df['floor']) / self.y_scale
 
         for name, props in self.extra_regressors.items():
             df[name] = ((df[name] - props['mu']) / props['std'])
@@ -455,7 +457,7 @@ class Prophet(object):
             all_holidays = pd.concat((all_holidays, country_holidays_df),
                                      sort=False)
             all_holidays.reset_index(drop=True, inplace=True)
-        # Drop holidays that were not seen in data used to fit model
+        # Drop future holidays not previously seen in training data 
         if self.train_holiday_names is not None:
             # Remove holiday names didn't show up in fit
             index_to_drop = all_holidays.index[
@@ -1091,8 +1093,8 @@ class Prophet(object):
                 'sigma_obs': 1,
             }
 
-        if ((history['y'].min() == history['y'].max())
-            and (self.growth == 'linear')):
+        if (history['y'].min() == history['y'].max()
+            and self.growth == 'linear'):
             # Nothing to fit.
             self.params = stan_init()
             self.params['sigma_obs'] = 1e-9
@@ -1486,7 +1488,7 @@ class Prophet(object):
         requested number of periods.
         """
         if self.history_dates is None:
-            raise Exception('Model as not been fit.')
+            raise Exception('Model has not been fit.')
         last_date = self.history_dates.max()
         dates = pd.date_range(
             start=last_date,
