@@ -42,7 +42,8 @@ class TestProphet(TestCase):
         train = DATA.head(N // 2)
         future = DATA.tail(N // 2)
 
-        forecaster = Prophet(weekly_seasonality=False, yearly_seasonality=False)
+        forecaster = Prophet(weekly_seasonality=False,
+                             yearly_seasonality=False)
         forecaster.fit(train)
         forecaster.predict(future)
 
@@ -102,8 +103,10 @@ class TestProphet(TestCase):
             m = Prophet(uncertainty_samples=uncertainty)
             m.fit(train)
             fcst = m.predict(future)
-            expected_cols = ['ds', 'trend', 'additive_terms', 'multiplicative_terms', 'weekly', 'yhat']
-            self.assertTrue(all(col in expected_cols for col in fcst.columns.tolist()))
+            expected_cols = ['ds', 'trend', 'additive_terms',
+                             'multiplicative_terms', 'weekly', 'yhat']
+            self.assertTrue(all(col in expected_cols
+                                for col in fcst.columns.tolist()))
 
     def test_setup_dataframe(self):
         m = Prophet()
@@ -125,7 +128,6 @@ class TestProphet(TestCase):
         df.index = df.loc[:, 'ds']
         m = Prophet()
         m.fit(df)
-
 
     def test_logistic_floor(self):
         m = Prophet(growth='logistic')
@@ -223,7 +225,7 @@ class TestProphet(TestCase):
         mat = Prophet.fourier_series(DATA['ds'], 7, 3)
         # These are from the R forecast package directly.
         true_values = np.array([
-            0.7818315, 0.6234898, 0.9749279, -0.2225209, 0.4338837, -0.9009689,
+            0.7818315, 0.6234898, 0.9749279, -0.2225209, 0.4338837, -0.9009689
         ])
         self.assertAlmostEqual(np.sum((mat[0] - true_values)**2), 0.0)
 
@@ -231,7 +233,7 @@ class TestProphet(TestCase):
         mat = Prophet.fourier_series(DATA['ds'], 365.25, 3)
         # These are from the R forecast package directly.
         true_values = np.array([
-            0.7006152, -0.7135393, -0.9998330, 0.01827656, 0.7262249, 0.6874572,
+            0.7006152, -0.7135393, -0.9998330, 0.01827656, 0.7262249, 0.6874572
         ])
         self.assertAlmostEqual(np.sum((mat[0] - true_values)**2), 0.0)
 
