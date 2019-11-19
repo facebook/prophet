@@ -354,9 +354,9 @@ class Prophet(object):
                         'Changepoints must fall within training data.')
         else:
             # Place potential changepoints evenly through first
-            # {changepoint_range} proportion of the history
-            hist_size = int(np.floor(
-                self.history.shape[0] * self.changepoint_range))
+            # `changepoint_range` proportion of the history
+            hist_size = int(np.floor(self.history.shape[0]
+                                     * self.changepoint_range))
             if self.n_changepoints + 1 > hist_size:
                 self.n_changepoints = hist_size - 1
                 logger.info(
@@ -533,7 +533,7 @@ class Prophet(object):
                 if loc is not None:
                     expanded_holidays[key][loc] = 1.
                 else:
-                    expanded_holidays[key] # Access key to generate value
+                    expanded_holidays[key]  # Access key to generate value
         holiday_features = pd.DataFrame(expanded_holidays)
         # Make sure column order is consistent
         holiday_features = holiday_features[sorted(holiday_features.columns

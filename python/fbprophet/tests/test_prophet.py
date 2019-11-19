@@ -129,7 +129,6 @@ class TestProphet(TestCase):
         m = Prophet()
         m.fit(df)
 
-
     def test_logistic_floor(self):
         m = Prophet(growth='logistic')
         N = DATA.shape[0]
