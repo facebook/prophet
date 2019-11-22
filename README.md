@@ -1,6 +1,8 @@
 # Prophet: Automatic Forecasting Procedure
 
 [![Build Status](https://travis-ci.com/facebook/prophet.svg?branch=master)](https://travis-ci.com/facebook/prophet)
+[![Pypi_Version](https://img.shields.io/pypi/v/fbprophet.svg)](https://pypi.python.org/pypi/fbprophet)
+[![Conda_Version](https://anaconda.org/conda-forge/fbprophet/badges/version.svg)](https://anaconda.org/conda-forge/fbprophet/)
 
 Prophet is a procedure for forecasting time series data based on an additive model where non-linear trends are fit with yearly, weekly, and daily seasonality, plus holiday effects. It works best with time series that have strong seasonal effects and several seasons of historical data. Prophet is robust to missing data and shifts in the trend, and typically handles outliers well.
 
