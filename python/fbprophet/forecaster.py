@@ -198,21 +198,24 @@ class Prophet(object):
         reserved_names.extend([
             'ds', 'y', 'cap', 'floor', 'y_scaled', 'cap_scaled'])
         if name in reserved_names:
-            raise ValueError(f'Name "{name}" is reserved.')
+            raise ValueError('Name "{name}" is reserved.'.format(name=name)
         if (check_holidays and self.holidays is not None and
                 name in self.holidays['holiday'].unique()):
             raise ValueError(
-                f'Name "{name}" already used for a holiday.')
+                'Name "{name}" already used for a holiday.'.format(name=name)
         if (check_holidays and self.country_holidays is not None and
                 name in get_holiday_names(self.country_holidays)):
             raise ValueError(
-                f'Name "{name}" is a holiday name in {self.country_holidays}.')
+                'Name "{name}" is a holiday name in {country_holidays}.'
+                .format(name=name, country_holidays=self.country_holidays))
         if check_seasonalities and name in self.seasonalities:
             raise ValueError(
-                f'Name "{name}" already used for a seasonality.')
+                'Name "{name}" already used for a seasonality.'
+                .format(name=name))
         if check_regressors and name in self.extra_regressors:
             raise ValueError(
-                f'Name "{name}" already used for an added regressor.')
+                'Name "{name}" already used for an added regressor.'
+                .format(name=name))
 
     def setup_dataframe(self, df, initialize_scales=False):
         """Prepare dataframe for fitting or predicting.
@@ -248,19 +251,22 @@ class Prophet(object):
         for name in self.extra_regressors:
             if name not in df:
                 raise ValueError(
-                    f'Regressor "{name}" missing from dataframe')
+                    'Regressor "{name}" missing from dataframe'
+                    .format(name=name))
             df[name] = pd.to_numeric(df[name])
             if df[name].isnull().any():
-                raise ValueError(f'Found NaN in column {name}')
+                raise ValueError('Found NaN in column {name}'.format(name=name)
         for props in self.seasonalities.values():
             condition_name = props['condition_name']
             if condition_name is not None:
                 if condition_name not in df:
                     raise ValueError(
-                        f'Condition "{condition_name}" missing from dataframe')
+                        'Condition "{condition_name}" missing from dataframe'
+                        .format(condition_name=condition_name))
                 if not df[condition_name].isin([True, False]).all():
                     raise ValueError(
-                        f'Found non-boolean in column {condition_name}')
+                        'Found non-boolean in column {condition_name}'
+                        .format(condition_name=condition_name))
                 df[condition_name] = df[condition_name].astype('bool')
 
         if df.index.name == 'ds':
@@ -360,8 +366,9 @@ class Prophet(object):
             if self.n_changepoints + 1 > hist_size:
                 self.n_changepoints = hist_size - 1
                 logger.info(
-                    f'n_changepoints greater than number of observations. '
-                     'Using {self.n_changepoints}.'
+                    'n_changepoints greater than number of observations. '
+                    'Using {n_changepoints}.'
+                    .format(n_changepoints=self.n_changepoints)
                 )
             if self.n_changepoints > 0:
                 cp_indexes = (
@@ -513,8 +520,9 @@ class Prophet(object):
                 ps = float(self.holidays_prior_scale)
             if row.holiday in prior_scales and prior_scales[row.holiday] != ps:
                 raise ValueError(
-                    f'Holiday {row.holiday} does not have consistent prior '
-                    'scale specification.')
+                    'Holiday {holiday} does not have consistent prior '
+                    'scale specification.'.format(holiday=row.holiday)
+                )
             if ps <= 0:
                 raise ValueError('Prior scale must be > 0')
             prior_scales[row.holiday] = ps
@@ -695,8 +703,9 @@ class Prophet(object):
         # Set the holidays.
         if self.country_holidays is not None:
             logger.warning(
-                f'Changing country holidays from {self.country_holidays} to '
-                 '{country_name}.'
+                'Changing country holidays from {country_holidays} to '
+                '{country_name}.'
+                .format(country_holidays=self.country_holidays)
             )
         self.country_holidays = country_name
         return self
@@ -873,13 +882,14 @@ class Prophet(object):
             fourier_order = 0
             if name in self.seasonalities:
                 logger.info(
-                    f'Found custom seasonality named "{name}", '
-                     'disabling built-in {name} seasonality.'
+                    'Found custom seasonality named "{name}", disablling '
+                    'built-in {name} seasonality.'.format(name=name)
                 )
             elif auto_disable:
                 logger.info(
-                    f'Disabling {name} seasonality. Run prophet with '
-                     '{name}_seasonality=True to override this.'
+                    'Disabling {name} seasonality. Run prophet with '
+                    '{name}_seasonality=True to override this.'
+                    .format(name=name)
                 )
             else:
                 fourier_order = default_order
