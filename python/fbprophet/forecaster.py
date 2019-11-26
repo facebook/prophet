@@ -198,24 +198,30 @@ class Prophet(object):
         reserved_names.extend([
             'ds', 'y', 'cap', 'floor', 'y_scaled', 'cap_scaled'])
         if name in reserved_names:
-            raise ValueError('Name "{name}" is reserved.'.format(name=name)
+            raise ValueError(
+                'Name "{name}" is reserved.'.format(name=name)
+            )
         if (check_holidays and self.holidays is not None and
                 name in self.holidays['holiday'].unique()):
             raise ValueError(
                 'Name "{name}" already used for a holiday.'.format(name=name)
+            )
         if (check_holidays and self.country_holidays is not None and
                 name in get_holiday_names(self.country_holidays)):
             raise ValueError(
                 'Name "{name}" is a holiday name in {country_holidays}.'
-                .format(name=name, country_holidays=self.country_holidays))
+                .format(name=name, country_holidays=self.country_holidays)
+            )
         if check_seasonalities and name in self.seasonalities:
             raise ValueError(
                 'Name "{name}" already used for a seasonality.'
-                .format(name=name))
+                .format(name=name)
+            )
         if check_regressors and name in self.extra_regressors:
             raise ValueError(
                 'Name "{name}" already used for an added regressor.'
-                .format(name=name))
+                .format(name=name)
+            )
 
     def setup_dataframe(self, df, initialize_scales=False):
         """Prepare dataframe for fitting or predicting.
@@ -255,7 +261,9 @@ class Prophet(object):
                     .format(name=name))
             df[name] = pd.to_numeric(df[name])
             if df[name].isnull().any():
-                raise ValueError('Found NaN in column {name}'.format(name=name)
+                raise ValueError(
+                    'Found NaN in column {name}'.format(name=name)
+                )
         for props in self.seasonalities.values():
             condition_name = props['condition_name']
             if condition_name is not None:
