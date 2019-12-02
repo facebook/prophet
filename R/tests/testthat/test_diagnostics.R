@@ -129,6 +129,11 @@ test_that("performance_metrics", {
   ))
   df_horizon <- performance_metrics(df_cv, metrics = c('mape'))
   expect_null(df_horizon)
+  # List of metrics containing non valid metrics
+  expect_error(
+     performance_metrics(df, metrics = c('mse', 'error_metric')),
+     'Valid values for metrics are: mse, rmse, mae, mape, coverage'
+  )
 })
 
 test_that("rolling_mean", {
