@@ -249,7 +249,7 @@ performance_metrics <- function(df, metrics = NULL, rolling_window = 0.1) {
   }
   if (!all(metrics %in% valid_metrics)) {
     stop(
-      paste('Valid values for metrics are:', paste(metrics, collapse = ", "))
+      paste('Valid values for metrics are:', paste(valid_metrics, collapse = ", "))
     )
   }
   df_m <- df
