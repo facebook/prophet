@@ -250,7 +250,7 @@ class India(HolidayBase):
         # https://www.timeanddate.com/holidays/india/diwali?starty=
         # https://www.infoplease.com/calendar-holidays/major-holidays/
         # https://www.learnreligions.com/when-is-holi-1770208
-        warning_msg = "We only support Diwali and Holi holidays from 2010 to 2025"
+        warning_msg = "We only support Diwali and Holi holidays from 2010 to 2030"
         warnings.warn(warning_msg, Warning)
         name1 = "Diwali"
         name2 = "Holi"
