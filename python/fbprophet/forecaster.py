@@ -43,7 +43,6 @@ class Prophet(object):
     changepoint_range: Proportion of history in which trend changepoints will
         be estimated. Defaults to 0.8 for the first 80%. Not used if
         `changepoints` is specified.
-    Not used if input `changepoints` is supplied.
     yearly_seasonality: Fit yearly seasonality.
         Can be 'auto', True, False, or a number of Fourier terms to generate.
     weekly_seasonality: Fit weekly seasonality.
