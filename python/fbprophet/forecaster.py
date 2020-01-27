@@ -713,7 +713,10 @@ class Prophet(object):
             logger.warning(
                 'Changing country holidays from {country_holidays} to '
                 '{country_name}.'
-                .format(country_holidays=self.country_holidays)
+                .format(
+                    country_holidays=self.country_holidays,
+                    country_name=country_name,
+                )
             )
         self.country_holidays = country_name
         return self
@@ -890,7 +893,7 @@ class Prophet(object):
             fourier_order = 0
             if name in self.seasonalities:
                 logger.info(
-                    'Found custom seasonality named "{name}", disablling '
+                    'Found custom seasonality named "{name}", disabling '
                     'built-in {name} seasonality.'.format(name=name)
                 )
             elif auto_disable:
