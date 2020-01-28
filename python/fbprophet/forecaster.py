@@ -197,24 +197,30 @@ class Prophet(object):
         reserved_names.extend([
             'ds', 'y', 'cap', 'floor', 'y_scaled', 'cap_scaled'])
         if name in reserved_names:
-            raise ValueError('Name {name!r} is reserved.'.format(name=name))
+            raise ValueError(
+                'Name {name!r} is reserved.'.format(name=name)
+            )
         if (check_holidays and self.holidays is not None and
                 name in self.holidays['holiday'].unique()):
             raise ValueError(
-                'Name {name!r} already used for a holiday.'.format(name=name))
+                'Name {name!r} already used for a holiday.'.format(name=name)
+            )
         if (check_holidays and self.country_holidays is not None and
                 name in get_holiday_names(self.country_holidays)):
             raise ValueError(
                 'Name {name!r} is a holiday name in {country_holidays}.'
-                .format(name=name, country_holidays=self.country_holidays))
+                .format(name=name, country_holidays=self.country_holidays)
+            )
         if check_seasonalities and name in self.seasonalities:
             raise ValueError(
                 'Name {name!r} already used for a seasonality.'
-                .format(name=name))
+                .format(name=name)
+            )
         if check_regressors and name in self.extra_regressors:
             raise ValueError(
                 'Name {name!r} already used for an added regressor.'
-                .format(name=name))
+                .format(name=name)
+            )
 
     def setup_dataframe(self, df, initialize_scales=False):
         """Prepare dataframe for fitting or predicting.
@@ -251,22 +257,26 @@ class Prophet(object):
             if name not in df:
                 raise ValueError(
                     'Regressor {name!r} missing from dataframe'
-                    .format(name=name))
+                    .format(name=name)
+                )
             df[name] = pd.to_numeric(df[name])
             if df[name].isnull().any():
-                raise ValueError('Found NaN in column {name!r}'
-                                 .format(name=name))
+                raise ValueError(
+                    'Found NaN in column {name!r}'.format(name=name)
+                )
         for props in self.seasonalities.values():
             condition_name = props['condition_name']
             if condition_name is not None:
                 if condition_name not in df:
                     raise ValueError(
                         'Condition {condition_name!r} missing from dataframe'
-                        .format(condition_name=condition_name))
+                        .format(condition_name=condition_name)
+                    )
                 if not df[condition_name].isin([True, False]).all():
                     raise ValueError(
                         'Found non-boolean in column {condition_name!r}'
-                        .format(condition_name=condition_name))
+                        .format(condition_name=condition_name)
+                    )
                 df[condition_name] = df[condition_name].astype('bool')
 
         if df.index.name == 'ds':
