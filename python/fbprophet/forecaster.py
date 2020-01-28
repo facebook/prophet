@@ -895,13 +895,13 @@ class Prophet(object):
             fourier_order = 0
             if name in self.seasonalities:
                 logger.info(
-                    'Found custom seasonality named {name!r}, disablling '
+                    'Found custom seasonality named {name!r}, disabling '
                     'built-in {name!r} seasonality.'.format(name=name)
                 )
             elif auto_disable:
                 logger.info(
-                    'Disabling {name!r} seasonality. Run prophet with '
-                    '{name!r}_seasonality=True to override this.'
+                    'Disabling {name} seasonality. Run prophet with '
+                    '{name}_seasonality=True to override this.'
                     .format(name=name)
                 )
             else:
