@@ -43,7 +43,6 @@ class Prophet(object):
     changepoint_range: Proportion of history in which trend changepoints will
         be estimated. Defaults to 0.8 for the first 80%. Not used if
         `changepoints` is specified.
-    Not used if input `changepoints` is supplied.
     yearly_seasonality: Fit yearly seasonality.
         Can be 'auto', True, False, or a number of Fourier terms to generate.
     weekly_seasonality: Fit weekly seasonality.
@@ -706,7 +705,10 @@ class Prophet(object):
             logger.warning(
                 'Changing country holidays from {country_holidays!r} to '
                 '{country_name!r}.'
-                .format(country_holidays=self.country_holidays)
+                .format(
+                    country_holidays=self.country_holidays,
+                    country_name=country_name,
+                )
             )
         self.country_holidays = country_name
         return self

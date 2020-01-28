@@ -23,7 +23,7 @@ The requirements for running a GitHub pages site locally is described in [GitHub
 
 > If you have run the site before, you can start with step 1 and then move on to step 5.
 
-1. Ensure that you are in the same directory where this `README.md` exists (e.g., it could be in `/docs` on `master`, in the root of a `gh-pages` branch, etc). The below RubyGems commands, etc. must be run from there.
+1. Ensure that you are in the same directory where this `README.md` exists (e.g., it could be in `/docs` on `master`, in the root of a `gh-pages` branch, etc). The below RubyGems commands, etc must be run from there.
 
 1. Make sure you have Ruby and [RubyGems](https://rubygems.org/) installed.
 
@@ -37,7 +37,7 @@ The requirements for running a GitHub pages site locally is described in [GitHub
     # may require sudo
     gem install bundler
     ```
-1. Install the project's dependencies
+1. Install the project's dependencies.
 
     ```
     # run this in the 'docs' directory
@@ -52,7 +52,7 @@ The requirements for running a GitHub pages site locally is described in [GitHub
 
 1. Run Jekyll's server.
 
-    - On first runs or for structural changes to the documentation (e.g., new sidebar menu item), do a full build.
+    - On first run or for structural changes to the documentation (e.g., new sidebar menu item), do a full build.
 
     ```
     bundle exec jekyll serve

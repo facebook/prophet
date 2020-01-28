@@ -8,7 +8,7 @@ subsections:
     title: Generating documentation
 ---
 
-Prophet has a non-fixed release cycle but we will be making bugfixes in response to user feedback and adding features.  Its current state is Beta (v0.3), we expect no obvious bugs. Please let us know if you encounter a bug by [filing an issue](https://github.com/facebook/prophet/issues). Github issues is also the right place to ask questions about using Prophet.
+Prophet has a non-fixed release cycle but we will be making bugfixes in response to user feedback and adding features.  Its current state is Beta (v0.5), we expect no obvious bugs. Please let us know if you encounter a bug by [filing an issue](https://github.com/facebook/prophet/issues). Github issues is also the right place to ask questions about using Prophet.
 
 We appreciate all contributions. If you are planning to contribute back bug-fixes, please do so without any further discussion.
 
