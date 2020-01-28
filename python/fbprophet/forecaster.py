@@ -198,23 +198,23 @@ class Prophet(object):
         reserved_names.extend([
             'ds', 'y', 'cap', 'floor', 'y_scaled', 'cap_scaled'])
         if name in reserved_names:
-            raise ValueError('Name "{name}" is reserved.'.format(name=name)
+            raise ValueError('Name {name!r} is reserved.'.format(name=name)
         if (check_holidays and self.holidays is not None and
                 name in self.holidays['holiday'].unique()):
             raise ValueError(
-                'Name "{name}" already used for a holiday.'.format(name=name)
+                'Name {name!r} already used for a holiday.'.format(name=name)
         if (check_holidays and self.country_holidays is not None and
                 name in get_holiday_names(self.country_holidays)):
             raise ValueError(
-                'Name "{name}" is a holiday name in {country_holidays}.'
+                'Name {name!r} is a holiday name in {country_holidays}.'
                 .format(name=name, country_holidays=self.country_holidays))
         if check_seasonalities and name in self.seasonalities:
             raise ValueError(
-                'Name "{name}" already used for a seasonality.'
+                'Name {name!r} already used for a seasonality.'
                 .format(name=name))
         if check_regressors and name in self.extra_regressors:
             raise ValueError(
-                'Name "{name}" already used for an added regressor.'
+                'Name {name!r} already used for an added regressor.'
                 .format(name=name))
 
     def setup_dataframe(self, df, initialize_scales=False):
@@ -251,21 +251,22 @@ class Prophet(object):
         for name in self.extra_regressors:
             if name not in df:
                 raise ValueError(
-                    'Regressor "{name}" missing from dataframe'
+                    'Regressor {name!r} missing from dataframe'
                     .format(name=name))
             df[name] = pd.to_numeric(df[name])
             if df[name].isnull().any():
-                raise ValueError('Found NaN in column {name}'.format(name=name)
+                raise ValueError('Found NaN in column {name!r}'
+                                 .format(name=name))
         for props in self.seasonalities.values():
             condition_name = props['condition_name']
             if condition_name is not None:
                 if condition_name not in df:
                     raise ValueError(
-                        'Condition "{condition_name}" missing from dataframe'
+                        'Condition {condition_name!r} missing from dataframe'
                         .format(condition_name=condition_name))
                 if not df[condition_name].isin([True, False]).all():
                     raise ValueError(
-                        'Found non-boolean in column {condition_name}'
+                        'Found non-boolean in column {condition_name!r}'
                         .format(condition_name=condition_name))
                 df[condition_name] = df[condition_name].astype('bool')
 
@@ -520,7 +521,7 @@ class Prophet(object):
                 ps = float(self.holidays_prior_scale)
             if row.holiday in prior_scales and prior_scales[row.holiday] != ps:
                 raise ValueError(
-                    'Holiday {holiday} does not have consistent prior '
+                    'Holiday {holiday!r} does not have consistent prior '
                     'scale specification.'.format(holiday=row.holiday)
                 )
             if ps <= 0:
@@ -703,8 +704,8 @@ class Prophet(object):
         # Set the holidays.
         if self.country_holidays is not None:
             logger.warning(
-                'Changing country holidays from {country_holidays} to '
-                '{country_name}.'
+                'Changing country holidays from {country_holidays!r} to '
+                '{country_name!r}.'
                 .format(country_holidays=self.country_holidays)
             )
         self.country_holidays = country_name
@@ -882,13 +883,13 @@ class Prophet(object):
             fourier_order = 0
             if name in self.seasonalities:
                 logger.info(
-                    'Found custom seasonality named "{name}", disablling '
-                    'built-in {name} seasonality.'.format(name=name)
+                    'Found custom seasonality named {name!r}, disablling '
+                    'built-in {name!r} seasonality.'.format(name=name)
                 )
             elif auto_disable:
                 logger.info(
-                    'Disabling {name} seasonality. Run prophet with '
-                    '{name}_seasonality=True to override this.'
+                    'Disabling {name!r} seasonality. Run prophet with '
+                    '{name!r}_seasonality=True to override this.'
                     .format(name=name)
                 )
             else:
