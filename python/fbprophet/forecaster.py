@@ -198,11 +198,11 @@ class Prophet(object):
         reserved_names.extend([
             'ds', 'y', 'cap', 'floor', 'y_scaled', 'cap_scaled'])
         if name in reserved_names:
-            raise ValueError('Name {name!r} is reserved.'.format(name=name)
+            raise ValueError('Name {name!r} is reserved.'.format(name=name))
         if (check_holidays and self.holidays is not None and
                 name in self.holidays['holiday'].unique()):
             raise ValueError(
-                'Name {name!r} already used for a holiday.'.format(name=name)
+                'Name {name!r} already used for a holiday.'.format(name=name))
         if (check_holidays and self.country_holidays is not None and
                 name in get_holiday_names(self.country_holidays)):
             raise ValueError(
