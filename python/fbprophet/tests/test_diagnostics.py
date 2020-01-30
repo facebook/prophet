@@ -259,8 +259,10 @@ class TestDiagnostics(TestCase):
                 self.assertTrue((m1.holidays == m2.holidays).values.all())
             self.assertEqual(m1.country_holidays, m2.country_holidays)
             self.assertEqual(m1.seasonality_mode, m2.seasonality_mode)
-            self.assertEqual(m1.seasonality_prior_scale, m2.seasonality_prior_scale)
-            self.assertEqual(m1.changepoint_prior_scale, m2.changepoint_prior_scale)
+            self.assertEqual(m1.seasonality_prior_scale,
+                             m2.seasonality_prior_scale)
+            self.assertEqual(m1.changepoint_prior_scale,
+                             m2.changepoint_prior_scale)
             self.assertEqual(m1.holidays_prior_scale, m2.holidays_prior_scale)
             self.assertEqual(m1.mcmc_samples, m2.mcmc_samples)
             self.assertEqual(m1.interval_width, m2.interval_width)
