@@ -13,13 +13,10 @@ from datetime import date, timedelta
 from convertdate.islamic import from_gregorian, to_gregorian
 from lunarcalendar import Lunar, Converter
 
-try:
-    from holidays import WEEKEND, HolidayBase, easter, rd
-except:
-    from holidays.constants import WEEKEND
-    from holidays.holiday_base import HolidayBase
-    from dateutil.easter import easter
-    from dateutil.relativedelta import relativedelta as rd
+from holidays import WEEKEND, HolidayBase
+from dateutil.easter import easter
+from dateutil.relativedelta import relativedelta as rd
+
 
 # Official public holidays at a country level
 # ------------ Holidays in Brazil---------------------
