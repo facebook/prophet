@@ -57,7 +57,7 @@ m <- prophet(df, growth = 'logistic')
 m = Prophet(growth='logistic')
 m.fit(df)
 ```
-We make a dataframe for future predictions as before, except we must also specify the capacity in the future. Here we keep capacity constant at the same value as in the history, and forecast 3 years into the future:
+We make a dataframe for future predictions as before, except we must also specify the capacity in the future. Here we keep capacity constant at the same value as in the history, and forecast 5 years into the future:
 
 
 ```R
