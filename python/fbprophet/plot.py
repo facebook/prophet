@@ -288,7 +288,7 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), n
             pd.Timedelta(days=weekly_start))
     df_w = seasonality_plot_df(m, days)
     seas = m.predict_seasonal_components(df_w)
-    days = days.weekday_name
+    days = days.day_name()
     artists += ax.plot(range(len(days)), seas[name], ls='-',
                     c='#0072B2')
     if uncertainty and m.uncertainty_samples:
