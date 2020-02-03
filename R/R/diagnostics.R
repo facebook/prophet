@@ -99,6 +99,11 @@ cross_validation <- function(
         'is larger than initial window. Consider increasing initial.'))
     }
   }
+  
+  predict_columns <- c('ds', 'yhat')
+  if (model$uncertainty.samples){
+    predict_columns <- append(predict_columns, c('yhat_lower', 'yhat_upper'))
+  }
 
   cutoffs <- generate_cutoffs(df, horizon.dt, initial.dt, period.dt)
 
@@ -133,8 +138,8 @@ cross_validation <- function(
     future <- df.predict[columns]
     yhat <- stats::predict(m, future)
     # Merge yhat, y, and cutoff.
-    df.c <- dplyr::inner_join(df.predict, yhat, by = "ds")
-    df.c <- dplyr::select(df.c, ds, y, yhat, yhat_lower, yhat_upper)
+    df.c <- dplyr::inner_join(df.predict, yhat$predict_columns, by = "ds")
+    df.c <- dplyr::select(df.c, y, yhat$predict_columns)
     df.c$cutoff <- cutoff
     predicts <- rbind(predicts, df.c)
   }
@@ -235,12 +240,16 @@ performance_metrics <- function(df, metrics = NULL, rolling_window = 0.1) {
   if (is.null(metrics)) {
     metrics <- valid_metrics
   }
+  if (!('yhat_lower' %in% df) | (!('yhat_upper' %in% df)) & ('coverage' %in% metrics)){
+    metrics <- valid_metrics[valid_metrics != 'coverage']
+  }
+
   if (length(metrics) != length(unique(metrics))) {
     stop('Input metrics must be an array of unique values.')
   }
   if (!all(metrics %in% valid_metrics)) {
     stop(
-      paste('Valid values for metrics are:', paste(metrics, collapse = ", "))
+      paste('Valid values for metrics are:', paste(valid_metrics, collapse = ", "))
     )
   }
   df_m <- df

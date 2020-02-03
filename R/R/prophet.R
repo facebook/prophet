@@ -62,7 +62,8 @@ globalVariables(c(
 #'  If mcmc.samples>0, this will be integrated over all model parameters,
 #'  which will include uncertainty in seasonality.
 #' @param uncertainty.samples Number of simulated draws used to estimate
-#'  uncertainty intervals.
+#'  uncertainty intervals. Settings this value to 0 or False will disable
+#'  uncertainty estimation and speed up the calculation.
 #' @param fit Boolean, if FALSE the model is initialized but not fit.
 #' @param ... Additional arguments, passed to \code{\link{fit.prophet}}
 #'
@@ -1263,8 +1264,8 @@ fit.prophet <- function(m, df, ...) {
       iter = m$mcmc.samples
     )
     args <- utils::modifyList(args, list(...))
-    stan.fit <- do.call(rstan::sampling, args)
-    m$params <- rstan::extract(stan.fit)
+    m$stan.fit <- do.call(rstan::sampling, args)
+    m$params <- rstan::extract(m$stan.fit)
     n.iteration <- length(m$params$k)
   } else {
     args <- list(
@@ -1276,15 +1277,15 @@ fit.prophet <- function(m, df, ...) {
       as_vector = FALSE
     )
     args <- utils::modifyList(args, list(...))
-    stan.fit <- do.call(rstan::optimizing, args)
-    if (stan.fit$return_code != 0) {
+    m$stan.fit <- do.call(rstan::optimizing, args)
+    if (m$stan.fit$return_code != 0) {
       message(
         'Optimization terminated abnormally. Falling back to Newton optimizer.'
       )
       args$algorithm = 'Newton'
-      stan.fit <- do.call(rstan::optimizing, args)
+      m$stan.fit <- do.call(rstan::optimizing, args)
     }
-    m$params <- stan.fit$par
+    m$params <- m$stan.fit$par
     n.iteration <- 1
   }
   
@@ -1342,8 +1343,12 @@ predict.prophet <- function(object, df = NULL, ...) {
 
   df$trend <- predict_trend(object, df)
   seasonal.components <- predict_seasonal_components(object, df)
-  intervals <- predict_uncertainty(object, df)
-
+  if (object$uncertainty.samples) {
+    intervals <- predict_uncertainty(object, df)
+  } else {
+    intervals <- NULL
+    }
+ 
   # Drop columns except ds, cap, floor, and trend
   cols <- c('ds', 'trend')
   if ('cap' %in% colnames(df)) {
@@ -1453,8 +1458,10 @@ predict_seasonal_components <- function(m, df) {
   m <- out$m
   seasonal.features <- out$seasonal.features
   component.cols <- out$component.cols
-  lower.p <- (1 - m$interval.width)/2
-  upper.p <- (1 + m$interval.width)/2
+  if (m$uncertainty.samples){
+    lower.p <- (1 - m$interval.width)/2
+    upper.p <- (1 + m$interval.width)/2
+  }
 
   X <- as.matrix(seasonal.features)
   component.predictions <- data.frame(matrix(ncol = 0, nrow = nrow(X)))
@@ -1466,10 +1473,12 @@ predict_seasonal_components <- function(m, df) {
       comp <- comp * m$y.scale
     }
     component.predictions[[component]] <- rowMeans(comp, na.rm = TRUE)
-    component.predictions[[paste0(component, '_lower')]] <- apply(
-      comp, 1, stats::quantile, lower.p, na.rm = TRUE)
-    component.predictions[[paste0(component, '_upper')]] <- apply(
-      comp, 1, stats::quantile, upper.p, na.rm = TRUE)
+    if (m$uncertainty.samples){
+      component.predictions[[paste0(component, '_lower')]] <- apply(
+        comp, 1, stats::quantile, lower.p, na.rm = TRUE)
+      component.predictions[[paste0(component, '_upper')]] <- apply(
+        comp, 1, stats::quantile, upper.p, na.rm = TRUE)
+    }
   }
   return(component.predictions)
 }

@@ -8,3 +8,4 @@ LunarCalendar>=0.0.9
 convertdate>=2.1.2
 holidays>=0.9.5
 setuptools-git>=1.2
+python-dateutil>=2.8.0
