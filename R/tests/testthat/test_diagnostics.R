@@ -99,6 +99,8 @@ test_that("cross_validation_uncertainty_disabled", {
       m, horizon = 4, units = "days", period = 4, initial = 115)
     expected.cols <- c('y', 'ds', 'yhat', 'cutoff')
     expect_equal(expected.cols, colnames(df.cv))
+    df.p <- performance_metrics(df.cv)
+    expect_false('coverage' %in% colnames(df.p))
   }
 })
 

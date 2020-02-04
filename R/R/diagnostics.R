@@ -242,8 +242,8 @@ performance_metrics <- function(df, metrics = NULL, rolling_window = 0.1) {
   if (is.null(metrics)) {
     metrics <- valid_metrics
   }
-  if (!('yhat_lower' %in% colnames(df)) | (!('yhat_upper' %in% colnames(df))) & ('coverage' %in% metrics)){
-    metrics <- valid_metrics[valid_metrics != 'coverage']
+  if ((!('yhat_lower' %in% colnames(df)) | !('yhat_upper' %in% colnames(df))) & ('coverage' %in% metrics)){
+    metrics <- metrics[metrics != 'coverage']
   }
 
   if (length(metrics) != length(unique(metrics))) {

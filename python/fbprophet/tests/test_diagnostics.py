@@ -114,6 +114,8 @@ class TestDiagnostics(TestCase):
                 m, horizon='4 days', period='4 days', initial='115 days')
             expected_cols = ['ds', 'yhat', 'y', 'cutoff']
             self.assertTrue(all(col in expected_cols for col in df_cv.columns.tolist()))
+            df_p = diagnostics.performance_metrics(df_cv)
+            self.assertTrue('coverage' not in df_p.columns)
 
     def test_performance_metrics(self):
         m = Prophet()
