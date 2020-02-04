@@ -33,8 +33,13 @@ test_that("fit_predict_no_changepoints", {
   expect_warning({
     # warning from prophet(), error from predict()
     m <- prophet(train, n.changepoints = 0)
-    expect_error(predict(m, future), NA)
   })
+  fcst <- predict(m, future)
+
+  expect_warning({
+    m <- prophet(train, n.changepoints = 0, mcmc.samples = 100)
+  })
+  fcst <- predict(m, future)
 })
 
 test_that("fit_predict_changepoint_not_in_history", {
