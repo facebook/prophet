@@ -28,9 +28,10 @@ def utf8_to_ascii(text):
         unicodedata.normalize('NFD', text)
         .encode('ascii', 'ignore')
         .decode('ascii')
+        .strip()
     )
     # Check if anything converted
-    if sum(1 for x in ascii_text if x != ' ') == 0:
+    if sum(1 for x in ascii_text if x not in [' ', '(', ')', ',']) == 0:
         return 'FAILED_TO_PARSE'
     else:
         return ascii_text
@@ -43,9 +44,11 @@ def generate_holidays_file():
     years = np.arange(1995, 2045, 1)
     all_holidays = []
     # class names in holiday packages which are not countries
+    # Also cut out countries with utf-8 holidays that don't parse to ascii
     class_to_exclude = set([
         'rd', 'date', 'Lunar', 'timedelta', 'Calendar', 'Converter', 'HolidayBase',
-        'DateNotExist',
+        'DateNotExist', 'Belarus', 'BY', 'Bulgaria', 'BG', 'Japan', 'JP', 'Serbia',
+        'RS', 'Ukraine', 'UA',
     ])
 
     class_list2 = inspect.getmembers(hdays_part2, inspect.isclass)
@@ -78,7 +81,7 @@ def generate_holidays_file():
 
     # Convert to ASCII, and drop holidays that fail to convert
     generated_holidays['holiday'] = generated_holidays['holiday'].apply(utf8_to_ascii)
-    generated_holidays = generated_holidays[generated_holidays['holiday'] != 'FAILED_TO_PARSE']
+    assert 'FAILED_TO_PARSE' not in generated_holidays['holiday'].unique()
     generated_holidays.to_csv("../R/data-raw/generated_holidays.csv", index=False)
 
 

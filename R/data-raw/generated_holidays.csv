@@ -5908,62 +5908,6 @@ ds,holiday,country,year
 2044-11-01,Allerheiligen,BE,2044
 2044-11-11,Wapenstilstand,BE,2044
 2044-12-25,Kerstmis,BE,2044
-1995-05-06,",      ",BG,1995
-1996-05-06,",      ",BG,1996
-1997-05-06,",      ",BG,1997
-1998-05-06,",      ",BG,1998
-1999-05-06,",      ",BG,1999
-2000-05-06,",      ",BG,2000
-2001-05-06,",      ",BG,2001
-2002-05-06,",      ",BG,2002
-2003-05-06,",      ",BG,2003
-2004-05-06,",      ",BG,2004
-2005-05-01,",        ",BG,2005
-2005-05-06,",      ",BG,2005
-2006-05-06,",      ",BG,2006
-2007-05-06,",      ",BG,2007
-2008-05-06,",      ",BG,2008
-2009-05-06,",      ",BG,2009
-2010-05-06,",      ",BG,2010
-2011-05-06,",      ",BG,2011
-2012-05-06,",      ",BG,2012
-2013-05-06,",      ",BG,2013
-2014-05-06,",      ",BG,2014
-2015-05-06,",      ",BG,2015
-2016-05-01,",        ",BG,2016
-2016-05-06,",      ",BG,2016
-2017-05-06,",      ",BG,2017
-2018-05-06,",      ",BG,2018
-2019-05-06,",      ",BG,2019
-2020-05-06,",      ",BG,2020
-2021-05-01," ,        ",BG,2021
-2021-05-06,",      ",BG,2021
-2022-05-06,",      ",BG,2022
-2023-05-06,",      ",BG,2023
-2024-05-06,",      ",BG,2024
-2025-05-06,",      ",BG,2025
-2026-05-06,",      ",BG,2026
-2027-05-01," ,        ",BG,2027
-2027-05-06,",      ",BG,2027
-2028-05-06,",      ",BG,2028
-2029-05-06,",      ",BG,2029
-2030-05-06,",      ",BG,2030
-2031-05-06,",      ",BG,2031
-2032-05-01," ,        ",BG,2032
-2032-05-06,",      ",BG,2032
-2033-05-06,",      ",BG,2033
-2034-05-06,",      ",BG,2034
-2035-05-06,",      ",BG,2035
-2036-05-06,",      ",BG,2036
-2037-05-06,",      ",BG,2037
-2038-05-06,",      ",BG,2038
-2039-05-06,",      ",BG,2039
-2040-05-06,", ,      ",BG,2040
-2041-05-06,",      ",BG,2041
-2042-05-06,",      ",BG,2042
-2043-05-01," ,        ",BG,2043
-2043-05-06,",      ",BG,2043
-2044-05-06,",      ",BG,2044
 1995-01-01,New Year's Day,BR,1995
 1995-04-21,Tiradentes,BR,1995
 1995-05-01,Worker's Day,BR,1995
@@ -6364,145 +6308,6 @@ ds,holiday,country,year
 2044-11-02,All Souls' Day,BR,2044
 2044-11-15,Republic Proclamation Day,BR,2044
 2044-12-25,Christmas,BR,2044
-1999-01-07,  ( ),BY,1999
-1999-07-03,    ( ),BY,1999
-1999-12-25,  ( ),BY,1999
-2000-01-07,  ( ),BY,2000
-2000-05-09," , ",BY,2000
-2000-07-03,    ( ),BY,2000
-2000-12-25,  ( ),BY,2000
-2001-01-07,  ( ),BY,2001
-2001-07-03,    ( ),BY,2001
-2001-12-25,  ( ),BY,2001
-2002-01-07,  ( ),BY,2002
-2002-07-03,    ( ),BY,2002
-2002-12-25,  ( ),BY,2002
-2003-01-07,  ( ),BY,2003
-2003-07-03,    ( ),BY,2003
-2003-12-25,  ( ),BY,2003
-2004-01-07,  ( ),BY,2004
-2004-07-03,    ( ),BY,2004
-2004-12-25,  ( ),BY,2004
-2005-01-07,  ( ),BY,2005
-2005-07-03,    ( ),BY,2005
-2005-12-25,  ( ),BY,2005
-2006-01-07,  ( ),BY,2006
-2006-07-03,    ( ),BY,2006
-2006-12-25,  ( ),BY,2006
-2007-01-07,  ( ),BY,2007
-2007-07-03,    ( ),BY,2007
-2007-12-25,  ( ),BY,2007
-2008-01-07,  ( ),BY,2008
-2008-07-03,    ( ),BY,2008
-2008-12-25,  ( ),BY,2008
-2009-01-07,  ( ),BY,2009
-2009-07-03,    ( ),BY,2009
-2009-12-25,  ( ),BY,2009
-2010-01-07,  ( ),BY,2010
-2010-07-03,    ( ),BY,2010
-2010-12-25,  ( ),BY,2010
-2011-01-07,  ( ),BY,2011
-2011-07-03,    ( ),BY,2011
-2011-12-25,  ( ),BY,2011
-2012-01-07,  ( ),BY,2012
-2012-07-03,    ( ),BY,2012
-2012-12-25,  ( ),BY,2012
-2013-01-07,  ( ),BY,2013
-2013-07-03,    ( ),BY,2013
-2013-12-25,  ( ),BY,2013
-2014-01-07,  ( ),BY,2014
-2014-07-03,    ( ),BY,2014
-2014-12-25,  ( ),BY,2014
-2015-01-07,  ( ),BY,2015
-2015-07-03,    ( ),BY,2015
-2015-12-25,  ( ),BY,2015
-2016-01-07,  ( ),BY,2016
-2016-07-03,    ( ),BY,2016
-2016-12-25,  ( ),BY,2016
-2017-01-07,  ( ),BY,2017
-2017-07-03,    ( ),BY,2017
-2017-12-25,  ( ),BY,2017
-2018-01-07,  ( ),BY,2018
-2018-07-03,    ( ),BY,2018
-2018-12-25,  ( ),BY,2018
-2019-01-07,  ( ),BY,2019
-2019-07-03,    ( ),BY,2019
-2019-12-25,  ( ),BY,2019
-2020-01-07,  ( ),BY,2020
-2020-07-03,    ( ),BY,2020
-2020-12-25,  ( ),BY,2020
-2021-01-07,  ( ),BY,2021
-2021-07-03,    ( ),BY,2021
-2021-12-25,  ( ),BY,2021
-2022-01-07,  ( ),BY,2022
-2022-07-03,    ( ),BY,2022
-2022-12-25,  ( ),BY,2022
-2023-01-07,  ( ),BY,2023
-2023-07-03,    ( ),BY,2023
-2023-12-25,  ( ),BY,2023
-2024-01-07,  ( ),BY,2024
-2024-07-03,    ( ),BY,2024
-2024-12-25,  ( ),BY,2024
-2025-01-07,  ( ),BY,2025
-2025-07-03,    ( ),BY,2025
-2025-12-25,  ( ),BY,2025
-2026-01-07,  ( ),BY,2026
-2026-07-03,    ( ),BY,2026
-2026-12-25,  ( ),BY,2026
-2027-01-07,  ( ),BY,2027
-2027-07-03,    ( ),BY,2027
-2027-12-25,  ( ),BY,2027
-2028-01-07,  ( ),BY,2028
-2028-07-03,    ( ),BY,2028
-2028-12-25,  ( ),BY,2028
-2029-01-07,  ( ),BY,2029
-2029-07-03,    ( ),BY,2029
-2029-12-25,  ( ),BY,2029
-2030-01-07,  ( ),BY,2030
-2030-07-03,    ( ),BY,2030
-2030-12-25,  ( ),BY,2030
-2031-01-07,  ( ),BY,2031
-2031-07-03,    ( ),BY,2031
-2031-12-25,  ( ),BY,2031
-2032-01-07,  ( ),BY,2032
-2032-07-03,    ( ),BY,2032
-2032-12-25,  ( ),BY,2032
-2033-01-07,  ( ),BY,2033
-2033-07-03,    ( ),BY,2033
-2033-12-25,  ( ),BY,2033
-2034-01-07,  ( ),BY,2034
-2034-07-03,    ( ),BY,2034
-2034-12-25,  ( ),BY,2034
-2035-01-07,  ( ),BY,2035
-2035-07-03,    ( ),BY,2035
-2035-12-25,  ( ),BY,2035
-2036-01-07,  ( ),BY,2036
-2036-07-03,    ( ),BY,2036
-2036-12-25,  ( ),BY,2036
-2037-01-07,  ( ),BY,2037
-2037-07-03,    ( ),BY,2037
-2037-12-25,  ( ),BY,2037
-2038-01-07,  ( ),BY,2038
-2038-07-03,    ( ),BY,2038
-2038-12-25,  ( ),BY,2038
-2039-01-07,  ( ),BY,2039
-2039-07-03,    ( ),BY,2039
-2039-12-25,  ( ),BY,2039
-2040-01-07,  ( ),BY,2040
-2040-07-03,    ( ),BY,2040
-2040-12-25,  ( ),BY,2040
-2041-01-07,  ( ),BY,2041
-2041-07-03,    ( ),BY,2041
-2041-12-25,  ( ),BY,2041
-2042-01-07,  ( ),BY,2042
-2042-07-03,    ( ),BY,2042
-2042-12-25,  ( ),BY,2042
-2043-01-07,  ( ),BY,2043
-2043-07-03,    ( ),BY,2043
-2043-12-25,  ( ),BY,2043
-2044-01-07,  ( ),BY,2044
-2044-07-03,    ( ),BY,2044
-2044-12-25,  ( ),BY,2044
 1995-02-21,Language Martyrs' Day,Bangladesh,1995
 1995-03-17,Mujib's birthday,Bangladesh,1995
 1995-03-26,Independence Day,Bangladesh,1995
@@ -6853,145 +6658,6 @@ ds,holiday,country,year
 2044-05-01,Labor Day,Bangladesh,2044
 2044-08-15,National Mourning Day,Bangladesh,2044
 2044-12-16,Victory Day,Bangladesh,2044
-1999-01-07,  ( ),Belarus,1999
-1999-07-03,    ( ),Belarus,1999
-1999-12-25,  ( ),Belarus,1999
-2000-01-07,  ( ),Belarus,2000
-2000-05-09," , ",Belarus,2000
-2000-07-03,    ( ),Belarus,2000
-2000-12-25,  ( ),Belarus,2000
-2001-01-07,  ( ),Belarus,2001
-2001-07-03,    ( ),Belarus,2001
-2001-12-25,  ( ),Belarus,2001
-2002-01-07,  ( ),Belarus,2002
-2002-07-03,    ( ),Belarus,2002
-2002-12-25,  ( ),Belarus,2002
-2003-01-07,  ( ),Belarus,2003
-2003-07-03,    ( ),Belarus,2003
-2003-12-25,  ( ),Belarus,2003
-2004-01-07,  ( ),Belarus,2004
-2004-07-03,    ( ),Belarus,2004
-2004-12-25,  ( ),Belarus,2004
-2005-01-07,  ( ),Belarus,2005
-2005-07-03,    ( ),Belarus,2005
-2005-12-25,  ( ),Belarus,2005
-2006-01-07,  ( ),Belarus,2006
-2006-07-03,    ( ),Belarus,2006
-2006-12-25,  ( ),Belarus,2006
-2007-01-07,  ( ),Belarus,2007
-2007-07-03,    ( ),Belarus,2007
-2007-12-25,  ( ),Belarus,2007
-2008-01-07,  ( ),Belarus,2008
-2008-07-03,    ( ),Belarus,2008
-2008-12-25,  ( ),Belarus,2008
-2009-01-07,  ( ),Belarus,2009
-2009-07-03,    ( ),Belarus,2009
-2009-12-25,  ( ),Belarus,2009
-2010-01-07,  ( ),Belarus,2010
-2010-07-03,    ( ),Belarus,2010
-2010-12-25,  ( ),Belarus,2010
-2011-01-07,  ( ),Belarus,2011
-2011-07-03,    ( ),Belarus,2011
-2011-12-25,  ( ),Belarus,2011
-2012-01-07,  ( ),Belarus,2012
-2012-07-03,    ( ),Belarus,2012
-2012-12-25,  ( ),Belarus,2012
-2013-01-07,  ( ),Belarus,2013
-2013-07-03,    ( ),Belarus,2013
-2013-12-25,  ( ),Belarus,2013
-2014-01-07,  ( ),Belarus,2014
-2014-07-03,    ( ),Belarus,2014
-2014-12-25,  ( ),Belarus,2014
-2015-01-07,  ( ),Belarus,2015
-2015-07-03,    ( ),Belarus,2015
-2015-12-25,  ( ),Belarus,2015
-2016-01-07,  ( ),Belarus,2016
-2016-07-03,    ( ),Belarus,2016
-2016-12-25,  ( ),Belarus,2016
-2017-01-07,  ( ),Belarus,2017
-2017-07-03,    ( ),Belarus,2017
-2017-12-25,  ( ),Belarus,2017
-2018-01-07,  ( ),Belarus,2018
-2018-07-03,    ( ),Belarus,2018
-2018-12-25,  ( ),Belarus,2018
-2019-01-07,  ( ),Belarus,2019
-2019-07-03,    ( ),Belarus,2019
-2019-12-25,  ( ),Belarus,2019
-2020-01-07,  ( ),Belarus,2020
-2020-07-03,    ( ),Belarus,2020
-2020-12-25,  ( ),Belarus,2020
-2021-01-07,  ( ),Belarus,2021
-2021-07-03,    ( ),Belarus,2021
-2021-12-25,  ( ),Belarus,2021
-2022-01-07,  ( ),Belarus,2022
-2022-07-03,    ( ),Belarus,2022
-2022-12-25,  ( ),Belarus,2022
-2023-01-07,  ( ),Belarus,2023
-2023-07-03,    ( ),Belarus,2023
-2023-12-25,  ( ),Belarus,2023
-2024-01-07,  ( ),Belarus,2024
-2024-07-03,    ( ),Belarus,2024
-2024-12-25,  ( ),Belarus,2024
-2025-01-07,  ( ),Belarus,2025
-2025-07-03,    ( ),Belarus,2025
-2025-12-25,  ( ),Belarus,2025
-2026-01-07,  ( ),Belarus,2026
-2026-07-03,    ( ),Belarus,2026
-2026-12-25,  ( ),Belarus,2026
-2027-01-07,  ( ),Belarus,2027
-2027-07-03,    ( ),Belarus,2027
-2027-12-25,  ( ),Belarus,2027
-2028-01-07,  ( ),Belarus,2028
-2028-07-03,    ( ),Belarus,2028
-2028-12-25,  ( ),Belarus,2028
-2029-01-07,  ( ),Belarus,2029
-2029-07-03,    ( ),Belarus,2029
-2029-12-25,  ( ),Belarus,2029
-2030-01-07,  ( ),Belarus,2030
-2030-07-03,    ( ),Belarus,2030
-2030-12-25,  ( ),Belarus,2030
-2031-01-07,  ( ),Belarus,2031
-2031-07-03,    ( ),Belarus,2031
-2031-12-25,  ( ),Belarus,2031
-2032-01-07,  ( ),Belarus,2032
-2032-07-03,    ( ),Belarus,2032
-2032-12-25,  ( ),Belarus,2032
-2033-01-07,  ( ),Belarus,2033
-2033-07-03,    ( ),Belarus,2033
-2033-12-25,  ( ),Belarus,2033
-2034-01-07,  ( ),Belarus,2034
-2034-07-03,    ( ),Belarus,2034
-2034-12-25,  ( ),Belarus,2034
-2035-01-07,  ( ),Belarus,2035
-2035-07-03,    ( ),Belarus,2035
-2035-12-25,  ( ),Belarus,2035
-2036-01-07,  ( ),Belarus,2036
-2036-07-03,    ( ),Belarus,2036
-2036-12-25,  ( ),Belarus,2036
-2037-01-07,  ( ),Belarus,2037
-2037-07-03,    ( ),Belarus,2037
-2037-12-25,  ( ),Belarus,2037
-2038-01-07,  ( ),Belarus,2038
-2038-07-03,    ( ),Belarus,2038
-2038-12-25,  ( ),Belarus,2038
-2039-01-07,  ( ),Belarus,2039
-2039-07-03,    ( ),Belarus,2039
-2039-12-25,  ( ),Belarus,2039
-2040-01-07,  ( ),Belarus,2040
-2040-07-03,    ( ),Belarus,2040
-2040-12-25,  ( ),Belarus,2040
-2041-01-07,  ( ),Belarus,2041
-2041-07-03,    ( ),Belarus,2041
-2041-12-25,  ( ),Belarus,2041
-2042-01-07,  ( ),Belarus,2042
-2042-07-03,    ( ),Belarus,2042
-2042-12-25,  ( ),Belarus,2042
-2043-01-07,  ( ),Belarus,2043
-2043-07-03,    ( ),Belarus,2043
-2043-12-25,  ( ),Belarus,2043
-2044-01-07,  ( ),Belarus,2044
-2044-07-03,    ( ),Belarus,2044
-2044-12-25,  ( ),Belarus,2044
 1995-01-01,Nieuwjaarsdag,Belgium,1995
 1995-04-16,Pasen,Belgium,1995
 1995-04-17,Paasmaandag,Belgium,1995
@@ -7991,62 +7657,6 @@ ds,holiday,country,year
 2044-11-02,All Souls' Day,Brazil,2044
 2044-11-15,Republic Proclamation Day,Brazil,2044
 2044-12-25,Christmas,Brazil,2044
-1995-05-06,",      ",Bulgaria,1995
-1996-05-06,",      ",Bulgaria,1996
-1997-05-06,",      ",Bulgaria,1997
-1998-05-06,",      ",Bulgaria,1998
-1999-05-06,",      ",Bulgaria,1999
-2000-05-06,",      ",Bulgaria,2000
-2001-05-06,",      ",Bulgaria,2001
-2002-05-06,",      ",Bulgaria,2002
-2003-05-06,",      ",Bulgaria,2003
-2004-05-06,",      ",Bulgaria,2004
-2005-05-01,",        ",Bulgaria,2005
-2005-05-06,",      ",Bulgaria,2005
-2006-05-06,",      ",Bulgaria,2006
-2007-05-06,",      ",Bulgaria,2007
-2008-05-06,",      ",Bulgaria,2008
-2009-05-06,",      ",Bulgaria,2009
-2010-05-06,",      ",Bulgaria,2010
-2011-05-06,",      ",Bulgaria,2011
-2012-05-06,",      ",Bulgaria,2012
-2013-05-06,",      ",Bulgaria,2013
-2014-05-06,",      ",Bulgaria,2014
-2015-05-06,",      ",Bulgaria,2015
-2016-05-01,",        ",Bulgaria,2016
-2016-05-06,",      ",Bulgaria,2016
-2017-05-06,",      ",Bulgaria,2017
-2018-05-06,",      ",Bulgaria,2018
-2019-05-06,",      ",Bulgaria,2019
-2020-05-06,",      ",Bulgaria,2020
-2021-05-01," ,        ",Bulgaria,2021
-2021-05-06,",      ",Bulgaria,2021
-2022-05-06,",      ",Bulgaria,2022
-2023-05-06,",      ",Bulgaria,2023
-2024-05-06,",      ",Bulgaria,2024
-2025-05-06,",      ",Bulgaria,2025
-2026-05-06,",      ",Bulgaria,2026
-2027-05-01," ,        ",Bulgaria,2027
-2027-05-06,",      ",Bulgaria,2027
-2028-05-06,",      ",Bulgaria,2028
-2029-05-06,",      ",Bulgaria,2029
-2030-05-06,",      ",Bulgaria,2030
-2031-05-06,",      ",Bulgaria,2031
-2032-05-01," ,        ",Bulgaria,2032
-2032-05-06,",      ",Bulgaria,2032
-2033-05-06,",      ",Bulgaria,2033
-2034-05-06,",      ",Bulgaria,2034
-2035-05-06,",      ",Bulgaria,2035
-2036-05-06,",      ",Bulgaria,2036
-2037-05-06,",      ",Bulgaria,2037
-2038-05-06,",      ",Bulgaria,2038
-2039-05-06,",      ",Bulgaria,2039
-2040-05-06,", ,      ",Bulgaria,2040
-2041-05-06,",      ",Bulgaria,2041
-2042-05-06,",      ",Bulgaria,2042
-2043-05-01," ,        ",Bulgaria,2043
-2043-05-06,",      ",Bulgaria,2043
-2044-05-06,",      ",Bulgaria,2044
 1995-01-01,New Year's Day,CA,1995
 1995-01-02,New Year's Day (Observed),CA,1995
 1995-04-14,Good Friday,CA,1995
@@ -26486,555 +26096,555 @@ ds,holiday,country,year
 2044-12-25,Christmas Day,GB,2044
 2044-12-26,Boxing Day,GB,2044
 2044-12-27,Christmas Day (Observed),GB,2044
-1995-01-01, [New Year's Day],GR,1995
-1995-01-06, [Epiphany],GR,1995
-1995-03-06,  [Clean Monday],GR,1995
-1995-03-25,   [Independence Day],GR,1995
-1995-04-24,   [Easter Monday],GR,1995
-1995-05-01,  [Labour day],GR,1995
-1995-06-12,    [Monday of the Holy Spirit],GR,1995
-1995-08-15,   [Assumption of Mary],GR,1995
-1995-10-28,   [Ochi Day],GR,1995
-1995-12-25, [Christmas],GR,1995
-1995-12-26,    [Day after Christmas],GR,1995
-1996-01-01, [New Year's Day],GR,1996
-1996-01-06, [Epiphany],GR,1996
-1996-02-26,  [Clean Monday],GR,1996
-1996-03-25,   [Independence Day],GR,1996
-1996-04-15,   [Easter Monday],GR,1996
-1996-05-01,  [Labour day],GR,1996
-1996-06-03,    [Monday of the Holy Spirit],GR,1996
-1996-08-15,   [Assumption of Mary],GR,1996
-1996-10-28,   [Ochi Day],GR,1996
-1996-12-25, [Christmas],GR,1996
-1996-12-26,    [Day after Christmas],GR,1996
-1997-01-01, [New Year's Day],GR,1997
-1997-01-06, [Epiphany],GR,1997
-1997-03-10,  [Clean Monday],GR,1997
-1997-03-25,   [Independence Day],GR,1997
-1997-04-28,   [Easter Monday],GR,1997
-1997-05-01,  [Labour day],GR,1997
-1997-06-16,    [Monday of the Holy Spirit],GR,1997
-1997-08-15,   [Assumption of Mary],GR,1997
-1997-10-28,   [Ochi Day],GR,1997
-1997-12-25, [Christmas],GR,1997
-1997-12-26,    [Day after Christmas],GR,1997
-1998-01-01, [New Year's Day],GR,1998
-1998-01-06, [Epiphany],GR,1998
-1998-03-02,  [Clean Monday],GR,1998
-1998-03-25,   [Independence Day],GR,1998
-1998-04-20,   [Easter Monday],GR,1998
-1998-05-01,  [Labour day],GR,1998
-1998-06-08,    [Monday of the Holy Spirit],GR,1998
-1998-08-15,   [Assumption of Mary],GR,1998
-1998-10-28,   [Ochi Day],GR,1998
-1998-12-25, [Christmas],GR,1998
-1998-12-26,    [Day after Christmas],GR,1998
-1999-01-01, [New Year's Day],GR,1999
-1999-01-06, [Epiphany],GR,1999
-1999-02-22,  [Clean Monday],GR,1999
-1999-03-25,   [Independence Day],GR,1999
-1999-04-12,   [Easter Monday],GR,1999
-1999-05-01,  [Labour day],GR,1999
-1999-05-31,    [Monday of the Holy Spirit],GR,1999
-1999-08-15,   [Assumption of Mary],GR,1999
-1999-10-28,   [Ochi Day],GR,1999
-1999-12-25, [Christmas],GR,1999
-1999-12-26,    [Day after Christmas],GR,1999
-2000-01-01, [New Year's Day],GR,2000
-2000-01-06, [Epiphany],GR,2000
-2000-03-13,  [Clean Monday],GR,2000
-2000-03-25,   [Independence Day],GR,2000
-2000-05-01,"  [Labour day],    [Easter Monday]",GR,2000
-2000-06-19,    [Monday of the Holy Spirit],GR,2000
-2000-08-15,   [Assumption of Mary],GR,2000
-2000-10-28,   [Ochi Day],GR,2000
-2000-12-25, [Christmas],GR,2000
-2000-12-26,    [Day after Christmas],GR,2000
-2001-01-01, [New Year's Day],GR,2001
-2001-01-06, [Epiphany],GR,2001
-2001-02-26,  [Clean Monday],GR,2001
-2001-03-25,   [Independence Day],GR,2001
-2001-04-16,   [Easter Monday],GR,2001
-2001-05-01,  [Labour day],GR,2001
-2001-06-04,    [Monday of the Holy Spirit],GR,2001
-2001-08-15,   [Assumption of Mary],GR,2001
-2001-10-28,   [Ochi Day],GR,2001
-2001-12-25, [Christmas],GR,2001
-2001-12-26,    [Day after Christmas],GR,2001
-2002-01-01, [New Year's Day],GR,2002
-2002-01-06, [Epiphany],GR,2002
-2002-03-18,  [Clean Monday],GR,2002
-2002-03-25,   [Independence Day],GR,2002
-2002-05-01,  [Labour day],GR,2002
-2002-05-06,   [Easter Monday],GR,2002
-2002-06-24,    [Monday of the Holy Spirit],GR,2002
-2002-08-15,   [Assumption of Mary],GR,2002
-2002-10-28,   [Ochi Day],GR,2002
-2002-12-25, [Christmas],GR,2002
-2002-12-26,    [Day after Christmas],GR,2002
-2003-01-01, [New Year's Day],GR,2003
-2003-01-06, [Epiphany],GR,2003
-2003-03-10,  [Clean Monday],GR,2003
-2003-03-25,   [Independence Day],GR,2003
-2003-04-28,   [Easter Monday],GR,2003
-2003-05-01,  [Labour day],GR,2003
-2003-06-16,    [Monday of the Holy Spirit],GR,2003
-2003-08-15,   [Assumption of Mary],GR,2003
-2003-10-28,   [Ochi Day],GR,2003
-2003-12-25, [Christmas],GR,2003
-2003-12-26,    [Day after Christmas],GR,2003
-2004-01-01, [New Year's Day],GR,2004
-2004-01-06, [Epiphany],GR,2004
-2004-02-23,  [Clean Monday],GR,2004
-2004-03-25,   [Independence Day],GR,2004
-2004-04-12,   [Easter Monday],GR,2004
-2004-05-01,  [Labour day],GR,2004
-2004-05-31,    [Monday of the Holy Spirit],GR,2004
-2004-08-15,   [Assumption of Mary],GR,2004
-2004-10-28,   [Ochi Day],GR,2004
-2004-12-25, [Christmas],GR,2004
-2004-12-26,    [Day after Christmas],GR,2004
-2005-01-01, [New Year's Day],GR,2005
-2005-01-06, [Epiphany],GR,2005
-2005-03-14,  [Clean Monday],GR,2005
-2005-03-25,   [Independence Day],GR,2005
-2005-05-01,  [Labour day],GR,2005
-2005-05-02,   [Easter Monday],GR,2005
-2005-06-20,    [Monday of the Holy Spirit],GR,2005
-2005-08-15,   [Assumption of Mary],GR,2005
-2005-10-28,   [Ochi Day],GR,2005
-2005-12-25, [Christmas],GR,2005
-2005-12-26,    [Day after Christmas],GR,2005
-2006-01-01, [New Year's Day],GR,2006
-2006-01-06, [Epiphany],GR,2006
-2006-03-06,  [Clean Monday],GR,2006
-2006-03-25,   [Independence Day],GR,2006
-2006-04-24,   [Easter Monday],GR,2006
-2006-05-01,  [Labour day],GR,2006
-2006-06-12,    [Monday of the Holy Spirit],GR,2006
-2006-08-15,   [Assumption of Mary],GR,2006
-2006-10-28,   [Ochi Day],GR,2006
-2006-12-25, [Christmas],GR,2006
-2006-12-26,    [Day after Christmas],GR,2006
-2007-01-01, [New Year's Day],GR,2007
-2007-01-06, [Epiphany],GR,2007
-2007-02-19,  [Clean Monday],GR,2007
-2007-03-25,   [Independence Day],GR,2007
-2007-04-09,   [Easter Monday],GR,2007
-2007-05-01,  [Labour day],GR,2007
-2007-05-28,    [Monday of the Holy Spirit],GR,2007
-2007-08-15,   [Assumption of Mary],GR,2007
-2007-10-28,   [Ochi Day],GR,2007
-2007-12-25, [Christmas],GR,2007
-2007-12-26,    [Day after Christmas],GR,2007
-2008-01-01, [New Year's Day],GR,2008
-2008-01-06, [Epiphany],GR,2008
-2008-03-10,  [Clean Monday],GR,2008
-2008-03-25,   [Independence Day],GR,2008
-2008-04-28,   [Easter Monday],GR,2008
-2008-05-01,  [Labour day],GR,2008
-2008-06-16,    [Monday of the Holy Spirit],GR,2008
-2008-08-15,   [Assumption of Mary],GR,2008
-2008-10-28,   [Ochi Day],GR,2008
-2008-12-25, [Christmas],GR,2008
-2008-12-26,    [Day after Christmas],GR,2008
-2009-01-01, [New Year's Day],GR,2009
-2009-01-06, [Epiphany],GR,2009
-2009-03-02,  [Clean Monday],GR,2009
-2009-03-25,   [Independence Day],GR,2009
-2009-04-20,   [Easter Monday],GR,2009
-2009-05-01,  [Labour day],GR,2009
-2009-06-08,    [Monday of the Holy Spirit],GR,2009
-2009-08-15,   [Assumption of Mary],GR,2009
-2009-10-28,   [Ochi Day],GR,2009
-2009-12-25, [Christmas],GR,2009
-2009-12-26,    [Day after Christmas],GR,2009
-2010-01-01, [New Year's Day],GR,2010
-2010-01-06, [Epiphany],GR,2010
-2010-02-15,  [Clean Monday],GR,2010
-2010-03-25,   [Independence Day],GR,2010
-2010-04-05,   [Easter Monday],GR,2010
-2010-05-01,  [Labour day],GR,2010
-2010-05-24,    [Monday of the Holy Spirit],GR,2010
-2010-08-15,   [Assumption of Mary],GR,2010
-2010-10-28,   [Ochi Day],GR,2010
-2010-12-25, [Christmas],GR,2010
-2010-12-26,    [Day after Christmas],GR,2010
-2011-01-01, [New Year's Day],GR,2011
-2011-01-06, [Epiphany],GR,2011
-2011-03-07,  [Clean Monday],GR,2011
-2011-03-25,   [Independence Day],GR,2011
-2011-04-25,   [Easter Monday],GR,2011
-2011-05-01,  [Labour day],GR,2011
-2011-06-13,    [Monday of the Holy Spirit],GR,2011
-2011-08-15,   [Assumption of Mary],GR,2011
-2011-10-28,   [Ochi Day],GR,2011
-2011-12-25, [Christmas],GR,2011
-2011-12-26,    [Day after Christmas],GR,2011
-2012-01-01, [New Year's Day],GR,2012
-2012-01-06, [Epiphany],GR,2012
-2012-02-27,  [Clean Monday],GR,2012
-2012-03-25,   [Independence Day],GR,2012
-2012-04-16,   [Easter Monday],GR,2012
-2012-05-01,  [Labour day],GR,2012
-2012-06-04,    [Monday of the Holy Spirit],GR,2012
-2012-08-15,   [Assumption of Mary],GR,2012
-2012-10-28,   [Ochi Day],GR,2012
-2012-12-25, [Christmas],GR,2012
-2012-12-26,    [Day after Christmas],GR,2012
-2013-01-01, [New Year's Day],GR,2013
-2013-01-06, [Epiphany],GR,2013
-2013-03-18,  [Clean Monday],GR,2013
-2013-03-25,   [Independence Day],GR,2013
-2013-05-01,  [Labour day],GR,2013
-2013-05-06,   [Easter Monday],GR,2013
-2013-06-24,    [Monday of the Holy Spirit],GR,2013
-2013-08-15,   [Assumption of Mary],GR,2013
-2013-10-28,   [Ochi Day],GR,2013
-2013-12-25, [Christmas],GR,2013
-2013-12-26,    [Day after Christmas],GR,2013
-2014-01-01, [New Year's Day],GR,2014
-2014-01-06, [Epiphany],GR,2014
-2014-03-03,  [Clean Monday],GR,2014
-2014-03-25,   [Independence Day],GR,2014
-2014-04-21,   [Easter Monday],GR,2014
-2014-05-01,  [Labour day],GR,2014
-2014-06-09,    [Monday of the Holy Spirit],GR,2014
-2014-08-15,   [Assumption of Mary],GR,2014
-2014-10-28,   [Ochi Day],GR,2014
-2014-12-25, [Christmas],GR,2014
-2014-12-26,    [Day after Christmas],GR,2014
-2015-01-01, [New Year's Day],GR,2015
-2015-01-06, [Epiphany],GR,2015
-2015-02-23,  [Clean Monday],GR,2015
-2015-03-25,   [Independence Day],GR,2015
-2015-04-13,   [Easter Monday],GR,2015
-2015-05-01,  [Labour day],GR,2015
-2015-06-01,    [Monday of the Holy Spirit],GR,2015
-2015-08-15,   [Assumption of Mary],GR,2015
-2015-10-28,   [Ochi Day],GR,2015
-2015-12-25, [Christmas],GR,2015
-2015-12-26,    [Day after Christmas],GR,2015
-2016-01-01, [New Year's Day],GR,2016
-2016-01-06, [Epiphany],GR,2016
-2016-03-14,  [Clean Monday],GR,2016
-2016-03-25,   [Independence Day],GR,2016
-2016-05-01,  [Labour day],GR,2016
-2016-05-02,   [Easter Monday],GR,2016
-2016-06-20,    [Monday of the Holy Spirit],GR,2016
-2016-08-15,   [Assumption of Mary],GR,2016
-2016-10-28,   [Ochi Day],GR,2016
-2016-12-25, [Christmas],GR,2016
-2016-12-26,    [Day after Christmas],GR,2016
-2017-01-01, [New Year's Day],GR,2017
-2017-01-06, [Epiphany],GR,2017
-2017-02-27,  [Clean Monday],GR,2017
-2017-03-25,   [Independence Day],GR,2017
-2017-04-17,   [Easter Monday],GR,2017
-2017-05-01,  [Labour day],GR,2017
-2017-06-05,    [Monday of the Holy Spirit],GR,2017
-2017-08-15,   [Assumption of Mary],GR,2017
-2017-10-28,   [Ochi Day],GR,2017
-2017-12-25, [Christmas],GR,2017
-2017-12-26,    [Day after Christmas],GR,2017
-2018-01-01, [New Year's Day],GR,2018
-2018-01-06, [Epiphany],GR,2018
-2018-02-19,  [Clean Monday],GR,2018
-2018-03-25,   [Independence Day],GR,2018
-2018-04-09,   [Easter Monday],GR,2018
-2018-05-01,  [Labour day],GR,2018
-2018-05-28,    [Monday of the Holy Spirit],GR,2018
-2018-08-15,   [Assumption of Mary],GR,2018
-2018-10-28,   [Ochi Day],GR,2018
-2018-12-25, [Christmas],GR,2018
-2018-12-26,    [Day after Christmas],GR,2018
-2019-01-01, [New Year's Day],GR,2019
-2019-01-06, [Epiphany],GR,2019
-2019-03-11,  [Clean Monday],GR,2019
-2019-03-25,   [Independence Day],GR,2019
-2019-04-29,   [Easter Monday],GR,2019
-2019-05-01,  [Labour day],GR,2019
-2019-06-17,    [Monday of the Holy Spirit],GR,2019
-2019-08-15,   [Assumption of Mary],GR,2019
-2019-10-28,   [Ochi Day],GR,2019
-2019-12-25, [Christmas],GR,2019
-2019-12-26,    [Day after Christmas],GR,2019
-2020-01-01, [New Year's Day],GR,2020
-2020-01-06, [Epiphany],GR,2020
-2020-03-02,  [Clean Monday],GR,2020
-2020-03-25,   [Independence Day],GR,2020
-2020-04-20,   [Easter Monday],GR,2020
-2020-05-01,  [Labour day],GR,2020
-2020-06-08,    [Monday of the Holy Spirit],GR,2020
-2020-08-15,   [Assumption of Mary],GR,2020
-2020-10-28,   [Ochi Day],GR,2020
-2020-12-25, [Christmas],GR,2020
-2020-12-26,    [Day after Christmas],GR,2020
-2021-01-01, [New Year's Day],GR,2021
-2021-01-06, [Epiphany],GR,2021
-2021-03-15,  [Clean Monday],GR,2021
-2021-03-25,   [Independence Day],GR,2021
-2021-05-01,  [Labour day],GR,2021
-2021-05-03,   [Easter Monday],GR,2021
-2021-06-21,    [Monday of the Holy Spirit],GR,2021
-2021-08-15,   [Assumption of Mary],GR,2021
-2021-10-28,   [Ochi Day],GR,2021
-2021-12-25, [Christmas],GR,2021
-2021-12-26,    [Day after Christmas],GR,2021
-2022-01-01, [New Year's Day],GR,2022
-2022-01-06, [Epiphany],GR,2022
-2022-03-07,  [Clean Monday],GR,2022
-2022-03-25,   [Independence Day],GR,2022
-2022-04-25,   [Easter Monday],GR,2022
-2022-05-01,  [Labour day],GR,2022
-2022-06-13,    [Monday of the Holy Spirit],GR,2022
-2022-08-15,   [Assumption of Mary],GR,2022
-2022-10-28,   [Ochi Day],GR,2022
-2022-12-25, [Christmas],GR,2022
-2022-12-26,    [Day after Christmas],GR,2022
-2023-01-01, [New Year's Day],GR,2023
-2023-01-06, [Epiphany],GR,2023
-2023-02-27,  [Clean Monday],GR,2023
-2023-03-25,   [Independence Day],GR,2023
-2023-04-17,   [Easter Monday],GR,2023
-2023-05-01,  [Labour day],GR,2023
-2023-06-05,    [Monday of the Holy Spirit],GR,2023
-2023-08-15,   [Assumption of Mary],GR,2023
-2023-10-28,   [Ochi Day],GR,2023
-2023-12-25, [Christmas],GR,2023
-2023-12-26,    [Day after Christmas],GR,2023
-2024-01-01, [New Year's Day],GR,2024
-2024-01-06, [Epiphany],GR,2024
-2024-03-18,  [Clean Monday],GR,2024
-2024-03-25,   [Independence Day],GR,2024
-2024-05-01,  [Labour day],GR,2024
-2024-05-06,   [Easter Monday],GR,2024
-2024-06-24,    [Monday of the Holy Spirit],GR,2024
-2024-08-15,   [Assumption of Mary],GR,2024
-2024-10-28,   [Ochi Day],GR,2024
-2024-12-25, [Christmas],GR,2024
-2024-12-26,    [Day after Christmas],GR,2024
-2025-01-01, [New Year's Day],GR,2025
-2025-01-06, [Epiphany],GR,2025
-2025-03-03,  [Clean Monday],GR,2025
-2025-03-25,   [Independence Day],GR,2025
-2025-04-21,   [Easter Monday],GR,2025
-2025-05-01,  [Labour day],GR,2025
-2025-06-09,    [Monday of the Holy Spirit],GR,2025
-2025-08-15,   [Assumption of Mary],GR,2025
-2025-10-28,   [Ochi Day],GR,2025
-2025-12-25, [Christmas],GR,2025
-2025-12-26,    [Day after Christmas],GR,2025
-2026-01-01, [New Year's Day],GR,2026
-2026-01-06, [Epiphany],GR,2026
-2026-02-23,  [Clean Monday],GR,2026
-2026-03-25,   [Independence Day],GR,2026
-2026-04-13,   [Easter Monday],GR,2026
-2026-05-01,  [Labour day],GR,2026
-2026-06-01,    [Monday of the Holy Spirit],GR,2026
-2026-08-15,   [Assumption of Mary],GR,2026
-2026-10-28,   [Ochi Day],GR,2026
-2026-12-25, [Christmas],GR,2026
-2026-12-26,    [Day after Christmas],GR,2026
-2027-01-01, [New Year's Day],GR,2027
-2027-01-06, [Epiphany],GR,2027
-2027-03-15,  [Clean Monday],GR,2027
-2027-03-25,   [Independence Day],GR,2027
-2027-05-01,  [Labour day],GR,2027
-2027-05-03,   [Easter Monday],GR,2027
-2027-06-21,    [Monday of the Holy Spirit],GR,2027
-2027-08-15,   [Assumption of Mary],GR,2027
-2027-10-28,   [Ochi Day],GR,2027
-2027-12-25, [Christmas],GR,2027
-2027-12-26,    [Day after Christmas],GR,2027
-2028-01-01, [New Year's Day],GR,2028
-2028-01-06, [Epiphany],GR,2028
-2028-02-28,  [Clean Monday],GR,2028
-2028-03-25,   [Independence Day],GR,2028
-2028-04-17,   [Easter Monday],GR,2028
-2028-05-01,  [Labour day],GR,2028
-2028-06-05,    [Monday of the Holy Spirit],GR,2028
-2028-08-15,   [Assumption of Mary],GR,2028
-2028-10-28,   [Ochi Day],GR,2028
-2028-12-25, [Christmas],GR,2028
-2028-12-26,    [Day after Christmas],GR,2028
-2029-01-01, [New Year's Day],GR,2029
-2029-01-06, [Epiphany],GR,2029
-2029-02-19,  [Clean Monday],GR,2029
-2029-03-25,   [Independence Day],GR,2029
-2029-04-09,   [Easter Monday],GR,2029
-2029-05-01,  [Labour day],GR,2029
-2029-05-28,    [Monday of the Holy Spirit],GR,2029
-2029-08-15,   [Assumption of Mary],GR,2029
-2029-10-28,   [Ochi Day],GR,2029
-2029-12-25, [Christmas],GR,2029
-2029-12-26,    [Day after Christmas],GR,2029
-2030-01-01, [New Year's Day],GR,2030
-2030-01-06, [Epiphany],GR,2030
-2030-03-11,  [Clean Monday],GR,2030
-2030-03-25,   [Independence Day],GR,2030
-2030-04-29,   [Easter Monday],GR,2030
-2030-05-01,  [Labour day],GR,2030
-2030-06-17,    [Monday of the Holy Spirit],GR,2030
-2030-08-15,   [Assumption of Mary],GR,2030
-2030-10-28,   [Ochi Day],GR,2030
-2030-12-25, [Christmas],GR,2030
-2030-12-26,    [Day after Christmas],GR,2030
-2031-01-01, [New Year's Day],GR,2031
-2031-01-06, [Epiphany],GR,2031
-2031-02-24,  [Clean Monday],GR,2031
-2031-03-25,   [Independence Day],GR,2031
-2031-04-14,   [Easter Monday],GR,2031
-2031-05-01,  [Labour day],GR,2031
-2031-06-02,    [Monday of the Holy Spirit],GR,2031
-2031-08-15,   [Assumption of Mary],GR,2031
-2031-10-28,   [Ochi Day],GR,2031
-2031-12-25, [Christmas],GR,2031
-2031-12-26,    [Day after Christmas],GR,2031
-2032-01-01, [New Year's Day],GR,2032
-2032-01-06, [Epiphany],GR,2032
-2032-03-15,  [Clean Monday],GR,2032
-2032-03-25,   [Independence Day],GR,2032
-2032-05-01,  [Labour day],GR,2032
-2032-05-03,   [Easter Monday],GR,2032
-2032-06-21,    [Monday of the Holy Spirit],GR,2032
-2032-08-15,   [Assumption of Mary],GR,2032
-2032-10-28,   [Ochi Day],GR,2032
-2032-12-25, [Christmas],GR,2032
-2032-12-26,    [Day after Christmas],GR,2032
-2033-01-01, [New Year's Day],GR,2033
-2033-01-06, [Epiphany],GR,2033
-2033-03-07,  [Clean Monday],GR,2033
-2033-03-25,   [Independence Day],GR,2033
-2033-04-25,   [Easter Monday],GR,2033
-2033-05-01,  [Labour day],GR,2033
-2033-06-13,    [Monday of the Holy Spirit],GR,2033
-2033-08-15,   [Assumption of Mary],GR,2033
-2033-10-28,   [Ochi Day],GR,2033
-2033-12-25, [Christmas],GR,2033
-2033-12-26,    [Day after Christmas],GR,2033
-2034-01-01, [New Year's Day],GR,2034
-2034-01-06, [Epiphany],GR,2034
-2034-02-20,  [Clean Monday],GR,2034
-2034-03-25,   [Independence Day],GR,2034
-2034-04-10,   [Easter Monday],GR,2034
-2034-05-01,  [Labour day],GR,2034
-2034-05-29,    [Monday of the Holy Spirit],GR,2034
-2034-08-15,   [Assumption of Mary],GR,2034
-2034-10-28,   [Ochi Day],GR,2034
-2034-12-25, [Christmas],GR,2034
-2034-12-26,    [Day after Christmas],GR,2034
-2035-01-01, [New Year's Day],GR,2035
-2035-01-06, [Epiphany],GR,2035
-2035-03-12,  [Clean Monday],GR,2035
-2035-03-25,   [Independence Day],GR,2035
-2035-04-30,   [Easter Monday],GR,2035
-2035-05-01,  [Labour day],GR,2035
-2035-06-18,    [Monday of the Holy Spirit],GR,2035
-2035-08-15,   [Assumption of Mary],GR,2035
-2035-10-28,   [Ochi Day],GR,2035
-2035-12-25, [Christmas],GR,2035
-2035-12-26,    [Day after Christmas],GR,2035
-2036-01-01, [New Year's Day],GR,2036
-2036-01-06, [Epiphany],GR,2036
-2036-03-03,  [Clean Monday],GR,2036
-2036-03-25,   [Independence Day],GR,2036
-2036-04-21,   [Easter Monday],GR,2036
-2036-05-01,  [Labour day],GR,2036
-2036-06-09,    [Monday of the Holy Spirit],GR,2036
-2036-08-15,   [Assumption of Mary],GR,2036
-2036-10-28,   [Ochi Day],GR,2036
-2036-12-25, [Christmas],GR,2036
-2036-12-26,    [Day after Christmas],GR,2036
-2037-01-01, [New Year's Day],GR,2037
-2037-01-06, [Epiphany],GR,2037
-2037-02-16,  [Clean Monday],GR,2037
-2037-03-25,   [Independence Day],GR,2037
-2037-04-06,   [Easter Monday],GR,2037
-2037-05-01,  [Labour day],GR,2037
-2037-05-25,    [Monday of the Holy Spirit],GR,2037
-2037-08-15,   [Assumption of Mary],GR,2037
-2037-10-28,   [Ochi Day],GR,2037
-2037-12-25, [Christmas],GR,2037
-2037-12-26,    [Day after Christmas],GR,2037
-2038-01-01, [New Year's Day],GR,2038
-2038-01-06, [Epiphany],GR,2038
-2038-03-08,  [Clean Monday],GR,2038
-2038-03-25,   [Independence Day],GR,2038
-2038-04-26,   [Easter Monday],GR,2038
-2038-05-01,  [Labour day],GR,2038
-2038-06-14,    [Monday of the Holy Spirit],GR,2038
-2038-08-15,   [Assumption of Mary],GR,2038
-2038-10-28,   [Ochi Day],GR,2038
-2038-12-25, [Christmas],GR,2038
-2038-12-26,    [Day after Christmas],GR,2038
-2039-01-01, [New Year's Day],GR,2039
-2039-01-06, [Epiphany],GR,2039
-2039-02-28,  [Clean Monday],GR,2039
-2039-03-25,   [Independence Day],GR,2039
-2039-04-18,   [Easter Monday],GR,2039
-2039-05-01,  [Labour day],GR,2039
-2039-06-06,    [Monday of the Holy Spirit],GR,2039
-2039-08-15,   [Assumption of Mary],GR,2039
-2039-10-28,   [Ochi Day],GR,2039
-2039-12-25, [Christmas],GR,2039
-2039-12-26,    [Day after Christmas],GR,2039
-2040-01-01, [New Year's Day],GR,2040
-2040-01-06, [Epiphany],GR,2040
-2040-03-19,  [Clean Monday],GR,2040
-2040-03-25,   [Independence Day],GR,2040
-2040-05-01,  [Labour day],GR,2040
-2040-05-07,   [Easter Monday],GR,2040
-2040-06-25,    [Monday of the Holy Spirit],GR,2040
-2040-08-15,   [Assumption of Mary],GR,2040
-2040-10-28,   [Ochi Day],GR,2040
-2040-12-25, [Christmas],GR,2040
-2040-12-26,    [Day after Christmas],GR,2040
-2041-01-01, [New Year's Day],GR,2041
-2041-01-06, [Epiphany],GR,2041
-2041-03-04,  [Clean Monday],GR,2041
-2041-03-25,   [Independence Day],GR,2041
-2041-04-22,   [Easter Monday],GR,2041
-2041-05-01,  [Labour day],GR,2041
-2041-06-10,    [Monday of the Holy Spirit],GR,2041
-2041-08-15,   [Assumption of Mary],GR,2041
-2041-10-28,   [Ochi Day],GR,2041
-2041-12-25, [Christmas],GR,2041
-2041-12-26,    [Day after Christmas],GR,2041
-2042-01-01, [New Year's Day],GR,2042
-2042-01-06, [Epiphany],GR,2042
-2042-02-24,  [Clean Monday],GR,2042
-2042-03-25,   [Independence Day],GR,2042
-2042-04-14,   [Easter Monday],GR,2042
-2042-05-01,  [Labour day],GR,2042
-2042-06-02,    [Monday of the Holy Spirit],GR,2042
-2042-08-15,   [Assumption of Mary],GR,2042
-2042-10-28,   [Ochi Day],GR,2042
-2042-12-25, [Christmas],GR,2042
-2042-12-26,    [Day after Christmas],GR,2042
-2043-01-01, [New Year's Day],GR,2043
-2043-01-06, [Epiphany],GR,2043
-2043-03-16,  [Clean Monday],GR,2043
-2043-03-25,   [Independence Day],GR,2043
-2043-05-01,  [Labour day],GR,2043
-2043-05-04,   [Easter Monday],GR,2043
-2043-06-22,    [Monday of the Holy Spirit],GR,2043
-2043-08-15,   [Assumption of Mary],GR,2043
-2043-10-28,   [Ochi Day],GR,2043
-2043-12-25, [Christmas],GR,2043
-2043-12-26,    [Day after Christmas],GR,2043
-2044-01-01, [New Year's Day],GR,2044
-2044-01-06, [Epiphany],GR,2044
-2044-03-07,  [Clean Monday],GR,2044
-2044-03-25,   [Independence Day],GR,2044
-2044-04-25,   [Easter Monday],GR,2044
-2044-05-01,  [Labour day],GR,2044
-2044-06-13,    [Monday of the Holy Spirit],GR,2044
-2044-08-15,   [Assumption of Mary],GR,2044
-2044-10-28,   [Ochi Day],GR,2044
-2044-12-25, [Christmas],GR,2044
-2044-12-26,    [Day after Christmas],GR,2044
+1995-01-01,[New Year's Day],GR,1995
+1995-01-06,[Epiphany],GR,1995
+1995-03-06,[Clean Monday],GR,1995
+1995-03-25,[Independence Day],GR,1995
+1995-04-24,[Easter Monday],GR,1995
+1995-05-01,[Labour day],GR,1995
+1995-06-12,[Monday of the Holy Spirit],GR,1995
+1995-08-15,[Assumption of Mary],GR,1995
+1995-10-28,[Ochi Day],GR,1995
+1995-12-25,[Christmas],GR,1995
+1995-12-26,[Day after Christmas],GR,1995
+1996-01-01,[New Year's Day],GR,1996
+1996-01-06,[Epiphany],GR,1996
+1996-02-26,[Clean Monday],GR,1996
+1996-03-25,[Independence Day],GR,1996
+1996-04-15,[Easter Monday],GR,1996
+1996-05-01,[Labour day],GR,1996
+1996-06-03,[Monday of the Holy Spirit],GR,1996
+1996-08-15,[Assumption of Mary],GR,1996
+1996-10-28,[Ochi Day],GR,1996
+1996-12-25,[Christmas],GR,1996
+1996-12-26,[Day after Christmas],GR,1996
+1997-01-01,[New Year's Day],GR,1997
+1997-01-06,[Epiphany],GR,1997
+1997-03-10,[Clean Monday],GR,1997
+1997-03-25,[Independence Day],GR,1997
+1997-04-28,[Easter Monday],GR,1997
+1997-05-01,[Labour day],GR,1997
+1997-06-16,[Monday of the Holy Spirit],GR,1997
+1997-08-15,[Assumption of Mary],GR,1997
+1997-10-28,[Ochi Day],GR,1997
+1997-12-25,[Christmas],GR,1997
+1997-12-26,[Day after Christmas],GR,1997
+1998-01-01,[New Year's Day],GR,1998
+1998-01-06,[Epiphany],GR,1998
+1998-03-02,[Clean Monday],GR,1998
+1998-03-25,[Independence Day],GR,1998
+1998-04-20,[Easter Monday],GR,1998
+1998-05-01,[Labour day],GR,1998
+1998-06-08,[Monday of the Holy Spirit],GR,1998
+1998-08-15,[Assumption of Mary],GR,1998
+1998-10-28,[Ochi Day],GR,1998
+1998-12-25,[Christmas],GR,1998
+1998-12-26,[Day after Christmas],GR,1998
+1999-01-01,[New Year's Day],GR,1999
+1999-01-06,[Epiphany],GR,1999
+1999-02-22,[Clean Monday],GR,1999
+1999-03-25,[Independence Day],GR,1999
+1999-04-12,[Easter Monday],GR,1999
+1999-05-01,[Labour day],GR,1999
+1999-05-31,[Monday of the Holy Spirit],GR,1999
+1999-08-15,[Assumption of Mary],GR,1999
+1999-10-28,[Ochi Day],GR,1999
+1999-12-25,[Christmas],GR,1999
+1999-12-26,[Day after Christmas],GR,1999
+2000-01-01,[New Year's Day],GR,2000
+2000-01-06,[Epiphany],GR,2000
+2000-03-13,[Clean Monday],GR,2000
+2000-03-25,[Independence Day],GR,2000
+2000-05-01,"[Labour day],    [Easter Monday]",GR,2000
+2000-06-19,[Monday of the Holy Spirit],GR,2000
+2000-08-15,[Assumption of Mary],GR,2000
+2000-10-28,[Ochi Day],GR,2000
+2000-12-25,[Christmas],GR,2000
+2000-12-26,[Day after Christmas],GR,2000
+2001-01-01,[New Year's Day],GR,2001
+2001-01-06,[Epiphany],GR,2001
+2001-02-26,[Clean Monday],GR,2001
+2001-03-25,[Independence Day],GR,2001
+2001-04-16,[Easter Monday],GR,2001
+2001-05-01,[Labour day],GR,2001
+2001-06-04,[Monday of the Holy Spirit],GR,2001
+2001-08-15,[Assumption of Mary],GR,2001
+2001-10-28,[Ochi Day],GR,2001
+2001-12-25,[Christmas],GR,2001
+2001-12-26,[Day after Christmas],GR,2001
+2002-01-01,[New Year's Day],GR,2002
+2002-01-06,[Epiphany],GR,2002
+2002-03-18,[Clean Monday],GR,2002
+2002-03-25,[Independence Day],GR,2002
+2002-05-01,[Labour day],GR,2002
+2002-05-06,[Easter Monday],GR,2002
+2002-06-24,[Monday of the Holy Spirit],GR,2002
+2002-08-15,[Assumption of Mary],GR,2002
+2002-10-28,[Ochi Day],GR,2002
+2002-12-25,[Christmas],GR,2002
+2002-12-26,[Day after Christmas],GR,2002
+2003-01-01,[New Year's Day],GR,2003
+2003-01-06,[Epiphany],GR,2003
+2003-03-10,[Clean Monday],GR,2003
+2003-03-25,[Independence Day],GR,2003
+2003-04-28,[Easter Monday],GR,2003
+2003-05-01,[Labour day],GR,2003
+2003-06-16,[Monday of the Holy Spirit],GR,2003
+2003-08-15,[Assumption of Mary],GR,2003
+2003-10-28,[Ochi Day],GR,2003
+2003-12-25,[Christmas],GR,2003
+2003-12-26,[Day after Christmas],GR,2003
+2004-01-01,[New Year's Day],GR,2004
+2004-01-06,[Epiphany],GR,2004
+2004-02-23,[Clean Monday],GR,2004
+2004-03-25,[Independence Day],GR,2004
+2004-04-12,[Easter Monday],GR,2004
+2004-05-01,[Labour day],GR,2004
+2004-05-31,[Monday of the Holy Spirit],GR,2004
+2004-08-15,[Assumption of Mary],GR,2004
+2004-10-28,[Ochi Day],GR,2004
+2004-12-25,[Christmas],GR,2004
+2004-12-26,[Day after Christmas],GR,2004
+2005-01-01,[New Year's Day],GR,2005
+2005-01-06,[Epiphany],GR,2005
+2005-03-14,[Clean Monday],GR,2005
+2005-03-25,[Independence Day],GR,2005
+2005-05-01,[Labour day],GR,2005
+2005-05-02,[Easter Monday],GR,2005
+2005-06-20,[Monday of the Holy Spirit],GR,2005
+2005-08-15,[Assumption of Mary],GR,2005
+2005-10-28,[Ochi Day],GR,2005
+2005-12-25,[Christmas],GR,2005
+2005-12-26,[Day after Christmas],GR,2005
+2006-01-01,[New Year's Day],GR,2006
+2006-01-06,[Epiphany],GR,2006
+2006-03-06,[Clean Monday],GR,2006
+2006-03-25,[Independence Day],GR,2006
+2006-04-24,[Easter Monday],GR,2006
+2006-05-01,[Labour day],GR,2006
+2006-06-12,[Monday of the Holy Spirit],GR,2006
+2006-08-15,[Assumption of Mary],GR,2006
+2006-10-28,[Ochi Day],GR,2006
+2006-12-25,[Christmas],GR,2006
+2006-12-26,[Day after Christmas],GR,2006
+2007-01-01,[New Year's Day],GR,2007
+2007-01-06,[Epiphany],GR,2007
+2007-02-19,[Clean Monday],GR,2007
+2007-03-25,[Independence Day],GR,2007
+2007-04-09,[Easter Monday],GR,2007
+2007-05-01,[Labour day],GR,2007
+2007-05-28,[Monday of the Holy Spirit],GR,2007
+2007-08-15,[Assumption of Mary],GR,2007
+2007-10-28,[Ochi Day],GR,2007
+2007-12-25,[Christmas],GR,2007
+2007-12-26,[Day after Christmas],GR,2007
+2008-01-01,[New Year's Day],GR,2008
+2008-01-06,[Epiphany],GR,2008
+2008-03-10,[Clean Monday],GR,2008
+2008-03-25,[Independence Day],GR,2008
+2008-04-28,[Easter Monday],GR,2008
+2008-05-01,[Labour day],GR,2008
+2008-06-16,[Monday of the Holy Spirit],GR,2008
+2008-08-15,[Assumption of Mary],GR,2008
+2008-10-28,[Ochi Day],GR,2008
+2008-12-25,[Christmas],GR,2008
+2008-12-26,[Day after Christmas],GR,2008
+2009-01-01,[New Year's Day],GR,2009
+2009-01-06,[Epiphany],GR,2009
+2009-03-02,[Clean Monday],GR,2009
+2009-03-25,[Independence Day],GR,2009
+2009-04-20,[Easter Monday],GR,2009
+2009-05-01,[Labour day],GR,2009
+2009-06-08,[Monday of the Holy Spirit],GR,2009
+2009-08-15,[Assumption of Mary],GR,2009
+2009-10-28,[Ochi Day],GR,2009
+2009-12-25,[Christmas],GR,2009
+2009-12-26,[Day after Christmas],GR,2009
+2010-01-01,[New Year's Day],GR,2010
+2010-01-06,[Epiphany],GR,2010
+2010-02-15,[Clean Monday],GR,2010
+2010-03-25,[Independence Day],GR,2010
+2010-04-05,[Easter Monday],GR,2010
+2010-05-01,[Labour day],GR,2010
+2010-05-24,[Monday of the Holy Spirit],GR,2010
+2010-08-15,[Assumption of Mary],GR,2010
+2010-10-28,[Ochi Day],GR,2010
+2010-12-25,[Christmas],GR,2010
+2010-12-26,[Day after Christmas],GR,2010
+2011-01-01,[New Year's Day],GR,2011
+2011-01-06,[Epiphany],GR,2011
+2011-03-07,[Clean Monday],GR,2011
+2011-03-25,[Independence Day],GR,2011
+2011-04-25,[Easter Monday],GR,2011
+2011-05-01,[Labour day],GR,2011
+2011-06-13,[Monday of the Holy Spirit],GR,2011
+2011-08-15,[Assumption of Mary],GR,2011
+2011-10-28,[Ochi Day],GR,2011
+2011-12-25,[Christmas],GR,2011
+2011-12-26,[Day after Christmas],GR,2011
+2012-01-01,[New Year's Day],GR,2012
+2012-01-06,[Epiphany],GR,2012
+2012-02-27,[Clean Monday],GR,2012
+2012-03-25,[Independence Day],GR,2012
+2012-04-16,[Easter Monday],GR,2012
+2012-05-01,[Labour day],GR,2012
+2012-06-04,[Monday of the Holy Spirit],GR,2012
+2012-08-15,[Assumption of Mary],GR,2012
+2012-10-28,[Ochi Day],GR,2012
+2012-12-25,[Christmas],GR,2012
+2012-12-26,[Day after Christmas],GR,2012
+2013-01-01,[New Year's Day],GR,2013
+2013-01-06,[Epiphany],GR,2013
+2013-03-18,[Clean Monday],GR,2013
+2013-03-25,[Independence Day],GR,2013
+2013-05-01,[Labour day],GR,2013
+2013-05-06,[Easter Monday],GR,2013
+2013-06-24,[Monday of the Holy Spirit],GR,2013
+2013-08-15,[Assumption of Mary],GR,2013
+2013-10-28,[Ochi Day],GR,2013
+2013-12-25,[Christmas],GR,2013
+2013-12-26,[Day after Christmas],GR,2013
+2014-01-01,[New Year's Day],GR,2014
+2014-01-06,[Epiphany],GR,2014
+2014-03-03,[Clean Monday],GR,2014
+2014-03-25,[Independence Day],GR,2014
+2014-04-21,[Easter Monday],GR,2014
+2014-05-01,[Labour day],GR,2014
+2014-06-09,[Monday of the Holy Spirit],GR,2014
+2014-08-15,[Assumption of Mary],GR,2014
+2014-10-28,[Ochi Day],GR,2014
+2014-12-25,[Christmas],GR,2014
+2014-12-26,[Day after Christmas],GR,2014
+2015-01-01,[New Year's Day],GR,2015
+2015-01-06,[Epiphany],GR,2015
+2015-02-23,[Clean Monday],GR,2015
+2015-03-25,[Independence Day],GR,2015
+2015-04-13,[Easter Monday],GR,2015
+2015-05-01,[Labour day],GR,2015
+2015-06-01,[Monday of the Holy Spirit],GR,2015
+2015-08-15,[Assumption of Mary],GR,2015
+2015-10-28,[Ochi Day],GR,2015
+2015-12-25,[Christmas],GR,2015
+2015-12-26,[Day after Christmas],GR,2015
+2016-01-01,[New Year's Day],GR,2016
+2016-01-06,[Epiphany],GR,2016
+2016-03-14,[Clean Monday],GR,2016
+2016-03-25,[Independence Day],GR,2016
+2016-05-01,[Labour day],GR,2016
+2016-05-02,[Easter Monday],GR,2016
+2016-06-20,[Monday of the Holy Spirit],GR,2016
+2016-08-15,[Assumption of Mary],GR,2016
+2016-10-28,[Ochi Day],GR,2016
+2016-12-25,[Christmas],GR,2016
+2016-12-26,[Day after Christmas],GR,2016
+2017-01-01,[New Year's Day],GR,2017
+2017-01-06,[Epiphany],GR,2017
+2017-02-27,[Clean Monday],GR,2017
+2017-03-25,[Independence Day],GR,2017
+2017-04-17,[Easter Monday],GR,2017
+2017-05-01,[Labour day],GR,2017
+2017-06-05,[Monday of the Holy Spirit],GR,2017
+2017-08-15,[Assumption of Mary],GR,2017
+2017-10-28,[Ochi Day],GR,2017
+2017-12-25,[Christmas],GR,2017
+2017-12-26,[Day after Christmas],GR,2017
+2018-01-01,[New Year's Day],GR,2018
+2018-01-06,[Epiphany],GR,2018
+2018-02-19,[Clean Monday],GR,2018
+2018-03-25,[Independence Day],GR,2018
+2018-04-09,[Easter Monday],GR,2018
+2018-05-01,[Labour day],GR,2018
+2018-05-28,[Monday of the Holy Spirit],GR,2018
+2018-08-15,[Assumption of Mary],GR,2018
+2018-10-28,[Ochi Day],GR,2018
+2018-12-25,[Christmas],GR,2018
+2018-12-26,[Day after Christmas],GR,2018
+2019-01-01,[New Year's Day],GR,2019
+2019-01-06,[Epiphany],GR,2019
+2019-03-11,[Clean Monday],GR,2019
+2019-03-25,[Independence Day],GR,2019
+2019-04-29,[Easter Monday],GR,2019
+2019-05-01,[Labour day],GR,2019
+2019-06-17,[Monday of the Holy Spirit],GR,2019
+2019-08-15,[Assumption of Mary],GR,2019
+2019-10-28,[Ochi Day],GR,2019
+2019-12-25,[Christmas],GR,2019
+2019-12-26,[Day after Christmas],GR,2019
+2020-01-01,[New Year's Day],GR,2020
+2020-01-06,[Epiphany],GR,2020
+2020-03-02,[Clean Monday],GR,2020
+2020-03-25,[Independence Day],GR,2020
+2020-04-20,[Easter Monday],GR,2020
+2020-05-01,[Labour day],GR,2020
+2020-06-08,[Monday of the Holy Spirit],GR,2020
+2020-08-15,[Assumption of Mary],GR,2020
+2020-10-28,[Ochi Day],GR,2020
+2020-12-25,[Christmas],GR,2020
+2020-12-26,[Day after Christmas],GR,2020
+2021-01-01,[New Year's Day],GR,2021
+2021-01-06,[Epiphany],GR,2021
+2021-03-15,[Clean Monday],GR,2021
+2021-03-25,[Independence Day],GR,2021
+2021-05-01,[Labour day],GR,2021
+2021-05-03,[Easter Monday],GR,2021
+2021-06-21,[Monday of the Holy Spirit],GR,2021
+2021-08-15,[Assumption of Mary],GR,2021
+2021-10-28,[Ochi Day],GR,2021
+2021-12-25,[Christmas],GR,2021
+2021-12-26,[Day after Christmas],GR,2021
+2022-01-01,[New Year's Day],GR,2022
+2022-01-06,[Epiphany],GR,2022
+2022-03-07,[Clean Monday],GR,2022
+2022-03-25,[Independence Day],GR,2022
+2022-04-25,[Easter Monday],GR,2022
+2022-05-01,[Labour day],GR,2022
+2022-06-13,[Monday of the Holy Spirit],GR,2022
+2022-08-15,[Assumption of Mary],GR,2022
+2022-10-28,[Ochi Day],GR,2022
+2022-12-25,[Christmas],GR,2022
+2022-12-26,[Day after Christmas],GR,2022
+2023-01-01,[New Year's Day],GR,2023
+2023-01-06,[Epiphany],GR,2023
+2023-02-27,[Clean Monday],GR,2023
+2023-03-25,[Independence Day],GR,2023
+2023-04-17,[Easter Monday],GR,2023
+2023-05-01,[Labour day],GR,2023
+2023-06-05,[Monday of the Holy Spirit],GR,2023
+2023-08-15,[Assumption of Mary],GR,2023
+2023-10-28,[Ochi Day],GR,2023
+2023-12-25,[Christmas],GR,2023
+2023-12-26,[Day after Christmas],GR,2023
+2024-01-01,[New Year's Day],GR,2024
+2024-01-06,[Epiphany],GR,2024
+2024-03-18,[Clean Monday],GR,2024
+2024-03-25,[Independence Day],GR,2024
+2024-05-01,[Labour day],GR,2024
+2024-05-06,[Easter Monday],GR,2024
+2024-06-24,[Monday of the Holy Spirit],GR,2024
+2024-08-15,[Assumption of Mary],GR,2024
+2024-10-28,[Ochi Day],GR,2024
+2024-12-25,[Christmas],GR,2024
+2024-12-26,[Day after Christmas],GR,2024
+2025-01-01,[New Year's Day],GR,2025
+2025-01-06,[Epiphany],GR,2025
+2025-03-03,[Clean Monday],GR,2025
+2025-03-25,[Independence Day],GR,2025
+2025-04-21,[Easter Monday],GR,2025
+2025-05-01,[Labour day],GR,2025
+2025-06-09,[Monday of the Holy Spirit],GR,2025
+2025-08-15,[Assumption of Mary],GR,2025
+2025-10-28,[Ochi Day],GR,2025
+2025-12-25,[Christmas],GR,2025
+2025-12-26,[Day after Christmas],GR,2025
+2026-01-01,[New Year's Day],GR,2026
+2026-01-06,[Epiphany],GR,2026
+2026-02-23,[Clean Monday],GR,2026
+2026-03-25,[Independence Day],GR,2026
+2026-04-13,[Easter Monday],GR,2026
+2026-05-01,[Labour day],GR,2026
+2026-06-01,[Monday of the Holy Spirit],GR,2026
+2026-08-15,[Assumption of Mary],GR,2026
+2026-10-28,[Ochi Day],GR,2026
+2026-12-25,[Christmas],GR,2026
+2026-12-26,[Day after Christmas],GR,2026
+2027-01-01,[New Year's Day],GR,2027
+2027-01-06,[Epiphany],GR,2027
+2027-03-15,[Clean Monday],GR,2027
+2027-03-25,[Independence Day],GR,2027
+2027-05-01,[Labour day],GR,2027
+2027-05-03,[Easter Monday],GR,2027
+2027-06-21,[Monday of the Holy Spirit],GR,2027
+2027-08-15,[Assumption of Mary],GR,2027
+2027-10-28,[Ochi Day],GR,2027
+2027-12-25,[Christmas],GR,2027
+2027-12-26,[Day after Christmas],GR,2027
+2028-01-01,[New Year's Day],GR,2028
+2028-01-06,[Epiphany],GR,2028
+2028-02-28,[Clean Monday],GR,2028
+2028-03-25,[Independence Day],GR,2028
+2028-04-17,[Easter Monday],GR,2028
+2028-05-01,[Labour day],GR,2028
+2028-06-05,[Monday of the Holy Spirit],GR,2028
+2028-08-15,[Assumption of Mary],GR,2028
+2028-10-28,[Ochi Day],GR,2028
+2028-12-25,[Christmas],GR,2028
+2028-12-26,[Day after Christmas],GR,2028
+2029-01-01,[New Year's Day],GR,2029
+2029-01-06,[Epiphany],GR,2029
+2029-02-19,[Clean Monday],GR,2029
+2029-03-25,[Independence Day],GR,2029
+2029-04-09,[Easter Monday],GR,2029
+2029-05-01,[Labour day],GR,2029
+2029-05-28,[Monday of the Holy Spirit],GR,2029
+2029-08-15,[Assumption of Mary],GR,2029
+2029-10-28,[Ochi Day],GR,2029
+2029-12-25,[Christmas],GR,2029
+2029-12-26,[Day after Christmas],GR,2029
+2030-01-01,[New Year's Day],GR,2030
+2030-01-06,[Epiphany],GR,2030
+2030-03-11,[Clean Monday],GR,2030
+2030-03-25,[Independence Day],GR,2030
+2030-04-29,[Easter Monday],GR,2030
+2030-05-01,[Labour day],GR,2030
+2030-06-17,[Monday of the Holy Spirit],GR,2030
+2030-08-15,[Assumption of Mary],GR,2030
+2030-10-28,[Ochi Day],GR,2030
+2030-12-25,[Christmas],GR,2030
+2030-12-26,[Day after Christmas],GR,2030
+2031-01-01,[New Year's Day],GR,2031
+2031-01-06,[Epiphany],GR,2031
+2031-02-24,[Clean Monday],GR,2031
+2031-03-25,[Independence Day],GR,2031
+2031-04-14,[Easter Monday],GR,2031
+2031-05-01,[Labour day],GR,2031
+2031-06-02,[Monday of the Holy Spirit],GR,2031
+2031-08-15,[Assumption of Mary],GR,2031
+2031-10-28,[Ochi Day],GR,2031
+2031-12-25,[Christmas],GR,2031
+2031-12-26,[Day after Christmas],GR,2031
+2032-01-01,[New Year's Day],GR,2032
+2032-01-06,[Epiphany],GR,2032
+2032-03-15,[Clean Monday],GR,2032
+2032-03-25,[Independence Day],GR,2032
+2032-05-01,[Labour day],GR,2032
+2032-05-03,[Easter Monday],GR,2032
+2032-06-21,[Monday of the Holy Spirit],GR,2032
+2032-08-15,[Assumption of Mary],GR,2032
+2032-10-28,[Ochi Day],GR,2032
+2032-12-25,[Christmas],GR,2032
+2032-12-26,[Day after Christmas],GR,2032
+2033-01-01,[New Year's Day],GR,2033
+2033-01-06,[Epiphany],GR,2033
+2033-03-07,[Clean Monday],GR,2033
+2033-03-25,[Independence Day],GR,2033
+2033-04-25,[Easter Monday],GR,2033
+2033-05-01,[Labour day],GR,2033
+2033-06-13,[Monday of the Holy Spirit],GR,2033
+2033-08-15,[Assumption of Mary],GR,2033
+2033-10-28,[Ochi Day],GR,2033
+2033-12-25,[Christmas],GR,2033
+2033-12-26,[Day after Christmas],GR,2033
+2034-01-01,[New Year's Day],GR,2034
+2034-01-06,[Epiphany],GR,2034
+2034-02-20,[Clean Monday],GR,2034
+2034-03-25,[Independence Day],GR,2034
+2034-04-10,[Easter Monday],GR,2034
+2034-05-01,[Labour day],GR,2034
+2034-05-29,[Monday of the Holy Spirit],GR,2034
+2034-08-15,[Assumption of Mary],GR,2034
+2034-10-28,[Ochi Day],GR,2034
+2034-12-25,[Christmas],GR,2034
+2034-12-26,[Day after Christmas],GR,2034
+2035-01-01,[New Year's Day],GR,2035
+2035-01-06,[Epiphany],GR,2035
+2035-03-12,[Clean Monday],GR,2035
+2035-03-25,[Independence Day],GR,2035
+2035-04-30,[Easter Monday],GR,2035
+2035-05-01,[Labour day],GR,2035
+2035-06-18,[Monday of the Holy Spirit],GR,2035
+2035-08-15,[Assumption of Mary],GR,2035
+2035-10-28,[Ochi Day],GR,2035
+2035-12-25,[Christmas],GR,2035
+2035-12-26,[Day after Christmas],GR,2035
+2036-01-01,[New Year's Day],GR,2036
+2036-01-06,[Epiphany],GR,2036
+2036-03-03,[Clean Monday],GR,2036
+2036-03-25,[Independence Day],GR,2036
+2036-04-21,[Easter Monday],GR,2036
+2036-05-01,[Labour day],GR,2036
+2036-06-09,[Monday of the Holy Spirit],GR,2036
+2036-08-15,[Assumption of Mary],GR,2036
+2036-10-28,[Ochi Day],GR,2036
+2036-12-25,[Christmas],GR,2036
+2036-12-26,[Day after Christmas],GR,2036
+2037-01-01,[New Year's Day],GR,2037
+2037-01-06,[Epiphany],GR,2037
+2037-02-16,[Clean Monday],GR,2037
+2037-03-25,[Independence Day],GR,2037
+2037-04-06,[Easter Monday],GR,2037
+2037-05-01,[Labour day],GR,2037
+2037-05-25,[Monday of the Holy Spirit],GR,2037
+2037-08-15,[Assumption of Mary],GR,2037
+2037-10-28,[Ochi Day],GR,2037
+2037-12-25,[Christmas],GR,2037
+2037-12-26,[Day after Christmas],GR,2037
+2038-01-01,[New Year's Day],GR,2038
+2038-01-06,[Epiphany],GR,2038
+2038-03-08,[Clean Monday],GR,2038
+2038-03-25,[Independence Day],GR,2038
+2038-04-26,[Easter Monday],GR,2038
+2038-05-01,[Labour day],GR,2038
+2038-06-14,[Monday of the Holy Spirit],GR,2038
+2038-08-15,[Assumption of Mary],GR,2038
+2038-10-28,[Ochi Day],GR,2038
+2038-12-25,[Christmas],GR,2038
+2038-12-26,[Day after Christmas],GR,2038
+2039-01-01,[New Year's Day],GR,2039
+2039-01-06,[Epiphany],GR,2039
+2039-02-28,[Clean Monday],GR,2039
+2039-03-25,[Independence Day],GR,2039
+2039-04-18,[Easter Monday],GR,2039
+2039-05-01,[Labour day],GR,2039
+2039-06-06,[Monday of the Holy Spirit],GR,2039
+2039-08-15,[Assumption of Mary],GR,2039
+2039-10-28,[Ochi Day],GR,2039
+2039-12-25,[Christmas],GR,2039
+2039-12-26,[Day after Christmas],GR,2039
+2040-01-01,[New Year's Day],GR,2040
+2040-01-06,[Epiphany],GR,2040
+2040-03-19,[Clean Monday],GR,2040
+2040-03-25,[Independence Day],GR,2040
+2040-05-01,[Labour day],GR,2040
+2040-05-07,[Easter Monday],GR,2040
+2040-06-25,[Monday of the Holy Spirit],GR,2040
+2040-08-15,[Assumption of Mary],GR,2040
+2040-10-28,[Ochi Day],GR,2040
+2040-12-25,[Christmas],GR,2040
+2040-12-26,[Day after Christmas],GR,2040
+2041-01-01,[New Year's Day],GR,2041
+2041-01-06,[Epiphany],GR,2041
+2041-03-04,[Clean Monday],GR,2041
+2041-03-25,[Independence Day],GR,2041
+2041-04-22,[Easter Monday],GR,2041
+2041-05-01,[Labour day],GR,2041
+2041-06-10,[Monday of the Holy Spirit],GR,2041
+2041-08-15,[Assumption of Mary],GR,2041
+2041-10-28,[Ochi Day],GR,2041
+2041-12-25,[Christmas],GR,2041
+2041-12-26,[Day after Christmas],GR,2041
+2042-01-01,[New Year's Day],GR,2042
+2042-01-06,[Epiphany],GR,2042
+2042-02-24,[Clean Monday],GR,2042
+2042-03-25,[Independence Day],GR,2042
+2042-04-14,[Easter Monday],GR,2042
+2042-05-01,[Labour day],GR,2042
+2042-06-02,[Monday of the Holy Spirit],GR,2042
+2042-08-15,[Assumption of Mary],GR,2042
+2042-10-28,[Ochi Day],GR,2042
+2042-12-25,[Christmas],GR,2042
+2042-12-26,[Day after Christmas],GR,2042
+2043-01-01,[New Year's Day],GR,2043
+2043-01-06,[Epiphany],GR,2043
+2043-03-16,[Clean Monday],GR,2043
+2043-03-25,[Independence Day],GR,2043
+2043-05-01,[Labour day],GR,2043
+2043-05-04,[Easter Monday],GR,2043
+2043-06-22,[Monday of the Holy Spirit],GR,2043
+2043-08-15,[Assumption of Mary],GR,2043
+2043-10-28,[Ochi Day],GR,2043
+2043-12-25,[Christmas],GR,2043
+2043-12-26,[Day after Christmas],GR,2043
+2044-01-01,[New Year's Day],GR,2044
+2044-01-06,[Epiphany],GR,2044
+2044-03-07,[Clean Monday],GR,2044
+2044-03-25,[Independence Day],GR,2044
+2044-04-25,[Easter Monday],GR,2044
+2044-05-01,[Labour day],GR,2044
+2044-06-13,[Monday of the Holy Spirit],GR,2044
+2044-08-15,[Assumption of Mary],GR,2044
+2044-10-28,[Ochi Day],GR,2044
+2044-12-25,[Christmas],GR,2044
+2044-12-26,[Day after Christmas],GR,2044
 1995-01-01,Neujahr,Germany,1995
 1995-04-14,Karfreitag,Germany,1995
 1995-04-17,Ostermontag,Germany,1995
@@ -27485,555 +27095,555 @@ ds,holiday,country,year
 2044-10-03,Tag der Deutschen Einheit,Germany,2044
 2044-12-25,Erster Weihnachtstag,Germany,2044
 2044-12-26,Zweiter Weihnachtstag,Germany,2044
-1995-01-01, [New Year's Day],Greece,1995
-1995-01-06, [Epiphany],Greece,1995
-1995-03-06,  [Clean Monday],Greece,1995
-1995-03-25,   [Independence Day],Greece,1995
-1995-04-24,   [Easter Monday],Greece,1995
-1995-05-01,  [Labour day],Greece,1995
-1995-06-12,    [Monday of the Holy Spirit],Greece,1995
-1995-08-15,   [Assumption of Mary],Greece,1995
-1995-10-28,   [Ochi Day],Greece,1995
-1995-12-25, [Christmas],Greece,1995
-1995-12-26,    [Day after Christmas],Greece,1995
-1996-01-01, [New Year's Day],Greece,1996
-1996-01-06, [Epiphany],Greece,1996
-1996-02-26,  [Clean Monday],Greece,1996
-1996-03-25,   [Independence Day],Greece,1996
-1996-04-15,   [Easter Monday],Greece,1996
-1996-05-01,  [Labour day],Greece,1996
-1996-06-03,    [Monday of the Holy Spirit],Greece,1996
-1996-08-15,   [Assumption of Mary],Greece,1996
-1996-10-28,   [Ochi Day],Greece,1996
-1996-12-25, [Christmas],Greece,1996
-1996-12-26,    [Day after Christmas],Greece,1996
-1997-01-01, [New Year's Day],Greece,1997
-1997-01-06, [Epiphany],Greece,1997
-1997-03-10,  [Clean Monday],Greece,1997
-1997-03-25,   [Independence Day],Greece,1997
-1997-04-28,   [Easter Monday],Greece,1997
-1997-05-01,  [Labour day],Greece,1997
-1997-06-16,    [Monday of the Holy Spirit],Greece,1997
-1997-08-15,   [Assumption of Mary],Greece,1997
-1997-10-28,   [Ochi Day],Greece,1997
-1997-12-25, [Christmas],Greece,1997
-1997-12-26,    [Day after Christmas],Greece,1997
-1998-01-01, [New Year's Day],Greece,1998
-1998-01-06, [Epiphany],Greece,1998
-1998-03-02,  [Clean Monday],Greece,1998
-1998-03-25,   [Independence Day],Greece,1998
-1998-04-20,   [Easter Monday],Greece,1998
-1998-05-01,  [Labour day],Greece,1998
-1998-06-08,    [Monday of the Holy Spirit],Greece,1998
-1998-08-15,   [Assumption of Mary],Greece,1998
-1998-10-28,   [Ochi Day],Greece,1998
-1998-12-25, [Christmas],Greece,1998
-1998-12-26,    [Day after Christmas],Greece,1998
-1999-01-01, [New Year's Day],Greece,1999
-1999-01-06, [Epiphany],Greece,1999
-1999-02-22,  [Clean Monday],Greece,1999
-1999-03-25,   [Independence Day],Greece,1999
-1999-04-12,   [Easter Monday],Greece,1999
-1999-05-01,  [Labour day],Greece,1999
-1999-05-31,    [Monday of the Holy Spirit],Greece,1999
-1999-08-15,   [Assumption of Mary],Greece,1999
-1999-10-28,   [Ochi Day],Greece,1999
-1999-12-25, [Christmas],Greece,1999
-1999-12-26,    [Day after Christmas],Greece,1999
-2000-01-01, [New Year's Day],Greece,2000
-2000-01-06, [Epiphany],Greece,2000
-2000-03-13,  [Clean Monday],Greece,2000
-2000-03-25,   [Independence Day],Greece,2000
-2000-05-01,"  [Labour day],    [Easter Monday]",Greece,2000
-2000-06-19,    [Monday of the Holy Spirit],Greece,2000
-2000-08-15,   [Assumption of Mary],Greece,2000
-2000-10-28,   [Ochi Day],Greece,2000
-2000-12-25, [Christmas],Greece,2000
-2000-12-26,    [Day after Christmas],Greece,2000
-2001-01-01, [New Year's Day],Greece,2001
-2001-01-06, [Epiphany],Greece,2001
-2001-02-26,  [Clean Monday],Greece,2001
-2001-03-25,   [Independence Day],Greece,2001
-2001-04-16,   [Easter Monday],Greece,2001
-2001-05-01,  [Labour day],Greece,2001
-2001-06-04,    [Monday of the Holy Spirit],Greece,2001
-2001-08-15,   [Assumption of Mary],Greece,2001
-2001-10-28,   [Ochi Day],Greece,2001
-2001-12-25, [Christmas],Greece,2001
-2001-12-26,    [Day after Christmas],Greece,2001
-2002-01-01, [New Year's Day],Greece,2002
-2002-01-06, [Epiphany],Greece,2002
-2002-03-18,  [Clean Monday],Greece,2002
-2002-03-25,   [Independence Day],Greece,2002
-2002-05-01,  [Labour day],Greece,2002
-2002-05-06,   [Easter Monday],Greece,2002
-2002-06-24,    [Monday of the Holy Spirit],Greece,2002
-2002-08-15,   [Assumption of Mary],Greece,2002
-2002-10-28,   [Ochi Day],Greece,2002
-2002-12-25, [Christmas],Greece,2002
-2002-12-26,    [Day after Christmas],Greece,2002
-2003-01-01, [New Year's Day],Greece,2003
-2003-01-06, [Epiphany],Greece,2003
-2003-03-10,  [Clean Monday],Greece,2003
-2003-03-25,   [Independence Day],Greece,2003
-2003-04-28,   [Easter Monday],Greece,2003
-2003-05-01,  [Labour day],Greece,2003
-2003-06-16,    [Monday of the Holy Spirit],Greece,2003
-2003-08-15,   [Assumption of Mary],Greece,2003
-2003-10-28,   [Ochi Day],Greece,2003
-2003-12-25, [Christmas],Greece,2003
-2003-12-26,    [Day after Christmas],Greece,2003
-2004-01-01, [New Year's Day],Greece,2004
-2004-01-06, [Epiphany],Greece,2004
-2004-02-23,  [Clean Monday],Greece,2004
-2004-03-25,   [Independence Day],Greece,2004
-2004-04-12,   [Easter Monday],Greece,2004
-2004-05-01,  [Labour day],Greece,2004
-2004-05-31,    [Monday of the Holy Spirit],Greece,2004
-2004-08-15,   [Assumption of Mary],Greece,2004
-2004-10-28,   [Ochi Day],Greece,2004
-2004-12-25, [Christmas],Greece,2004
-2004-12-26,    [Day after Christmas],Greece,2004
-2005-01-01, [New Year's Day],Greece,2005
-2005-01-06, [Epiphany],Greece,2005
-2005-03-14,  [Clean Monday],Greece,2005
-2005-03-25,   [Independence Day],Greece,2005
-2005-05-01,  [Labour day],Greece,2005
-2005-05-02,   [Easter Monday],Greece,2005
-2005-06-20,    [Monday of the Holy Spirit],Greece,2005
-2005-08-15,   [Assumption of Mary],Greece,2005
-2005-10-28,   [Ochi Day],Greece,2005
-2005-12-25, [Christmas],Greece,2005
-2005-12-26,    [Day after Christmas],Greece,2005
-2006-01-01, [New Year's Day],Greece,2006
-2006-01-06, [Epiphany],Greece,2006
-2006-03-06,  [Clean Monday],Greece,2006
-2006-03-25,   [Independence Day],Greece,2006
-2006-04-24,   [Easter Monday],Greece,2006
-2006-05-01,  [Labour day],Greece,2006
-2006-06-12,    [Monday of the Holy Spirit],Greece,2006
-2006-08-15,   [Assumption of Mary],Greece,2006
-2006-10-28,   [Ochi Day],Greece,2006
-2006-12-25, [Christmas],Greece,2006
-2006-12-26,    [Day after Christmas],Greece,2006
-2007-01-01, [New Year's Day],Greece,2007
-2007-01-06, [Epiphany],Greece,2007
-2007-02-19,  [Clean Monday],Greece,2007
-2007-03-25,   [Independence Day],Greece,2007
-2007-04-09,   [Easter Monday],Greece,2007
-2007-05-01,  [Labour day],Greece,2007
-2007-05-28,    [Monday of the Holy Spirit],Greece,2007
-2007-08-15,   [Assumption of Mary],Greece,2007
-2007-10-28,   [Ochi Day],Greece,2007
-2007-12-25, [Christmas],Greece,2007
-2007-12-26,    [Day after Christmas],Greece,2007
-2008-01-01, [New Year's Day],Greece,2008
-2008-01-06, [Epiphany],Greece,2008
-2008-03-10,  [Clean Monday],Greece,2008
-2008-03-25,   [Independence Day],Greece,2008
-2008-04-28,   [Easter Monday],Greece,2008
-2008-05-01,  [Labour day],Greece,2008
-2008-06-16,    [Monday of the Holy Spirit],Greece,2008
-2008-08-15,   [Assumption of Mary],Greece,2008
-2008-10-28,   [Ochi Day],Greece,2008
-2008-12-25, [Christmas],Greece,2008
-2008-12-26,    [Day after Christmas],Greece,2008
-2009-01-01, [New Year's Day],Greece,2009
-2009-01-06, [Epiphany],Greece,2009
-2009-03-02,  [Clean Monday],Greece,2009
-2009-03-25,   [Independence Day],Greece,2009
-2009-04-20,   [Easter Monday],Greece,2009
-2009-05-01,  [Labour day],Greece,2009
-2009-06-08,    [Monday of the Holy Spirit],Greece,2009
-2009-08-15,   [Assumption of Mary],Greece,2009
-2009-10-28,   [Ochi Day],Greece,2009
-2009-12-25, [Christmas],Greece,2009
-2009-12-26,    [Day after Christmas],Greece,2009
-2010-01-01, [New Year's Day],Greece,2010
-2010-01-06, [Epiphany],Greece,2010
-2010-02-15,  [Clean Monday],Greece,2010
-2010-03-25,   [Independence Day],Greece,2010
-2010-04-05,   [Easter Monday],Greece,2010
-2010-05-01,  [Labour day],Greece,2010
-2010-05-24,    [Monday of the Holy Spirit],Greece,2010
-2010-08-15,   [Assumption of Mary],Greece,2010
-2010-10-28,   [Ochi Day],Greece,2010
-2010-12-25, [Christmas],Greece,2010
-2010-12-26,    [Day after Christmas],Greece,2010
-2011-01-01, [New Year's Day],Greece,2011
-2011-01-06, [Epiphany],Greece,2011
-2011-03-07,  [Clean Monday],Greece,2011
-2011-03-25,   [Independence Day],Greece,2011
-2011-04-25,   [Easter Monday],Greece,2011
-2011-05-01,  [Labour day],Greece,2011
-2011-06-13,    [Monday of the Holy Spirit],Greece,2011
-2011-08-15,   [Assumption of Mary],Greece,2011
-2011-10-28,   [Ochi Day],Greece,2011
-2011-12-25, [Christmas],Greece,2011
-2011-12-26,    [Day after Christmas],Greece,2011
-2012-01-01, [New Year's Day],Greece,2012
-2012-01-06, [Epiphany],Greece,2012
-2012-02-27,  [Clean Monday],Greece,2012
-2012-03-25,   [Independence Day],Greece,2012
-2012-04-16,   [Easter Monday],Greece,2012
-2012-05-01,  [Labour day],Greece,2012
-2012-06-04,    [Monday of the Holy Spirit],Greece,2012
-2012-08-15,   [Assumption of Mary],Greece,2012
-2012-10-28,   [Ochi Day],Greece,2012
-2012-12-25, [Christmas],Greece,2012
-2012-12-26,    [Day after Christmas],Greece,2012
-2013-01-01, [New Year's Day],Greece,2013
-2013-01-06, [Epiphany],Greece,2013
-2013-03-18,  [Clean Monday],Greece,2013
-2013-03-25,   [Independence Day],Greece,2013
-2013-05-01,  [Labour day],Greece,2013
-2013-05-06,   [Easter Monday],Greece,2013
-2013-06-24,    [Monday of the Holy Spirit],Greece,2013
-2013-08-15,   [Assumption of Mary],Greece,2013
-2013-10-28,   [Ochi Day],Greece,2013
-2013-12-25, [Christmas],Greece,2013
-2013-12-26,    [Day after Christmas],Greece,2013
-2014-01-01, [New Year's Day],Greece,2014
-2014-01-06, [Epiphany],Greece,2014
-2014-03-03,  [Clean Monday],Greece,2014
-2014-03-25,   [Independence Day],Greece,2014
-2014-04-21,   [Easter Monday],Greece,2014
-2014-05-01,  [Labour day],Greece,2014
-2014-06-09,    [Monday of the Holy Spirit],Greece,2014
-2014-08-15,   [Assumption of Mary],Greece,2014
-2014-10-28,   [Ochi Day],Greece,2014
-2014-12-25, [Christmas],Greece,2014
-2014-12-26,    [Day after Christmas],Greece,2014
-2015-01-01, [New Year's Day],Greece,2015
-2015-01-06, [Epiphany],Greece,2015
-2015-02-23,  [Clean Monday],Greece,2015
-2015-03-25,   [Independence Day],Greece,2015
-2015-04-13,   [Easter Monday],Greece,2015
-2015-05-01,  [Labour day],Greece,2015
-2015-06-01,    [Monday of the Holy Spirit],Greece,2015
-2015-08-15,   [Assumption of Mary],Greece,2015
-2015-10-28,   [Ochi Day],Greece,2015
-2015-12-25, [Christmas],Greece,2015
-2015-12-26,    [Day after Christmas],Greece,2015
-2016-01-01, [New Year's Day],Greece,2016
-2016-01-06, [Epiphany],Greece,2016
-2016-03-14,  [Clean Monday],Greece,2016
-2016-03-25,   [Independence Day],Greece,2016
-2016-05-01,  [Labour day],Greece,2016
-2016-05-02,   [Easter Monday],Greece,2016
-2016-06-20,    [Monday of the Holy Spirit],Greece,2016
-2016-08-15,   [Assumption of Mary],Greece,2016
-2016-10-28,   [Ochi Day],Greece,2016
-2016-12-25, [Christmas],Greece,2016
-2016-12-26,    [Day after Christmas],Greece,2016
-2017-01-01, [New Year's Day],Greece,2017
-2017-01-06, [Epiphany],Greece,2017
-2017-02-27,  [Clean Monday],Greece,2017
-2017-03-25,   [Independence Day],Greece,2017
-2017-04-17,   [Easter Monday],Greece,2017
-2017-05-01,  [Labour day],Greece,2017
-2017-06-05,    [Monday of the Holy Spirit],Greece,2017
-2017-08-15,   [Assumption of Mary],Greece,2017
-2017-10-28,   [Ochi Day],Greece,2017
-2017-12-25, [Christmas],Greece,2017
-2017-12-26,    [Day after Christmas],Greece,2017
-2018-01-01, [New Year's Day],Greece,2018
-2018-01-06, [Epiphany],Greece,2018
-2018-02-19,  [Clean Monday],Greece,2018
-2018-03-25,   [Independence Day],Greece,2018
-2018-04-09,   [Easter Monday],Greece,2018
-2018-05-01,  [Labour day],Greece,2018
-2018-05-28,    [Monday of the Holy Spirit],Greece,2018
-2018-08-15,   [Assumption of Mary],Greece,2018
-2018-10-28,   [Ochi Day],Greece,2018
-2018-12-25, [Christmas],Greece,2018
-2018-12-26,    [Day after Christmas],Greece,2018
-2019-01-01, [New Year's Day],Greece,2019
-2019-01-06, [Epiphany],Greece,2019
-2019-03-11,  [Clean Monday],Greece,2019
-2019-03-25,   [Independence Day],Greece,2019
-2019-04-29,   [Easter Monday],Greece,2019
-2019-05-01,  [Labour day],Greece,2019
-2019-06-17,    [Monday of the Holy Spirit],Greece,2019
-2019-08-15,   [Assumption of Mary],Greece,2019
-2019-10-28,   [Ochi Day],Greece,2019
-2019-12-25, [Christmas],Greece,2019
-2019-12-26,    [Day after Christmas],Greece,2019
-2020-01-01, [New Year's Day],Greece,2020
-2020-01-06, [Epiphany],Greece,2020
-2020-03-02,  [Clean Monday],Greece,2020
-2020-03-25,   [Independence Day],Greece,2020
-2020-04-20,   [Easter Monday],Greece,2020
-2020-05-01,  [Labour day],Greece,2020
-2020-06-08,    [Monday of the Holy Spirit],Greece,2020
-2020-08-15,   [Assumption of Mary],Greece,2020
-2020-10-28,   [Ochi Day],Greece,2020
-2020-12-25, [Christmas],Greece,2020
-2020-12-26,    [Day after Christmas],Greece,2020
-2021-01-01, [New Year's Day],Greece,2021
-2021-01-06, [Epiphany],Greece,2021
-2021-03-15,  [Clean Monday],Greece,2021
-2021-03-25,   [Independence Day],Greece,2021
-2021-05-01,  [Labour day],Greece,2021
-2021-05-03,   [Easter Monday],Greece,2021
-2021-06-21,    [Monday of the Holy Spirit],Greece,2021
-2021-08-15,   [Assumption of Mary],Greece,2021
-2021-10-28,   [Ochi Day],Greece,2021
-2021-12-25, [Christmas],Greece,2021
-2021-12-26,    [Day after Christmas],Greece,2021
-2022-01-01, [New Year's Day],Greece,2022
-2022-01-06, [Epiphany],Greece,2022
-2022-03-07,  [Clean Monday],Greece,2022
-2022-03-25,   [Independence Day],Greece,2022
-2022-04-25,   [Easter Monday],Greece,2022
-2022-05-01,  [Labour day],Greece,2022
-2022-06-13,    [Monday of the Holy Spirit],Greece,2022
-2022-08-15,   [Assumption of Mary],Greece,2022
-2022-10-28,   [Ochi Day],Greece,2022
-2022-12-25, [Christmas],Greece,2022
-2022-12-26,    [Day after Christmas],Greece,2022
-2023-01-01, [New Year's Day],Greece,2023
-2023-01-06, [Epiphany],Greece,2023
-2023-02-27,  [Clean Monday],Greece,2023
-2023-03-25,   [Independence Day],Greece,2023
-2023-04-17,   [Easter Monday],Greece,2023
-2023-05-01,  [Labour day],Greece,2023
-2023-06-05,    [Monday of the Holy Spirit],Greece,2023
-2023-08-15,   [Assumption of Mary],Greece,2023
-2023-10-28,   [Ochi Day],Greece,2023
-2023-12-25, [Christmas],Greece,2023
-2023-12-26,    [Day after Christmas],Greece,2023
-2024-01-01, [New Year's Day],Greece,2024
-2024-01-06, [Epiphany],Greece,2024
-2024-03-18,  [Clean Monday],Greece,2024
-2024-03-25,   [Independence Day],Greece,2024
-2024-05-01,  [Labour day],Greece,2024
-2024-05-06,   [Easter Monday],Greece,2024
-2024-06-24,    [Monday of the Holy Spirit],Greece,2024
-2024-08-15,   [Assumption of Mary],Greece,2024
-2024-10-28,   [Ochi Day],Greece,2024
-2024-12-25, [Christmas],Greece,2024
-2024-12-26,    [Day after Christmas],Greece,2024
-2025-01-01, [New Year's Day],Greece,2025
-2025-01-06, [Epiphany],Greece,2025
-2025-03-03,  [Clean Monday],Greece,2025
-2025-03-25,   [Independence Day],Greece,2025
-2025-04-21,   [Easter Monday],Greece,2025
-2025-05-01,  [Labour day],Greece,2025
-2025-06-09,    [Monday of the Holy Spirit],Greece,2025
-2025-08-15,   [Assumption of Mary],Greece,2025
-2025-10-28,   [Ochi Day],Greece,2025
-2025-12-25, [Christmas],Greece,2025
-2025-12-26,    [Day after Christmas],Greece,2025
-2026-01-01, [New Year's Day],Greece,2026
-2026-01-06, [Epiphany],Greece,2026
-2026-02-23,  [Clean Monday],Greece,2026
-2026-03-25,   [Independence Day],Greece,2026
-2026-04-13,   [Easter Monday],Greece,2026
-2026-05-01,  [Labour day],Greece,2026
-2026-06-01,    [Monday of the Holy Spirit],Greece,2026
-2026-08-15,   [Assumption of Mary],Greece,2026
-2026-10-28,   [Ochi Day],Greece,2026
-2026-12-25, [Christmas],Greece,2026
-2026-12-26,    [Day after Christmas],Greece,2026
-2027-01-01, [New Year's Day],Greece,2027
-2027-01-06, [Epiphany],Greece,2027
-2027-03-15,  [Clean Monday],Greece,2027
-2027-03-25,   [Independence Day],Greece,2027
-2027-05-01,  [Labour day],Greece,2027
-2027-05-03,   [Easter Monday],Greece,2027
-2027-06-21,    [Monday of the Holy Spirit],Greece,2027
-2027-08-15,   [Assumption of Mary],Greece,2027
-2027-10-28,   [Ochi Day],Greece,2027
-2027-12-25, [Christmas],Greece,2027
-2027-12-26,    [Day after Christmas],Greece,2027
-2028-01-01, [New Year's Day],Greece,2028
-2028-01-06, [Epiphany],Greece,2028
-2028-02-28,  [Clean Monday],Greece,2028
-2028-03-25,   [Independence Day],Greece,2028
-2028-04-17,   [Easter Monday],Greece,2028
-2028-05-01,  [Labour day],Greece,2028
-2028-06-05,    [Monday of the Holy Spirit],Greece,2028
-2028-08-15,   [Assumption of Mary],Greece,2028
-2028-10-28,   [Ochi Day],Greece,2028
-2028-12-25, [Christmas],Greece,2028
-2028-12-26,    [Day after Christmas],Greece,2028
-2029-01-01, [New Year's Day],Greece,2029
-2029-01-06, [Epiphany],Greece,2029
-2029-02-19,  [Clean Monday],Greece,2029
-2029-03-25,   [Independence Day],Greece,2029
-2029-04-09,   [Easter Monday],Greece,2029
-2029-05-01,  [Labour day],Greece,2029
-2029-05-28,    [Monday of the Holy Spirit],Greece,2029
-2029-08-15,   [Assumption of Mary],Greece,2029
-2029-10-28,   [Ochi Day],Greece,2029
-2029-12-25, [Christmas],Greece,2029
-2029-12-26,    [Day after Christmas],Greece,2029
-2030-01-01, [New Year's Day],Greece,2030
-2030-01-06, [Epiphany],Greece,2030
-2030-03-11,  [Clean Monday],Greece,2030
-2030-03-25,   [Independence Day],Greece,2030
-2030-04-29,   [Easter Monday],Greece,2030
-2030-05-01,  [Labour day],Greece,2030
-2030-06-17,    [Monday of the Holy Spirit],Greece,2030
-2030-08-15,   [Assumption of Mary],Greece,2030
-2030-10-28,   [Ochi Day],Greece,2030
-2030-12-25, [Christmas],Greece,2030
-2030-12-26,    [Day after Christmas],Greece,2030
-2031-01-01, [New Year's Day],Greece,2031
-2031-01-06, [Epiphany],Greece,2031
-2031-02-24,  [Clean Monday],Greece,2031
-2031-03-25,   [Independence Day],Greece,2031
-2031-04-14,   [Easter Monday],Greece,2031
-2031-05-01,  [Labour day],Greece,2031
-2031-06-02,    [Monday of the Holy Spirit],Greece,2031
-2031-08-15,   [Assumption of Mary],Greece,2031
-2031-10-28,   [Ochi Day],Greece,2031
-2031-12-25, [Christmas],Greece,2031
-2031-12-26,    [Day after Christmas],Greece,2031
-2032-01-01, [New Year's Day],Greece,2032
-2032-01-06, [Epiphany],Greece,2032
-2032-03-15,  [Clean Monday],Greece,2032
-2032-03-25,   [Independence Day],Greece,2032
-2032-05-01,  [Labour day],Greece,2032
-2032-05-03,   [Easter Monday],Greece,2032
-2032-06-21,    [Monday of the Holy Spirit],Greece,2032
-2032-08-15,   [Assumption of Mary],Greece,2032
-2032-10-28,   [Ochi Day],Greece,2032
-2032-12-25, [Christmas],Greece,2032
-2032-12-26,    [Day after Christmas],Greece,2032
-2033-01-01, [New Year's Day],Greece,2033
-2033-01-06, [Epiphany],Greece,2033
-2033-03-07,  [Clean Monday],Greece,2033
-2033-03-25,   [Independence Day],Greece,2033
-2033-04-25,   [Easter Monday],Greece,2033
-2033-05-01,  [Labour day],Greece,2033
-2033-06-13,    [Monday of the Holy Spirit],Greece,2033
-2033-08-15,   [Assumption of Mary],Greece,2033
-2033-10-28,   [Ochi Day],Greece,2033
-2033-12-25, [Christmas],Greece,2033
-2033-12-26,    [Day after Christmas],Greece,2033
-2034-01-01, [New Year's Day],Greece,2034
-2034-01-06, [Epiphany],Greece,2034
-2034-02-20,  [Clean Monday],Greece,2034
-2034-03-25,   [Independence Day],Greece,2034
-2034-04-10,   [Easter Monday],Greece,2034
-2034-05-01,  [Labour day],Greece,2034
-2034-05-29,    [Monday of the Holy Spirit],Greece,2034
-2034-08-15,   [Assumption of Mary],Greece,2034
-2034-10-28,   [Ochi Day],Greece,2034
-2034-12-25, [Christmas],Greece,2034
-2034-12-26,    [Day after Christmas],Greece,2034
-2035-01-01, [New Year's Day],Greece,2035
-2035-01-06, [Epiphany],Greece,2035
-2035-03-12,  [Clean Monday],Greece,2035
-2035-03-25,   [Independence Day],Greece,2035
-2035-04-30,   [Easter Monday],Greece,2035
-2035-05-01,  [Labour day],Greece,2035
-2035-06-18,    [Monday of the Holy Spirit],Greece,2035
-2035-08-15,   [Assumption of Mary],Greece,2035
-2035-10-28,   [Ochi Day],Greece,2035
-2035-12-25, [Christmas],Greece,2035
-2035-12-26,    [Day after Christmas],Greece,2035
-2036-01-01, [New Year's Day],Greece,2036
-2036-01-06, [Epiphany],Greece,2036
-2036-03-03,  [Clean Monday],Greece,2036
-2036-03-25,   [Independence Day],Greece,2036
-2036-04-21,   [Easter Monday],Greece,2036
-2036-05-01,  [Labour day],Greece,2036
-2036-06-09,    [Monday of the Holy Spirit],Greece,2036
-2036-08-15,   [Assumption of Mary],Greece,2036
-2036-10-28,   [Ochi Day],Greece,2036
-2036-12-25, [Christmas],Greece,2036
-2036-12-26,    [Day after Christmas],Greece,2036
-2037-01-01, [New Year's Day],Greece,2037
-2037-01-06, [Epiphany],Greece,2037
-2037-02-16,  [Clean Monday],Greece,2037
-2037-03-25,   [Independence Day],Greece,2037
-2037-04-06,   [Easter Monday],Greece,2037
-2037-05-01,  [Labour day],Greece,2037
-2037-05-25,    [Monday of the Holy Spirit],Greece,2037
-2037-08-15,   [Assumption of Mary],Greece,2037
-2037-10-28,   [Ochi Day],Greece,2037
-2037-12-25, [Christmas],Greece,2037
-2037-12-26,    [Day after Christmas],Greece,2037
-2038-01-01, [New Year's Day],Greece,2038
-2038-01-06, [Epiphany],Greece,2038
-2038-03-08,  [Clean Monday],Greece,2038
-2038-03-25,   [Independence Day],Greece,2038
-2038-04-26,   [Easter Monday],Greece,2038
-2038-05-01,  [Labour day],Greece,2038
-2038-06-14,    [Monday of the Holy Spirit],Greece,2038
-2038-08-15,   [Assumption of Mary],Greece,2038
-2038-10-28,   [Ochi Day],Greece,2038
-2038-12-25, [Christmas],Greece,2038
-2038-12-26,    [Day after Christmas],Greece,2038
-2039-01-01, [New Year's Day],Greece,2039
-2039-01-06, [Epiphany],Greece,2039
-2039-02-28,  [Clean Monday],Greece,2039
-2039-03-25,   [Independence Day],Greece,2039
-2039-04-18,   [Easter Monday],Greece,2039
-2039-05-01,  [Labour day],Greece,2039
-2039-06-06,    [Monday of the Holy Spirit],Greece,2039
-2039-08-15,   [Assumption of Mary],Greece,2039
-2039-10-28,   [Ochi Day],Greece,2039
-2039-12-25, [Christmas],Greece,2039
-2039-12-26,    [Day after Christmas],Greece,2039
-2040-01-01, [New Year's Day],Greece,2040
-2040-01-06, [Epiphany],Greece,2040
-2040-03-19,  [Clean Monday],Greece,2040
-2040-03-25,   [Independence Day],Greece,2040
-2040-05-01,  [Labour day],Greece,2040
-2040-05-07,   [Easter Monday],Greece,2040
-2040-06-25,    [Monday of the Holy Spirit],Greece,2040
-2040-08-15,   [Assumption of Mary],Greece,2040
-2040-10-28,   [Ochi Day],Greece,2040
-2040-12-25, [Christmas],Greece,2040
-2040-12-26,    [Day after Christmas],Greece,2040
-2041-01-01, [New Year's Day],Greece,2041
-2041-01-06, [Epiphany],Greece,2041
-2041-03-04,  [Clean Monday],Greece,2041
-2041-03-25,   [Independence Day],Greece,2041
-2041-04-22,   [Easter Monday],Greece,2041
-2041-05-01,  [Labour day],Greece,2041
-2041-06-10,    [Monday of the Holy Spirit],Greece,2041
-2041-08-15,   [Assumption of Mary],Greece,2041
-2041-10-28,   [Ochi Day],Greece,2041
-2041-12-25, [Christmas],Greece,2041
-2041-12-26,    [Day after Christmas],Greece,2041
-2042-01-01, [New Year's Day],Greece,2042
-2042-01-06, [Epiphany],Greece,2042
-2042-02-24,  [Clean Monday],Greece,2042
-2042-03-25,   [Independence Day],Greece,2042
-2042-04-14,   [Easter Monday],Greece,2042
-2042-05-01,  [Labour day],Greece,2042
-2042-06-02,    [Monday of the Holy Spirit],Greece,2042
-2042-08-15,   [Assumption of Mary],Greece,2042
-2042-10-28,   [Ochi Day],Greece,2042
-2042-12-25, [Christmas],Greece,2042
-2042-12-26,    [Day after Christmas],Greece,2042
-2043-01-01, [New Year's Day],Greece,2043
-2043-01-06, [Epiphany],Greece,2043
-2043-03-16,  [Clean Monday],Greece,2043
-2043-03-25,   [Independence Day],Greece,2043
-2043-05-01,  [Labour day],Greece,2043
-2043-05-04,   [Easter Monday],Greece,2043
-2043-06-22,    [Monday of the Holy Spirit],Greece,2043
-2043-08-15,   [Assumption of Mary],Greece,2043
-2043-10-28,   [Ochi Day],Greece,2043
-2043-12-25, [Christmas],Greece,2043
-2043-12-26,    [Day after Christmas],Greece,2043
-2044-01-01, [New Year's Day],Greece,2044
-2044-01-06, [Epiphany],Greece,2044
-2044-03-07,  [Clean Monday],Greece,2044
-2044-03-25,   [Independence Day],Greece,2044
-2044-04-25,   [Easter Monday],Greece,2044
-2044-05-01,  [Labour day],Greece,2044
-2044-06-13,    [Monday of the Holy Spirit],Greece,2044
-2044-08-15,   [Assumption of Mary],Greece,2044
-2044-10-28,   [Ochi Day],Greece,2044
-2044-12-25, [Christmas],Greece,2044
-2044-12-26,    [Day after Christmas],Greece,2044
+1995-01-01,[New Year's Day],Greece,1995
+1995-01-06,[Epiphany],Greece,1995
+1995-03-06,[Clean Monday],Greece,1995
+1995-03-25,[Independence Day],Greece,1995
+1995-04-24,[Easter Monday],Greece,1995
+1995-05-01,[Labour day],Greece,1995
+1995-06-12,[Monday of the Holy Spirit],Greece,1995
+1995-08-15,[Assumption of Mary],Greece,1995
+1995-10-28,[Ochi Day],Greece,1995
+1995-12-25,[Christmas],Greece,1995
+1995-12-26,[Day after Christmas],Greece,1995
+1996-01-01,[New Year's Day],Greece,1996
+1996-01-06,[Epiphany],Greece,1996
+1996-02-26,[Clean Monday],Greece,1996
+1996-03-25,[Independence Day],Greece,1996
+1996-04-15,[Easter Monday],Greece,1996
+1996-05-01,[Labour day],Greece,1996
+1996-06-03,[Monday of the Holy Spirit],Greece,1996
+1996-08-15,[Assumption of Mary],Greece,1996
+1996-10-28,[Ochi Day],Greece,1996
+1996-12-25,[Christmas],Greece,1996
+1996-12-26,[Day after Christmas],Greece,1996
+1997-01-01,[New Year's Day],Greece,1997
+1997-01-06,[Epiphany],Greece,1997
+1997-03-10,[Clean Monday],Greece,1997
+1997-03-25,[Independence Day],Greece,1997
+1997-04-28,[Easter Monday],Greece,1997
+1997-05-01,[Labour day],Greece,1997
+1997-06-16,[Monday of the Holy Spirit],Greece,1997
+1997-08-15,[Assumption of Mary],Greece,1997
+1997-10-28,[Ochi Day],Greece,1997
+1997-12-25,[Christmas],Greece,1997
+1997-12-26,[Day after Christmas],Greece,1997
+1998-01-01,[New Year's Day],Greece,1998
+1998-01-06,[Epiphany],Greece,1998
+1998-03-02,[Clean Monday],Greece,1998
+1998-03-25,[Independence Day],Greece,1998
+1998-04-20,[Easter Monday],Greece,1998
+1998-05-01,[Labour day],Greece,1998
+1998-06-08,[Monday of the Holy Spirit],Greece,1998
+1998-08-15,[Assumption of Mary],Greece,1998
+1998-10-28,[Ochi Day],Greece,1998
+1998-12-25,[Christmas],Greece,1998
+1998-12-26,[Day after Christmas],Greece,1998
+1999-01-01,[New Year's Day],Greece,1999
+1999-01-06,[Epiphany],Greece,1999
+1999-02-22,[Clean Monday],Greece,1999
+1999-03-25,[Independence Day],Greece,1999
+1999-04-12,[Easter Monday],Greece,1999
+1999-05-01,[Labour day],Greece,1999
+1999-05-31,[Monday of the Holy Spirit],Greece,1999
+1999-08-15,[Assumption of Mary],Greece,1999
+1999-10-28,[Ochi Day],Greece,1999
+1999-12-25,[Christmas],Greece,1999
+1999-12-26,[Day after Christmas],Greece,1999
+2000-01-01,[New Year's Day],Greece,2000
+2000-01-06,[Epiphany],Greece,2000
+2000-03-13,[Clean Monday],Greece,2000
+2000-03-25,[Independence Day],Greece,2000
+2000-05-01,"[Labour day],    [Easter Monday]",Greece,2000
+2000-06-19,[Monday of the Holy Spirit],Greece,2000
+2000-08-15,[Assumption of Mary],Greece,2000
+2000-10-28,[Ochi Day],Greece,2000
+2000-12-25,[Christmas],Greece,2000
+2000-12-26,[Day after Christmas],Greece,2000
+2001-01-01,[New Year's Day],Greece,2001
+2001-01-06,[Epiphany],Greece,2001
+2001-02-26,[Clean Monday],Greece,2001
+2001-03-25,[Independence Day],Greece,2001
+2001-04-16,[Easter Monday],Greece,2001
+2001-05-01,[Labour day],Greece,2001
+2001-06-04,[Monday of the Holy Spirit],Greece,2001
+2001-08-15,[Assumption of Mary],Greece,2001
+2001-10-28,[Ochi Day],Greece,2001
+2001-12-25,[Christmas],Greece,2001
+2001-12-26,[Day after Christmas],Greece,2001
+2002-01-01,[New Year's Day],Greece,2002
+2002-01-06,[Epiphany],Greece,2002
+2002-03-18,[Clean Monday],Greece,2002
+2002-03-25,[Independence Day],Greece,2002
+2002-05-01,[Labour day],Greece,2002
+2002-05-06,[Easter Monday],Greece,2002
+2002-06-24,[Monday of the Holy Spirit],Greece,2002
+2002-08-15,[Assumption of Mary],Greece,2002
+2002-10-28,[Ochi Day],Greece,2002
+2002-12-25,[Christmas],Greece,2002
+2002-12-26,[Day after Christmas],Greece,2002
+2003-01-01,[New Year's Day],Greece,2003
+2003-01-06,[Epiphany],Greece,2003
+2003-03-10,[Clean Monday],Greece,2003
+2003-03-25,[Independence Day],Greece,2003
+2003-04-28,[Easter Monday],Greece,2003
+2003-05-01,[Labour day],Greece,2003
+2003-06-16,[Monday of the Holy Spirit],Greece,2003
+2003-08-15,[Assumption of Mary],Greece,2003
+2003-10-28,[Ochi Day],Greece,2003
+2003-12-25,[Christmas],Greece,2003
+2003-12-26,[Day after Christmas],Greece,2003
+2004-01-01,[New Year's Day],Greece,2004
+2004-01-06,[Epiphany],Greece,2004
+2004-02-23,[Clean Monday],Greece,2004
+2004-03-25,[Independence Day],Greece,2004
+2004-04-12,[Easter Monday],Greece,2004
+2004-05-01,[Labour day],Greece,2004
+2004-05-31,[Monday of the Holy Spirit],Greece,2004
+2004-08-15,[Assumption of Mary],Greece,2004
+2004-10-28,[Ochi Day],Greece,2004
+2004-12-25,[Christmas],Greece,2004
+2004-12-26,[Day after Christmas],Greece,2004
+2005-01-01,[New Year's Day],Greece,2005
+2005-01-06,[Epiphany],Greece,2005
+2005-03-14,[Clean Monday],Greece,2005
+2005-03-25,[Independence Day],Greece,2005
+2005-05-01,[Labour day],Greece,2005
+2005-05-02,[Easter Monday],Greece,2005
+2005-06-20,[Monday of the Holy Spirit],Greece,2005
+2005-08-15,[Assumption of Mary],Greece,2005
+2005-10-28,[Ochi Day],Greece,2005
+2005-12-25,[Christmas],Greece,2005
+2005-12-26,[Day after Christmas],Greece,2005
+2006-01-01,[New Year's Day],Greece,2006
+2006-01-06,[Epiphany],Greece,2006
+2006-03-06,[Clean Monday],Greece,2006
+2006-03-25,[Independence Day],Greece,2006
+2006-04-24,[Easter Monday],Greece,2006
+2006-05-01,[Labour day],Greece,2006
+2006-06-12,[Monday of the Holy Spirit],Greece,2006
+2006-08-15,[Assumption of Mary],Greece,2006
+2006-10-28,[Ochi Day],Greece,2006
+2006-12-25,[Christmas],Greece,2006
+2006-12-26,[Day after Christmas],Greece,2006
+2007-01-01,[New Year's Day],Greece,2007
+2007-01-06,[Epiphany],Greece,2007
+2007-02-19,[Clean Monday],Greece,2007
+2007-03-25,[Independence Day],Greece,2007
+2007-04-09,[Easter Monday],Greece,2007
+2007-05-01,[Labour day],Greece,2007
+2007-05-28,[Monday of the Holy Spirit],Greece,2007
+2007-08-15,[Assumption of Mary],Greece,2007
+2007-10-28,[Ochi Day],Greece,2007
+2007-12-25,[Christmas],Greece,2007
+2007-12-26,[Day after Christmas],Greece,2007
+2008-01-01,[New Year's Day],Greece,2008
+2008-01-06,[Epiphany],Greece,2008
+2008-03-10,[Clean Monday],Greece,2008
+2008-03-25,[Independence Day],Greece,2008
+2008-04-28,[Easter Monday],Greece,2008
+2008-05-01,[Labour day],Greece,2008
+2008-06-16,[Monday of the Holy Spirit],Greece,2008
+2008-08-15,[Assumption of Mary],Greece,2008
+2008-10-28,[Ochi Day],Greece,2008
+2008-12-25,[Christmas],Greece,2008
+2008-12-26,[Day after Christmas],Greece,2008
+2009-01-01,[New Year's Day],Greece,2009
+2009-01-06,[Epiphany],Greece,2009
+2009-03-02,[Clean Monday],Greece,2009
+2009-03-25,[Independence Day],Greece,2009
+2009-04-20,[Easter Monday],Greece,2009
+2009-05-01,[Labour day],Greece,2009
+2009-06-08,[Monday of the Holy Spirit],Greece,2009
+2009-08-15,[Assumption of Mary],Greece,2009
+2009-10-28,[Ochi Day],Greece,2009
+2009-12-25,[Christmas],Greece,2009
+2009-12-26,[Day after Christmas],Greece,2009
+2010-01-01,[New Year's Day],Greece,2010
+2010-01-06,[Epiphany],Greece,2010
+2010-02-15,[Clean Monday],Greece,2010
+2010-03-25,[Independence Day],Greece,2010
+2010-04-05,[Easter Monday],Greece,2010
+2010-05-01,[Labour day],Greece,2010
+2010-05-24,[Monday of the Holy Spirit],Greece,2010
+2010-08-15,[Assumption of Mary],Greece,2010
+2010-10-28,[Ochi Day],Greece,2010
+2010-12-25,[Christmas],Greece,2010
+2010-12-26,[Day after Christmas],Greece,2010
+2011-01-01,[New Year's Day],Greece,2011
+2011-01-06,[Epiphany],Greece,2011
+2011-03-07,[Clean Monday],Greece,2011
+2011-03-25,[Independence Day],Greece,2011
+2011-04-25,[Easter Monday],Greece,2011
+2011-05-01,[Labour day],Greece,2011
+2011-06-13,[Monday of the Holy Spirit],Greece,2011
+2011-08-15,[Assumption of Mary],Greece,2011
+2011-10-28,[Ochi Day],Greece,2011
+2011-12-25,[Christmas],Greece,2011
+2011-12-26,[Day after Christmas],Greece,2011
+2012-01-01,[New Year's Day],Greece,2012
+2012-01-06,[Epiphany],Greece,2012
+2012-02-27,[Clean Monday],Greece,2012
+2012-03-25,[Independence Day],Greece,2012
+2012-04-16,[Easter Monday],Greece,2012
+2012-05-01,[Labour day],Greece,2012
+2012-06-04,[Monday of the Holy Spirit],Greece,2012
+2012-08-15,[Assumption of Mary],Greece,2012
+2012-10-28,[Ochi Day],Greece,2012
+2012-12-25,[Christmas],Greece,2012
+2012-12-26,[Day after Christmas],Greece,2012
+2013-01-01,[New Year's Day],Greece,2013
+2013-01-06,[Epiphany],Greece,2013
+2013-03-18,[Clean Monday],Greece,2013
+2013-03-25,[Independence Day],Greece,2013
+2013-05-01,[Labour day],Greece,2013
+2013-05-06,[Easter Monday],Greece,2013
+2013-06-24,[Monday of the Holy Spirit],Greece,2013
+2013-08-15,[Assumption of Mary],Greece,2013
+2013-10-28,[Ochi Day],Greece,2013
+2013-12-25,[Christmas],Greece,2013
+2013-12-26,[Day after Christmas],Greece,2013
+2014-01-01,[New Year's Day],Greece,2014
+2014-01-06,[Epiphany],Greece,2014
+2014-03-03,[Clean Monday],Greece,2014
+2014-03-25,[Independence Day],Greece,2014
+2014-04-21,[Easter Monday],Greece,2014
+2014-05-01,[Labour day],Greece,2014
+2014-06-09,[Monday of the Holy Spirit],Greece,2014
+2014-08-15,[Assumption of Mary],Greece,2014
+2014-10-28,[Ochi Day],Greece,2014
+2014-12-25,[Christmas],Greece,2014
+2014-12-26,[Day after Christmas],Greece,2014
+2015-01-01,[New Year's Day],Greece,2015
+2015-01-06,[Epiphany],Greece,2015
+2015-02-23,[Clean Monday],Greece,2015
+2015-03-25,[Independence Day],Greece,2015
+2015-04-13,[Easter Monday],Greece,2015
+2015-05-01,[Labour day],Greece,2015
+2015-06-01,[Monday of the Holy Spirit],Greece,2015
+2015-08-15,[Assumption of Mary],Greece,2015
+2015-10-28,[Ochi Day],Greece,2015
+2015-12-25,[Christmas],Greece,2015
+2015-12-26,[Day after Christmas],Greece,2015
+2016-01-01,[New Year's Day],Greece,2016
+2016-01-06,[Epiphany],Greece,2016
+2016-03-14,[Clean Monday],Greece,2016
+2016-03-25,[Independence Day],Greece,2016
+2016-05-01,[Labour day],Greece,2016
+2016-05-02,[Easter Monday],Greece,2016
+2016-06-20,[Monday of the Holy Spirit],Greece,2016
+2016-08-15,[Assumption of Mary],Greece,2016
+2016-10-28,[Ochi Day],Greece,2016
+2016-12-25,[Christmas],Greece,2016
+2016-12-26,[Day after Christmas],Greece,2016
+2017-01-01,[New Year's Day],Greece,2017
+2017-01-06,[Epiphany],Greece,2017
+2017-02-27,[Clean Monday],Greece,2017
+2017-03-25,[Independence Day],Greece,2017
+2017-04-17,[Easter Monday],Greece,2017
+2017-05-01,[Labour day],Greece,2017
+2017-06-05,[Monday of the Holy Spirit],Greece,2017
+2017-08-15,[Assumption of Mary],Greece,2017
+2017-10-28,[Ochi Day],Greece,2017
+2017-12-25,[Christmas],Greece,2017
+2017-12-26,[Day after Christmas],Greece,2017
+2018-01-01,[New Year's Day],Greece,2018
+2018-01-06,[Epiphany],Greece,2018
+2018-02-19,[Clean Monday],Greece,2018
+2018-03-25,[Independence Day],Greece,2018
+2018-04-09,[Easter Monday],Greece,2018
+2018-05-01,[Labour day],Greece,2018
+2018-05-28,[Monday of the Holy Spirit],Greece,2018
+2018-08-15,[Assumption of Mary],Greece,2018
+2018-10-28,[Ochi Day],Greece,2018
+2018-12-25,[Christmas],Greece,2018
+2018-12-26,[Day after Christmas],Greece,2018
+2019-01-01,[New Year's Day],Greece,2019
+2019-01-06,[Epiphany],Greece,2019
+2019-03-11,[Clean Monday],Greece,2019
+2019-03-25,[Independence Day],Greece,2019
+2019-04-29,[Easter Monday],Greece,2019
+2019-05-01,[Labour day],Greece,2019
+2019-06-17,[Monday of the Holy Spirit],Greece,2019
+2019-08-15,[Assumption of Mary],Greece,2019
+2019-10-28,[Ochi Day],Greece,2019
+2019-12-25,[Christmas],Greece,2019
+2019-12-26,[Day after Christmas],Greece,2019
+2020-01-01,[New Year's Day],Greece,2020
+2020-01-06,[Epiphany],Greece,2020
+2020-03-02,[Clean Monday],Greece,2020
+2020-03-25,[Independence Day],Greece,2020
+2020-04-20,[Easter Monday],Greece,2020
+2020-05-01,[Labour day],Greece,2020
+2020-06-08,[Monday of the Holy Spirit],Greece,2020
+2020-08-15,[Assumption of Mary],Greece,2020
+2020-10-28,[Ochi Day],Greece,2020
+2020-12-25,[Christmas],Greece,2020
+2020-12-26,[Day after Christmas],Greece,2020
+2021-01-01,[New Year's Day],Greece,2021
+2021-01-06,[Epiphany],Greece,2021
+2021-03-15,[Clean Monday],Greece,2021
+2021-03-25,[Independence Day],Greece,2021
+2021-05-01,[Labour day],Greece,2021
+2021-05-03,[Easter Monday],Greece,2021
+2021-06-21,[Monday of the Holy Spirit],Greece,2021
+2021-08-15,[Assumption of Mary],Greece,2021
+2021-10-28,[Ochi Day],Greece,2021
+2021-12-25,[Christmas],Greece,2021
+2021-12-26,[Day after Christmas],Greece,2021
+2022-01-01,[New Year's Day],Greece,2022
+2022-01-06,[Epiphany],Greece,2022
+2022-03-07,[Clean Monday],Greece,2022
+2022-03-25,[Independence Day],Greece,2022
+2022-04-25,[Easter Monday],Greece,2022
+2022-05-01,[Labour day],Greece,2022
+2022-06-13,[Monday of the Holy Spirit],Greece,2022
+2022-08-15,[Assumption of Mary],Greece,2022
+2022-10-28,[Ochi Day],Greece,2022
+2022-12-25,[Christmas],Greece,2022
+2022-12-26,[Day after Christmas],Greece,2022
+2023-01-01,[New Year's Day],Greece,2023
+2023-01-06,[Epiphany],Greece,2023
+2023-02-27,[Clean Monday],Greece,2023
+2023-03-25,[Independence Day],Greece,2023
+2023-04-17,[Easter Monday],Greece,2023
+2023-05-01,[Labour day],Greece,2023
+2023-06-05,[Monday of the Holy Spirit],Greece,2023
+2023-08-15,[Assumption of Mary],Greece,2023
+2023-10-28,[Ochi Day],Greece,2023
+2023-12-25,[Christmas],Greece,2023
+2023-12-26,[Day after Christmas],Greece,2023
+2024-01-01,[New Year's Day],Greece,2024
+2024-01-06,[Epiphany],Greece,2024
+2024-03-18,[Clean Monday],Greece,2024
+2024-03-25,[Independence Day],Greece,2024
+2024-05-01,[Labour day],Greece,2024
+2024-05-06,[Easter Monday],Greece,2024
+2024-06-24,[Monday of the Holy Spirit],Greece,2024
+2024-08-15,[Assumption of Mary],Greece,2024
+2024-10-28,[Ochi Day],Greece,2024
+2024-12-25,[Christmas],Greece,2024
+2024-12-26,[Day after Christmas],Greece,2024
+2025-01-01,[New Year's Day],Greece,2025
+2025-01-06,[Epiphany],Greece,2025
+2025-03-03,[Clean Monday],Greece,2025
+2025-03-25,[Independence Day],Greece,2025
+2025-04-21,[Easter Monday],Greece,2025
+2025-05-01,[Labour day],Greece,2025
+2025-06-09,[Monday of the Holy Spirit],Greece,2025
+2025-08-15,[Assumption of Mary],Greece,2025
+2025-10-28,[Ochi Day],Greece,2025
+2025-12-25,[Christmas],Greece,2025
+2025-12-26,[Day after Christmas],Greece,2025
+2026-01-01,[New Year's Day],Greece,2026
+2026-01-06,[Epiphany],Greece,2026
+2026-02-23,[Clean Monday],Greece,2026
+2026-03-25,[Independence Day],Greece,2026
+2026-04-13,[Easter Monday],Greece,2026
+2026-05-01,[Labour day],Greece,2026
+2026-06-01,[Monday of the Holy Spirit],Greece,2026
+2026-08-15,[Assumption of Mary],Greece,2026
+2026-10-28,[Ochi Day],Greece,2026
+2026-12-25,[Christmas],Greece,2026
+2026-12-26,[Day after Christmas],Greece,2026
+2027-01-01,[New Year's Day],Greece,2027
+2027-01-06,[Epiphany],Greece,2027
+2027-03-15,[Clean Monday],Greece,2027
+2027-03-25,[Independence Day],Greece,2027
+2027-05-01,[Labour day],Greece,2027
+2027-05-03,[Easter Monday],Greece,2027
+2027-06-21,[Monday of the Holy Spirit],Greece,2027
+2027-08-15,[Assumption of Mary],Greece,2027
+2027-10-28,[Ochi Day],Greece,2027
+2027-12-25,[Christmas],Greece,2027
+2027-12-26,[Day after Christmas],Greece,2027
+2028-01-01,[New Year's Day],Greece,2028
+2028-01-06,[Epiphany],Greece,2028
+2028-02-28,[Clean Monday],Greece,2028
+2028-03-25,[Independence Day],Greece,2028
+2028-04-17,[Easter Monday],Greece,2028
+2028-05-01,[Labour day],Greece,2028
+2028-06-05,[Monday of the Holy Spirit],Greece,2028
+2028-08-15,[Assumption of Mary],Greece,2028
+2028-10-28,[Ochi Day],Greece,2028
+2028-12-25,[Christmas],Greece,2028
+2028-12-26,[Day after Christmas],Greece,2028
+2029-01-01,[New Year's Day],Greece,2029
+2029-01-06,[Epiphany],Greece,2029
+2029-02-19,[Clean Monday],Greece,2029
+2029-03-25,[Independence Day],Greece,2029
+2029-04-09,[Easter Monday],Greece,2029
+2029-05-01,[Labour day],Greece,2029
+2029-05-28,[Monday of the Holy Spirit],Greece,2029
+2029-08-15,[Assumption of Mary],Greece,2029
+2029-10-28,[Ochi Day],Greece,2029
+2029-12-25,[Christmas],Greece,2029
+2029-12-26,[Day after Christmas],Greece,2029
+2030-01-01,[New Year's Day],Greece,2030
+2030-01-06,[Epiphany],Greece,2030
+2030-03-11,[Clean Monday],Greece,2030
+2030-03-25,[Independence Day],Greece,2030
+2030-04-29,[Easter Monday],Greece,2030
+2030-05-01,[Labour day],Greece,2030
+2030-06-17,[Monday of the Holy Spirit],Greece,2030
+2030-08-15,[Assumption of Mary],Greece,2030
+2030-10-28,[Ochi Day],Greece,2030
+2030-12-25,[Christmas],Greece,2030
+2030-12-26,[Day after Christmas],Greece,2030
+2031-01-01,[New Year's Day],Greece,2031
+2031-01-06,[Epiphany],Greece,2031
+2031-02-24,[Clean Monday],Greece,2031
+2031-03-25,[Independence Day],Greece,2031
+2031-04-14,[Easter Monday],Greece,2031
+2031-05-01,[Labour day],Greece,2031
+2031-06-02,[Monday of the Holy Spirit],Greece,2031
+2031-08-15,[Assumption of Mary],Greece,2031
+2031-10-28,[Ochi Day],Greece,2031
+2031-12-25,[Christmas],Greece,2031
+2031-12-26,[Day after Christmas],Greece,2031
+2032-01-01,[New Year's Day],Greece,2032
+2032-01-06,[Epiphany],Greece,2032
+2032-03-15,[Clean Monday],Greece,2032
+2032-03-25,[Independence Day],Greece,2032
+2032-05-01,[Labour day],Greece,2032
+2032-05-03,[Easter Monday],Greece,2032
+2032-06-21,[Monday of the Holy Spirit],Greece,2032
+2032-08-15,[Assumption of Mary],Greece,2032
+2032-10-28,[Ochi Day],Greece,2032
+2032-12-25,[Christmas],Greece,2032
+2032-12-26,[Day after Christmas],Greece,2032
+2033-01-01,[New Year's Day],Greece,2033
+2033-01-06,[Epiphany],Greece,2033
+2033-03-07,[Clean Monday],Greece,2033
+2033-03-25,[Independence Day],Greece,2033
+2033-04-25,[Easter Monday],Greece,2033
+2033-05-01,[Labour day],Greece,2033
+2033-06-13,[Monday of the Holy Spirit],Greece,2033
+2033-08-15,[Assumption of Mary],Greece,2033
+2033-10-28,[Ochi Day],Greece,2033
+2033-12-25,[Christmas],Greece,2033
+2033-12-26,[Day after Christmas],Greece,2033
+2034-01-01,[New Year's Day],Greece,2034
+2034-01-06,[Epiphany],Greece,2034
+2034-02-20,[Clean Monday],Greece,2034
+2034-03-25,[Independence Day],Greece,2034
+2034-04-10,[Easter Monday],Greece,2034
+2034-05-01,[Labour day],Greece,2034
+2034-05-29,[Monday of the Holy Spirit],Greece,2034
+2034-08-15,[Assumption of Mary],Greece,2034
+2034-10-28,[Ochi Day],Greece,2034
+2034-12-25,[Christmas],Greece,2034
+2034-12-26,[Day after Christmas],Greece,2034
+2035-01-01,[New Year's Day],Greece,2035
+2035-01-06,[Epiphany],Greece,2035
+2035-03-12,[Clean Monday],Greece,2035
+2035-03-25,[Independence Day],Greece,2035
+2035-04-30,[Easter Monday],Greece,2035
+2035-05-01,[Labour day],Greece,2035
+2035-06-18,[Monday of the Holy Spirit],Greece,2035
+2035-08-15,[Assumption of Mary],Greece,2035
+2035-10-28,[Ochi Day],Greece,2035
+2035-12-25,[Christmas],Greece,2035
+2035-12-26,[Day after Christmas],Greece,2035
+2036-01-01,[New Year's Day],Greece,2036
+2036-01-06,[Epiphany],Greece,2036
+2036-03-03,[Clean Monday],Greece,2036
+2036-03-25,[Independence Day],Greece,2036
+2036-04-21,[Easter Monday],Greece,2036
+2036-05-01,[Labour day],Greece,2036
+2036-06-09,[Monday of the Holy Spirit],Greece,2036
+2036-08-15,[Assumption of Mary],Greece,2036
+2036-10-28,[Ochi Day],Greece,2036
+2036-12-25,[Christmas],Greece,2036
+2036-12-26,[Day after Christmas],Greece,2036
+2037-01-01,[New Year's Day],Greece,2037
+2037-01-06,[Epiphany],Greece,2037
+2037-02-16,[Clean Monday],Greece,2037
+2037-03-25,[Independence Day],Greece,2037
+2037-04-06,[Easter Monday],Greece,2037
+2037-05-01,[Labour day],Greece,2037
+2037-05-25,[Monday of the Holy Spirit],Greece,2037
+2037-08-15,[Assumption of Mary],Greece,2037
+2037-10-28,[Ochi Day],Greece,2037
+2037-12-25,[Christmas],Greece,2037
+2037-12-26,[Day after Christmas],Greece,2037
+2038-01-01,[New Year's Day],Greece,2038
+2038-01-06,[Epiphany],Greece,2038
+2038-03-08,[Clean Monday],Greece,2038
+2038-03-25,[Independence Day],Greece,2038
+2038-04-26,[Easter Monday],Greece,2038
+2038-05-01,[Labour day],Greece,2038
+2038-06-14,[Monday of the Holy Spirit],Greece,2038
+2038-08-15,[Assumption of Mary],Greece,2038
+2038-10-28,[Ochi Day],Greece,2038
+2038-12-25,[Christmas],Greece,2038
+2038-12-26,[Day after Christmas],Greece,2038
+2039-01-01,[New Year's Day],Greece,2039
+2039-01-06,[Epiphany],Greece,2039
+2039-02-28,[Clean Monday],Greece,2039
+2039-03-25,[Independence Day],Greece,2039
+2039-04-18,[Easter Monday],Greece,2039
+2039-05-01,[Labour day],Greece,2039
+2039-06-06,[Monday of the Holy Spirit],Greece,2039
+2039-08-15,[Assumption of Mary],Greece,2039
+2039-10-28,[Ochi Day],Greece,2039
+2039-12-25,[Christmas],Greece,2039
+2039-12-26,[Day after Christmas],Greece,2039
+2040-01-01,[New Year's Day],Greece,2040
+2040-01-06,[Epiphany],Greece,2040
+2040-03-19,[Clean Monday],Greece,2040
+2040-03-25,[Independence Day],Greece,2040
+2040-05-01,[Labour day],Greece,2040
+2040-05-07,[Easter Monday],Greece,2040
+2040-06-25,[Monday of the Holy Spirit],Greece,2040
+2040-08-15,[Assumption of Mary],Greece,2040
+2040-10-28,[Ochi Day],Greece,2040
+2040-12-25,[Christmas],Greece,2040
+2040-12-26,[Day after Christmas],Greece,2040
+2041-01-01,[New Year's Day],Greece,2041
+2041-01-06,[Epiphany],Greece,2041
+2041-03-04,[Clean Monday],Greece,2041
+2041-03-25,[Independence Day],Greece,2041
+2041-04-22,[Easter Monday],Greece,2041
+2041-05-01,[Labour day],Greece,2041
+2041-06-10,[Monday of the Holy Spirit],Greece,2041
+2041-08-15,[Assumption of Mary],Greece,2041
+2041-10-28,[Ochi Day],Greece,2041
+2041-12-25,[Christmas],Greece,2041
+2041-12-26,[Day after Christmas],Greece,2041
+2042-01-01,[New Year's Day],Greece,2042
+2042-01-06,[Epiphany],Greece,2042
+2042-02-24,[Clean Monday],Greece,2042
+2042-03-25,[Independence Day],Greece,2042
+2042-04-14,[Easter Monday],Greece,2042
+2042-05-01,[Labour day],Greece,2042
+2042-06-02,[Monday of the Holy Spirit],Greece,2042
+2042-08-15,[Assumption of Mary],Greece,2042
+2042-10-28,[Ochi Day],Greece,2042
+2042-12-25,[Christmas],Greece,2042
+2042-12-26,[Day after Christmas],Greece,2042
+2043-01-01,[New Year's Day],Greece,2043
+2043-01-06,[Epiphany],Greece,2043
+2043-03-16,[Clean Monday],Greece,2043
+2043-03-25,[Independence Day],Greece,2043
+2043-05-01,[Labour day],Greece,2043
+2043-05-04,[Easter Monday],Greece,2043
+2043-06-22,[Monday of the Holy Spirit],Greece,2043
+2043-08-15,[Assumption of Mary],Greece,2043
+2043-10-28,[Ochi Day],Greece,2043
+2043-12-25,[Christmas],Greece,2043
+2043-12-26,[Day after Christmas],Greece,2043
+2044-01-01,[New Year's Day],Greece,2044
+2044-01-06,[Epiphany],Greece,2044
+2044-03-07,[Clean Monday],Greece,2044
+2044-03-25,[Independence Day],Greece,2044
+2044-04-25,[Easter Monday],Greece,2044
+2044-05-01,[Labour day],Greece,2044
+2044-06-13,[Monday of the Holy Spirit],Greece,2044
+2044-08-15,[Assumption of Mary],Greece,2044
+2044-10-28,[Ochi Day],Greece,2044
+2044-12-25,[Christmas],Greece,2044
+2044-12-26,[Day after Christmas],Greece,2044
 1995-01-02,The day following the first day of January,HK,1995
 1995-01-31,Lunar New Year's Day,HK,1995
 1995-02-01,The second day of Lunar New Year,HK,1995
@@ -75395,69 +75005,6 @@ ds,holiday,country,year
 2044-12-25,Christmas Day,PortugalExt,2044
 2044-12-26,26 de Dezembro,PortugalExt,2044
 2044-12-31,Vespera de Ano novo,PortugalExt,2044
-1995-01-03,  (Observed),RS,1995
-1997-02-17,   (Observed),RS,1997
-1998-02-17,   (Observed),RS,1998
-1999-05-03,  (Observed),RS,1999
-2000-01-03,  (Observed),RS,2000
-2000-05-01,"  ,  ",RS,2000
-2001-11-12,      (Observed),RS,2001
-2003-02-17,   (Observed),RS,2003
-2004-02-17,   (Observed),RS,2004
-2004-05-03,  (Observed),RS,2004
-2005-01-03,  (Observed),RS,2005
-2005-05-01,",  ",RS,2005
-2005-05-02,"  ,  ",RS,2005
-2005-05-03,  (Observed),RS,2005
-2006-01-03,  (Observed),RS,2006
-2007-11-12,      (Observed),RS,2007
-2009-02-17,   (Observed),RS,2009
-2010-05-03,  (Observed),RS,2010
-2011-01-03,  (Observed),RS,2011
-2011-05-03,  (Observed),RS,2011
-2012-01-03,  (Observed),RS,2012
-2012-11-12,      (Observed),RS,2012
-2014-02-17,   (Observed),RS,2014
-2015-02-17,   (Observed),RS,2015
-2016-05-01,",  ",RS,2016
-2016-05-02,"  ,  ",RS,2016
-2016-05-03,  (Observed),RS,2016
-2017-01-03,  (Observed),RS,2017
-2018-11-12,      (Observed),RS,2018
-2020-02-17,   (Observed),RS,2020
-2021-05-01," ,  ",RS,2021
-2021-05-02,",  ",RS,2021
-2021-05-03,"  ,   (Observed)",RS,2021
-2022-01-03,  (Observed),RS,2022
-2022-05-03,  (Observed),RS,2022
-2023-01-03,  (Observed),RS,2023
-2025-02-17,   (Observed),RS,2025
-2026-02-17,   (Observed),RS,2026
-2027-05-01," ,  ",RS,2027
-2027-05-02,",  ",RS,2027
-2027-05-03,"  ,   (Observed)",RS,2027
-2028-01-03,  (Observed),RS,2028
-2029-11-12,      (Observed),RS,2029
-2031-02-17,   (Observed),RS,2031
-2032-02-17,   (Observed),RS,2032
-2032-05-01," ,  ",RS,2032
-2032-05-02,",  ",RS,2032
-2032-05-03,"  ,   (Observed)",RS,2032
-2033-01-03,  (Observed),RS,2033
-2033-05-03,  (Observed),RS,2033
-2034-01-03,  (Observed),RS,2034
-2035-11-12,      (Observed),RS,2035
-2037-02-17,   (Observed),RS,2037
-2038-05-03,  (Observed),RS,2038
-2039-01-03,  (Observed),RS,2039
-2039-05-03,  (Observed),RS,2039
-2040-01-03,  (Observed),RS,2040
-2040-11-12,      (Observed),RS,2040
-2042-02-17,   (Observed),RS,2042
-2043-02-17,   (Observed),RS,2043
-2043-05-01," ,  ",RS,2043
-2043-05-02," ,  ",RS,2043
-2044-05-03,  (Observed),RS,2044
 1995-01-01,New Year's Day,RU,1995
 1995-01-07,Orthodox Christmas Day,RU,1995
 1995-02-23,Defender of the Fatherland Day,RU,1995
@@ -82164,69 +81711,6 @@ ds,holiday,country,year
 2044-12-25,Christmas Day,Scotland,2044
 2044-12-26,Boxing Day,Scotland,2044
 2044-12-27,Christmas Day (Observed),Scotland,2044
-1995-01-03,  (Observed),Serbia,1995
-1997-02-17,   (Observed),Serbia,1997
-1998-02-17,   (Observed),Serbia,1998
-1999-05-03,  (Observed),Serbia,1999
-2000-01-03,  (Observed),Serbia,2000
-2000-05-01,"  ,  ",Serbia,2000
-2001-11-12,      (Observed),Serbia,2001
-2003-02-17,   (Observed),Serbia,2003
-2004-02-17,   (Observed),Serbia,2004
-2004-05-03,  (Observed),Serbia,2004
-2005-01-03,  (Observed),Serbia,2005
-2005-05-01,",  ",Serbia,2005
-2005-05-02,"  ,  ",Serbia,2005
-2005-05-03,  (Observed),Serbia,2005
-2006-01-03,  (Observed),Serbia,2006
-2007-11-12,      (Observed),Serbia,2007
-2009-02-17,   (Observed),Serbia,2009
-2010-05-03,  (Observed),Serbia,2010
-2011-01-03,  (Observed),Serbia,2011
-2011-05-03,  (Observed),Serbia,2011
-2012-01-03,  (Observed),Serbia,2012
-2012-11-12,      (Observed),Serbia,2012
-2014-02-17,   (Observed),Serbia,2014
-2015-02-17,   (Observed),Serbia,2015
-2016-05-01,",  ",Serbia,2016
-2016-05-02,"  ,  ",Serbia,2016
-2016-05-03,  (Observed),Serbia,2016
-2017-01-03,  (Observed),Serbia,2017
-2018-11-12,      (Observed),Serbia,2018
-2020-02-17,   (Observed),Serbia,2020
-2021-05-01," ,  ",Serbia,2021
-2021-05-02,",  ",Serbia,2021
-2021-05-03,"  ,   (Observed)",Serbia,2021
-2022-01-03,  (Observed),Serbia,2022
-2022-05-03,  (Observed),Serbia,2022
-2023-01-03,  (Observed),Serbia,2023
-2025-02-17,   (Observed),Serbia,2025
-2026-02-17,   (Observed),Serbia,2026
-2027-05-01," ,  ",Serbia,2027
-2027-05-02,",  ",Serbia,2027
-2027-05-03,"  ,   (Observed)",Serbia,2027
-2028-01-03,  (Observed),Serbia,2028
-2029-11-12,      (Observed),Serbia,2029
-2031-02-17,   (Observed),Serbia,2031
-2032-02-17,   (Observed),Serbia,2032
-2032-05-01," ,  ",Serbia,2032
-2032-05-02,",  ",Serbia,2032
-2032-05-03,"  ,   (Observed)",Serbia,2032
-2033-01-03,  (Observed),Serbia,2033
-2033-05-03,  (Observed),Serbia,2033
-2034-01-03,  (Observed),Serbia,2034
-2035-11-12,      (Observed),Serbia,2035
-2037-02-17,   (Observed),Serbia,2037
-2038-05-03,  (Observed),Serbia,2038
-2039-01-03,  (Observed),Serbia,2039
-2039-05-03,  (Observed),Serbia,2039
-2040-01-03,  (Observed),Serbia,2040
-2040-11-12,      (Observed),Serbia,2040
-2042-02-17,   (Observed),Serbia,2042
-2043-02-17,   (Observed),Serbia,2043
-2043-05-01," ,  ",Serbia,2043
-2043-05-02," ,  ",Serbia,2043
-2044-05-03,  (Observed),Serbia,2044
 1995-01-01,New Year's Day [Sunday],Singapore,1995
 1995-01-02,Monday following New Year's Day,Singapore,1995
 1995-01-31,Chinese New Year,Singapore,1995
@@ -90701,7 +90185,7 @@ ds,holiday,country,year
 2044-12-31,New Year's Eve,TH,2044
 1995-01-01,New Year's Day,TU,1995
 1995-03-02,Eid al-Fitr,TU,1995
-1995-04-23,National Sovereignty and Children's Day	,TU,1995
+1995-04-23,National Sovereignty and Children's Day,TU,1995
 1995-05-01,Labor Day,TU,1995
 1995-05-10,Feast of the Sacrifice,TU,1995
 1995-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,1995
@@ -90710,7 +90194,7 @@ ds,holiday,country,year
 1995-10-29,Republic Day,TU,1995
 1996-01-01,New Year's Day,TU,1996
 1996-02-20,Eid al-Fitr,TU,1996
-1996-04-23,National Sovereignty and Children's Day	,TU,1996
+1996-04-23,National Sovereignty and Children's Day,TU,1996
 1996-04-29,Feast of the Sacrifice,TU,1996
 1996-05-01,Labor Day,TU,1996
 1996-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,1996
@@ -90720,7 +90204,7 @@ ds,holiday,country,year
 1997-01-01,New Year's Day,TU,1997
 1997-02-08,Eid al-Fitr,TU,1997
 1997-04-18,Feast of the Sacrifice,TU,1997
-1997-04-23,National Sovereignty and Children's Day	,TU,1997
+1997-04-23,National Sovereignty and Children's Day,TU,1997
 1997-05-01,Labor Day,TU,1997
 1997-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,1997
 1997-07-15,Democracy and National Unity Day,TU,1997
@@ -90729,7 +90213,7 @@ ds,holiday,country,year
 1998-01-01,New Year's Day,TU,1998
 1998-01-29,Eid al-Fitr,TU,1998
 1998-04-08,Feast of the Sacrifice,TU,1998
-1998-04-23,National Sovereignty and Children's Day	,TU,1998
+1998-04-23,National Sovereignty and Children's Day,TU,1998
 1998-05-01,Labor Day,TU,1998
 1998-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,1998
 1998-07-15,Democracy and National Unity Day,TU,1998
@@ -90738,7 +90222,7 @@ ds,holiday,country,year
 1999-01-01,New Year's Day,TU,1999
 1999-01-18,Eid al-Fitr,TU,1999
 1999-03-28,Feast of the Sacrifice,TU,1999
-1999-04-23,National Sovereignty and Children's Day	,TU,1999
+1999-04-23,National Sovereignty and Children's Day,TU,1999
 1999-05-01,Labor Day,TU,1999
 1999-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,1999
 1999-07-15,Democracy and National Unity Day,TU,1999
@@ -90747,7 +90231,7 @@ ds,holiday,country,year
 2000-01-01,New Year's Day,TU,2000
 2000-01-07,Eid al-Fitr,TU,2000
 2000-03-16,Feast of the Sacrifice,TU,2000
-2000-04-23,National Sovereignty and Children's Day	,TU,2000
+2000-04-23,National Sovereignty and Children's Day,TU,2000
 2000-05-01,Labor Day,TU,2000
 2000-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2000
 2000-07-15,Democracy and National Unity Day,TU,2000
@@ -90756,7 +90240,7 @@ ds,holiday,country,year
 2000-12-27,Eid al-Fitr,TU,2000
 2001-01-01,New Year's Day,TU,2001
 2001-03-06,Feast of the Sacrifice,TU,2001
-2001-04-23,National Sovereignty and Children's Day	,TU,2001
+2001-04-23,National Sovereignty and Children's Day,TU,2001
 2001-05-01,Labor Day,TU,2001
 2001-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2001
 2001-07-15,Democracy and National Unity Day,TU,2001
@@ -90765,7 +90249,7 @@ ds,holiday,country,year
 2001-12-16,Eid al-Fitr,TU,2001
 2002-01-01,New Year's Day,TU,2002
 2002-02-23,Feast of the Sacrifice,TU,2002
-2002-04-23,National Sovereignty and Children's Day	,TU,2002
+2002-04-23,National Sovereignty and Children's Day,TU,2002
 2002-05-01,Labor Day,TU,2002
 2002-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2002
 2002-07-15,Democracy and National Unity Day,TU,2002
@@ -90774,7 +90258,7 @@ ds,holiday,country,year
 2002-12-05,Eid al-Fitr,TU,2002
 2003-01-01,New Year's Day,TU,2003
 2003-02-12,Feast of the Sacrifice,TU,2003
-2003-04-23,National Sovereignty and Children's Day	,TU,2003
+2003-04-23,National Sovereignty and Children's Day,TU,2003
 2003-05-01,Labor Day,TU,2003
 2003-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2003
 2003-07-15,Democracy and National Unity Day,TU,2003
@@ -90783,7 +90267,7 @@ ds,holiday,country,year
 2003-11-25,Eid al-Fitr,TU,2003
 2004-01-01,New Year's Day,TU,2004
 2004-02-02,Feast of the Sacrifice,TU,2004
-2004-04-23,National Sovereignty and Children's Day	,TU,2004
+2004-04-23,National Sovereignty and Children's Day,TU,2004
 2004-05-01,Labor Day,TU,2004
 2004-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2004
 2004-07-15,Democracy and National Unity Day,TU,2004
@@ -90792,7 +90276,7 @@ ds,holiday,country,year
 2004-11-13,Eid al-Fitr,TU,2004
 2005-01-01,New Year's Day,TU,2005
 2005-01-21,Feast of the Sacrifice,TU,2005
-2005-04-23,National Sovereignty and Children's Day	,TU,2005
+2005-04-23,National Sovereignty and Children's Day,TU,2005
 2005-05-01,Labor Day,TU,2005
 2005-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2005
 2005-07-15,Democracy and National Unity Day,TU,2005
@@ -90801,7 +90285,7 @@ ds,holiday,country,year
 2005-11-02,Eid al-Fitr,TU,2005
 2006-01-01,New Year's Day,TU,2006
 2006-01-10,Feast of the Sacrifice,TU,2006
-2006-04-23,National Sovereignty and Children's Day	,TU,2006
+2006-04-23,National Sovereignty and Children's Day,TU,2006
 2006-05-01,Labor Day,TU,2006
 2006-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2006
 2006-07-15,Democracy and National Unity Day,TU,2006
@@ -90810,7 +90294,7 @@ ds,holiday,country,year
 2006-10-29,Republic Day,TU,2006
 2006-12-31,Feast of the Sacrifice,TU,2006
 2007-01-01,New Year's Day,TU,2007
-2007-04-23,National Sovereignty and Children's Day	,TU,2007
+2007-04-23,National Sovereignty and Children's Day,TU,2007
 2007-05-01,Labor Day,TU,2007
 2007-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2007
 2007-07-15,Democracy and National Unity Day,TU,2007
@@ -90819,7 +90303,7 @@ ds,holiday,country,year
 2007-10-29,Republic Day,TU,2007
 2007-12-20,Feast of the Sacrifice,TU,2007
 2008-01-01,New Year's Day,TU,2008
-2008-04-23,National Sovereignty and Children's Day	,TU,2008
+2008-04-23,National Sovereignty and Children's Day,TU,2008
 2008-05-01,Labor Day,TU,2008
 2008-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2008
 2008-07-15,Democracy and National Unity Day,TU,2008
@@ -90828,7 +90312,7 @@ ds,holiday,country,year
 2008-10-29,Republic Day,TU,2008
 2008-12-09,Feast of the Sacrifice,TU,2008
 2009-01-01,New Year's Day,TU,2009
-2009-04-23,National Sovereignty and Children's Day	,TU,2009
+2009-04-23,National Sovereignty and Children's Day,TU,2009
 2009-05-01,Labor Day,TU,2009
 2009-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2009
 2009-07-15,Democracy and National Unity Day,TU,2009
@@ -90837,7 +90321,7 @@ ds,holiday,country,year
 2009-10-29,Republic Day,TU,2009
 2009-11-28,Feast of the Sacrifice,TU,2009
 2010-01-01,New Year's Day,TU,2010
-2010-04-23,National Sovereignty and Children's Day	,TU,2010
+2010-04-23,National Sovereignty and Children's Day,TU,2010
 2010-05-01,Labor Day,TU,2010
 2010-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2010
 2010-07-15,Democracy and National Unity Day,TU,2010
@@ -90846,7 +90330,7 @@ ds,holiday,country,year
 2010-10-29,Republic Day,TU,2010
 2010-11-17,Feast of the Sacrifice,TU,2010
 2011-01-01,New Year's Day,TU,2011
-2011-04-23,National Sovereignty and Children's Day	,TU,2011
+2011-04-23,National Sovereignty and Children's Day,TU,2011
 2011-05-01,Labor Day,TU,2011
 2011-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2011
 2011-07-15,Democracy and National Unity Day,TU,2011
@@ -90854,7 +90338,7 @@ ds,holiday,country,year
 2011-10-29,Republic Day,TU,2011
 2011-11-07,Feast of the Sacrifice,TU,2011
 2012-01-01,New Year's Day,TU,2012
-2012-04-23,National Sovereignty and Children's Day	,TU,2012
+2012-04-23,National Sovereignty and Children's Day,TU,2012
 2012-05-01,Labor Day,TU,2012
 2012-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2012
 2012-07-15,Democracy and National Unity Day,TU,2012
@@ -90863,7 +90347,7 @@ ds,holiday,country,year
 2012-10-26,Feast of the Sacrifice,TU,2012
 2012-10-29,Republic Day,TU,2012
 2013-01-01,New Year's Day,TU,2013
-2013-04-23,National Sovereignty and Children's Day	,TU,2013
+2013-04-23,National Sovereignty and Children's Day,TU,2013
 2013-05-01,Labor Day,TU,2013
 2013-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2013
 2013-07-15,Democracy and National Unity Day,TU,2013
@@ -90872,7 +90356,7 @@ ds,holiday,country,year
 2013-10-15,Feast of the Sacrifice,TU,2013
 2013-10-29,Republic Day,TU,2013
 2014-01-01,New Year's Day,TU,2014
-2014-04-23,National Sovereignty and Children's Day	,TU,2014
+2014-04-23,National Sovereignty and Children's Day,TU,2014
 2014-05-01,Labor Day,TU,2014
 2014-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2014
 2014-07-15,Democracy and National Unity Day,TU,2014
@@ -90881,7 +90365,7 @@ ds,holiday,country,year
 2014-10-05,Feast of the Sacrifice,TU,2014
 2014-10-29,Republic Day,TU,2014
 2015-01-01,New Year's Day,TU,2015
-2015-04-23,National Sovereignty and Children's Day	,TU,2015
+2015-04-23,National Sovereignty and Children's Day,TU,2015
 2015-05-01,Labor Day,TU,2015
 2015-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2015
 2015-07-15,Democracy and National Unity Day,TU,2015
@@ -90890,7 +90374,7 @@ ds,holiday,country,year
 2015-09-24,Feast of the Sacrifice,TU,2015
 2015-10-29,Republic Day,TU,2015
 2016-01-01,New Year's Day,TU,2016
-2016-04-23,National Sovereignty and Children's Day	,TU,2016
+2016-04-23,National Sovereignty and Children's Day,TU,2016
 2016-05-01,Labor Day,TU,2016
 2016-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2016
 2016-07-06,Eid al-Fitr,TU,2016
@@ -90899,7 +90383,7 @@ ds,holiday,country,year
 2016-09-13,Feast of the Sacrifice,TU,2016
 2016-10-29,Republic Day,TU,2016
 2017-01-01,New Year's Day,TU,2017
-2017-04-23,National Sovereignty and Children's Day	,TU,2017
+2017-04-23,National Sovereignty and Children's Day,TU,2017
 2017-05-01,Labor Day,TU,2017
 2017-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2017
 2017-06-25,Eid al-Fitr,TU,2017
@@ -90908,7 +90392,7 @@ ds,holiday,country,year
 2017-09-02,Feast of the Sacrifice,TU,2017
 2017-10-29,Republic Day,TU,2017
 2018-01-01,New Year's Day,TU,2018
-2018-04-23,National Sovereignty and Children's Day	,TU,2018
+2018-04-23,National Sovereignty and Children's Day,TU,2018
 2018-05-01,Labor Day,TU,2018
 2018-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2018
 2018-06-14,Eid al-Fitr,TU,2018
@@ -90917,7 +90401,7 @@ ds,holiday,country,year
 2018-08-30,Victory Day,TU,2018
 2018-10-29,Republic Day,TU,2018
 2019-01-01,New Year's Day,TU,2019
-2019-04-23,National Sovereignty and Children's Day	,TU,2019
+2019-04-23,National Sovereignty and Children's Day,TU,2019
 2019-05-01,Labor Day,TU,2019
 2019-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2019
 2019-06-04,Eid al-Fitr,TU,2019
@@ -90926,7 +90410,7 @@ ds,holiday,country,year
 2019-08-30,Victory Day,TU,2019
 2019-10-29,Republic Day,TU,2019
 2020-01-01,New Year's Day,TU,2020
-2020-04-23,National Sovereignty and Children's Day	,TU,2020
+2020-04-23,National Sovereignty and Children's Day,TU,2020
 2020-05-01,Labor Day,TU,2020
 2020-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2020
 2020-05-23,Eid al-Fitr,TU,2020
@@ -90934,7 +90418,7 @@ ds,holiday,country,year
 2020-08-30,Victory Day,TU,2020
 2020-10-29,Republic Day,TU,2020
 2021-01-01,New Year's Day,TU,2021
-2021-04-23,National Sovereignty and Children's Day	,TU,2021
+2021-04-23,National Sovereignty and Children's Day,TU,2021
 2021-05-01,Labor Day,TU,2021
 2021-05-12,Eid al-Fitr,TU,2021
 2021-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2021
@@ -90943,7 +90427,7 @@ ds,holiday,country,year
 2021-08-30,Victory Day,TU,2021
 2021-10-29,Republic Day,TU,2021
 2022-01-01,New Year's Day,TU,2022
-2022-04-23,National Sovereignty and Children's Day	,TU,2022
+2022-04-23,National Sovereignty and Children's Day,TU,2022
 2022-05-01,Labor Day,TU,2022
 2022-05-02,Eid al-Fitr,TU,2022
 2022-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2022
@@ -90953,7 +90437,7 @@ ds,holiday,country,year
 2022-10-29,Republic Day,TU,2022
 2023-01-01,New Year's Day,TU,2023
 2023-04-21,Eid al-Fitr,TU,2023
-2023-04-23,National Sovereignty and Children's Day	,TU,2023
+2023-04-23,National Sovereignty and Children's Day,TU,2023
 2023-05-01,Labor Day,TU,2023
 2023-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2023
 2023-06-29,Feast of the Sacrifice,TU,2023
@@ -90962,7 +90446,7 @@ ds,holiday,country,year
 2023-10-29,Republic Day,TU,2023
 2024-01-01,New Year's Day,TU,2024
 2024-04-09,Eid al-Fitr,TU,2024
-2024-04-23,National Sovereignty and Children's Day	,TU,2024
+2024-04-23,National Sovereignty and Children's Day,TU,2024
 2024-05-01,Labor Day,TU,2024
 2024-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2024
 2024-06-17,Feast of the Sacrifice,TU,2024
@@ -90971,7 +90455,7 @@ ds,holiday,country,year
 2024-10-29,Republic Day,TU,2024
 2025-01-01,New Year's Day,TU,2025
 2025-03-30,Eid al-Fitr,TU,2025
-2025-04-23,National Sovereignty and Children's Day	,TU,2025
+2025-04-23,National Sovereignty and Children's Day,TU,2025
 2025-05-01,Labor Day,TU,2025
 2025-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2025
 2025-06-07,Feast of the Sacrifice,TU,2025
@@ -90980,7 +90464,7 @@ ds,holiday,country,year
 2025-10-29,Republic Day,TU,2025
 2026-01-01,New Year's Day,TU,2026
 2026-03-19,Eid al-Fitr,TU,2026
-2026-04-23,National Sovereignty and Children's Day	,TU,2026
+2026-04-23,National Sovereignty and Children's Day,TU,2026
 2026-05-01,Labor Day,TU,2026
 2026-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2026
 2026-05-27,Feast of the Sacrifice,TU,2026
@@ -90988,7 +90472,7 @@ ds,holiday,country,year
 2026-08-30,Victory Day,TU,2026
 2026-10-29,Republic Day,TU,2026
 2027-01-01,New Year's Day,TU,2027
-2027-04-23,National Sovereignty and Children's Day	,TU,2027
+2027-04-23,National Sovereignty and Children's Day,TU,2027
 2027-05-01,Labor Day,TU,2027
 2027-05-17,Feast of the Sacrifice,TU,2027
 2027-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2027
@@ -90997,7 +90481,7 @@ ds,holiday,country,year
 2027-10-29,Republic Day,TU,2027
 2028-01-01,New Year's Day,TU,2028
 2028-02-26,Eid al-Fitr,TU,2028
-2028-04-23,National Sovereignty and Children's Day	,TU,2028
+2028-04-23,National Sovereignty and Children's Day,TU,2028
 2028-05-01,Labor Day,TU,2028
 2028-05-05,Feast of the Sacrifice,TU,2028
 2028-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2028
@@ -91006,7 +90490,7 @@ ds,holiday,country,year
 2028-10-29,Republic Day,TU,2028
 2029-01-01,New Year's Day,TU,2029
 2029-02-14,Eid al-Fitr,TU,2029
-2029-04-23,National Sovereignty and Children's Day	,TU,2029
+2029-04-23,National Sovereignty and Children's Day,TU,2029
 2029-04-24,Feast of the Sacrifice,TU,2029
 2029-05-01,Labor Day,TU,2029
 2029-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2029
@@ -91016,7 +90500,7 @@ ds,holiday,country,year
 2030-01-01,New Year's Day,TU,2030
 2030-02-04,Eid al-Fitr,TU,2030
 2030-04-14,Feast of the Sacrifice,TU,2030
-2030-04-23,National Sovereignty and Children's Day	,TU,2030
+2030-04-23,National Sovereignty and Children's Day,TU,2030
 2030-05-01,Labor Day,TU,2030
 2030-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2030
 2030-07-15,Democracy and National Unity Day,TU,2030
@@ -91025,7 +90509,7 @@ ds,holiday,country,year
 2031-01-01,New Year's Day,TU,2031
 2031-01-24,Eid al-Fitr,TU,2031
 2031-04-03,Feast of the Sacrifice,TU,2031
-2031-04-23,National Sovereignty and Children's Day	,TU,2031
+2031-04-23,National Sovereignty and Children's Day,TU,2031
 2031-05-01,Labor Day,TU,2031
 2031-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2031
 2031-07-15,Democracy and National Unity Day,TU,2031
@@ -91034,7 +90518,7 @@ ds,holiday,country,year
 2032-01-01,New Year's Day,TU,2032
 2032-01-13,Eid al-Fitr,TU,2032
 2032-03-22,Feast of the Sacrifice,TU,2032
-2032-04-23,National Sovereignty and Children's Day	,TU,2032
+2032-04-23,National Sovereignty and Children's Day,TU,2032
 2032-05-01,Labor Day,TU,2032
 2032-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2032
 2032-07-15,Democracy and National Unity Day,TU,2032
@@ -91043,7 +90527,7 @@ ds,holiday,country,year
 2033-01-01,New Year's Day,TU,2033
 2033-01-02,Eid al-Fitr,TU,2033
 2033-03-12,Feast of the Sacrifice,TU,2033
-2033-04-23,National Sovereignty and Children's Day	,TU,2033
+2033-04-23,National Sovereignty and Children's Day,TU,2033
 2033-05-01,Labor Day,TU,2033
 2033-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2033
 2033-07-15,Democracy and National Unity Day,TU,2033
@@ -91052,7 +90536,7 @@ ds,holiday,country,year
 2033-12-22,Eid al-Fitr,TU,2033
 2034-01-01,New Year's Day,TU,2034
 2034-03-01,Feast of the Sacrifice,TU,2034
-2034-04-23,National Sovereignty and Children's Day	,TU,2034
+2034-04-23,National Sovereignty and Children's Day,TU,2034
 2034-05-01,Labor Day,TU,2034
 2034-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2034
 2034-07-15,Democracy and National Unity Day,TU,2034
@@ -91061,7 +90545,7 @@ ds,holiday,country,year
 2034-12-11,Eid al-Fitr,TU,2034
 2035-01-01,New Year's Day,TU,2035
 2035-02-18,Feast of the Sacrifice,TU,2035
-2035-04-23,National Sovereignty and Children's Day	,TU,2035
+2035-04-23,National Sovereignty and Children's Day,TU,2035
 2035-05-01,Labor Day,TU,2035
 2035-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2035
 2035-07-15,Democracy and National Unity Day,TU,2035
@@ -91070,7 +90554,7 @@ ds,holiday,country,year
 2035-12-01,Eid al-Fitr,TU,2035
 2036-01-01,New Year's Day,TU,2036
 2036-02-08,Feast of the Sacrifice,TU,2036
-2036-04-23,National Sovereignty and Children's Day	,TU,2036
+2036-04-23,National Sovereignty and Children's Day,TU,2036
 2036-05-01,Labor Day,TU,2036
 2036-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2036
 2036-07-15,Democracy and National Unity Day,TU,2036
@@ -91079,7 +90563,7 @@ ds,holiday,country,year
 2036-11-19,Eid al-Fitr,TU,2036
 2037-01-01,New Year's Day,TU,2037
 2037-01-27,Feast of the Sacrifice,TU,2037
-2037-04-23,National Sovereignty and Children's Day	,TU,2037
+2037-04-23,National Sovereignty and Children's Day,TU,2037
 2037-05-01,Labor Day,TU,2037
 2037-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2037
 2037-07-15,Democracy and National Unity Day,TU,2037
@@ -91088,7 +90572,7 @@ ds,holiday,country,year
 2037-11-09,Eid al-Fitr,TU,2037
 2038-01-01,New Year's Day,TU,2038
 2038-01-17,Feast of the Sacrifice,TU,2038
-2038-04-23,National Sovereignty and Children's Day	,TU,2038
+2038-04-23,National Sovereignty and Children's Day,TU,2038
 2038-05-01,Labor Day,TU,2038
 2038-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2038
 2038-07-15,Democracy and National Unity Day,TU,2038
@@ -91096,7 +90580,7 @@ ds,holiday,country,year
 2038-10-29,"Eid al-Fitr, Republic Day",TU,2038
 2039-01-01,New Year's Day,TU,2039
 2039-01-06,Feast of the Sacrifice,TU,2039
-2039-04-23,National Sovereignty and Children's Day	,TU,2039
+2039-04-23,National Sovereignty and Children's Day,TU,2039
 2039-05-01,Labor Day,TU,2039
 2039-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2039
 2039-07-15,Democracy and National Unity Day,TU,2039
@@ -91105,7 +90589,7 @@ ds,holiday,country,year
 2039-10-29,Republic Day,TU,2039
 2039-12-26,Feast of the Sacrifice,TU,2039
 2040-01-01,New Year's Day,TU,2040
-2040-04-23,National Sovereignty and Children's Day	,TU,2040
+2040-04-23,National Sovereignty and Children's Day,TU,2040
 2040-05-01,Labor Day,TU,2040
 2040-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2040
 2040-07-15,Democracy and National Unity Day,TU,2040
@@ -91114,7 +90598,7 @@ ds,holiday,country,year
 2040-10-29,Republic Day,TU,2040
 2040-12-15,Feast of the Sacrifice,TU,2040
 2041-01-01,New Year's Day,TU,2041
-2041-04-23,National Sovereignty and Children's Day	,TU,2041
+2041-04-23,National Sovereignty and Children's Day,TU,2041
 2041-05-01,Labor Day,TU,2041
 2041-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2041
 2041-07-15,Democracy and National Unity Day,TU,2041
@@ -91123,7 +90607,7 @@ ds,holiday,country,year
 2041-10-29,Republic Day,TU,2041
 2041-12-04,Feast of the Sacrifice,TU,2041
 2042-01-01,New Year's Day,TU,2042
-2042-04-23,National Sovereignty and Children's Day	,TU,2042
+2042-04-23,National Sovereignty and Children's Day,TU,2042
 2042-05-01,Labor Day,TU,2042
 2042-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2042
 2042-07-15,Democracy and National Unity Day,TU,2042
@@ -91132,7 +90616,7 @@ ds,holiday,country,year
 2042-10-29,Republic Day,TU,2042
 2042-11-23,Feast of the Sacrifice,TU,2042
 2043-01-01,New Year's Day,TU,2043
-2043-04-23,National Sovereignty and Children's Day	,TU,2043
+2043-04-23,National Sovereignty and Children's Day,TU,2043
 2043-05-01,Labor Day,TU,2043
 2043-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2043
 2043-07-15,Democracy and National Unity Day,TU,2043
@@ -91141,7 +90625,7 @@ ds,holiday,country,year
 2043-10-29,Republic Day,TU,2043
 2043-11-13,Feast of the Sacrifice,TU,2043
 2044-01-01,New Year's Day,TU,2044
-2044-04-23,National Sovereignty and Children's Day	,TU,2044
+2044-04-23,National Sovereignty and Children's Day,TU,2044
 2044-05-01,Labor Day,TU,2044
 2044-05-19,"Commemoration of Ataturk, Youth and Sports Day",TU,2044
 2044-07-15,Democracy and National Unity Day,TU,2044
@@ -91758,7 +91242,7 @@ ds,holiday,country,year
 2044-12-31,New Year's Eve,Thailand,2044
 1995-01-01,New Year's Day,Turkey,1995
 1995-03-02,Eid al-Fitr,Turkey,1995
-1995-04-23,National Sovereignty and Children's Day	,Turkey,1995
+1995-04-23,National Sovereignty and Children's Day,Turkey,1995
 1995-05-01,Labor Day,Turkey,1995
 1995-05-10,Feast of the Sacrifice,Turkey,1995
 1995-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,1995
@@ -91767,7 +91251,7 @@ ds,holiday,country,year
 1995-10-29,Republic Day,Turkey,1995
 1996-01-01,New Year's Day,Turkey,1996
 1996-02-20,Eid al-Fitr,Turkey,1996
-1996-04-23,National Sovereignty and Children's Day	,Turkey,1996
+1996-04-23,National Sovereignty and Children's Day,Turkey,1996
 1996-04-29,Feast of the Sacrifice,Turkey,1996
 1996-05-01,Labor Day,Turkey,1996
 1996-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,1996
@@ -91777,7 +91261,7 @@ ds,holiday,country,year
 1997-01-01,New Year's Day,Turkey,1997
 1997-02-08,Eid al-Fitr,Turkey,1997
 1997-04-18,Feast of the Sacrifice,Turkey,1997
-1997-04-23,National Sovereignty and Children's Day	,Turkey,1997
+1997-04-23,National Sovereignty and Children's Day,Turkey,1997
 1997-05-01,Labor Day,Turkey,1997
 1997-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,1997
 1997-07-15,Democracy and National Unity Day,Turkey,1997
@@ -91786,7 +91270,7 @@ ds,holiday,country,year
 1998-01-01,New Year's Day,Turkey,1998
 1998-01-29,Eid al-Fitr,Turkey,1998
 1998-04-08,Feast of the Sacrifice,Turkey,1998
-1998-04-23,National Sovereignty and Children's Day	,Turkey,1998
+1998-04-23,National Sovereignty and Children's Day,Turkey,1998
 1998-05-01,Labor Day,Turkey,1998
 1998-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,1998
 1998-07-15,Democracy and National Unity Day,Turkey,1998
@@ -91795,7 +91279,7 @@ ds,holiday,country,year
 1999-01-01,New Year's Day,Turkey,1999
 1999-01-18,Eid al-Fitr,Turkey,1999
 1999-03-28,Feast of the Sacrifice,Turkey,1999
-1999-04-23,National Sovereignty and Children's Day	,Turkey,1999
+1999-04-23,National Sovereignty and Children's Day,Turkey,1999
 1999-05-01,Labor Day,Turkey,1999
 1999-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,1999
 1999-07-15,Democracy and National Unity Day,Turkey,1999
@@ -91804,7 +91288,7 @@ ds,holiday,country,year
 2000-01-01,New Year's Day,Turkey,2000
 2000-01-07,Eid al-Fitr,Turkey,2000
 2000-03-16,Feast of the Sacrifice,Turkey,2000
-2000-04-23,National Sovereignty and Children's Day	,Turkey,2000
+2000-04-23,National Sovereignty and Children's Day,Turkey,2000
 2000-05-01,Labor Day,Turkey,2000
 2000-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2000
 2000-07-15,Democracy and National Unity Day,Turkey,2000
@@ -91813,7 +91297,7 @@ ds,holiday,country,year
 2000-12-27,Eid al-Fitr,Turkey,2000
 2001-01-01,New Year's Day,Turkey,2001
 2001-03-06,Feast of the Sacrifice,Turkey,2001
-2001-04-23,National Sovereignty and Children's Day	,Turkey,2001
+2001-04-23,National Sovereignty and Children's Day,Turkey,2001
 2001-05-01,Labor Day,Turkey,2001
 2001-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2001
 2001-07-15,Democracy and National Unity Day,Turkey,2001
@@ -91822,7 +91306,7 @@ ds,holiday,country,year
 2001-12-16,Eid al-Fitr,Turkey,2001
 2002-01-01,New Year's Day,Turkey,2002
 2002-02-23,Feast of the Sacrifice,Turkey,2002
-2002-04-23,National Sovereignty and Children's Day	,Turkey,2002
+2002-04-23,National Sovereignty and Children's Day,Turkey,2002
 2002-05-01,Labor Day,Turkey,2002
 2002-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2002
 2002-07-15,Democracy and National Unity Day,Turkey,2002
@@ -91831,7 +91315,7 @@ ds,holiday,country,year
 2002-12-05,Eid al-Fitr,Turkey,2002
 2003-01-01,New Year's Day,Turkey,2003
 2003-02-12,Feast of the Sacrifice,Turkey,2003
-2003-04-23,National Sovereignty and Children's Day	,Turkey,2003
+2003-04-23,National Sovereignty and Children's Day,Turkey,2003
 2003-05-01,Labor Day,Turkey,2003
 2003-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2003
 2003-07-15,Democracy and National Unity Day,Turkey,2003
@@ -91840,7 +91324,7 @@ ds,holiday,country,year
 2003-11-25,Eid al-Fitr,Turkey,2003
 2004-01-01,New Year's Day,Turkey,2004
 2004-02-02,Feast of the Sacrifice,Turkey,2004
-2004-04-23,National Sovereignty and Children's Day	,Turkey,2004
+2004-04-23,National Sovereignty and Children's Day,Turkey,2004
 2004-05-01,Labor Day,Turkey,2004
 2004-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2004
 2004-07-15,Democracy and National Unity Day,Turkey,2004
@@ -91849,7 +91333,7 @@ ds,holiday,country,year
 2004-11-13,Eid al-Fitr,Turkey,2004
 2005-01-01,New Year's Day,Turkey,2005
 2005-01-21,Feast of the Sacrifice,Turkey,2005
-2005-04-23,National Sovereignty and Children's Day	,Turkey,2005
+2005-04-23,National Sovereignty and Children's Day,Turkey,2005
 2005-05-01,Labor Day,Turkey,2005
 2005-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2005
 2005-07-15,Democracy and National Unity Day,Turkey,2005
@@ -91858,7 +91342,7 @@ ds,holiday,country,year
 2005-11-02,Eid al-Fitr,Turkey,2005
 2006-01-01,New Year's Day,Turkey,2006
 2006-01-10,Feast of the Sacrifice,Turkey,2006
-2006-04-23,National Sovereignty and Children's Day	,Turkey,2006
+2006-04-23,National Sovereignty and Children's Day,Turkey,2006
 2006-05-01,Labor Day,Turkey,2006
 2006-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2006
 2006-07-15,Democracy and National Unity Day,Turkey,2006
@@ -91867,7 +91351,7 @@ ds,holiday,country,year
 2006-10-29,Republic Day,Turkey,2006
 2006-12-31,Feast of the Sacrifice,Turkey,2006
 2007-01-01,New Year's Day,Turkey,2007
-2007-04-23,National Sovereignty and Children's Day	,Turkey,2007
+2007-04-23,National Sovereignty and Children's Day,Turkey,2007
 2007-05-01,Labor Day,Turkey,2007
 2007-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2007
 2007-07-15,Democracy and National Unity Day,Turkey,2007
@@ -91876,7 +91360,7 @@ ds,holiday,country,year
 2007-10-29,Republic Day,Turkey,2007
 2007-12-20,Feast of the Sacrifice,Turkey,2007
 2008-01-01,New Year's Day,Turkey,2008
-2008-04-23,National Sovereignty and Children's Day	,Turkey,2008
+2008-04-23,National Sovereignty and Children's Day,Turkey,2008
 2008-05-01,Labor Day,Turkey,2008
 2008-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2008
 2008-07-15,Democracy and National Unity Day,Turkey,2008
@@ -91885,7 +91369,7 @@ ds,holiday,country,year
 2008-10-29,Republic Day,Turkey,2008
 2008-12-09,Feast of the Sacrifice,Turkey,2008
 2009-01-01,New Year's Day,Turkey,2009
-2009-04-23,National Sovereignty and Children's Day	,Turkey,2009
+2009-04-23,National Sovereignty and Children's Day,Turkey,2009
 2009-05-01,Labor Day,Turkey,2009
 2009-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2009
 2009-07-15,Democracy and National Unity Day,Turkey,2009
@@ -91894,7 +91378,7 @@ ds,holiday,country,year
 2009-10-29,Republic Day,Turkey,2009
 2009-11-28,Feast of the Sacrifice,Turkey,2009
 2010-01-01,New Year's Day,Turkey,2010
-2010-04-23,National Sovereignty and Children's Day	,Turkey,2010
+2010-04-23,National Sovereignty and Children's Day,Turkey,2010
 2010-05-01,Labor Day,Turkey,2010
 2010-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2010
 2010-07-15,Democracy and National Unity Day,Turkey,2010
@@ -91903,7 +91387,7 @@ ds,holiday,country,year
 2010-10-29,Republic Day,Turkey,2010
 2010-11-17,Feast of the Sacrifice,Turkey,2010
 2011-01-01,New Year's Day,Turkey,2011
-2011-04-23,National Sovereignty and Children's Day	,Turkey,2011
+2011-04-23,National Sovereignty and Children's Day,Turkey,2011
 2011-05-01,Labor Day,Turkey,2011
 2011-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2011
 2011-07-15,Democracy and National Unity Day,Turkey,2011
@@ -91911,7 +91395,7 @@ ds,holiday,country,year
 2011-10-29,Republic Day,Turkey,2011
 2011-11-07,Feast of the Sacrifice,Turkey,2011
 2012-01-01,New Year's Day,Turkey,2012
-2012-04-23,National Sovereignty and Children's Day	,Turkey,2012
+2012-04-23,National Sovereignty and Children's Day,Turkey,2012
 2012-05-01,Labor Day,Turkey,2012
 2012-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2012
 2012-07-15,Democracy and National Unity Day,Turkey,2012
@@ -91920,7 +91404,7 @@ ds,holiday,country,year
 2012-10-26,Feast of the Sacrifice,Turkey,2012
 2012-10-29,Republic Day,Turkey,2012
 2013-01-01,New Year's Day,Turkey,2013
-2013-04-23,National Sovereignty and Children's Day	,Turkey,2013
+2013-04-23,National Sovereignty and Children's Day,Turkey,2013
 2013-05-01,Labor Day,Turkey,2013
 2013-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2013
 2013-07-15,Democracy and National Unity Day,Turkey,2013
@@ -91929,7 +91413,7 @@ ds,holiday,country,year
 2013-10-15,Feast of the Sacrifice,Turkey,2013
 2013-10-29,Republic Day,Turkey,2013
 2014-01-01,New Year's Day,Turkey,2014
-2014-04-23,National Sovereignty and Children's Day	,Turkey,2014
+2014-04-23,National Sovereignty and Children's Day,Turkey,2014
 2014-05-01,Labor Day,Turkey,2014
 2014-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2014
 2014-07-15,Democracy and National Unity Day,Turkey,2014
@@ -91938,7 +91422,7 @@ ds,holiday,country,year
 2014-10-05,Feast of the Sacrifice,Turkey,2014
 2014-10-29,Republic Day,Turkey,2014
 2015-01-01,New Year's Day,Turkey,2015
-2015-04-23,National Sovereignty and Children's Day	,Turkey,2015
+2015-04-23,National Sovereignty and Children's Day,Turkey,2015
 2015-05-01,Labor Day,Turkey,2015
 2015-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2015
 2015-07-15,Democracy and National Unity Day,Turkey,2015
@@ -91947,7 +91431,7 @@ ds,holiday,country,year
 2015-09-24,Feast of the Sacrifice,Turkey,2015
 2015-10-29,Republic Day,Turkey,2015
 2016-01-01,New Year's Day,Turkey,2016
-2016-04-23,National Sovereignty and Children's Day	,Turkey,2016
+2016-04-23,National Sovereignty and Children's Day,Turkey,2016
 2016-05-01,Labor Day,Turkey,2016
 2016-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2016
 2016-07-06,Eid al-Fitr,Turkey,2016
@@ -91956,7 +91440,7 @@ ds,holiday,country,year
 2016-09-13,Feast of the Sacrifice,Turkey,2016
 2016-10-29,Republic Day,Turkey,2016
 2017-01-01,New Year's Day,Turkey,2017
-2017-04-23,National Sovereignty and Children's Day	,Turkey,2017
+2017-04-23,National Sovereignty and Children's Day,Turkey,2017
 2017-05-01,Labor Day,Turkey,2017
 2017-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2017
 2017-06-25,Eid al-Fitr,Turkey,2017
@@ -91965,7 +91449,7 @@ ds,holiday,country,year
 2017-09-02,Feast of the Sacrifice,Turkey,2017
 2017-10-29,Republic Day,Turkey,2017
 2018-01-01,New Year's Day,Turkey,2018
-2018-04-23,National Sovereignty and Children's Day	,Turkey,2018
+2018-04-23,National Sovereignty and Children's Day,Turkey,2018
 2018-05-01,Labor Day,Turkey,2018
 2018-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2018
 2018-06-14,Eid al-Fitr,Turkey,2018
@@ -91974,7 +91458,7 @@ ds,holiday,country,year
 2018-08-30,Victory Day,Turkey,2018
 2018-10-29,Republic Day,Turkey,2018
 2019-01-01,New Year's Day,Turkey,2019
-2019-04-23,National Sovereignty and Children's Day	,Turkey,2019
+2019-04-23,National Sovereignty and Children's Day,Turkey,2019
 2019-05-01,Labor Day,Turkey,2019
 2019-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2019
 2019-06-04,Eid al-Fitr,Turkey,2019
@@ -91983,7 +91467,7 @@ ds,holiday,country,year
 2019-08-30,Victory Day,Turkey,2019
 2019-10-29,Republic Day,Turkey,2019
 2020-01-01,New Year's Day,Turkey,2020
-2020-04-23,National Sovereignty and Children's Day	,Turkey,2020
+2020-04-23,National Sovereignty and Children's Day,Turkey,2020
 2020-05-01,Labor Day,Turkey,2020
 2020-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2020
 2020-05-23,Eid al-Fitr,Turkey,2020
@@ -91991,7 +91475,7 @@ ds,holiday,country,year
 2020-08-30,Victory Day,Turkey,2020
 2020-10-29,Republic Day,Turkey,2020
 2021-01-01,New Year's Day,Turkey,2021
-2021-04-23,National Sovereignty and Children's Day	,Turkey,2021
+2021-04-23,National Sovereignty and Children's Day,Turkey,2021
 2021-05-01,Labor Day,Turkey,2021
 2021-05-12,Eid al-Fitr,Turkey,2021
 2021-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2021
@@ -92000,7 +91484,7 @@ ds,holiday,country,year
 2021-08-30,Victory Day,Turkey,2021
 2021-10-29,Republic Day,Turkey,2021
 2022-01-01,New Year's Day,Turkey,2022
-2022-04-23,National Sovereignty and Children's Day	,Turkey,2022
+2022-04-23,National Sovereignty and Children's Day,Turkey,2022
 2022-05-01,Labor Day,Turkey,2022
 2022-05-02,Eid al-Fitr,Turkey,2022
 2022-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2022
@@ -92010,7 +91494,7 @@ ds,holiday,country,year
 2022-10-29,Republic Day,Turkey,2022
 2023-01-01,New Year's Day,Turkey,2023
 2023-04-21,Eid al-Fitr,Turkey,2023
-2023-04-23,National Sovereignty and Children's Day	,Turkey,2023
+2023-04-23,National Sovereignty and Children's Day,Turkey,2023
 2023-05-01,Labor Day,Turkey,2023
 2023-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2023
 2023-06-29,Feast of the Sacrifice,Turkey,2023
@@ -92019,7 +91503,7 @@ ds,holiday,country,year
 2023-10-29,Republic Day,Turkey,2023
 2024-01-01,New Year's Day,Turkey,2024
 2024-04-09,Eid al-Fitr,Turkey,2024
-2024-04-23,National Sovereignty and Children's Day	,Turkey,2024
+2024-04-23,National Sovereignty and Children's Day,Turkey,2024
 2024-05-01,Labor Day,Turkey,2024
 2024-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2024
 2024-06-17,Feast of the Sacrifice,Turkey,2024
@@ -92028,7 +91512,7 @@ ds,holiday,country,year
 2024-10-29,Republic Day,Turkey,2024
 2025-01-01,New Year's Day,Turkey,2025
 2025-03-30,Eid al-Fitr,Turkey,2025
-2025-04-23,National Sovereignty and Children's Day	,Turkey,2025
+2025-04-23,National Sovereignty and Children's Day,Turkey,2025
 2025-05-01,Labor Day,Turkey,2025
 2025-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2025
 2025-06-07,Feast of the Sacrifice,Turkey,2025
@@ -92037,7 +91521,7 @@ ds,holiday,country,year
 2025-10-29,Republic Day,Turkey,2025
 2026-01-01,New Year's Day,Turkey,2026
 2026-03-19,Eid al-Fitr,Turkey,2026
-2026-04-23,National Sovereignty and Children's Day	,Turkey,2026
+2026-04-23,National Sovereignty and Children's Day,Turkey,2026
 2026-05-01,Labor Day,Turkey,2026
 2026-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2026
 2026-05-27,Feast of the Sacrifice,Turkey,2026
@@ -92045,7 +91529,7 @@ ds,holiday,country,year
 2026-08-30,Victory Day,Turkey,2026
 2026-10-29,Republic Day,Turkey,2026
 2027-01-01,New Year's Day,Turkey,2027
-2027-04-23,National Sovereignty and Children's Day	,Turkey,2027
+2027-04-23,National Sovereignty and Children's Day,Turkey,2027
 2027-05-01,Labor Day,Turkey,2027
 2027-05-17,Feast of the Sacrifice,Turkey,2027
 2027-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2027
@@ -92054,7 +91538,7 @@ ds,holiday,country,year
 2027-10-29,Republic Day,Turkey,2027
 2028-01-01,New Year's Day,Turkey,2028
 2028-02-26,Eid al-Fitr,Turkey,2028
-2028-04-23,National Sovereignty and Children's Day	,Turkey,2028
+2028-04-23,National Sovereignty and Children's Day,Turkey,2028
 2028-05-01,Labor Day,Turkey,2028
 2028-05-05,Feast of the Sacrifice,Turkey,2028
 2028-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2028
@@ -92063,7 +91547,7 @@ ds,holiday,country,year
 2028-10-29,Republic Day,Turkey,2028
 2029-01-01,New Year's Day,Turkey,2029
 2029-02-14,Eid al-Fitr,Turkey,2029
-2029-04-23,National Sovereignty and Children's Day	,Turkey,2029
+2029-04-23,National Sovereignty and Children's Day,Turkey,2029
 2029-04-24,Feast of the Sacrifice,Turkey,2029
 2029-05-01,Labor Day,Turkey,2029
 2029-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2029
@@ -92073,7 +91557,7 @@ ds,holiday,country,year
 2030-01-01,New Year's Day,Turkey,2030
 2030-02-04,Eid al-Fitr,Turkey,2030
 2030-04-14,Feast of the Sacrifice,Turkey,2030
-2030-04-23,National Sovereignty and Children's Day	,Turkey,2030
+2030-04-23,National Sovereignty and Children's Day,Turkey,2030
 2030-05-01,Labor Day,Turkey,2030
 2030-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2030
 2030-07-15,Democracy and National Unity Day,Turkey,2030
@@ -92082,7 +91566,7 @@ ds,holiday,country,year
 2031-01-01,New Year's Day,Turkey,2031
 2031-01-24,Eid al-Fitr,Turkey,2031
 2031-04-03,Feast of the Sacrifice,Turkey,2031
-2031-04-23,National Sovereignty and Children's Day	,Turkey,2031
+2031-04-23,National Sovereignty and Children's Day,Turkey,2031
 2031-05-01,Labor Day,Turkey,2031
 2031-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2031
 2031-07-15,Democracy and National Unity Day,Turkey,2031
@@ -92091,7 +91575,7 @@ ds,holiday,country,year
 2032-01-01,New Year's Day,Turkey,2032
 2032-01-13,Eid al-Fitr,Turkey,2032
 2032-03-22,Feast of the Sacrifice,Turkey,2032
-2032-04-23,National Sovereignty and Children's Day	,Turkey,2032
+2032-04-23,National Sovereignty and Children's Day,Turkey,2032
 2032-05-01,Labor Day,Turkey,2032
 2032-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2032
 2032-07-15,Democracy and National Unity Day,Turkey,2032
@@ -92100,7 +91584,7 @@ ds,holiday,country,year
 2033-01-01,New Year's Day,Turkey,2033
 2033-01-02,Eid al-Fitr,Turkey,2033
 2033-03-12,Feast of the Sacrifice,Turkey,2033
-2033-04-23,National Sovereignty and Children's Day	,Turkey,2033
+2033-04-23,National Sovereignty and Children's Day,Turkey,2033
 2033-05-01,Labor Day,Turkey,2033
 2033-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2033
 2033-07-15,Democracy and National Unity Day,Turkey,2033
@@ -92109,7 +91593,7 @@ ds,holiday,country,year
 2033-12-22,Eid al-Fitr,Turkey,2033
 2034-01-01,New Year's Day,Turkey,2034
 2034-03-01,Feast of the Sacrifice,Turkey,2034
-2034-04-23,National Sovereignty and Children's Day	,Turkey,2034
+2034-04-23,National Sovereignty and Children's Day,Turkey,2034
 2034-05-01,Labor Day,Turkey,2034
 2034-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2034
 2034-07-15,Democracy and National Unity Day,Turkey,2034
@@ -92118,7 +91602,7 @@ ds,holiday,country,year
 2034-12-11,Eid al-Fitr,Turkey,2034
 2035-01-01,New Year's Day,Turkey,2035
 2035-02-18,Feast of the Sacrifice,Turkey,2035
-2035-04-23,National Sovereignty and Children's Day	,Turkey,2035
+2035-04-23,National Sovereignty and Children's Day,Turkey,2035
 2035-05-01,Labor Day,Turkey,2035
 2035-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2035
 2035-07-15,Democracy and National Unity Day,Turkey,2035
@@ -92127,7 +91611,7 @@ ds,holiday,country,year
 2035-12-01,Eid al-Fitr,Turkey,2035
 2036-01-01,New Year's Day,Turkey,2036
 2036-02-08,Feast of the Sacrifice,Turkey,2036
-2036-04-23,National Sovereignty and Children's Day	,Turkey,2036
+2036-04-23,National Sovereignty and Children's Day,Turkey,2036
 2036-05-01,Labor Day,Turkey,2036
 2036-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2036
 2036-07-15,Democracy and National Unity Day,Turkey,2036
@@ -92136,7 +91620,7 @@ ds,holiday,country,year
 2036-11-19,Eid al-Fitr,Turkey,2036
 2037-01-01,New Year's Day,Turkey,2037
 2037-01-27,Feast of the Sacrifice,Turkey,2037
-2037-04-23,National Sovereignty and Children's Day	,Turkey,2037
+2037-04-23,National Sovereignty and Children's Day,Turkey,2037
 2037-05-01,Labor Day,Turkey,2037
 2037-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2037
 2037-07-15,Democracy and National Unity Day,Turkey,2037
@@ -92145,7 +91629,7 @@ ds,holiday,country,year
 2037-11-09,Eid al-Fitr,Turkey,2037
 2038-01-01,New Year's Day,Turkey,2038
 2038-01-17,Feast of the Sacrifice,Turkey,2038
-2038-04-23,National Sovereignty and Children's Day	,Turkey,2038
+2038-04-23,National Sovereignty and Children's Day,Turkey,2038
 2038-05-01,Labor Day,Turkey,2038
 2038-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2038
 2038-07-15,Democracy and National Unity Day,Turkey,2038
@@ -92153,7 +91637,7 @@ ds,holiday,country,year
 2038-10-29,"Eid al-Fitr, Republic Day",Turkey,2038
 2039-01-01,New Year's Day,Turkey,2039
 2039-01-06,Feast of the Sacrifice,Turkey,2039
-2039-04-23,National Sovereignty and Children's Day	,Turkey,2039
+2039-04-23,National Sovereignty and Children's Day,Turkey,2039
 2039-05-01,Labor Day,Turkey,2039
 2039-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2039
 2039-07-15,Democracy and National Unity Day,Turkey,2039
@@ -92162,7 +91646,7 @@ ds,holiday,country,year
 2039-10-29,Republic Day,Turkey,2039
 2039-12-26,Feast of the Sacrifice,Turkey,2039
 2040-01-01,New Year's Day,Turkey,2040
-2040-04-23,National Sovereignty and Children's Day	,Turkey,2040
+2040-04-23,National Sovereignty and Children's Day,Turkey,2040
 2040-05-01,Labor Day,Turkey,2040
 2040-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2040
 2040-07-15,Democracy and National Unity Day,Turkey,2040
@@ -92171,7 +91655,7 @@ ds,holiday,country,year
 2040-10-29,Republic Day,Turkey,2040
 2040-12-15,Feast of the Sacrifice,Turkey,2040
 2041-01-01,New Year's Day,Turkey,2041
-2041-04-23,National Sovereignty and Children's Day	,Turkey,2041
+2041-04-23,National Sovereignty and Children's Day,Turkey,2041
 2041-05-01,Labor Day,Turkey,2041
 2041-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2041
 2041-07-15,Democracy and National Unity Day,Turkey,2041
@@ -92180,7 +91664,7 @@ ds,holiday,country,year
 2041-10-29,Republic Day,Turkey,2041
 2041-12-04,Feast of the Sacrifice,Turkey,2041
 2042-01-01,New Year's Day,Turkey,2042
-2042-04-23,National Sovereignty and Children's Day	,Turkey,2042
+2042-04-23,National Sovereignty and Children's Day,Turkey,2042
 2042-05-01,Labor Day,Turkey,2042
 2042-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2042
 2042-07-15,Democracy and National Unity Day,Turkey,2042
@@ -92189,7 +91673,7 @@ ds,holiday,country,year
 2042-10-29,Republic Day,Turkey,2042
 2042-11-23,Feast of the Sacrifice,Turkey,2042
 2043-01-01,New Year's Day,Turkey,2043
-2043-04-23,National Sovereignty and Children's Day	,Turkey,2043
+2043-04-23,National Sovereignty and Children's Day,Turkey,2043
 2043-05-01,Labor Day,Turkey,2043
 2043-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2043
 2043-07-15,Democracy and National Unity Day,Turkey,2043
@@ -92198,7 +91682,7 @@ ds,holiday,country,year
 2043-10-29,Republic Day,Turkey,2043
 2043-11-13,Feast of the Sacrifice,Turkey,2043
 2044-01-01,New Year's Day,Turkey,2044
-2044-04-23,National Sovereignty and Children's Day	,Turkey,2044
+2044-04-23,National Sovereignty and Children's Day,Turkey,2044
 2044-05-01,Labor Day,Turkey,2044
 2044-05-19,"Commemoration of Ataturk, Youth and Sports Day",Turkey,2044
 2044-07-15,Democracy and National Unity Day,Turkey,2044
@@ -92206,134 +91690,6 @@ ds,holiday,country,year
 2044-08-30,Victory Day,Turkey,2044
 2044-10-29,Republic Day,Turkey,2044
 2044-11-01,Feast of the Sacrifice,Turkey,2044
-1995-01-07,  (),UA,1995
-1995-04-23, (),UA,1995
-1996-01-07,  (),UA,1996
-1996-04-14, (),UA,1996
-1997-01-07,  (),UA,1997
-1997-04-27, (),UA,1997
-1998-01-07,  (),UA,1998
-1998-04-19, (),UA,1998
-1999-01-07,  (),UA,1999
-1999-04-11, (),UA,1999
-2000-01-07,  (),UA,2000
-2000-04-30, (),UA,2000
-2001-01-07,  (),UA,2001
-2001-04-15, (),UA,2001
-2002-01-07,  (),UA,2002
-2002-05-05, (),UA,2002
-2003-01-07,  (),UA,2003
-2003-04-27, (),UA,2003
-2004-01-07,  (),UA,2004
-2004-04-11, (),UA,2004
-2005-01-07,  (),UA,2005
-2005-05-01,"   ,  ()",UA,2005
-2006-01-07,  (),UA,2006
-2006-04-23, (),UA,2006
-2007-01-07,  (),UA,2007
-2007-04-08, (),UA,2007
-2008-01-07,  (),UA,2008
-2008-04-27, (),UA,2008
-2009-01-07,  (),UA,2009
-2009-04-19, (),UA,2009
-2010-01-07,  (),UA,2010
-2010-04-04, (),UA,2010
-2011-01-07,  (),UA,2011
-2011-04-24, (),UA,2011
-2012-01-07,  (),UA,2012
-2012-04-15, (),UA,2012
-2013-01-07,  (),UA,2013
-2013-05-05, (),UA,2013
-2014-01-07,  (),UA,2014
-2014-04-20, (),UA,2014
-2015-01-07,  (),UA,2015
-2015-04-12, (),UA,2015
-2016-01-07,  (),UA,2016
-2016-05-01,"   ,  ()",UA,2016
-2017-01-07,  (),UA,2017
-2017-04-16, (),UA,2017
-2017-12-25,  (),UA,2017
-2018-01-07,  (),UA,2018
-2018-04-08, (),UA,2018
-2018-12-25,  (),UA,2018
-2019-01-07,  (),UA,2019
-2019-04-28, (),UA,2019
-2019-12-25,  (),UA,2019
-2020-01-07,  (),UA,2020
-2020-04-19, (),UA,2020
-2020-12-25,  (),UA,2020
-2021-01-07,  (),UA,2021
-2021-05-02, (),UA,2021
-2021-12-25,  (),UA,2021
-2022-01-07,  (),UA,2022
-2022-04-24, (),UA,2022
-2022-12-25,  (),UA,2022
-2023-01-07,  (),UA,2023
-2023-04-16, (),UA,2023
-2023-12-25,  (),UA,2023
-2024-01-07,  (),UA,2024
-2024-05-05, (),UA,2024
-2024-12-25,  (),UA,2024
-2025-01-07,  (),UA,2025
-2025-04-20, (),UA,2025
-2025-12-25,  (),UA,2025
-2026-01-07,  (),UA,2026
-2026-04-12, (),UA,2026
-2026-12-25,  (),UA,2026
-2027-01-07,  (),UA,2027
-2027-05-02, (),UA,2027
-2027-12-25,  (),UA,2027
-2028-01-07,  (),UA,2028
-2028-04-16, (),UA,2028
-2028-12-25,  (),UA,2028
-2029-01-07,  (),UA,2029
-2029-04-08, (),UA,2029
-2029-12-25,  (),UA,2029
-2030-01-07,  (),UA,2030
-2030-04-28, (),UA,2030
-2030-12-25,  (),UA,2030
-2031-01-07,  (),UA,2031
-2031-04-13, (),UA,2031
-2031-12-25,  (),UA,2031
-2032-01-07,  (),UA,2032
-2032-05-02, (),UA,2032
-2032-12-25,  (),UA,2032
-2033-01-07,  (),UA,2033
-2033-04-24, (),UA,2033
-2033-12-25,  (),UA,2033
-2034-01-07,  (),UA,2034
-2034-04-09, (),UA,2034
-2034-12-25,  (),UA,2034
-2035-01-07,  (),UA,2035
-2035-04-29, (),UA,2035
-2035-12-25,  (),UA,2035
-2036-01-07,  (),UA,2036
-2036-04-20, (),UA,2036
-2036-12-25,  (),UA,2036
-2037-01-07,  (),UA,2037
-2037-04-05, (),UA,2037
-2037-12-25,  (),UA,2037
-2038-01-07,  (),UA,2038
-2038-04-25, (),UA,2038
-2038-12-25,  (),UA,2038
-2039-01-07,  (),UA,2039
-2039-04-17, (),UA,2039
-2039-12-25,  (),UA,2039
-2040-01-07,  (),UA,2040
-2040-05-06, (),UA,2040
-2040-12-25,  (),UA,2040
-2041-01-07,  (),UA,2041
-2041-04-21, (),UA,2041
-2041-12-25,  (),UA,2041
-2042-01-07,  (),UA,2042
-2042-04-13, (),UA,2042
-2042-12-25,  (),UA,2042
-2043-01-07,  (),UA,2043
-2043-05-03, (),UA,2043
-2043-12-25,  (),UA,2043
-2044-01-07,  (),UA,2044
-2044-04-24, (),UA,2044
-2044-12-25,  (),UA,2044
 1995-01-01,New Year's Day,UK,1995
 1995-01-02,"New Year Holiday [Scotland], New Year's Day (Observed)",UK,1995
 1995-01-03,New Year Holiday [Scotland] (Observed),UK,1995
@@ -93614,134 +92970,6 @@ ds,holiday,country,year
 2044-11-24,Thanksgiving,US,2044
 2044-12-25,Christmas Day,US,2044
 2044-12-26,Christmas Day (Observed),US,2044
-1995-01-07,  (),Ukraine,1995
-1995-04-23, (),Ukraine,1995
-1996-01-07,  (),Ukraine,1996
-1996-04-14, (),Ukraine,1996
-1997-01-07,  (),Ukraine,1997
-1997-04-27, (),Ukraine,1997
-1998-01-07,  (),Ukraine,1998
-1998-04-19, (),Ukraine,1998
-1999-01-07,  (),Ukraine,1999
-1999-04-11, (),Ukraine,1999
-2000-01-07,  (),Ukraine,2000
-2000-04-30, (),Ukraine,2000
-2001-01-07,  (),Ukraine,2001
-2001-04-15, (),Ukraine,2001
-2002-01-07,  (),Ukraine,2002
-2002-05-05, (),Ukraine,2002
-2003-01-07,  (),Ukraine,2003
-2003-04-27, (),Ukraine,2003
-2004-01-07,  (),Ukraine,2004
-2004-04-11, (),Ukraine,2004
-2005-01-07,  (),Ukraine,2005
-2005-05-01,"   ,  ()",Ukraine,2005
-2006-01-07,  (),Ukraine,2006
-2006-04-23, (),Ukraine,2006
-2007-01-07,  (),Ukraine,2007
-2007-04-08, (),Ukraine,2007
-2008-01-07,  (),Ukraine,2008
-2008-04-27, (),Ukraine,2008
-2009-01-07,  (),Ukraine,2009
-2009-04-19, (),Ukraine,2009
-2010-01-07,  (),Ukraine,2010
-2010-04-04, (),Ukraine,2010
-2011-01-07,  (),Ukraine,2011
-2011-04-24, (),Ukraine,2011
-2012-01-07,  (),Ukraine,2012
-2012-04-15, (),Ukraine,2012
-2013-01-07,  (),Ukraine,2013
-2013-05-05, (),Ukraine,2013
-2014-01-07,  (),Ukraine,2014
-2014-04-20, (),Ukraine,2014
-2015-01-07,  (),Ukraine,2015
-2015-04-12, (),Ukraine,2015
-2016-01-07,  (),Ukraine,2016
-2016-05-01,"   ,  ()",Ukraine,2016
-2017-01-07,  (),Ukraine,2017
-2017-04-16, (),Ukraine,2017
-2017-12-25,  (),Ukraine,2017
-2018-01-07,  (),Ukraine,2018
-2018-04-08, (),Ukraine,2018
-2018-12-25,  (),Ukraine,2018
-2019-01-07,  (),Ukraine,2019
-2019-04-28, (),Ukraine,2019
-2019-12-25,  (),Ukraine,2019
-2020-01-07,  (),Ukraine,2020
-2020-04-19, (),Ukraine,2020
-2020-12-25,  (),Ukraine,2020
-2021-01-07,  (),Ukraine,2021
-2021-05-02, (),Ukraine,2021
-2021-12-25,  (),Ukraine,2021
-2022-01-07,  (),Ukraine,2022
-2022-04-24, (),Ukraine,2022
-2022-12-25,  (),Ukraine,2022
-2023-01-07,  (),Ukraine,2023
-2023-04-16, (),Ukraine,2023
-2023-12-25,  (),Ukraine,2023
-2024-01-07,  (),Ukraine,2024
-2024-05-05, (),Ukraine,2024
-2024-12-25,  (),Ukraine,2024
-2025-01-07,  (),Ukraine,2025
-2025-04-20, (),Ukraine,2025
-2025-12-25,  (),Ukraine,2025
-2026-01-07,  (),Ukraine,2026
-2026-04-12, (),Ukraine,2026
-2026-12-25,  (),Ukraine,2026
-2027-01-07,  (),Ukraine,2027
-2027-05-02, (),Ukraine,2027
-2027-12-25,  (),Ukraine,2027
-2028-01-07,  (),Ukraine,2028
-2028-04-16, (),Ukraine,2028
-2028-12-25,  (),Ukraine,2028
-2029-01-07,  (),Ukraine,2029
-2029-04-08, (),Ukraine,2029
-2029-12-25,  (),Ukraine,2029
-2030-01-07,  (),Ukraine,2030
-2030-04-28, (),Ukraine,2030
-2030-12-25,  (),Ukraine,2030
-2031-01-07,  (),Ukraine,2031
-2031-04-13, (),Ukraine,2031
-2031-12-25,  (),Ukraine,2031
-2032-01-07,  (),Ukraine,2032
-2032-05-02, (),Ukraine,2032
-2032-12-25,  (),Ukraine,2032
-2033-01-07,  (),Ukraine,2033
-2033-04-24, (),Ukraine,2033
-2033-12-25,  (),Ukraine,2033
-2034-01-07,  (),Ukraine,2034
-2034-04-09, (),Ukraine,2034
-2034-12-25,  (),Ukraine,2034
-2035-01-07,  (),Ukraine,2035
-2035-04-29, (),Ukraine,2035
-2035-12-25,  (),Ukraine,2035
-2036-01-07,  (),Ukraine,2036
-2036-04-20, (),Ukraine,2036
-2036-12-25,  (),Ukraine,2036
-2037-01-07,  (),Ukraine,2037
-2037-04-05, (),Ukraine,2037
-2037-12-25,  (),Ukraine,2037
-2038-01-07,  (),Ukraine,2038
-2038-04-25, (),Ukraine,2038
-2038-12-25,  (),Ukraine,2038
-2039-01-07,  (),Ukraine,2039
-2039-04-17, (),Ukraine,2039
-2039-12-25,  (),Ukraine,2039
-2040-01-07,  (),Ukraine,2040
-2040-05-06, (),Ukraine,2040
-2040-12-25,  (),Ukraine,2040
-2041-01-07,  (),Ukraine,2041
-2041-04-21, (),Ukraine,2041
-2041-12-25,  (),Ukraine,2041
-2042-01-07,  (),Ukraine,2042
-2042-04-13, (),Ukraine,2042
-2042-12-25,  (),Ukraine,2042
-2043-01-07,  (),Ukraine,2043
-2043-05-03, (),Ukraine,2043
-2043-12-25,  (),Ukraine,2043
-2044-01-07,  (),Ukraine,2044
-2044-04-24, (),Ukraine,2044
-2044-12-25,  (),Ukraine,2044
 1995-01-01,New Year's Day,UnitedKingdom,1995
 1995-01-02,"New Year Holiday [Scotland], New Year's Day (Observed)",UnitedKingdom,1995
 1995-01-03,New Year Holiday [Scotland] (Observed),UnitedKingdom,1995
