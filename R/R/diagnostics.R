@@ -138,8 +138,9 @@ cross_validation <- function(
     future <- df.predict[columns]
     yhat <- stats::predict(m, future)
     # Merge yhat, y, and cutoff.
-    df.c <- dplyr::inner_join(df.predict, yhat$predict_columns, by = "ds")
-    df.c <- dplyr::select(df.c, y, yhat$predict_columns)
+    df.c <- dplyr::inner_join(df.predict, yhat[predict_columns], by = "ds")
+    df.c <- df.c[c(predict_columns, "y")]
+    df.c <- dplyr::select(df.c, y, predict_columns)
     df.c$cutoff <- cutoff
     predicts <- rbind(predicts, df.c)
   }
@@ -240,7 +241,7 @@ performance_metrics <- function(df, metrics = NULL, rolling_window = 0.1) {
   if (is.null(metrics)) {
     metrics <- valid_metrics
   }
-  if (!('yhat_lower' %in% df) | (!('yhat_upper' %in% df)) & ('coverage' %in% metrics)){
+  if (!('yhat_lower' %in% colnames(df)) | (!('yhat_upper' %in% colnames(df))) & ('coverage' %in% metrics)){
     metrics <- valid_metrics[valid_metrics != 'coverage']
   }
 

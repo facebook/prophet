@@ -26,7 +26,7 @@ test_that("cross_validation", {
     m, horizon = 4, units = "days", period = 10, initial = 115)
   expect_equal(length(unique(df.cv$cutoff)), 3)
   expect_equal(max(df.cv$ds - df.cv$cutoff), horizon)
-  expect_true(min(df.cv$cutoff) >= ts + initial)
+  expect_true(as.Date(min(df.cv$cutoff)) >= ts + initial)
   dc <- diff(df.cv$cutoff)
   dc <- min(dc[dc > 0])
   expect_true(dc >= period)
@@ -131,7 +131,7 @@ test_that("performance_metrics", {
   expect_null(df_horizon)
   # List of metrics containing non valid metrics
   expect_error(
-     performance_metrics(df, metrics = c('mse', 'error_metric')),
+     performance_metrics(df_cv, metrics = c('mse', 'error_metric')),
      'Valid values for metrics are: mse, rmse, mae, mape, coverage'
   )
 })
