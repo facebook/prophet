@@ -166,8 +166,8 @@ prophet_plot_components <- function(
 #' @param m Prophet model
 #' @param fcst Dataframe output of `predict`.
 #' @param name String name of the component to plot (column of fcst).
-#' @param uncertainty Optional boolean to plot uncertainty intervals, which will
-#' only be done if m$uncertainty.samples > 0.
+#' @param uncertainty Optional boolean to plot uncertainty intervals, which will 
+#'  only be done if m$uncertainty.samples > 0.
 #' @param plot_cap Boolean indicating if the capacity should be shown in the
 #'  figure, if available.
 #'
@@ -233,7 +233,7 @@ seasonality_plot_df <- function(m, ds) {
 #'
 #' @param m Prophet model object
 #' @param uncertainty Optional boolean to plot uncertainty intervals, which will
-#' only be done if m$uncertainty.samples > 0.
+#'  only be done if m$uncertainty.samples > 0.
 #' @param weekly_start Integer specifying the start day of the weekly
 #'  seasonality plot. 0 (default) starts the week on Sunday. 1 shifts by 1 day
 #'  to Monday, and so on.
@@ -276,7 +276,7 @@ plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0,
 #'
 #' @param m Prophet model object.
 #' @param uncertainty Optional boolean to plot uncertainty intervals, which
-#' will only be done if m$uncertainty.samples > 0.
+#'  will only be done if m$uncertainty.samples > 0.
 #' @param yearly_start Integer specifying the start day of the yearly
 #'  seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts by 1 day
 #'  to Jan 2, and so on.
@@ -321,7 +321,7 @@ plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0,
 #' @param m Prophet model object.
 #' @param name String name of the seasonality.
 #' @param uncertainty Optional boolean to plot uncertainty intervals, which
-#' will only be done if m$uncertainty.samples > 0.
+#'  will only be done if m$uncertainty.samples > 0.
 #'
 #' @return A ggplot2 plot.
 #'
@@ -430,7 +430,7 @@ dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
   df <- df_for_plotting(x, fcst)
 
   # build variables to include, or not, the uncertainty data
-  if(uncertainty && x$uncertainty.sampes && exists("yhat_lower", where = df))
+  if(uncertainty && x$uncertainty.samples && exists("yhat_lower", where = df))
   {
     colsToKeep <- c('y', 'yhat', 'yhat_lower', 'yhat_upper')
     forecastCols <- c('yhat_lower', 'yhat', 'yhat_upper')

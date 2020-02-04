@@ -11,8 +11,12 @@ from calendar import Calendar, MONDAY
 from datetime import date, timedelta
 
 from convertdate.islamic import from_gregorian, to_gregorian
-from holidays import WEEKEND, HolidayBase, easter, rd
 from lunarcalendar import Lunar, Converter
+
+from holidays import WEEKEND, HolidayBase
+from dateutil.easter import easter
+from dateutil.relativedelta import relativedelta as rd
+
 
 # Official public holidays at a country level
 # ------------ Holidays in Brazil---------------------
@@ -51,7 +55,7 @@ class Brazil(HolidayBase):
         self[date(year, 11, 2)] = "All Souls' Day"
 
         # Republic Proclamation Day
-        self[date(year, 11, 5)] = "Republic Proclamation Day"
+        self[date(year, 11, 15)] = "Republic Proclamation Day"
 
         # Christmas
         self[date(year, 12, 25)] = "Christmas"
@@ -240,7 +244,7 @@ class India(HolidayBase):
         name = "Gandhi Jayanti"
         self[date(year, 10, 2)] = name
         # --------------------------------
-        # Hindo holidays
+        # Hindu holidays
         #     Diwali
         #     Holi
         # --------------------------------
@@ -249,7 +253,8 @@ class India(HolidayBase):
         # http://www.theholidayspot.com/diwali/calendar.htm
         # https://www.timeanddate.com/holidays/india/diwali?starty=
         # https://www.infoplease.com/calendar-holidays/major-holidays/
-        warning_msg = "We only support Diwali and Holi holidays from 2010 to 2025"
+        # https://www.learnreligions.com/when-is-holi-1770208
+        warning_msg = "We only support Diwali and Holi holidays from 2010 to 2030"
         warnings.warn(warning_msg, Warning)
         name1 = "Diwali"
         name2 = "Holi"
@@ -301,6 +306,21 @@ class India(HolidayBase):
         elif year == 2025:
             self[date(year, 10, 21)] = name1
             self[date(year, 3, 14)] = name2
+        elif year == 2026:
+            self[date(year, 11, 8)] = name1
+            self[date(year, 3, 3)] = name2
+        elif year == 2027:
+            self[date(year, 10, 29)] = name1
+            self[date(year, 3, 22)] = name2
+        elif year == 2028:
+            self[date(year, 10, 17)] = name1
+            self[date(year, 3, 11)] = name2
+        elif year == 2029:
+            self[date(year, 11, 5)] = name1
+            self[date(year, 2, 28)] = name2
+        elif year == 2030:
+            self[date(year, 10, 26)] = name1
+            self[date(year, 3, 19)] = name2
         else:
             pass
 

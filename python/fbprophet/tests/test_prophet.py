@@ -42,7 +42,8 @@ class TestProphet(TestCase):
         train = DATA.head(N // 2)
         future = DATA.tail(N // 2)
 
-        forecaster = Prophet(weekly_seasonality=False, yearly_seasonality=False)
+        forecaster = Prophet(weekly_seasonality=False,
+                             yearly_seasonality=False)
         forecaster.fit(train)
         forecaster.predict(future)
 
@@ -52,6 +53,10 @@ class TestProphet(TestCase):
         future = DATA.tail(N // 2)
 
         forecaster = Prophet(n_changepoints=0)
+        forecaster.fit(train)
+        forecaster.predict(future)
+
+        forecaster = Prophet(n_changepoints=0, mcmc_samples=100)
         forecaster.fit(train)
         forecaster.predict(future)
 
@@ -89,6 +94,20 @@ class TestProphet(TestCase):
         fcst = m.predict(future)
         self.assertEqual(fcst['yhat'].values[-1], 0)
 
+    def test_fit_predict_uncertainty_disabled(self):
+        N = DATA.shape[0]
+        train = DATA.head(N // 2)
+        future = DATA.tail(N // 2)
+
+        for uncertainty in [0, False]:
+            m = Prophet(uncertainty_samples=uncertainty)
+            m.fit(train)
+            fcst = m.predict(future)
+            expected_cols = ['ds', 'trend', 'additive_terms',
+                             'multiplicative_terms', 'weekly', 'yhat']
+            self.assertTrue(all(col in expected_cols
+                                for col in fcst.columns.tolist()))
+
     def test_setup_dataframe(self):
         m = Prophet()
         N = DATA.shape[0]
@@ -110,7 +129,6 @@ class TestProphet(TestCase):
         m = Prophet()
         m.fit(df)
 
-
     def test_logistic_floor(self):
         m = Prophet(growth='logistic')
         N = DATA.shape[0]
@@ -124,6 +142,7 @@ class TestProphet(TestCase):
         self.assertTrue(m.logistic_floor)
         self.assertTrue('floor' in m.history)
         self.assertAlmostEqual(m.history['y_scaled'][0], 1.)
+        self.assertEqual(m.fit_kwargs, {'algorithm': 'Newton'})
         fcst1 = m.predict(future)
 
         m2 = Prophet(growth='logistic')
@@ -207,7 +226,7 @@ class TestProphet(TestCase):
         mat = Prophet.fourier_series(DATA['ds'], 7, 3)
         # These are from the R forecast package directly.
         true_values = np.array([
-            0.7818315, 0.6234898, 0.9749279, -0.2225209, 0.4338837, -0.9009689,
+            0.7818315, 0.6234898, 0.9749279, -0.2225209, 0.4338837, -0.9009689
         ])
         self.assertAlmostEqual(np.sum((mat[0] - true_values)**2), 0.0)
 
@@ -215,7 +234,7 @@ class TestProphet(TestCase):
         mat = Prophet.fourier_series(DATA['ds'], 365.25, 3)
         # These are from the R forecast package directly.
         true_values = np.array([
-            0.7006152, -0.7135393, -0.9998330, 0.01827656, 0.7262249, 0.6874572,
+            0.7006152, -0.7135393, -0.9998330, 0.01827656, 0.7262249, 0.6874572
         ])
         self.assertAlmostEqual(np.sum((mat[0] - true_values)**2), 0.0)
 
