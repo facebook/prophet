@@ -164,6 +164,11 @@ class TestDiagnostics(TestCase):
             df_cv, metrics=['mape'],
         )
         self.assertIsNone(df_horizon)
+        # List of metrics containing non-valid metrics
+        with self.assertRaises(ValueError):
+            diagnostics.performance_metrics(
+                df_cv, metrics=['mse', 'error_metric'],
+            )
 
     def test_rolling_mean(self):
         x = np.arange(10)
