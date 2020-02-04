@@ -90,6 +90,18 @@ test_that("cross_validation_default_value_check", {
   expect_equal(sum(dplyr::select(df.cv1 - df.cv2, y, yhat)), 0)
 })
 
+test_that("cross_validation_uncertainty_disabled", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  for (uncertainty in c(0, FALSE)) {
+    m <- prophet(uncertainty.samples = uncertainty)
+    m <- fit.prophet(m = m, df = DATA, algorithm = "Newton")
+    df.cv <- cross_validation(
+      m, horizon = 4, units = "days", period = 4, initial = 115)
+    expected.cols <- c('y', 'ds', 'yhat', 'cutoff')
+    expect_equal(expected.cols, colnames(df.cv))
+  }
+})
+
 test_that("performance_metrics", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   m <- prophet(DATA)

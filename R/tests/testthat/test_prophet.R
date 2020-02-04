@@ -73,6 +73,16 @@ test_that("fit_predict_constant_history", {
   expect_equal(tail(fcst$yhat, 1), 0)
 })
 
+test_that("fit_predict_uncertainty_disabled", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  for (uncertainty in c(0, FALSE)) {
+    m <- prophet(train, uncertainty.samples = uncertainty)
+    fcst <- predict(m, future)
+    expected.cols <- c('ds', 'trend', 'additive_terms', 'weekly', 'multiplicative_terms', 'yhat')
+    expect_equal(expected.cols, colnames(fcst))
+  }
+})
+
 test_that("setup_dataframe", {
   history <- train
   m <- prophet(history, fit = FALSE)
