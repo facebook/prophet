@@ -344,9 +344,9 @@ time_diff <- function(ds1, ds2, units = "days") {
 setup_dataframe <- function(m, df, initialize_scales = FALSE) {
   if (exists('y', where=df)) {
     df$y <- as.numeric(df$y)
-  }
-  if (any(is.infinite(df$y))) {
-    stop("Found infinity in column y.")
+    if (any(is.infinite(df$y))) {
+      stop("Found infinity in column y.")
+    }
   }
   df$ds <- set_date(df$ds)
   if (anyNA(df$ds)) {
