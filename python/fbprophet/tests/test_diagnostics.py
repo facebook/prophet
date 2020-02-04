@@ -109,7 +109,7 @@ class TestDiagnostics(TestCase):
         df = self.__df.copy()
         for uncertainty in [0, False]:
             m = Prophet(uncertainty_samples=uncertainty)
-            m.fit(df)
+            m.fit(df, algorithm='Newton')
             df_cv = diagnostics.cross_validation(
                 m, horizon='4 days', period='4 days', initial='115 days')
             expected_cols = ['ds', 'yhat', 'y', 'cutoff']

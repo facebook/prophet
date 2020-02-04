@@ -134,7 +134,8 @@ prophet <- function(df = NULL,
     history.dates = NULL,
     train.holiday.names = NULL,
     train.component.cols = NULL,
-    component.modes = NULL
+    component.modes = NULL,
+    fit.kwargs = list()
   )
   m <- validate_inputs(m)
   class(m) <- append("prophet", class(m))
@@ -1208,6 +1209,7 @@ fit.prophet <- function(m, df, ...) {
   component.cols <- out2$component.cols
   m$train.component.cols <- component.cols
   m$component.modes <- out2$modes
+  m$fit.kwargs <- list(...)
 
   m <- set_changepoints(m)
 

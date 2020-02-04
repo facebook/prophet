@@ -117,7 +117,8 @@ cross_validation <- function(
     if (nrow(history.c) < 2) {
       stop('Less than two datapoints before cutoff. Increase initial window.')
     }
-    m <- fit.prophet(m, history.c)
+    fit.args <- c(list(m=m, df=history.c), model$fit.kwargs)
+    m <- do.call(fit.prophet, fit.args)
     # Calculate yhat
     df.predict <- dplyr::filter(df, ds > cutoff, ds <= cutoff + horizon.dt)
     # Get the columns for the future dataframe

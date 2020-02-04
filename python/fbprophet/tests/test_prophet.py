@@ -142,6 +142,7 @@ class TestProphet(TestCase):
         self.assertTrue(m.logistic_floor)
         self.assertTrue('floor' in m.history)
         self.assertAlmostEqual(m.history['y_scaled'][0], 1.)
+        self.assertEqual(m.fit_kwargs, {'algorithm': 'Newton'})
         fcst1 = m.predict(future)
 
         m2 = Prophet(growth='logistic')

@@ -8,6 +8,7 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 from collections import OrderedDict, defaultdict
+from copy import deepcopy
 from datetime import timedelta
 
 import numpy as np
@@ -137,6 +138,7 @@ class Prophet(object):
         self.train_component_cols = None
         self.component_modes = None
         self.train_holiday_names = None
+        self.fit_kwargs = {}
         self.validate_inputs()
 
     def validate_inputs(self):
@@ -1080,6 +1082,7 @@ class Prophet(object):
             self.make_all_seasonality_features(history))
         self.train_component_cols = component_cols
         self.component_modes = modes
+        self.fit_kwargs = deepcopy(kwargs)
 
         self.set_changepoints()
 

@@ -114,6 +114,7 @@ test_that("logistic_floor", {
   expect_true(m$logistic.floor)
   expect_true('floor' %in% colnames(m$history))
   expect_equal(m$history$y_scaled[1], 1., tolerance = 1e-6)
+  expect_equal(m$fit.kwargs, list(algorithm = 'Newton'))
   fcst1 <- predict(m, future1)
 
   m2 <- prophet(growth = 'logistic')
