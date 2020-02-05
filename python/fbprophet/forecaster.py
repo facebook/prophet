@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 import numpy as np
 import pandas as pd
@@ -417,7 +417,7 @@ class Prophet(object):
         """
         # convert to days since epoch
         t = np.array(
-            (dates - pd.datetime(1970, 1, 1))
+            (dates - datetime(1970, 1, 1))
                 .dt.total_seconds()
                 .astype(np.float)
         ) / (3600 * 24.)
