@@ -1329,10 +1329,10 @@ class Prophet(object):
                 comp *= self.y_scale
             data[component] = np.nanmean(comp, axis=1)
             if self.uncertainty_samples:
-                data[component + '_lower'] = np.nanpercentile(
+                data[component + '_lower'] = self.percentile(
                     comp, lower_p, axis=1,
                 )
-                data[component + '_upper'] = np.nanpercentile(
+                data[component + '_upper'] = self.percentile(
                     comp, upper_p, axis=1,
                 )
         return pd.DataFrame(data)
@@ -1410,9 +1410,9 @@ class Prophet(object):
 
         series = {}
         for key in ['yhat', 'trend']:
-            series['{}_lower'.format(key)] = np.nanpercentile(
+            series['{}_lower'.format(key)] = self.percentile(
                 sim_values[key], lower_p, axis=1)
-            series['{}_upper'.format(key)] = np.nanpercentile(
+            series['{}_upper'.format(key)] = self.percentile(
                 sim_values[key], upper_p, axis=1)
 
         return pd.DataFrame(series)
@@ -1497,6 +1497,17 @@ class Prophet(object):
                                             changepoint_ts)
 
         return trend * self.y_scale + df['floor']
+
+    def percentile(self, a, *args, **kwargs):
+        """
+        We rely on np.nanpercentile in the rare instances where there
+        are a small number of bad samples with MCMC that contain NaNs.
+        However, since np.nanpercentile is far slower than np.percentile,
+        we only fall back to it if the array contains NaNs. See
+        https://github.com/facebook/prophet/issues/1310 for more details.
+        """
+        fn =  np.nanpercentile if np.isnan(a).any() else np.percentile
+        return fn(a, *args, **kwargs)
 
     def make_future_dataframe(self, periods, freq='D', include_history=True):
         """Simulate the trend using the extrapolated generative model.
