@@ -12,15 +12,10 @@ from datetime import timedelta
 
 import numpy as np
 import pandas as pd
-import pystan  # noqa F401
 
-from fbprophet.diagnostics import prophet_copy
 from fbprophet.make_holidays import get_holiday_names, make_holidays_df
-from fbprophet.models import CmdStanPyBackend, PyStanBackend
-from fbprophet.plot import (plot, plot_components, plot_forecast_component,
-                            plot_seasonality, plot_weekly, plot_yearly,
-                            seasonality_plot_df)
-from typing import Tuple
+from fbprophet.backends import StanBackendEnum
+from fbprophet.plot import (plot, plot_components)
 
 logger = logging.getLogger('fbprophet')
 logger.addHandler(logging.NullHandler())
@@ -78,7 +73,8 @@ class Prophet(object):
         uncertainty intervals. Settings this value to 0 or False will disable
         uncertainty estimation and speed up the calculation.
         uncertainty intervals.
-    stan_backend: str, set to "cmdstanpy" or "pystan" (default)
+    stan_backend: StanBackendEnum, one of the items from the enum, default:
+        StanBackendEnum.PYSTAN
     """
 
     def __init__(
@@ -98,7 +94,7 @@ class Prophet(object):
             mcmc_samples=0,
             interval_width=0.80,
             uncertainty_samples=1000,
-            stan_backend='pystan'
+            stan_backend=StanBackendEnum.PYSTAN
     ):
         self.growth = growth
 
@@ -142,12 +138,17 @@ class Prophet(object):
         self.component_modes = None
         self.train_holiday_names = None
         self.validate_inputs()
-        if stan_backend == 'cmdstanpy':
-            self.stan_backend = CmdStanPyBackend(logger)
-        elif stan_backend == 'pystan':
+
+        if stan_backend == StanBackendEnum.PYSTAN:
+            from fbprophet.backends.models import PyStanBackend
             self.stan_backend = PyStanBackend(logger)
+        elif stan_backend == StanBackendEnum.CMDSTANPY:
+            from fbprophet.backends.models import CmdStanPyBackend
+            self.stan_backend = CmdStanPyBackend(logger)
         else:
             raise ValueError("Unknown stan backend: {}".format(stan_backend))
+
+
 
     def validate_inputs(self):
         """Validates the inputs to Prophet."""

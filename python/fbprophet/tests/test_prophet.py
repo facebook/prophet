@@ -14,8 +14,8 @@ from unittest import TestCase, skipUnless
 
 import numpy as np
 import pandas as pd
-
 from fbprophet import Prophet
+from fbprophet.backends import get_backends_from_env
 
 DATA = pd.read_csv(
     os.path.join(os.path.dirname(__file__), 'data.csv'),
@@ -25,6 +25,8 @@ DATA2 = pd.read_csv(
     os.path.join(os.path.dirname(__file__), 'data2.csv'),
     parse_dates=['ds'],
 )
+
+stan_backend = get_backends_from_env()[0]
 
 
 class TestProphet(TestCase):
@@ -40,7 +42,7 @@ class TestProphet(TestCase):
         test = DATA.tail(days)
         test.reset_index(inplace=True)
 
-        for backend in ["cmdstanpy", "pystan"]:
+        for backend in get_backends_from_env():
             forecaster = Prophet(stan_backend=backend)
             forecaster.fit(train, seed=1237861298)
             np.random.seed(876543987)
@@ -57,7 +59,7 @@ class TestProphet(TestCase):
         test = DATA.tail(days)
         test.reset_index(inplace=True)
 
-        for backend in ["cmdstanpy", "pystan"]:
+        for backend in get_backends_from_env():
             forecaster = Prophet(stan_backend=backend)
             forecaster.fit(train, seed=1237861298, algorithm='Newton')
             np.random.seed(876543987)
@@ -75,16 +77,15 @@ class TestProphet(TestCase):
         test = DATA.tail(days)
         test.reset_index(inplace=True)
 
-        for backend in ["cmdstanpy", "pystan"]:
-            forecaster = Prophet(stan_backend=backend, mcmc_samples=500)
+        forecaster = Prophet(stan_backend=stan_backend, mcmc_samples=500)
 
-            forecaster.fit(train, seed=1237861298, chains=4)
-            np.random.seed(876543987)
-            future = forecaster.make_future_dataframe(days, include_history=False)
-            future = forecaster.predict(future)
-            # this gives ~ 215.77
-            res = self.rmse(future['yhat'], test['y'])
-            self.assertTrue(236 > res > 193, msg="backend: {}".format(backend))
+        forecaster.fit(train, seed=1237861298, chains=4)
+        np.random.seed(876543987)
+        future = forecaster.make_future_dataframe(days, include_history=False)
+        future = forecaster.predict(future)
+        # this gives ~ 215.77
+        res = self.rmse(future['yhat'], test['y'])
+        self.assertTrue(236 > res > 193, msg="backend: {}".format(stan_backend))
 
     def test_fit_predict_no_seasons(self):
         N = DATA.shape[0]
@@ -92,7 +93,8 @@ class TestProphet(TestCase):
         future = DATA.tail(N // 2)
 
         forecaster = Prophet(weekly_seasonality=False,
-                             yearly_seasonality=False)
+                             yearly_seasonality=False,
+                             stan_backend=stan_backend)
         forecaster.fit(train)
         forecaster.predict(future)
 
@@ -101,18 +103,19 @@ class TestProphet(TestCase):
         train = DATA.head(N // 2)
         future = DATA.tail(N // 2)
 
-        forecaster = Prophet(n_changepoints=0)
+        forecaster = Prophet(n_changepoints=0, stan_backend=stan_backend)
         forecaster.fit(train)
         forecaster.predict(future)
 
-        forecaster = Prophet(n_changepoints=0, mcmc_samples=100)
+        forecaster = Prophet(n_changepoints=0, mcmc_samples=100, stan_backend=stan_backend)
         forecaster.fit(train)
         forecaster.predict(future)
 
     def test_fit_changepoint_not_in_history(self):
         train = DATA[(DATA['ds'] < '2013-01-01') | (DATA['ds'] > '2014-01-01')]
         future = pd.DataFrame({'ds': DATA['ds']})
-        forecaster = Prophet(changepoints=['2013-06-06'])
+        prophet = Prophet(changepoints=['2013-06-06'], stan_backend=stan_backend)
+        forecaster = prophet
         forecaster.fit(train)
         forecaster.predict(future)
 
@@ -123,7 +126,7 @@ class TestProphet(TestCase):
         train2['y'] += 10
         train = train1.append(train2)
         future = pd.DataFrame({'ds': DATA['ds'].tail(N // 2)})
-        forecaster = Prophet()
+        forecaster = Prophet(stan_backend=stan_backend)
         forecaster.fit(train)
         forecaster.predict(future)
 
@@ -132,13 +135,13 @@ class TestProphet(TestCase):
         train = DATA.head(N // 2).copy()
         train['y'] = 20
         future = pd.DataFrame({'ds': DATA['ds'].tail(N // 2)})
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         m.fit(train)
         fcst = m.predict(future)
         self.assertEqual(fcst['yhat'].values[-1], 20)
         train['y'] = 0
         future = pd.DataFrame({'ds': DATA['ds'].tail(N // 2)})
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         m.fit(train)
         fcst = m.predict(future)
         self.assertEqual(fcst['yhat'].values[-1], 0)
@@ -149,7 +152,7 @@ class TestProphet(TestCase):
         future = DATA.tail(N // 2)
 
         for uncertainty in [0, False]:
-            m = Prophet(uncertainty_samples=uncertainty)
+            m = Prophet(uncertainty_samples=uncertainty, stan_backend=stan_backend)
             m.fit(train)
             fcst = m.predict(future)
             expected_cols = ['ds', 'trend', 'additive_terms',
@@ -158,7 +161,7 @@ class TestProphet(TestCase):
                                 for col in fcst.columns.tolist()))
 
     def test_setup_dataframe(self):
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         N = DATA.shape[0]
         history = DATA.head(N // 2).copy()
 
@@ -170,16 +173,16 @@ class TestProphet(TestCase):
 
         self.assertTrue('y_scaled' in history)
         self.assertEqual(history['y_scaled'].max(), 1.0)
-    
+
     def test_setup_dataframe_ds_column(self):
         "Test case where 'ds' exists as an index name and column"
         df = DATA.copy()
         df.index = df.loc[:, 'ds']
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         m.fit(df)
 
     def test_logistic_floor(self):
-        m = Prophet(growth='logistic')
+        m = Prophet(growth='logistic', stan_backend=stan_backend)
         N = DATA.shape[0]
         history = DATA.head(N // 2).copy()
         history['floor'] = 10.
@@ -193,7 +196,7 @@ class TestProphet(TestCase):
         self.assertAlmostEqual(m.history['y_scaled'][0], 1.)
         fcst1 = m.predict(future)
 
-        m2 = Prophet(growth='logistic')
+        m2 = Prophet(growth='logistic', stan_backend=stan_backend)
         history2 = history.copy()
         history2['y'] += 10.
         history2['floor'] += 10.
@@ -208,7 +211,7 @@ class TestProphet(TestCase):
         self.assertTrue((np.abs(fcst1['yhat'] - fcst2['yhat']) < 1).all())
 
     def test_get_changepoints(self):
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         N = DATA.shape[0]
         history = DATA.head(N // 2).copy()
 
@@ -225,7 +228,7 @@ class TestProphet(TestCase):
         self.assertTrue(cp.max() <= history['t'].values[cp_indx])
 
     def test_set_changepoint_range(self):
-        m = Prophet(changepoint_range=0.4)
+        m = Prophet(changepoint_range=0.4, stan_backend=stan_backend)
         N = DATA.shape[0]
         history = DATA.head(N // 2).copy()
 
@@ -241,12 +244,12 @@ class TestProphet(TestCase):
         cp_indx = int(np.ceil(0.4 * history.shape[0]))
         self.assertTrue(cp.max() <= history['t'].values[cp_indx])
         with self.assertRaises(ValueError):
-            m = Prophet(changepoint_range=-0.1)
+            m = Prophet(changepoint_range=-0.1, stan_backend=stan_backend)
         with self.assertRaises(ValueError):
-            m = Prophet(changepoint_range=2)
+            m = Prophet(changepoint_range=2, stan_backend=stan_backend)
 
     def test_get_zero_changepoints(self):
-        m = Prophet(n_changepoints=0)
+        m = Prophet(n_changepoints=0, stan_backend=stan_backend)
         N = DATA.shape[0]
         history = DATA.head(N // 2).copy()
 
@@ -259,7 +262,7 @@ class TestProphet(TestCase):
         self.assertEqual(cp[0], 0)
 
     def test_override_n_changepoints(self):
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         history = DATA.head(20).copy()
 
         history = m.setup_dataframe(history, initialize_scales=True)
@@ -287,7 +290,7 @@ class TestProphet(TestCase):
         self.assertAlmostEqual(np.sum((mat[0] - true_values) ** 2), 0.0)
 
     def test_growth_init(self):
-        model = Prophet(growth='logistic')
+        model = Prophet(growth='logistic', stan_backend=stan_backend)
         history = DATA.iloc[:468].copy()
         history['cap'] = history['y'].max()
 
@@ -303,7 +306,7 @@ class TestProphet(TestCase):
         self.assertAlmostEqual(m, -0.08167497, places=4)
 
     def test_piecewise_linear(self):
-        model = Prophet()
+        model = Prophet(stan_backend=stan_backend)
 
         t = np.arange(11.)
         m = 0
@@ -322,7 +325,7 @@ class TestProphet(TestCase):
         self.assertEqual((y - y_true).sum(), 0.0)
 
     def test_piecewise_logistic(self):
-        model = Prophet()
+        model = Prophet(stan_backend=stan_backend)
 
         t = np.arange(11.)
         cap = np.ones(11) * 10
@@ -350,7 +353,7 @@ class TestProphet(TestCase):
             'lower_window': [-1],
             'upper_window': [0],
         })
-        model = Prophet(holidays=holidays)
+        model = Prophet(holidays=holidays, stan_backend=stan_backend)
         df = pd.DataFrame({
             'ds': pd.date_range('2016-12-20', '2016-12-31')
         })
@@ -367,7 +370,7 @@ class TestProphet(TestCase):
             'lower_window': [-1],
             'upper_window': [10],
         })
-        m = Prophet(holidays=holidays)
+        m = Prophet(holidays=holidays, stan_backend=stan_backend)
         feats, priors, names = m.make_holiday_features(df['ds'], m.holidays)
         # 12 columns generated even though only 8 overlap
         self.assertEqual(feats.shape, (df.shape[0], 12))
@@ -381,7 +384,7 @@ class TestProphet(TestCase):
             'upper_window': [0, 0],
             'prior_scale': [5., 5.],
         })
-        m = Prophet(holidays=holidays)
+        m = Prophet(holidays=holidays, stan_backend=stan_backend)
         feats, priors, names = m.make_holiday_features(df['ds'], m.holidays)
         self.assertEqual(priors, [5., 5.])
         self.assertEqual(names, ['xmas'])
@@ -394,7 +397,7 @@ class TestProphet(TestCase):
             'prior_scale': [8] * 2,
         })
         holidays2 = pd.concat((holidays, holidays2), sort=True)
-        m = Prophet(holidays=holidays2)
+        m = Prophet(holidays=holidays2, stan_backend=stan_backend)
         feats, priors, names = m.make_holiday_features(df['ds'], m.holidays)
         pn = zip(priors, [s.split('_delim_')[0] for s in feats.columns])
         for t in pn:
@@ -407,7 +410,7 @@ class TestProphet(TestCase):
         })
         holidays2 = pd.concat((holidays, holidays2), sort=True)
         feats, priors, names = Prophet(
-            holidays=holidays2, holidays_prior_scale=4
+            holidays=holidays2, holidays_prior_scale=4, stan_backend=stan_backend
         ).make_holiday_features(df['ds'], holidays2)
         self.assertEqual(set(priors), {4., 5.})
         # Check incompatible priors
@@ -419,7 +422,7 @@ class TestProphet(TestCase):
             'prior_scale': [5., 6.],
         })
         with self.assertRaises(ValueError):
-            Prophet(holidays=holidays).make_holiday_features(df['ds'], holidays)
+            Prophet(holidays=holidays, stan_backend=stan_backend).make_holiday_features(df['ds'], holidays)
 
     def test_fit_with_holidays(self):
         holidays = pd.DataFrame({
@@ -428,7 +431,7 @@ class TestProphet(TestCase):
             'lower_window': [0] * 2,
             'upper_window': [1] * 2,
         })
-        model = Prophet(holidays=holidays, uncertainty_samples=0)
+        model = Prophet(holidays=holidays, uncertainty_samples=0, stan_backend=stan_backend)
         model.fit(DATA).predict()
 
     def test_fit_predict_with_country_holidays(self):
@@ -439,26 +442,26 @@ class TestProphet(TestCase):
             'upper_window': [1] * 2,
         })
         # Test with holidays and country_holidays
-        model = Prophet(holidays=holidays, uncertainty_samples=0)
+        model = Prophet(holidays=holidays, uncertainty_samples=0, stan_backend=stan_backend)
         model.add_country_holidays(country_name='US')
         model.fit(DATA).predict()
         # There are training holidays missing in the test set
         train = DATA.head(154)
         future = DATA.tail(355)
-        model = Prophet(uncertainty_samples=0)
+        model = Prophet(uncertainty_samples=0, stan_backend=stan_backend)
         model.add_country_holidays(country_name='US')
         model.fit(train).predict(future)
         # There are test holidays missing in the training set
         train = DATA.tail(355)
         future = DATA2
-        model = Prophet(uncertainty_samples=0)
+        model = Prophet(uncertainty_samples=0, stan_backend=stan_backend)
         model.add_country_holidays(country_name='US')
         model.fit(train).predict(future)
 
     def test_make_future_dataframe(self):
         N = 468
         train = DATA.head(N // 2)
-        forecaster = Prophet()
+        forecaster = Prophet(stan_backend=stan_backend)
         forecaster.fit(train)
         future = forecaster.make_future_dataframe(periods=3, freq='D',
                                                   include_history=False)
@@ -478,7 +481,7 @@ class TestProphet(TestCase):
         # Should be enabled
         N = 15
         train = DATA.head(N)
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         self.assertEqual(m.weekly_seasonality, 'auto')
         m.fit(train)
         self.assertIn('weekly', m.seasonalities)
@@ -495,18 +498,18 @@ class TestProphet(TestCase):
         # Should be disabled due to too short history
         N = 9
         train = DATA.head(N)
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         m.fit(train)
         self.assertNotIn('weekly', m.seasonalities)
-        m = Prophet(weekly_seasonality=True)
+        m = Prophet(weekly_seasonality=True, stan_backend=stan_backend)
         m.fit(train)
         self.assertIn('weekly', m.seasonalities)
         # Should be False due to weekly spacing
         train = DATA.iloc[::7, :]
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         m.fit(train)
         self.assertNotIn('weekly', m.seasonalities)
-        m = Prophet(weekly_seasonality=2, seasonality_prior_scale=3.)
+        m = Prophet(weekly_seasonality=2, seasonality_prior_scale=3., stan_backend=stan_backend)
         m.fit(DATA)
         self.assertEqual(
             m.seasonalities['weekly'],
@@ -521,7 +524,7 @@ class TestProphet(TestCase):
 
     def test_auto_yearly_seasonality(self):
         # Should be enabled
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         self.assertEqual(m.yearly_seasonality, 'auto')
         m.fit(DATA)
         self.assertIn('yearly', m.seasonalities)
@@ -538,13 +541,13 @@ class TestProphet(TestCase):
         # Should be disabled due to too short history
         N = 240
         train = DATA.head(N)
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         m.fit(train)
         self.assertNotIn('yearly', m.seasonalities)
-        m = Prophet(yearly_seasonality=True)
+        m = Prophet(yearly_seasonality=True, stan_backend=stan_backend)
         m.fit(train)
         self.assertIn('yearly', m.seasonalities)
-        m = Prophet(yearly_seasonality=7, seasonality_prior_scale=3.)
+        m = Prophet(yearly_seasonality=7, seasonality_prior_scale=3., stan_backend=stan_backend)
         m.fit(DATA)
         self.assertEqual(
             m.seasonalities['yearly'],
@@ -559,7 +562,7 @@ class TestProphet(TestCase):
 
     def test_auto_daily_seasonality(self):
         # Should be enabled
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         self.assertEqual(m.daily_seasonality, 'auto')
         m.fit(DATA2)
         self.assertIn('daily', m.seasonalities)
@@ -576,13 +579,13 @@ class TestProphet(TestCase):
         # Should be disabled due to too short history
         N = 430
         train = DATA2.head(N)
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         m.fit(train)
         self.assertNotIn('daily', m.seasonalities)
-        m = Prophet(daily_seasonality=True)
+        m = Prophet(daily_seasonality=True, stan_backend=stan_backend)
         m.fit(train)
         self.assertIn('daily', m.seasonalities)
-        m = Prophet(daily_seasonality=7, seasonality_prior_scale=3.)
+        m = Prophet(daily_seasonality=7, seasonality_prior_scale=3., stan_backend=stan_backend)
         m.fit(DATA2)
         self.assertEqual(
             m.seasonalities['daily'],
@@ -594,7 +597,7 @@ class TestProphet(TestCase):
                 'condition_name': None
             },
         )
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         m.fit(DATA)
         self.assertNotIn('daily', m.seasonalities)
 
@@ -603,7 +606,7 @@ class TestProphet(TestCase):
             'ds': pd.to_datetime(['2017-01-02']),
             'holiday': ['special_day'],
         })
-        m = Prophet(holidays=holidays)
+        m = Prophet(holidays=holidays, stan_backend=stan_backend)
         m.fit(DATA2)
         fcst = m.predict()
         self.assertEqual(sum(fcst['special_day'] == 0), 575)
@@ -614,7 +617,7 @@ class TestProphet(TestCase):
             'holiday': ['special_day'],
             'prior_scale': [4.],
         })
-        m = Prophet(holidays=holidays)
+        m = Prophet(holidays=holidays, stan_backend=stan_backend)
         m.add_seasonality(name='monthly', period=30, fourier_order=5,
                           prior_scale=2.)
         self.assertEqual(
@@ -633,7 +636,7 @@ class TestProphet(TestCase):
             m.add_seasonality(name='trend', period=30, fourier_order=5)
         m.add_seasonality(name='weekly', period=30, fourier_order=5)
         # Test fourier order <= 0
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         with self.assertRaises(ValueError):
             m.add_seasonality(name='weekly', period=7, fourier_order=0)
         with self.assertRaises(ValueError):
@@ -642,6 +645,7 @@ class TestProphet(TestCase):
         m = Prophet(
             holidays=holidays, yearly_seasonality=False,
             seasonality_mode='multiplicative',
+            stan_backend=stan_backend
         )
         m.add_seasonality(name='monthly', period=30, fourier_order=5,
                           prior_scale=2., mode='additive')
@@ -667,7 +671,7 @@ class TestProphet(TestCase):
         self.assertEqual(prior_scales, true)
 
     def test_conditional_custom_seasonality(self):
-        m = Prophet(weekly_seasonality=False, yearly_seasonality=False)
+        m = Prophet(weekly_seasonality=False, yearly_seasonality=False, stan_backend=stan_backend)
         m.add_seasonality(name='conditional_weekly', period=7, fourier_order=3,
                           prior_scale=2., condition_name='is_conditional_week')
         m.add_seasonality(name='normal_monthly', period=30.5, fourier_order=5,
@@ -703,7 +707,7 @@ class TestProphet(TestCase):
                                        df['is_conditional_week'].values))
 
     def test_added_regressors(self):
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         m.add_regressor('binary_feature', prior_scale=0.2)
         m.add_regressor('numeric_feature', prior_scale=0.5)
         m.add_regressor(
@@ -800,16 +804,16 @@ class TestProphet(TestCase):
         )
         # Check works if constant extra regressor at 0
         df['constant_feature'] = 0
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         m.add_regressor('constant_feature')
         m.fit(df)
         self.assertEqual(m.extra_regressors['constant_feature']['std'], 1)
 
     def test_set_seasonality_mode(self):
         # Setting attribute
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         self.assertEqual(m.seasonality_mode, 'additive')
-        m = Prophet(seasonality_mode='multiplicative')
+        m = Prophet(seasonality_mode='multiplicative', stan_backend=stan_backend)
         self.assertEqual(m.seasonality_mode, 'multiplicative')
         with self.assertRaises(ValueError):
             Prophet(seasonality_mode='batman')
@@ -822,7 +826,7 @@ class TestProphet(TestCase):
             'lower_window': [-1],
             'upper_window': [0],
         })
-        m = Prophet(seasonality_mode='multiplicative', holidays=holidays)
+        m = Prophet(seasonality_mode='multiplicative', holidays=holidays, stan_backend=stan_backend)
         m.add_seasonality('monthly', period=30, mode='additive', fourier_order=3)
         m.add_regressor('binary_feature', mode='additive')
         m.add_regressor('numeric_feature')

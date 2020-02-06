@@ -4,10 +4,9 @@
 # LICENSE file in the root directory of this source tree.
 
 import os.path
-import pickle
 import platform
 import sys
-
+import os
 from pkg_resources import (
     normalize_path,
     working_set,
@@ -17,8 +16,8 @@ from pkg_resources import (
 from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
-from setuptools.command.test import test as test_command, NonDataProperty
-from fbprophet.models import PyStanBackend, CmdStanPyBackend
+from setuptools.command.test import test as test_command
+from fbprophet.backends import StanBackendEnum, get_backends_from_env
 
 PLATFORM = 'unix'
 if platform.platform().startswith('Win'):
@@ -29,8 +28,14 @@ MODEL_TARGET_DIR = os.path.join('fbprophet', 'stan_model')
 
 
 def build_models(target_dir):
-    CmdStanPyBackend.build_model(target_dir, MODEL_DIR)
-    PyStanBackend.build_model(target_dir, MODEL_DIR)
+    backends = get_backends_from_env()
+    for backend in backends:
+        if backend == StanBackendEnum.PYSTAN:
+            from fbprophet.backends.models import PyStanBackend
+            PyStanBackend.build_model(target_dir, MODEL_DIR)
+        elif backend == StanBackendEnum.CMDSTANPY:
+            from fbprophet.backends.models import CmdStanPyBackend
+            CmdStanPyBackend.build_model(target_dir, MODEL_DIR)
 
 
 class BuildPyCommand(build_py):
@@ -137,7 +142,7 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
-      ],
+    ],
     long_description="""
 Implements a procedure for forecasting time series data based on an additive model where non-linear trends are fit with yearly, weekly, and daily seasonality, plus holiday effects. It works best with time series that have strong seasonal effects and several seasons of historical data. Prophet is robust to missing data and shifts in the trend, and typically handles outliers well.
 """

@@ -17,12 +17,14 @@ import pandas as pd
 
 from fbprophet import Prophet
 from fbprophet import diagnostics
+from fbprophet.backends import get_backends_from_env
 
 DATA_all = pd.read_csv(
     os.path.join(os.path.dirname(__file__), 'data.csv'), parse_dates=['ds']
 )
 DATA = DATA_all.head(100)
 
+stan_backend = get_backends_from_env()[0]
 
 class TestDiagnostics(TestCase):
 
@@ -32,7 +34,7 @@ class TestDiagnostics(TestCase):
         self.__df = DATA
 
     def test_cross_validation(self):
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         m.fit(self.__df)
         # Calculate the number of cutoff points(k)
         horizon = pd.Timedelta('4 days')
@@ -61,7 +63,7 @@ class TestDiagnostics(TestCase):
     def test_cross_validation_logistic(self):
         df = self.__df.copy()
         df['cap'] = 40
-        m = Prophet(growth='logistic').fit(df)
+        m = Prophet(growth='logistic', stan_backend=stan_backend).fit(df)
         df_cv = diagnostics.cross_validation(
             m, horizon='1 days', period='1 days', initial='140 days')
         self.assertEqual(len(np.unique(df_cv['cutoff'])), 2)
@@ -74,7 +76,7 @@ class TestDiagnostics(TestCase):
         df = self.__df.copy()
         df['extra'] = range(df.shape[0])
         df['is_conditional_week'] = np.arange(df.shape[0]) // 7 % 2
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
         m.add_seasonality(name='conditional_weekly', period=7, fourier_order=3,
                           prior_scale=2., condition_name='is_conditional_week')
@@ -93,7 +95,7 @@ class TestDiagnostics(TestCase):
             np.sum((df_merged['y_x'] - df_merged['y_y']) ** 2), 0.0)
 
     def test_cross_validation_default_value_check(self):
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         m.fit(self.__df)
         # Default value of initial should be equal to 3 * horizon
         df_cv1 = diagnostics.cross_validation(
@@ -108,7 +110,7 @@ class TestDiagnostics(TestCase):
     def test_cross_validation_uncertainty_disabled(self):
         df = self.__df.copy()
         for uncertainty in [0, False]:
-            m = Prophet(uncertainty_samples=uncertainty)
+            m = Prophet(uncertainty_samples=uncertainty, stan_backend=stan_backend)
             m.fit(df)
             df_cv = diagnostics.cross_validation(
                 m, horizon='4 days', period='4 days', initial='115 days')
@@ -116,7 +118,7 @@ class TestDiagnostics(TestCase):
             self.assertTrue(all(col in expected_cols for col in df_cv.columns.tolist()))
 
     def test_performance_metrics(self):
-        m = Prophet()
+        m = Prophet(stan_backend=stan_backend)
         m.fit(self.__df)
         df_cv = diagnostics.cross_validation(
             m, horizon='4 days', period='10 days', initial='90 days')
@@ -234,7 +236,7 @@ class TestDiagnostics(TestCase):
         )
         # Values should be copied correctly
         for product in products:
-            m1 = Prophet(*product)
+            m1 = Prophet(stan_backend=stan_backend, *product)
             m1.country_holidays = 'US'
             m1.history = m1.setup_dataframe(
                 df.copy(), initialize_scales=True)
@@ -271,7 +273,7 @@ class TestDiagnostics(TestCase):
         # Check for cutoff and custom seasonality and extra regressors
         changepoints = pd.date_range('2012-06-15', '2012-09-15')
         cutoff = pd.Timestamp('2012-07-25')
-        m1 = Prophet(changepoints=changepoints)
+        m1 = Prophet(changepoints=changepoints, stan_backend=stan_backend)
         m1.add_seasonality('custom', 10, 5)
         m1.add_regressor('binary_feature')
         m1.fit(df)

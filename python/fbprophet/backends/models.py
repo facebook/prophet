@@ -12,12 +12,18 @@ import pickle
 import pkg_resources
 import numpy as np
 import os
+from . import StanBackendEnum
 
 
 class IStanBackend(ABC):
     def __init__(self, logger):
         self.model = self.load_model()
         self.logger = logger
+
+    @staticmethod
+    @abstractmethod
+    def get_type() -> StanBackendEnum:
+        pass
 
     @abstractmethod
     def load_model(self):
@@ -38,6 +44,10 @@ class IStanBackend(ABC):
 
 
 class CmdStanPyBackend(IStanBackend):
+
+    @staticmethod
+    def get_type() -> StanBackendEnum:
+        return StanBackendEnum.CMDSTANPY
 
     @staticmethod
     def build_model(target_dir, model_dir):
@@ -184,6 +194,10 @@ class CmdStanPyBackend(IStanBackend):
 
 
 class PyStanBackend(IStanBackend):
+
+    @staticmethod
+    def get_type() -> StanBackendEnum:
+        return StanBackendEnum.CMDSTANPY
 
     @staticmethod
     def build_model(target_dir, model_dir):
