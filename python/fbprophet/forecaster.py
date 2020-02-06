@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 from fbprophet.make_holidays import get_holiday_names, make_holidays_df
-from fbprophet.backends import StanBackendEnum
+from fbprophet.models import StanBackendEnum
 from fbprophet.plot import (plot, plot_components)
 
 logger = logging.getLogger('fbprophet')
@@ -74,8 +74,8 @@ class Prophet(object):
         uncertainty intervals. Settings this value to 0 or False will disable
         uncertainty estimation and speed up the calculation.
         uncertainty intervals.
-    stan_backend: StanBackendEnum, one of the items from the enum, default:
-        StanBackendEnum.PYSTAN
+    stan_backend: str as defined in StanBackendEnum default: None - will try to
+        iterate over all available backends and find the working one
     """
 
     def __init__(
@@ -95,7 +95,7 @@ class Prophet(object):
             mcmc_samples=0,
             interval_width=0.80,
             uncertainty_samples=1000,
-            stan_backend=StanBackendEnum.PYSTAN
+            stan_backend=None
     ):
         self.growth = growth
 
@@ -140,18 +140,20 @@ class Prophet(object):
         self.train_holiday_names = None
         self.fit_kwargs = {}
         self.validate_inputs()
+        self._load_stan_backend(stan_backend)
 
-        logger.info("Stan backend: {0}".format(stan_backend))
-        if stan_backend == StanBackendEnum.PYSTAN:
-            from fbprophet.backends.models import PyStanBackend
-            self.stan_backend = PyStanBackend(logger)
-        elif stan_backend == StanBackendEnum.CMDSTANPY:
-            from fbprophet.backends.models import CmdStanPyBackend
-            self.stan_backend = CmdStanPyBackend(logger)
+    def _load_stan_backend(self, stan_backend):
+        if stan_backend is None:
+            for i in StanBackendEnum:
+                try:
+                    logger.debug("Trying to load backend: %s", i.name)
+                    return self._load_stan_backend(i.name)
+                except Exception as e:
+                    logger.info("Unable to load backend %s (%s), trying the next one", i.name, e)
         else:
-            raise ValueError("Unknown stan backend: {}".format(stan_backend))
+            self.stan_backend = StanBackendEnum.get_backend_class(stan_backend)(logger)
 
-
+        logger.info("Loaded stan backend: %s", self.stan_backend.get_type())
 
     def validate_inputs(self):
         """Validates the inputs to Prophet."""

@@ -17,7 +17,8 @@ from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
 from setuptools.command.test import test as test_command
-from fbprophet.backends import StanBackendEnum, get_backends_from_env
+from fbprophet.models import StanBackendEnum
+from typing import List
 
 PLATFORM = 'unix'
 if platform.platform().startswith('Win'):
@@ -27,15 +28,14 @@ MODEL_DIR = os.path.join('stan', PLATFORM)
 MODEL_TARGET_DIR = os.path.join('fbprophet', 'stan_model')
 
 
+def get_backends_from_env() -> List[str]:
+    import os
+    return os.environ.get("STAN_BACKEND", StanBackendEnum.PYSTAN.name).split(",")
+
+
 def build_models(target_dir):
-    backends = get_backends_from_env()
-    for backend in backends:
-        if backend == StanBackendEnum.PYSTAN:
-            from fbprophet.backends.models import PyStanBackend
-            PyStanBackend.build_model(target_dir, MODEL_DIR)
-        elif backend == StanBackendEnum.CMDSTANPY:
-            from fbprophet.backends.models import CmdStanPyBackend
-            CmdStanPyBackend.build_model(target_dir, MODEL_DIR)
+    for backend in get_backends_from_env():
+        StanBackendEnum.get_backend_class(backend).build_model(target_dir, MODEL_DIR)
 
 
 class BuildPyCommand(build_py):

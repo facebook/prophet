@@ -8,11 +8,11 @@ from __future__ import absolute_import, division, print_function
 from abc import abstractmethod, ABC
 from typing import Tuple
 from collections import OrderedDict
+from enum import Enum
 import pickle
 import pkg_resources
 import numpy as np
 import os
-from . import StanBackendEnum
 
 
 class IStanBackend(ABC):
@@ -22,7 +22,7 @@ class IStanBackend(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_type() -> StanBackendEnum:
+    def get_type():
         pass
 
     @abstractmethod
@@ -46,8 +46,8 @@ class IStanBackend(ABC):
 class CmdStanPyBackend(IStanBackend):
 
     @staticmethod
-    def get_type() -> StanBackendEnum:
-        return StanBackendEnum.CMDSTANPY
+    def get_type():
+        return StanBackendEnum.CMDSTANPY.name
 
     @staticmethod
     def build_model(target_dir, model_dir):
@@ -196,8 +196,8 @@ class CmdStanPyBackend(IStanBackend):
 class PyStanBackend(IStanBackend):
 
     @staticmethod
-    def get_type() -> StanBackendEnum:
-        return StanBackendEnum.PYSTAN
+    def get_type():
+        return StanBackendEnum.PYSTAN.name
 
     @staticmethod
     def build_model(target_dir, model_dir):
@@ -259,3 +259,15 @@ class PyStanBackend(IStanBackend):
         )
         with open(model_file, 'rb') as f:
             return pickle.load(f)
+
+
+class StanBackendEnum(Enum):
+    PYSTAN = PyStanBackend
+    CMDSTANPY = CmdStanPyBackend
+
+    @staticmethod
+    def get_backend_class(name: str) -> IStanBackend:
+        try:
+            return StanBackendEnum[name].value
+        except KeyError:
+            raise ValueError("Unknown stan backend: {}".format(name))
