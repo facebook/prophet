@@ -141,6 +141,7 @@ class Prophet(object):
         self.fit_kwargs = {}
         self.validate_inputs()
 
+        logger.info("Stan backend: {0}".format(stan_backend))
         if stan_backend == StanBackendEnum.PYSTAN:
             from fbprophet.backends.models import PyStanBackend
             self.stan_backend = PyStanBackend(logger)

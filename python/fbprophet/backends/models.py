@@ -197,7 +197,7 @@ class PyStanBackend(IStanBackend):
 
     @staticmethod
     def get_type() -> StanBackendEnum:
-        return StanBackendEnum.CMDSTANPY
+        return StanBackendEnum.PYSTAN
 
     @staticmethod
     def build_model(target_dir, model_dir):
