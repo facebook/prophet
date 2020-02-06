@@ -25,8 +25,8 @@ df_for_plotting <- function(m, fcst) {
 #' @param x Prophet object.
 #' @param fcst Data frame returned by predict(m, df).
 #' @param uncertainty Optional boolean indicating if the uncertainty interval for yhat
-#'  should be plotted, which will only be done if x$uncertainty.samples > 0. 
-#'  Must be present in fcst as yhat_lower and yhat_upper. 
+#'  should be plotted, which will only be done if x$uncertainty.samples > 0.
+#'  Must be present in fcst as yhat_lower and yhat_upper.
 #' @param plot_cap Boolean indicating if the capacity should be shown in the
 #'  figure, if available.
 #' @param xlabel Optional label for x-axis
@@ -82,7 +82,7 @@ plot.prophet <- function(x, fcst, uncertainty = TRUE, plot_cap = TRUE,
 #' @param m Prophet object.
 #' @param fcst Data frame returned by predict(m, df).
 #' @param uncertainty Optional boolean indicating if the uncertainty interval should be
-#'  plotted for the trend, from fcst columns trend_lower and trend_upper.This will 
+#'  plotted for the trend, from fcst columns trend_lower and trend_upper.This will
 #'  only be done if m$uncertainty.samples > 0.
 #' @param plot_cap Boolean indicating if the capacity should be shown in the
 #'  figure, if available.
@@ -124,10 +124,10 @@ prophet_plot_components <- function(
     if (!(name %in% c('weekly', 'yearly')) &&
         (name %in% colnames(fcst))) {
       if (m$seasonalities[[name]]$period == 7) {
-        panels[[length(panels) + 1]] <- plot_weekly(m, uncertainty, 
+        panels[[length(panels) + 1]] <- plot_weekly(m, uncertainty,
                                                     weekly_start, name)
       } else if (m$seasonalities[[name]]$period == 365.25) {
-        panels[[length(panels) + 1]] <- plot_yearly(m, uncertainty, 
+        panels[[length(panels) + 1]] <- plot_yearly(m, uncertainty,
                                                     yearly_start, name)
       } else {
         panels[[length(panels) + 1]] <- plot_seasonality(m, name, uncertainty)
@@ -167,7 +167,7 @@ prophet_plot_components <- function(
 #' @param fcst Dataframe output of `predict`.
 #' @param name String name of the component to plot (column of fcst).
 #' @param uncertainty Optional boolean to plot uncertainty intervals, which will 
-#' only be done if m$uncertainty.samples > 0.
+#'  only be done if m$uncertainty.samples > 0.
 #' @param plot_cap Boolean indicating if the capacity should be shown in the
 #'  figure, if available.
 #'
@@ -233,17 +233,17 @@ seasonality_plot_df <- function(m, ds) {
 #'
 #' @param m Prophet model object
 #' @param uncertainty Optional boolean to plot uncertainty intervals, which will
-#' only be done if m$uncertainty.samples > 0.
+#'  only be done if m$uncertainty.samples > 0.
 #' @param weekly_start Integer specifying the start day of the weekly
 #'  seasonality plot. 0 (default) starts the week on Sunday. 1 shifts by 1 day
 #'  to Monday, and so on.
-#' @param name Name of seasonality component if previously changed 
+#' @param name Name of seasonality component if previously changed
 #'  from default 'weekly'.
 #'
 #' @return A ggplot2 plot.
 #'
 #' @keywords internal
-plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0, 
+plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0,
                         name = 'weekly') {
   # Compute weekly seasonality for a Sun-Sat sequence of dates.
   days <- seq(set_date('2017-01-01'), by='d', length.out=7) + as.difftime(
@@ -276,17 +276,17 @@ plot_weekly <- function(m, uncertainty = TRUE, weekly_start = 0,
 #'
 #' @param m Prophet model object.
 #' @param uncertainty Optional boolean to plot uncertainty intervals, which
-#' will only be done if m$uncertainty.samples > 0.
+#'  will only be done if m$uncertainty.samples > 0.
 #' @param yearly_start Integer specifying the start day of the yearly
 #'  seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts by 1 day
 #'  to Jan 2, and so on.
-#' @param name Name of seasonality component if previously changed 
+#' @param name Name of seasonality component if previously changed
 #'  from default 'yearly'.
 #'
 #' @return A ggplot2 plot.
 #'
 #' @keywords internal
-plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0, 
+plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0,
                         name = 'yearly') {
   # Compute yearly seasonality for a Jan 1 - Dec 31 sequence of dates.
   days <- seq(set_date('2017-01-01'), by='d', length.out=365) + as.difftime(
@@ -321,7 +321,7 @@ plot_yearly <- function(m, uncertainty = TRUE, yearly_start = 0,
 #' @param m Prophet model object.
 #' @param name String name of the seasonality.
 #' @param uncertainty Optional boolean to plot uncertainty intervals, which
-#' will only be done if m$uncertainty.samples > 0.
+#'  will only be done if m$uncertainty.samples > 0.
 #'
 #' @return A ggplot2 plot.
 #'
@@ -403,9 +403,9 @@ add_changepoints_to_plot <- function(m, threshold = 0.01, cp_color = "red",
 #' @param x Prophet object.
 #' @param fcst Data frame returned by predict(m, df).
 #' @param uncertainty Optional boolean indicating if the uncertainty interval for yhat
-#'  should be plotted, which will only be done if x$uncertainty.samples > 0. Must be 
+#'  should be plotted, which will only be done if x$uncertainty.samples > 0. Must be
 #'  present in fcst as yhat_lower and yhat_upper.
-#' @param ... additional arguments
+#' @param ... additional arguments passed to dygraph::dygraph
 #' @importFrom dplyr "%>%"
 #' @return A dygraph plot.
 #'
@@ -421,14 +421,14 @@ add_changepoints_to_plot <- function(m, threshold = 0.01, cp_color = "red",
 #' }
 #'
 #' @export
-dyplot.prophet <- function(x, fcst, uncertainty=TRUE, 
-                           ...) 
+dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
+                           ...)
 {
   forecast.label='Predicted'
   actual.label='Actual'
   # create data.frame for plotting
   df <- df_for_plotting(x, fcst)
-  
+
   # build variables to include, or not, the uncertainty data
   if(uncertainty && x$uncertainty.samples && exists("yhat_lower", where = df))
   {
@@ -443,13 +443,13 @@ dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
   dfTS <- xts::xts(df %>% dplyr::select_(.dots=colsToKeep), order.by = df$ds)
 
   # base plot
-  dyBase <- dygraphs::dygraph(dfTS)
-  
+  dyBase <- dygraphs::dygraph(dfTS, ...)
+
   presAnnotation <- function(dygraph, x, text) {
     dygraph %>%
       dygraphs::dyAnnotation(x, text, text, attachAtBottom = TRUE)
   }
-  
+
   dyBase <- dyBase %>%
     # plot actual values
     dygraphs::dySeries(
@@ -458,7 +458,7 @@ dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
     # plot forecast and ribbon
     dygraphs::dySeries(forecastCols, label=forecast.label, color='blue') %>%
     # allow zooming
-    dygraphs::dyRangeSelector() %>% 
+    dygraphs::dyRangeSelector() %>%
     # make unzoom button
     dygraphs::dyUnzoom()
   if (!is.null(x$holidays)) {

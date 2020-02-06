@@ -111,11 +111,13 @@ class TestDiagnostics(TestCase):
         df = self.__df.copy()
         for uncertainty in [0, False]:
             m = Prophet(uncertainty_samples=uncertainty, stan_backend=stan_backend)
-            m.fit(df)
+            m.fit(df, algorithm='Newton')
             df_cv = diagnostics.cross_validation(
                 m, horizon='4 days', period='4 days', initial='115 days')
             expected_cols = ['ds', 'yhat', 'y', 'cutoff']
             self.assertTrue(all(col in expected_cols for col in df_cv.columns.tolist()))
+            df_p = diagnostics.performance_metrics(df_cv)
+            self.assertTrue('coverage' not in df_p.columns)
 
     def test_performance_metrics(self):
         m = Prophet(stan_backend=stan_backend)
@@ -164,6 +166,11 @@ class TestDiagnostics(TestCase):
             df_cv, metrics=['mape'],
         )
         self.assertIsNone(df_horizon)
+        # List of metrics containing non-valid metrics
+        with self.assertRaises(ValueError):
+            diagnostics.performance_metrics(
+                df_cv, metrics=['mse', 'error_metric'],
+            )
 
     def test_rolling_mean(self):
         x = np.arange(10)

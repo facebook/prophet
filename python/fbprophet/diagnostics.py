@@ -117,7 +117,7 @@ def cross_validation(model, horizon, period=None, initial=None):
                 'Less than two datapoints before cutoff. '
                 'Increase initial window.'
             )
-        m.fit(history_c)
+        m.fit(history_c, **model.fit_kwargs)
         # Calculate yhat
         index_predicted = (df['ds'] > cutoff) & (df['ds'] <= cutoff + horizon)
         # Get the columns for the future dataframe

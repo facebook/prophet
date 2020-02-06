@@ -8,7 +8,8 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 from collections import OrderedDict, defaultdict
-from datetime import timedelta
+from copy import deepcopy
+from datetime import timedelta, datetime
 
 import numpy as np
 import pandas as pd
@@ -137,6 +138,7 @@ class Prophet(object):
         self.train_component_cols = None
         self.component_modes = None
         self.train_holiday_names = None
+        self.fit_kwargs = {}
         self.validate_inputs()
 
         if stan_backend == StanBackendEnum.PYSTAN:
@@ -426,7 +428,7 @@ class Prophet(object):
         """
         # convert to days since epoch
         t = np.array(
-            (dates - pd.datetime(1970, 1, 1))
+            (dates - datetime(1970, 1, 1))
                 .dt.total_seconds()
                 .astype(np.float)
         ) / (3600 * 24.)
@@ -1091,6 +1093,7 @@ class Prophet(object):
             self.make_all_seasonality_features(history))
         self.train_component_cols = component_cols
         self.component_modes = modes
+        self.fit_kwargs = deepcopy(kwargs)
 
         self.set_changepoints()
 
@@ -1304,10 +1307,10 @@ class Prophet(object):
                 comp *= self.y_scale
             data[component] = np.nanmean(comp, axis=1)
             if self.uncertainty_samples:
-                data[component + '_lower'] = np.nanpercentile(
+                data[component + '_lower'] = self.percentile(
                     comp, lower_p, axis=1,
                 )
-                data[component + '_upper'] = np.nanpercentile(
+                data[component + '_upper'] = self.percentile(
                     comp, upper_p, axis=1,
                 )
         return pd.DataFrame(data)
@@ -1385,9 +1388,9 @@ class Prophet(object):
 
         series = {}
         for key in ['yhat', 'trend']:
-            series['{}_lower'.format(key)] = np.nanpercentile(
+            series['{}_lower'.format(key)] = self.percentile(
                 sim_values[key], lower_p, axis=1)
-            series['{}_upper'.format(key)] = np.nanpercentile(
+            series['{}_upper'.format(key)] = self.percentile(
                 sim_values[key], upper_p, axis=1)
 
         return pd.DataFrame(series)
@@ -1472,6 +1475,17 @@ class Prophet(object):
                                             changepoint_ts)
 
         return trend * self.y_scale + df['floor']
+
+    def percentile(self, a, *args, **kwargs):
+        """
+        We rely on np.nanpercentile in the rare instances where there
+        are a small number of bad samples with MCMC that contain NaNs.
+        However, since np.nanpercentile is far slower than np.percentile,
+        we only fall back to it if the array contains NaNs. See
+        https://github.com/facebook/prophet/issues/1310 for more details.
+        """
+        fn =  np.nanpercentile if np.isnan(a).any() else np.percentile
+        return fn(a, *args, **kwargs)
 
     def make_future_dataframe(self, periods, freq='D', include_history=True):
         """Simulate the trend using the extrapolated generative model.

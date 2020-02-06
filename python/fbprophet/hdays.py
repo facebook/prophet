@@ -12,6 +12,7 @@ from datetime import date, timedelta
 
 from convertdate.islamic import from_gregorian, to_gregorian
 from lunarcalendar import Lunar, Converter
+from lunarcalendar.converter import DateNotExist
 
 from holidays import WEEKEND, HolidayBase
 from dateutil.easter import easter
@@ -604,7 +605,7 @@ class Vietnam(HolidayBase):
         for offset in range(-1, 2, 1):
             try:
                 ds = Converter.Lunar2Solar(Lunar(year - 1 + offset, 12, 30)).to_date()
-            except ValueError:
+            except DateNotExist:
                 ds = Converter.Lunar2Solar(Lunar(year - 1 + offset, 12, 29)).to_date()
             if ds.year == year:
                 self[ds] = name

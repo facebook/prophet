@@ -33,8 +33,13 @@ test_that("fit_predict_no_changepoints", {
   expect_warning({
     # warning from prophet(), error from predict()
     m <- prophet(train, n.changepoints = 0)
-    expect_error(predict(m, future), NA)
   })
+  fcst <- predict(m, future)
+
+  expect_warning({
+    m <- prophet(train, n.changepoints = 0, mcmc.samples = 100)
+  })
+  fcst <- predict(m, future)
 })
 
 test_that("fit_predict_changepoint_not_in_history", {
@@ -71,6 +76,16 @@ test_that("fit_predict_constant_history", {
   m <- prophet(train2)
   fcst <- predict(m, future)
   expect_equal(tail(fcst$yhat, 1), 0)
+})
+
+test_that("fit_predict_uncertainty_disabled", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  for (uncertainty in c(0, FALSE)) {
+    m <- prophet(train, uncertainty.samples = uncertainty)
+    fcst <- predict(m, future)
+    expected.cols <- c('ds', 'trend', 'additive_terms', 'weekly', 'multiplicative_terms', 'yhat')
+    expect_equal(expected.cols, colnames(fcst))
+  }
 })
 
 test_that("setup_dataframe", {
@@ -114,6 +129,7 @@ test_that("logistic_floor", {
   expect_true(m$logistic.floor)
   expect_true('floor' %in% colnames(m$history))
   expect_equal(m$history$y_scaled[1], 1., tolerance = 1e-6)
+  expect_equal(m$fit.kwargs, list(algorithm = 'Newton'))
   fcst1 <- predict(m, future1)
 
   m2 <- prophet(growth = 'logistic')

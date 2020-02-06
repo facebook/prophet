@@ -26,7 +26,7 @@ test_that("cross_validation", {
     m, horizon = 4, units = "days", period = 10, initial = 115)
   expect_equal(length(unique(df.cv$cutoff)), 3)
   expect_equal(max(df.cv$ds - df.cv$cutoff), horizon)
-  expect_true(min(df.cv$cutoff) >= ts + initial)
+  expect_true(as.Date(min(df.cv$cutoff)) >= ts + initial)
   dc <- diff(df.cv$cutoff)
   dc <- min(dc[dc > 0])
   expect_true(dc >= period)
@@ -90,6 +90,20 @@ test_that("cross_validation_default_value_check", {
   expect_equal(sum(dplyr::select(df.cv1 - df.cv2, y, yhat)), 0)
 })
 
+test_that("cross_validation_uncertainty_disabled", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  for (uncertainty in c(0, FALSE)) {
+    m <- prophet(uncertainty.samples = uncertainty)
+    m <- fit.prophet(m = m, df = DATA, algorithm = "Newton")
+    df.cv <- cross_validation(
+      m, horizon = 4, units = "days", period = 4, initial = 115)
+    expected.cols <- c('y', 'ds', 'yhat', 'cutoff')
+    expect_equal(expected.cols, colnames(df.cv))
+    df.p <- performance_metrics(df.cv)
+    expect_false('coverage' %in% colnames(df.p))
+  }
+})
+
 test_that("performance_metrics", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   m <- prophet(DATA)
@@ -131,7 +145,7 @@ test_that("performance_metrics", {
   expect_null(df_horizon)
   # List of metrics containing non valid metrics
   expect_error(
-     performance_metrics(df, metrics = c('mse', 'error_metric')),
+     performance_metrics(df_cv, metrics = c('mse', 'error_metric')),
      'Valid values for metrics are: mse, rmse, mae, mape, coverage'
   )
 })

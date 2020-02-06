@@ -134,7 +134,8 @@ prophet <- function(df = NULL,
     history.dates = NULL,
     train.holiday.names = NULL,
     train.component.cols = NULL,
-    component.modes = NULL
+    component.modes = NULL,
+    fit.kwargs = list()
   )
   m <- validate_inputs(m)
   class(m) <- append("prophet", class(m))
@@ -343,9 +344,9 @@ time_diff <- function(ds1, ds2, units = "days") {
 setup_dataframe <- function(m, df, initialize_scales = FALSE) {
   if (exists('y', where=df)) {
     df$y <- as.numeric(df$y)
-  }
-  if (any(is.infinite(df$y))) {
-    stop("Found infinity in column y.")
+    if (any(is.infinite(df$y))) {
+      stop("Found infinity in column y.")
+    }
   }
   df$ds <- set_date(df$ds)
   if (anyNA(df$ds)) {
@@ -1208,6 +1209,7 @@ fit.prophet <- function(m, df, ...) {
   component.cols <- out2$component.cols
   m$train.component.cols <- component.cols
   m$component.modes <- out2$modes
+  m$fit.kwargs <- list(...)
 
   m <- set_changepoints(m)
 

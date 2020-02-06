@@ -33,7 +33,7 @@ except ImportError:
 
 try:
     import plotly.graph_objs as go
-    from plotly import tools as plotly_tools
+    from plotly.subplots import make_subplots
 except ImportError:
     logger.error('Importing plotly failed. Interactive plots will not work.')
 
@@ -724,7 +724,7 @@ def plot_components_plotly(
         components[seasonality] = get_seasonality_plotly_props(m, seasonality)
 
     # Create Plotly subplot figure and add the components to it
-    fig = plotly_tools.make_subplots(rows=len(components), cols=1, print_grid=False)
+    fig = make_subplots(rows=len(components), cols=1, print_grid=False)
     fig['layout'].update(go.Layout(
         showlegend=False,
         width=figsize[0],
