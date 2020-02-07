@@ -1,7 +1,6 @@
 dist: xenial
 language: python
 python:
-  - "2.7"
   - "3.7"
 
 install:
@@ -10,3 +9,8 @@ install:
 
 script:
   - cd python && python setup.py develop test
+  - python setup.py clean
+  - wget https://github.com/stan-dev/cmdstan/releases/download/v2.22.1/cmdstan-2.22.1.tar.gz -O /tmp/cmdstan.tar.gz > /dev/null
+  - tar -xvf /tmp/cmdstan.tar.gz -C /tmp > /dev/null
+  - make -C /tmp/cmdstan-2.22.1/ build > /dev/null
+  - CMDSTAN=/tmp/cmdstan-2.22.1 STAN_BACKEND=CMDSTANPY python setup.py develop test

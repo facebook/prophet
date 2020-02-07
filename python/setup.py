@@ -4,10 +4,9 @@
 # LICENSE file in the root directory of this source tree.
 
 import os.path
-import pickle
 import platform
 import sys
-
+import os
 from pkg_resources import (
     normalize_path,
     working_set,
@@ -18,7 +17,8 @@ from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
 from setuptools.command.test import test as test_command
-
+from fbprophet.models import StanBackendEnum
+from typing import List
 
 PLATFORM = 'unix'
 if platform.platform().startswith('Win'):
@@ -28,15 +28,14 @@ MODEL_DIR = os.path.join('stan', PLATFORM)
 MODEL_TARGET_DIR = os.path.join('fbprophet', 'stan_model')
 
 
-def build_stan_model(target_dir, model_dir=MODEL_DIR):
-    from pystan import StanModel
-    model_name = 'prophet.stan'
-    target_name = 'prophet_model.pkl'
-    with open(os.path.join(model_dir, model_name)) as f:
-        model_code = f.read()
-    sm = StanModel(model_code=model_code)
-    with open(os.path.join(target_dir, target_name), 'wb') as f:
-        pickle.dump(sm, f, protocol=pickle.HIGHEST_PROTOCOL)
+def get_backends_from_env() -> List[str]:
+    import os
+    return os.environ.get("STAN_BACKEND", StanBackendEnum.PYSTAN.name).split(",")
+
+
+def build_models(target_dir):
+    for backend in get_backends_from_env():
+        StanBackendEnum.get_backend_class(backend).build_model(target_dir, MODEL_DIR)
 
 
 class BuildPyCommand(build_py):
@@ -46,7 +45,7 @@ class BuildPyCommand(build_py):
         if not self.dry_run:
             target_dir = os.path.join(self.build_lib, MODEL_TARGET_DIR)
             self.mkpath(target_dir)
-            build_stan_model(target_dir)
+            build_models(target_dir)
 
         build_py.run(self)
 
@@ -58,12 +57,29 @@ class DevelopCommand(develop):
         if not self.dry_run:
             target_dir = os.path.join(self.setup_path, MODEL_TARGET_DIR)
             self.mkpath(target_dir)
-            build_stan_model(target_dir)
+            build_models(target_dir)
 
         develop.run(self)
 
 
 class TestCommand(test_command):
+    user_options = [
+        ('test-module=', 'm', "Run 'test_suite' in specified module"),
+        ('test-suite=', 's',
+         "Run single test, case or suite (e.g. 'module.test_suite')"),
+        ('test-runner=', 'r', "Test runner to use"),
+        ('test-slow', 'w', "Test slow suites (default off)"),
+    ]
+
+    def initialize_options(self):
+        super(TestCommand, self).initialize_options()
+        self.test_slow = False
+
+    def finalize_options(self):
+        super(TestCommand, self).finalize_options()
+        if self.test_slow is None:
+            self.test_slow = getattr(self.distribution, 'test_slow', False)
+
     """We must run tests on the build directory, not source."""
 
     def with_project_on_sys_path(self, func):
@@ -97,6 +113,7 @@ class TestCommand(test_command):
             sys.modules.update(old_modules)
             working_set.__init__()
 
+
 with open('requirements.txt', 'r') as f:
     install_requires = f.read().splitlines()
 
@@ -125,7 +142,7 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
-      ],
+    ],
     long_description="""
 Implements a procedure for forecasting time series data based on an additive model where non-linear trends are fit with yearly, weekly, and daily seasonality, plus holiday effects. It works best with time series that have strong seasonal effects and several seasons of historical data. Prophet is robust to missing data and shifts in the trend, and typically handles outliers well.
 """

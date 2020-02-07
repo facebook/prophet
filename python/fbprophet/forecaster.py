@@ -13,14 +13,10 @@ from datetime import timedelta, datetime
 
 import numpy as np
 import pandas as pd
-import pystan  # noqa F401
 
-from fbprophet.diagnostics import prophet_copy
 from fbprophet.make_holidays import get_holiday_names, make_holidays_df
-from fbprophet.models import prophet_stan_model
-from fbprophet.plot import (plot, plot_components, plot_forecast_component,
-                            plot_seasonality, plot_weekly, plot_yearly,
-                            seasonality_plot_df)
+from fbprophet.models import StanBackendEnum
+from fbprophet.plot import (plot, plot_components)
 
 logger = logging.getLogger('fbprophet')
 logger.addHandler(logging.NullHandler())
@@ -77,6 +73,9 @@ class Prophet(object):
     uncertainty_samples: Number of simulated draws used to estimate
         uncertainty intervals. Settings this value to 0 or False will disable
         uncertainty estimation and speed up the calculation.
+        uncertainty intervals.
+    stan_backend: str as defined in StanBackendEnum default: None - will try to
+        iterate over all available backends and find the working one
     """
 
     def __init__(
@@ -96,6 +95,7 @@ class Prophet(object):
             mcmc_samples=0,
             interval_width=0.80,
             uncertainty_samples=1000,
+            stan_backend=None
     ):
         self.growth = growth
 
@@ -140,6 +140,20 @@ class Prophet(object):
         self.train_holiday_names = None
         self.fit_kwargs = {}
         self.validate_inputs()
+        self._load_stan_backend(stan_backend)
+
+    def _load_stan_backend(self, stan_backend):
+        if stan_backend is None:
+            for i in StanBackendEnum:
+                try:
+                    logger.debug("Trying to load backend: %s", i.name)
+                    return self._load_stan_backend(i.name)
+                except Exception as e:
+                    logger.info("Unable to load backend %s (%s), trying the next one", i.name, e)
+        else:
+            self.stan_backend = StanBackendEnum.get_backend_class(stan_backend)(logger)
+
+        logger.info("Loaded stan backend: %s", self.stan_backend.get_type())
 
     def validate_inputs(self):
         """Validates the inputs to Prophet."""
@@ -476,7 +490,7 @@ class Prophet(object):
             all_holidays = pd.concat((all_holidays, country_holidays_df),
                                      sort=False)
             all_holidays.reset_index(drop=True, inplace=True)
-        # Drop future holidays not previously seen in training data 
+        # Drop future holidays not previously seen in training data
         if self.train_holiday_names is not None:
             # Remove holiday names didn't show up in fit
             index_to_drop = all_holidays.index[
@@ -1108,58 +1122,25 @@ class Prophet(object):
             dat['cap'] = history['cap_scaled']
             kinit = self.logistic_growth_init(history)
 
-        model = prophet_stan_model
-
-        def stan_init():
-            return {
-                'k': kinit[0],
-                'm': kinit[1],
-                'delta': np.zeros(len(self.changepoints_t)),
-                'beta': np.zeros(seasonal_features.shape[1]),
-                'sigma_obs': 1,
-            }
+        stan_init = {
+            'k': kinit[0],
+            'm': kinit[1],
+            'delta': np.zeros(len(self.changepoints_t)),
+            'beta': np.zeros(seasonal_features.shape[1]),
+            'sigma_obs': 1,
+        }
 
         if (history['y'].min() == history['y'].max()
             and self.growth == 'linear'):
             # Nothing to fit.
-            self.params = stan_init()
+            self.params = stan_init
             self.params['sigma_obs'] = 1e-9
             for par in self.params:
                 self.params[par] = np.array([self.params[par]])
         elif self.mcmc_samples > 0:
-            args = dict(
-                data=dat,
-                init=stan_init,
-                iter=self.mcmc_samples,
-            )
-            args.update(kwargs)
-            self.stan_fit = model.sampling(**args)
-            for par in self.stan_fit.model_pars:
-                self.params[par] = self.stan_fit[par]
-                # Shape vector parameters
-                if (par in ['delta', 'beta']
-                    and len(self.params[par].shape) < 2):
-                    self.params[par] = self.params[par].reshape((-1, 1))
+            self.params = self.stan_backend.sampling(stan_init, dat, self.mcmc_samples, **kwargs)
         else:
-            args = dict(
-                data=dat,
-                init=stan_init,
-                algorithm='Newton' if dat['T'] < 100 else 'LBFGS',
-                iter=1e4,
-            )
-            args.update(kwargs)
-            try:
-                self.stan_fit = model.optimizing(**args)
-            except RuntimeError:
-                logger.warning(
-                    'Optimization terminated abnormally. '
-                    'Falling back to Newton.'
-                )
-                args['algorithm'] = 'Newton'
-                self.stan_fit = model.optimizing(**args)
-
-            for par in self.stan_fit:
-                self.params[par] = self.stan_fit[par].reshape((1, -1))
+            self.params = self.stan_backend.fit(stan_init, dat, **kwargs)
 
         # If no changepoints were requested, replace delta with 0s
         if len(self.changepoints) == 0:
