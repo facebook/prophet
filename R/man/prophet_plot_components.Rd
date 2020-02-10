@@ -15,8 +15,9 @@ prophet_plot_components(m, fcst, uncertainty = TRUE, plot_cap = TRUE,
 
 \item{fcst}{Data frame returned by predict(m, df).}
 
-\item{uncertainty}{Boolean indicating if the uncertainty interval should be
-plotted for the trend, from fcst columns trend_lower and trend_upper.}
+\item{uncertainty}{Optional boolean indicating if the uncertainty interval should be
+plotted for the trend, from fcst columns trend_lower and trend_upper.This will
+only be done if m$uncertainty.samples > 0.}
 
 \item{plot_cap}{Boolean indicating if the capacity should be shown in the
 figure, if available.}

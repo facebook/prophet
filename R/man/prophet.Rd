@@ -76,7 +76,8 @@ If mcmc.samples>0, this will be integrated over all model parameters,
 which will include uncertainty in seasonality.}
 
 \item{uncertainty.samples}{Number of simulated draws used to estimate
-uncertainty intervals.}
+uncertainty intervals. Settings this value to 0 or False will disable
+uncertainty estimation and speed up the calculation.}
 
 \item{fit}{Boolean, if FALSE the model is initialized but not fit.}
 
