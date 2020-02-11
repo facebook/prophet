@@ -149,11 +149,11 @@ class Prophet(object):
                     logger.debug("Trying to load backend: %s", i.name)
                     return self._load_stan_backend(i.name)
                 except Exception as e:
-                    logger.info("Unable to load backend %s (%s), trying the next one", i.name, e)
+                    logger.debug("Unable to load backend %s (%s), trying the next one", i.name, e)
         else:
             self.stan_backend = StanBackendEnum.get_backend_class(stan_backend)(logger)
 
-        logger.info("Loaded stan backend: %s", self.stan_backend.get_type())
+        logger.debug("Loaded stan backend: %s", self.stan_backend.get_type())
 
     def validate_inputs(self):
         """Validates the inputs to Prophet."""
