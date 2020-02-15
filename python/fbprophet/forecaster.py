@@ -942,7 +942,11 @@ class Prophet(object):
         first = self.history['ds'].min()
         last = self.history['ds'].max()
         dt = self.history['ds'].diff()
-        min_dt = dt.iloc[dt.values.nonzero()[0]].min()
+        try:
+            min_dt = dt.iloc[dt.values.nonzero()[0]].min()
+        except AttributeError:
+            # Series.nonzero() was removed in pandas 0.24rc1
+            min_dt = dt.iloc[dt.values.to_numpy().nonzero()[0]].min()
 
         # Yearly seasonality
         yearly_disable = last - first < pd.Timedelta(days=730)
