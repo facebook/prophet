@@ -19,9 +19,7 @@ from fbprophet.models import StanBackendEnum
 from fbprophet.plot import (plot, plot_components)
 
 logger = logging.getLogger('fbprophet')
-logger.addHandler(logging.NullHandler())
-if len(logger.handlers) == 1:
-    logging.basicConfig(level=logging.INFO)
+logger.setLevel(logging.INFO)
 
 
 class Prophet(object):
