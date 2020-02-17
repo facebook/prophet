@@ -13,7 +13,8 @@ import pandas as pd
 
 from fbprophet.diagnostics import performance_metrics
 
-logger = logging.getLogger('fbprophet')
+logger = logging.getLogger('fbprophet.plot')
+
 
 
 try:
