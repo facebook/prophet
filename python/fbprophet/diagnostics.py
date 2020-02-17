@@ -7,7 +7,6 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
-import tqdm 
 from copy import deepcopy
 from functools import reduce
 
