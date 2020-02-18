@@ -7,7 +7,7 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
-import tqdm 
+from tqdm.autonotebook import tqdm
 from copy import deepcopy
 from functools import reduce
 
@@ -15,24 +15,6 @@ import numpy as np
 import pandas as pd
 
 logger = logging.getLogger('fbprophet')
-
-def isnotebook():
-    """
-    Allow for progressbar. 
-    """
-    try:
-        shell = get_ipython().__class__.__name__
-        if shell == 'ZMQInteractiveShell':
-            import tqdm.notebook.tqdm as tqdm
-        elif shell == 'TerminalInteractiveShell':
-            import tqdm.notebook.tqdm as tqdm
-        else:
-            from tqdm import tqdm
-    except NameError:
-        from tqdm import tqdm
-        
-        
-isnotebook()
 
 
 def generate_cutoffs(df, horizon, initial, period):
@@ -73,7 +55,7 @@ def generate_cutoffs(df, horizon, initial, period):
     logger.info('Making {} forecasts with cutoffs between {} and {}'.format(
         len(result), result[-1], result[0]
     ))
-    return reversed(result)
+    return list(reversed(result))
 
 
 def cross_validation(model, horizon, period=None, initial=None):
