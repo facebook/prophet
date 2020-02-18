@@ -11,7 +11,7 @@ from collections import OrderedDict
 from enum import Enum
 import pickle
 import pkg_resources
-import numpy as np
+
 import os
 
 
@@ -152,7 +152,9 @@ class CmdStanPyBackend(IStanBackend):
         return (cmdstanpy_init, cmdstanpy_data)
 
     @staticmethod
-    def stan_to_dict_numpy(column_names: Tuple[str, ...], data: np.array):
+    def stan_to_dict_numpy(column_names: Tuple[str, ...], data: 'np.array'):
+        import numpy as np
+
         output = OrderedDict()
 
         prev = None
