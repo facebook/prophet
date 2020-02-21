@@ -6,10 +6,6 @@
 \usage{
 compile_stan_model()
 }
-\arguments{
-\item{model}{String 'linear' or 'logistic' to specify a linear or logistic
-trend.}
-}
 \value{
 Stan model.
 }

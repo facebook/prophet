@@ -9,13 +9,14 @@ plot_yearly(m, uncertainty = TRUE, yearly_start = 0, name = "yearly")
 \arguments{
 \item{m}{Prophet model object.}
 
-\item{uncertainty}{Boolean to plot uncertainty intervals.}
+\item{uncertainty}{Optional boolean to plot uncertainty intervals, which
+will only be done if m$uncertainty.samples > 0.}
 
 \item{yearly_start}{Integer specifying the start day of the yearly
 seasonality plot. 0 (default) starts the year on Jan 1. 1 shifts by 1 day
 to Jan 2, and so on.}
 
-\item{name}{Name of seasonality component if previously changed 
+\item{name}{Name of seasonality component if previously changed
 from default 'yearly'.}
 }
 \value{

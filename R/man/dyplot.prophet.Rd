@@ -11,10 +11,11 @@ dyplot.prophet(x, fcst, uncertainty = TRUE, ...)
 
 \item{fcst}{Data frame returned by predict(m, df).}
 
-\item{uncertainty}{Boolean indicating if the uncertainty interval for yhat
-should be plotted. Must be present in fcst as yhat_lower and yhat_upper.}
+\item{uncertainty}{Optional boolean indicating if the uncertainty interval for yhat
+should be plotted, which will only be done if x$uncertainty.samples > 0. Must be
+present in fcst as yhat_lower and yhat_upper.}
 
-\item{...}{additional arguments}
+\item{...}{additional arguments passed to dygraph::dygraph}
 }
 \value{
 A dygraph plot.

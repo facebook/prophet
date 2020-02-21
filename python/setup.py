@@ -17,7 +17,6 @@ from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
 from setuptools.command.test import test as test_command
-from fbprophet.models import StanBackendEnum
 from typing import List
 
 PLATFORM = 'unix'
@@ -29,11 +28,12 @@ MODEL_TARGET_DIR = os.path.join('fbprophet', 'stan_model')
 
 
 def get_backends_from_env() -> List[str]:
-    import os
+    from fbprophet.models import StanBackendEnum
     return os.environ.get("STAN_BACKEND", StanBackendEnum.PYSTAN.name).split(",")
 
 
 def build_models(target_dir):
+    from fbprophet.models import StanBackendEnum
     for backend in get_backends_from_env():
         StanBackendEnum.get_backend_class(backend).build_model(target_dir, MODEL_DIR)
 
@@ -119,7 +119,7 @@ with open('requirements.txt', 'r') as f:
 
 setup(
     name='fbprophet',
-    version='0.5',
+    version='0.6',
     description='Automatic Forecasting Procedure',
     url='https://facebook.github.io/prophet/',
     author='Sean J. Taylor <sjtz@pm.me>, Ben Letham <bletham@fb.com>',

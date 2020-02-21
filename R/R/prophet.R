@@ -236,52 +236,38 @@ validate_column_name <- function(
   }
 }
 
-
-#' Load compiled Stan model
-#'
-#' @param model String 'linear' or 'logistic' to specify a linear or logistic
-#'  trend.
-#'
-#' @return Stan model.
-#'
-#' @keywords internal
-get_prophet_stan_model <- function() {
-  ## If the cached model doesn't work, just compile a new one.
-  tryCatch({
-    binary <- system.file(
-      'libs',
-      Sys.getenv('R_ARCH'),
-      'prophet_stan_model.RData',
-      package = 'prophet',
-      mustWork = TRUE
-    )
-    load(binary)
-    obj.name <- 'model.stanm'
-    stanm <- eval(parse(text = obj.name))
-
-    ## Should cause an error if the model doesn't work.
-    stanm@mk_cppmodule(stanm)
-    stanm
-  }, error = function(cond) {
-    compile_stan_model()
-  })
-}
-
 #' Compile Stan model
-#'
-#' @param model String 'linear' or 'logistic' to specify a linear or logistic
-#'  trend.
 #'
 #' @return Stan model.
 #'
 #' @keywords internal
 compile_stan_model <- function() {
+  packageStartupMessage('Compiling model (this will take a few minutes...)')
+  packageStartupMessage(
+    'If this is the first time fitting a model since package install, this is normal. ',
+    'You should not see this message more than once after install.'
+  )
+
+  dest <- file.path(path.package("prophet"), 'libs')
+  dir.create(dest, recursive = TRUE, showWarnings = FALSE)
+
+  packageStartupMessage(paste('Writing model to:', dest))
+  packageStartupMessage(paste('Compiling using binary:', R.home('bin')))
+
   fn <- 'stan/prophet.stan'
-
   stan.src <- system.file(fn, package = 'prophet', mustWork = TRUE)
-  stanc <- rstan::stanc(stan.src)
+  model.binary <- file.path(dest, 'prophet_stan_model.RData')
 
-  return(rstan::stan_model(stanc_ret = stanc, model_name = 'prophet_model'))
+  stanc <- rstan::stanc(stan.src)
+  model.stanm <- rstan::stan_model(
+    stanc_ret = stanc,
+    model_name = 'prophet_model'
+  )
+  save('model.stanm', file = model.binary)
+  packageStartupMessage('------ Model successfully compiled!')
+  packageStartupMessage('You can ignore any compiler warnings above.')
+  assign(".prophet.stan.model", model.stanm, envir = prophet_model_env)
+  return(model.stanm)
 }
 
 #' Convert date vector
@@ -1238,10 +1224,10 @@ fit.prophet <- function(m, df, ...) {
     kinit <- logistic_growth_init(history)
   }
 
-  if (exists(".prophet.stan.model")) {
-    model <- .prophet.stan.model
+  if (exists(".prophet.stan.model", where = prophet_model_env)) {
+    model <- get('.prophet.stan.model', envir = prophet_model_env)
   } else {
-    model <- get_prophet_stan_model()
+    model <- compile_stan_model()
   }
 
   stan_init <- function() {

@@ -11,7 +11,8 @@ plot_seasonality(m, name, uncertainty = TRUE)
 
 \item{name}{String name of the seasonality.}
 
-\item{uncertainty}{Boolean to plot uncertainty intervals.}
+\item{uncertainty}{Optional boolean to plot uncertainty intervals, which
+will only be done if m$uncertainty.samples > 0.}
 }
 \value{
 A ggplot2 plot.
