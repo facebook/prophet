@@ -47,7 +47,7 @@ $ pip install fbprophet
 
 The default dependency that Prophet has is `pystan`. PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install fbprophet.
 
-_(Currently only dev version)_ You can chose an alternative stan backend called `cmdstanpy` that requires [CmdStan](https://mc-stan.org/users/interfaces/cmdstan) command line interface by setting the environment variable `STAN_BACKEND` to `CMDSTANPY`, for example:
+You can chose an alternative stan backend called `cmdstanpy`. It requires [CmdStan](https://mc-stan.org/users/interfaces/cmdstan) command line interface and you will have to specify the environment variable `STAN_BACKEND` pointing to it, for example:
 
 ```
 # bash
