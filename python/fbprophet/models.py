@@ -74,7 +74,7 @@ class CmdStanPyBackend(IStanBackend):
             kwargs['algorithm'] = 'Newton' if stan_data['T'] < 100 else 'LBFGS'
         iterations = int(1e4)
         try:
-            stan_fit = self.model.optimize(data=stan_data,
+            self.stan_fit = self.model.optimize(data=stan_data,
                                            inits=stan_init,
                                            iter=iterations,
                                            **kwargs)
@@ -85,17 +85,17 @@ class CmdStanPyBackend(IStanBackend):
                     'Optimization terminated abnormally. Falling back to Newton.'
                 )
                 kwargs['algorithm'] = 'Newton'
-                stan_fit = self.model.optimize(data=stan_data,
+                self.stan_fit = self.model.optimize(data=stan_data,
                                                inits=stan_init,
                                                iter=iterations,
                                                **kwargs)
             else:
                 raise e
 
-        params = self.stan_to_dict_numpy(stan_fit.column_names, stan_fit.optimized_params_np)
-        for par in params:
-            params[par] = params[par].reshape((1, -1))
-        return params
+        self.params = self.stan_to_dict_numpy(self.stan_fit.column_names, self.stan_fit.optimized_params_np)
+        for par in self.params:
+            self.params[par] = self.params[par].reshape((1, -1))
+        return self.params
 
     def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
         (stan_init, stan_data) = self.prepare_data(stan_init, stan_data)
@@ -239,19 +239,19 @@ class PyStanBackend(IStanBackend):
         )
         args.update(kwargs)
         try:
-            params = self.model.optimizing(**args)
+            self.stan_fit = self.model.optimizing(**args)
         except RuntimeError:
             # Fall back on Newton
             self.logger.warning(
                 'Optimization terminated abnormally. Falling back to Newton.'
             )
             args['algorithm'] = 'Newton'
-            params = self.model.optimizing(**args)
+            self.stan_fit = self.model.optimizing(**args)
 
-        for par in params:
-            params[par] = params[par].reshape((1, -1))
+        for par in self.stan_fit:
+            self.params[par] = self.stan_fit[par].reshape((1, -1))
 
-        return params
+        return self.params
 
     def load_model(self):
         """Load compiled Stan model"""
