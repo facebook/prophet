@@ -81,6 +81,9 @@ Make sure compilers (gcc, g++, build-essential) and Python development tools (py
 
 ## Changelog
 
+### Version 0.6 (2020.02.21)
+- Added support for `cmdstanpy`
+ 
 ### Version 0.5 (2019.05.14)
 
 - Conditional seasonalities
