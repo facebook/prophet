@@ -39,7 +39,7 @@ class TestDiagnostics(TestCase):
         period = pd.Timedelta('10 days')
         initial = pd.Timedelta('115 days')
         # Run for both cases of multiprocess on or off
-        for multiprocess in [True, None]:
+        for multiprocess in [None, True]:
             df_cv = diagnostics.cross_validation(
                 m, horizon='4 days', period='10 days', initial='115 days',
                 multiprocess=multiprocess)
@@ -60,6 +60,24 @@ class TestDiagnostics(TestCase):
             with self.assertRaises(ValueError):
                 diagnostics.cross_validation(
                     m, horizon='10 days', period='10 days', initial='140 days')
+
+    def test_invalid_args_multiprocess(self):
+        m = Prophet()
+        m.fit(self.__df)
+        # Calculate the number of cutoff points(k)
+        horizon = pd.Timedelta('4 days')
+        period = pd.Timedelta('10 days')
+        initial = pd.Timedelta('115 days')
+        # Run for both cases of multiprocess on or off
+        for multiprocess in [False, 1, 'yes']:
+            with self.assertRaises(ValueError) as e:
+                df_cv = diagnostics.cross_validation(
+                    m, horizon='4 days', period='10 days', initial='115 days',
+                    multiprocess=multiprocess)
+            err = e.exception
+            self.assertEqual(str(err), f"{multiprocess} is not a valid "
+                                       f"assignment to multiprocess argument."
+                                       f"Valid options are 'None' or 'True'")
 
     def test_cross_validation_logistic(self):
         df = self.__df.copy()

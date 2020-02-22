@@ -86,6 +86,7 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Non
     -------
     A pd.DataFrame with the forecast, actual value and cutoff.
     """
+
     df = model.history.copy().reset_index(drop=True)
     horizon = pd.Timedelta(horizon)
     # Set period
@@ -110,7 +111,10 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Non
     if model.uncertainty_samples:
         predict_columns.extend(['yhat_lower', 'yhat_upper'])
 
+    predicts=[]
+
     cutoffs = generate_cutoffs(df, horizon, initial, period)
+<<<<<<< 3b7c4e17004965451cfe52a0797cb061360d3dde
     predicts = []
     for cutoff in tqdm(cutoffs):
         # Generate new object with copying fitting options
@@ -152,6 +156,10 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Non
         predicts = []
         for cutoff in cutoffs:
             predicts.append(single_cutoff_forecast(df, model, cutoff, horizon, predict_columns))
+    else:
+        raise ValueError(f"{multiprocess} is not a valid assignment to multiprocess argument.Valid "
+                         f"options are 'None' or 'True'")
+
 
     # Combine all predicted pd.DataFrame into one pd.DataFrame
     return pd.concat(predicts, axis=0).reset_index(drop=True)
@@ -297,7 +305,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
 
     Parameters
     ----------
-    df:
+    df: The dataframe returned by cross_validation.
     metrics: A list of performance metrics to compute. If not provided, will
         use ['mse', 'rmse', 'mae', 'mape', 'coverage'].
     rolling_window: Proportion of data to use in each rolling window for
