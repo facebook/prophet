@@ -13,6 +13,7 @@ from functools import reduce
 
 import numpy as np
 import pandas as pd
+from multiprocessing import Pool
 
 logger = logging.getLogger('fbprophet')
 
@@ -58,7 +59,7 @@ def generate_cutoffs(df, horizon, initial, period):
     return list(reversed(result))
 
 
-def cross_validation(model, horizon, period=None, initial=None):
+def cross_validation(model, horizon, period=None, initial=None, multiprocessing=None):
     """Cross-Validation for time series.
 
     Computes forecasts from historical cutoff points. Beginning from
@@ -77,6 +78,8 @@ def cross_validation(model, horizon, period=None, initial=None):
         be done at every this period. If not provided, 0.5 * horizon is used.
     initial: string with pd.Timedelta compatible style. The first training
         period will begin here. If not provided, 3 * horizon is used.
+    multiprocessing: Boolean True. Turns on parallel processing. If not provided,
+    defaults to sequential processing.
 
     Returns
     -------
@@ -139,9 +142,52 @@ def cross_validation(model, horizon, period=None, initial=None):
             df[index_predicted][['y']].reset_index(drop=True),
             pd.DataFrame({'cutoff': [cutoff] * len(yhat)})
         ], axis=1))
+    if multiprocessing:
+        with Pool() as pool:
+            logger.info('Running cross validation in multiprocessing mode')
+            predicts = pool.starmap(single_cutoff_forecast, cutoffs)
+    else:
+        predicts = []
+        for cutoff in cutoffs:
+            predicts.append(single_cutoff_forecast(m, cutoff))
 
     # Combine all predicted pd.DataFrame into one pd.DataFrame
     return pd.concat(predicts, axis=0).reset_index(drop=True)
+
+
+def single_cutoff_forecast(m, cutoff):
+    # Generate new object with copying fitting options
+    m = prophet_copy(m, cutoff)
+    # Train model
+    history_c = df[df['ds'] <= cutoff]
+    if history_c.shape[0] < 2:
+        raise Exception(
+            'Less than two datapoints before cutoff. '
+            'Increase initial window.'
+        )
+    m.fit(history_c, **m.fit_kwargs)
+    # Calculate yhat
+    index_predicted = (df['ds'] > cutoff) & (df['ds'] <= cutoff + horizon)
+    # Get the columns for the future dataframe
+    columns = ['ds']
+    if m.growth == 'logistic':
+        columns.append('cap')
+        if m.logistic_floor:
+            columns.append('floor')
+    columns.extend(m.extra_regressors.keys())
+    columns.extend([
+        props['condition_name']
+        for props in m.seasonalities.values()
+        if props['condition_name'] is not None])
+    yhat = m.predict(df[index_predicted][columns])
+    # Merge yhat(predicts), y(df, original data) and cutoff
+
+    return pd.concat([
+        yhat[predict_columns],
+        df[index_predicted][['y']].reset_index(drop=True),
+        pd.DataFrame({'cutoff': [cutoff] * len(yhat)})
+    ], axis=1)
+
 
 def prophet_copy(m, cutoff=None):
     """Copy Prophet object
