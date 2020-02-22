@@ -248,7 +248,9 @@ class PyStanBackend(IStanBackend):
             args['algorithm'] = 'Newton'
             self.stan_fit = self.model.optimizing(**args)
 
-        for par in self.stan_fit:
+        self.params = dict()
+
+        for par in self.stan_fit.keys():
             self.params[par] = self.stan_fit[par].reshape((1, -1))
 
         return self.params
