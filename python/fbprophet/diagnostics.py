@@ -145,7 +145,8 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocessing=
     if multiprocessing:
         with Pool() as pool:
             logger.info('Running cross validation in multiprocessing mode')
-            predicts = pool.starmap(single_cutoff_forecast, cutoffs)
+            input_df = [[df, model, cutoff, horizon, predict_columns] for cutoff in cutoffs]
+            predicts = pool.starmap(single_cutoff_forecast, input_df)
     else:
         predicts = []
         for cutoff in cutoffs:
