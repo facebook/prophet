@@ -38,25 +38,27 @@ class TestDiagnostics(TestCase):
         horizon = pd.Timedelta('4 days')
         period = pd.Timedelta('10 days')
         initial = pd.Timedelta('115 days')
-        df_cv = diagnostics.cross_validation(
-            m, horizon='4 days', period='10 days', initial='115 days')
-        self.assertEqual(len(np.unique(df_cv['cutoff'])), 3)
-        self.assertEqual(max(df_cv['ds'] - df_cv['cutoff']), horizon)
-        self.assertTrue(min(df_cv['cutoff']) >= min(self.__df['ds']) + initial)
-        dc = df_cv['cutoff'].diff()
-        dc = dc[dc > pd.Timedelta(0)].min()
-        self.assertTrue(dc >= period)
-        self.assertTrue((df_cv['cutoff'] < df_cv['ds']).all())
-        # Each y in df_cv and self.__df with same ds should be equal
-        df_merged = pd.merge(df_cv, self.__df, 'left', on='ds')
-        self.assertAlmostEqual(
-            np.sum((df_merged['y_x'] - df_merged['y_y']) ** 2), 0.0)
-        df_cv = diagnostics.cross_validation(
-            m, horizon='4 days', period='10 days', initial='135 days')
-        self.assertEqual(len(np.unique(df_cv['cutoff'])), 1)
-        with self.assertRaises(ValueError):
-            diagnostics.cross_validation(
-                m, horizon='10 days', period='10 days', initial='140 days')
+        for multiprocessing in [True]:
+            df_cv = diagnostics.cross_validation(
+                m, horizon='4 days', period='10 days', initial='115 days',
+                multiprocessing=multiprocessing)
+            self.assertEqual(len(np.unique(df_cv['cutoff'])), 3)
+            self.assertEqual(max(df_cv['ds'] - df_cv['cutoff']), horizon)
+            self.assertTrue(min(df_cv['cutoff']) >= min(self.__df['ds']) + initial)
+            dc = df_cv['cutoff'].diff()
+            dc = dc[dc > pd.Timedelta(0)].min()
+            self.assertTrue(dc >= period)
+            self.assertTrue((df_cv['cutoff'] < df_cv['ds']).all())
+            # Each y in df_cv and self.__df with same ds should be equal
+            df_merged = pd.merge(df_cv, self.__df, 'left', on='ds')
+            self.assertAlmostEqual(
+                np.sum((df_merged['y_x'] - df_merged['y_y']) ** 2), 0.0)
+            df_cv = diagnostics.cross_validation(
+                m, horizon='4 days', period='10 days', initial='135 days')
+            self.assertEqual(len(np.unique(df_cv['cutoff'])), 1)
+            with self.assertRaises(ValueError):
+                diagnostics.cross_validation(
+                    m, horizon='10 days', period='10 days', initial='140 days')
 
     def test_cross_validation_logistic(self):
         df = self.__df.copy()
