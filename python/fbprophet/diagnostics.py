@@ -149,13 +149,13 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocessing=
     else:
         predicts = []
         for cutoff in cutoffs:
-            predicts.append(single_cutoff_forecast(m, cutoff))
+            predicts.append(single_cutoff_forecast(df, model, cutoff, horizon, predict_columns))
 
     # Combine all predicted pd.DataFrame into one pd.DataFrame
     return pd.concat(predicts, axis=0).reset_index(drop=True)
 
 
-def single_cutoff_forecast(m, cutoff):
+def single_cutoff_forecast(df, m, cutoff, horizon, predict_columns):
     # Generate new object with copying fitting options
     m = prophet_copy(m, cutoff)
     # Train model
