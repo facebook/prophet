@@ -59,7 +59,7 @@ def generate_cutoffs(df, horizon, initial, period):
     return list(reversed(result))
 
 
-def cross_validation(model, horizon, period=None, initial=None, multiprocessing=None):
+def cross_validation(model, horizon, period=None, initial=None, multiprocess=None):
     """Cross-Validation for time series.
 
     Computes forecasts from historical cutoff points. Beginning from
@@ -78,8 +78,9 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocessing=
         be done at every this period. If not provided, 0.5 * horizon is used.
     initial: string with pd.Timedelta compatible style. The first training
         period will begin here. If not provided, 3 * horizon is used.
-    multiprocessing: Boolean True. Turns on parallel processing. If not provided,
-    defaults to sequential processing.
+    multiprocess: None, True, Optional (defaults to None). If `True`, use the
+        `multiprocessing` module to distribute each task to a different processor
+        core.
 
     Returns
     -------
@@ -142,12 +143,12 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocessing=
             df[index_predicted][['y']].reset_index(drop=True),
             pd.DataFrame({'cutoff': [cutoff] * len(yhat)})
         ], axis=1))
-    if multiprocessing:
+    if multiprocess is True:
         with Pool() as pool:
             logger.info('Running cross validation in multiprocessing mode')
             input_df = [[df, model, cutoff, horizon, predict_columns] for cutoff in cutoffs]
             predicts = pool.starmap(single_cutoff_forecast, input_df)
-    else:
+    elif multiprocess is None:
         predicts = []
         for cutoff in cutoffs:
             predicts.append(single_cutoff_forecast(df, model, cutoff, horizon, predict_columns))
