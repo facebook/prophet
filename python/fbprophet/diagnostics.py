@@ -157,6 +157,28 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocessing=
 
 
 def single_cutoff_forecast(df, m, cutoff, horizon, predict_columns):
+    """Forecast for single cutoff. Used in cross validation function
+    when evaluating for multiple cutoffs either sequentially or in parallel .
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        DataFrame with history to be used for single
+        cutoff forecast
+    m: Prophet model.
+    cutoff: string with pd.Timedelta compatible style.
+        Simulated Forecast will start from this date.
+    horizon: string with pd.Timedelta compatible style, e.g., '5 days',
+        '3 hours', '10 seconds'.
+    predict_columns: List of strings e.g. ['ds', 'yhat']
+        Columns with date and forecast to be returned in output.
+
+    Returns
+    -------
+    A pd.DataFrame with the forecast, actual value and cutoff.
+
+    """
+
     # Generate new object with copying fitting options
     m = prophet_copy(m, cutoff)
     # Train model
@@ -274,7 +296,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
 
     Parameters
     ----------
-    df: The dataframe returned by cross_validation.
+    df:
     metrics: A list of performance metrics to compute. If not provided, will
         use ['mse', 'rmse', 'mae', 'mape', 'coverage'].
     rolling_window: Proportion of data to use in each rolling window for
