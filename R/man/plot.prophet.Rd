@@ -4,8 +4,15 @@
 \alias{plot.prophet}
 \title{Plot the prophet forecast.}
 \usage{
-\method{plot}{prophet}(x, fcst, uncertainty = TRUE, plot_cap = TRUE,
-  xlabel = "ds", ylabel = "y", ...)
+\method{plot}{prophet}(
+  x,
+  fcst,
+  uncertainty = TRUE,
+  plot_cap = TRUE,
+  xlabel = "ds",
+  ylabel = "y",
+  ...
+)
 }
 \arguments{
 \item{x}{Prophet object.}

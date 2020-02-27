@@ -4,8 +4,7 @@
 \alias{add_regressor}
 \title{Add an additional regressor to be used for fitting and predicting.}
 \usage{
-add_regressor(m, name, prior.scale = NULL, standardize = "auto",
-  mode = NULL)
+add_regressor(m, name, prior.scale = NULL, standardize = "auto", mode = NULL)
 }
 \arguments{
 \item{m}{Prophet object.}

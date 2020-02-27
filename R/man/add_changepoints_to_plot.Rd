@@ -4,8 +4,14 @@
 \alias{add_changepoints_to_plot}
 \title{Get layers to overlay significant changepoints on prophet forecast plot.}
 \usage{
-add_changepoints_to_plot(m, threshold = 0.01, cp_color = "red",
-  cp_linetype = "dashed", trend = TRUE, ...)
+add_changepoints_to_plot(
+  m,
+  threshold = 0.01,
+  cp_color = "red",
+  cp_linetype = "dashed",
+  trend = TRUE,
+  ...
+)
 }
 \arguments{
 \item{m}{Prophet model object.}
