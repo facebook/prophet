@@ -271,5 +271,5 @@ class StanBackendEnum(Enum):
     def get_backend_class(name: str) -> IStanBackend:
         try:
             return StanBackendEnum[name].value
-        except KeyError:
-            raise ValueError("Unknown stan backend: {}".format(name))
+        except KeyError as e:
+            raise ValueError("Unknown stan backend: {}".format(name)) from e
