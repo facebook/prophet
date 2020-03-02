@@ -7,8 +7,13 @@
   # Create environment for storing stan model
   assign("prophet_model_env", new.env(), parent.env(environment()))
   tryCatch({
+    if (.Platform$OS.type == "windows") {
+      dest <- file.path('libs', .Platform$r_arch)
+    } else {
+      dest <- 'libs'
+    }
     binary <- system.file(
-      'libs',
+      dest,
       'prophet_stan_model.RData',
       package = 'prophet',
       mustWork = TRUE

@@ -248,7 +248,11 @@ compile_stan_model <- function() {
     'You should not see this message more than once after install.'
   )
 
-  dest <- file.path(path.package("prophet"), 'libs')
+  if (.Platform$OS.type == "windows") {
+    dest <- file.path(path.package("prophet"), 'libs', .Platform$r_arch)
+  } else {
+    dest <- file.path(path.package("prophet"), 'libs')
+  }  
   dir.create(dest, recursive = TRUE, showWarnings = FALSE)
 
   packageStartupMessage(paste('Writing model to:', dest))
