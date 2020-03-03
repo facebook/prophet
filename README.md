@@ -45,7 +45,7 @@ Prophet is on PyPI, so you can use pip to install it:
 $ pip install fbprophet
 ```
 
-The major dependency that Prophet has is `pystan`. PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install fbprophet.
+The major dependency that Prophet has is `pystan`. PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install fbprophet. You may also try the (more experimental) [cmdstanpy backend](https://github.com/stan-dev/cmdstanpy).
 
 After installation, you can [get started!](https://facebook.github.io/prophet/docs/quick_start.html#python-api)
 
@@ -64,6 +64,12 @@ On Windows, PyStan requires a compiler so you'll need to [follow the instruction
 Make sure compilers (gcc, g++, build-essential) and Python development tools (python-dev, python3-dev) are installed. In Red Hat systems, install the packages gcc64 and gcc64-c++. If you are using a VM, be aware that you will need at least 4GB of memory to install fbprophet, and at least 2GB of memory to use fbprophet.
 
 ## Changelog
+
+### Version 0.6 (2020.03.03)
+
+- Fix bugs related to upstream changes in `holidays` and `pandas` packages.
+- Compile model during first use, not during install (to comply with CRAN policy)
+- `cmdstanpy` backend now available in Python
 
 ### Version 0.5 (2019.05.14)
 
