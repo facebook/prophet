@@ -5,8 +5,15 @@
 \title{Add a seasonal component with specified period, number of Fourier
 components, and prior scale.}
 \usage{
-add_seasonality(m, name, period, fourier.order, prior.scale = NULL,
-  mode = NULL, condition.name = NULL)
+add_seasonality(
+  m,
+  name,
+  period,
+  fourier.order,
+  prior.scale = NULL,
+  mode = NULL,
+  condition.name = NULL
+)
 }
 \arguments{
 \item{m}{Prophet object.}

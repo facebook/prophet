@@ -4,14 +4,26 @@
 \alias{prophet}
 \title{Prophet forecaster.}
 \usage{
-prophet(df = NULL, growth = "linear", changepoints = NULL,
-  n.changepoints = 25, changepoint.range = 0.8,
-  yearly.seasonality = "auto", weekly.seasonality = "auto",
-  daily.seasonality = "auto", holidays = NULL,
-  seasonality.mode = "additive", seasonality.prior.scale = 10,
-  holidays.prior.scale = 10, changepoint.prior.scale = 0.05,
-  mcmc.samples = 0, interval.width = 0.8, uncertainty.samples = 1000,
-  fit = TRUE, ...)
+prophet(
+  df = NULL,
+  growth = "linear",
+  changepoints = NULL,
+  n.changepoints = 25,
+  changepoint.range = 0.8,
+  yearly.seasonality = "auto",
+  weekly.seasonality = "auto",
+  daily.seasonality = "auto",
+  holidays = NULL,
+  seasonality.mode = "additive",
+  seasonality.prior.scale = 10,
+  holidays.prior.scale = 10,
+  changepoint.prior.scale = 0.05,
+  mcmc.samples = 0,
+  interval.width = 0.8,
+  uncertainty.samples = 1000,
+  fit = TRUE,
+  ...
+)
 }
 \arguments{
 \item{df}{(optional) Dataframe containing the history. Must have columns ds

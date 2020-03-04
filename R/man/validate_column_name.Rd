@@ -4,8 +4,13 @@
 \alias{validate_column_name}
 \title{Validates the name of a seasonality, holiday, or regressor.}
 \usage{
-validate_column_name(m, name, check_holidays = TRUE,
-  check_seasonalities = TRUE, check_regressors = TRUE)
+validate_column_name(
+  m,
+  name,
+  check_holidays = TRUE,
+  check_seasonalities = TRUE,
+  check_regressors = TRUE
+)
 }
 \arguments{
 \item{m}{Prophet object.}
