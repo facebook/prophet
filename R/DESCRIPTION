@@ -30,12 +30,13 @@ Imports:
 Suggests:
     knitr,
     testthat,
-    readr
+    readr,
+    rmarkdown
 License: MIT + file LICENSE
 URL: https://github.com/facebook/prophet
 BugReports: https://github.com/facebook/prophet/issues
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 VignetteBuilder: knitr
 SystemRequirements: C++11
 Encoding: UTF-8

@@ -47,14 +47,14 @@ $ pip install fbprophet
 
 The default dependency that Prophet has is `pystan`. PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install fbprophet.
 
-You can chose an alternative stan backend called `cmdstanpy`. It requires [CmdStan](https://mc-stan.org/users/interfaces/cmdstan) command line interface and you will have to specify the environment variable `STAN_BACKEND` pointing to it, for example:
+You can also choose a (more experimental) alternative stan backend called `cmdstanpy`. It requires the [CmdStan](https://mc-stan.org/users/interfaces/cmdstan) command line interface and you will have to specify the environment variable `STAN_BACKEND` pointing to it, for example:
 
 ```
 # bash
 $ CMDSTAN=/tmp/cmdstan-2.22.1 STAN_BACKEND=CMDSTANPY pip install fbprophet
 ```
 
-Note that the `CMDSTAN` variable is directly related to `cmdstanpy` module and can be omitted if your CmdStan binaries are in your `$PATH`
+Note that the `CMDSTAN` variable is directly related to `cmdstanpy` module and can be omitted if your CmdStan binaries are in your `$PATH`.
 
 It is also possible to install Prophet with two backends:
 
@@ -81,9 +81,12 @@ Make sure compilers (gcc, g++, build-essential) and Python development tools (py
 
 ## Changelog
 
-### Version 0.6 (2020.02.21)
-- Added support for `cmdstanpy`
- 
+### Version 0.6 (2020.03.03)
+
+- Fix bugs related to upstream changes in `holidays` and `pandas` packages.
+- Compile model during first use, not during install (to comply with CRAN policy)
+- `cmdstanpy` backend now available in Python
+
 ### Version 0.5 (2019.05.14)
 
 - Conditional seasonalities

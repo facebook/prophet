@@ -248,7 +248,11 @@ compile_stan_model <- function() {
     'You should not see this message more than once after install.'
   )
 
-  dest <- file.path(path.package("prophet"), 'libs')
+  if (.Platform$OS.type == "windows") {
+    dest <- file.path(path.package("prophet"), 'libs', .Platform$r_arch)
+  } else {
+    dest <- file.path(path.package("prophet"), 'libs')
+  }  
   dir.create(dest, recursive = TRUE, showWarnings = FALSE)
 
   packageStartupMessage(paste('Writing model to:', dest))
@@ -597,7 +601,7 @@ make_holiday_features <- function(m, dates, holidays) {
       }
       names <- paste(.$holiday, '_delim_', ifelse(offsets < 0, '-', '+'),
                      abs(offsets), sep = '')
-      dplyr::data_frame(ds = .$ds + offsets * 24 * 3600, holiday = names)
+      dplyr::tibble(ds = .$ds + offsets * 24 * 3600, holiday = names)
     }) %>%
     dplyr::mutate(x = 1.) %>%
     tidyr::spread(holiday, x, fill = 0)
@@ -911,7 +915,7 @@ make_all_seasonality_features <- function(m, df) {
 #'
 #' @keywords internal
 regressor_column_matrix <- function(m, seasonal.features, modes) {
-  components <- dplyr::data_frame(component = colnames(seasonal.features)) %>%
+  components <- dplyr::tibble(component = colnames(seasonal.features)) %>%
     dplyr::mutate(col = seq_len(dplyr::n())) %>%
     tidyr::separate(component, c('component', 'part'), sep = "_delim_",
                     extra = "merge", fill = "right") %>%
@@ -1553,7 +1557,7 @@ predict_uncertainty <- function(m, df) {
   colnames(intervals) <- paste(rep(c('yhat', 'trend'), each=2),
                                c('lower', 'upper'), sep = "_")
 
-  return(dplyr::as_data_frame(intervals))
+  return(dplyr::as_tibble(intervals))
 }
 
 #' Simulate observations from the extrapolated generative model.

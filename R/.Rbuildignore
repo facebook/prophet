@@ -1,1 +1,4 @@
 ^data-raw$
+^libs$
+^doc$
+^Meta$
