@@ -19,6 +19,7 @@ class IStanBackend(ABC):
     def __init__(self, logger):
         self.model = self.load_model()
         self.logger = logger
+        self.stan_fit = None
 
     @staticmethod
     @abstractmethod
@@ -92,10 +93,10 @@ class CmdStanPyBackend(IStanBackend):
             else:
                 raise e
 
-        self.params = self.stan_to_dict_numpy(self.stan_fit.column_names, self.stan_fit.optimized_params_np)
-        for par in self.params:
-            self.params[par] = self.params[par].reshape((1, -1))
-        return self.params
+        params = self.stan_to_dict_numpy(self.stan_fit.column_names, self.stan_fit.optimized_params_np)
+        for par in params:
+            params[par] = params[par].reshape((1, -1))
+        return params
 
     def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
         (stan_init, stan_data) = self.prepare_data(stan_init, stan_data)
@@ -105,14 +106,14 @@ class CmdStanPyBackend(IStanBackend):
         if 'warmup_iters' not in kwargs:
             kwargs['warmup_iters'] = samples // 2
 
-        stan_fit = self.model.sample(data=stan_data,
+        self.stan_fit = self.model.sample(data=stan_data,
                                      inits=stan_init,
                                      sampling_iters=samples,
                                      **kwargs)
-        res = stan_fit.sample
+        res = self.stan_fit.sample
         (samples, c, columns) = res.shape
         res = res.reshape((samples * c, columns))
-        params = self.stan_to_dict_numpy(stan_fit.column_names, res)
+        params = self.stan_to_dict_numpy(self.stan_fit.column_names, res)
 
         for par in params:
             s = params[par].shape
@@ -220,10 +221,10 @@ class PyStanBackend(IStanBackend):
             iter=samples,
         )
         args.update(kwargs)
-        stan_fit = self.model.sampling(**args)
+        self.stan_fit = self.model.sampling(**args)
         out = dict()
-        for par in stan_fit.model_pars:
-            out[par] = stan_fit[par]
+        for par in self.stan_fit.model_pars:
+            out[par] = self.stan_fit[par]
             # Shape vector parameters
             if par in ['delta', 'beta'] and len(out[par].shape) < 2:
                 out[par] = out[par].reshape((-1, 1))
@@ -248,12 +249,12 @@ class PyStanBackend(IStanBackend):
             args['algorithm'] = 'Newton'
             self.stan_fit = self.model.optimizing(**args)
 
-        self.params = dict()
+        params = dict()
 
         for par in self.stan_fit.keys():
-            self.params[par] = self.stan_fit[par].reshape((1, -1))
+            params[par] = self.stan_fit[par].reshape((1, -1))
 
-        return self.params
+        return params
 
     def load_model(self):
         """Load compiled Stan model"""
