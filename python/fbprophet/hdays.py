@@ -15,7 +15,7 @@ from lunarcalendar import Lunar, Converter
 from lunarcalendar.converter import DateNotExist
 
 from holidays import WEEKEND, HolidayBase
-from dateutil.easter import easter
+from dateutil.easter import easter, EASTER_ORTHODOX
 from dateutil.relativedelta import relativedelta as rd
 
 
@@ -1300,6 +1300,7 @@ class China(HolidayBase):
 class CN(China):
     pass
 
+
 # ------------ Holidays in Russia---------------------
 class Russia(HolidayBase):
     """
@@ -1361,6 +1362,7 @@ class Russia(HolidayBase):
 
 class RU(Russia):
     pass
+
 
 # ------------ Holidays in Republic of Korea---------------------
 class Korea(HolidayBase):
@@ -1429,4 +1431,63 @@ class Korea(HolidayBase):
         self[date(year, 12, 25)] = name
 
 class KR(Korea):
+    pass
+
+
+# ------------ Holidays in Belarus---------------------
+class Belarus(HolidayBase):
+    """
+    Implement public holidays in Belarus
+
+    Reference:
+    https://en.wikipedia.org/wiki/Public_holidays_in_Belarus
+
+    Please note:
+    Some holidays might collide with weekends and therefore not compensated with next business day
+    as International Women's Day
+    """
+
+    def __init__(self, **kwargs):
+        self.country = "BY"
+        HolidayBase.__init__(self, **kwargs)
+
+    def _populate(self, year):
+        # New Year's Day
+        name = "New Year's Day"
+        self[date(year, 1, 1)] = name
+
+        # Orthodox Christmas day
+        name = "Orthodox Christmas Day"
+        self[date(year, 1, 7)] = name
+
+        # International Women's Day
+        name = "International Women's Day"
+        self[date(year, 3, 8)] = name
+
+        # Commemoration Day
+        name = "Commemoration Day"
+        self[easter(year, EASTER_ORTHODOX) + timedelta(days=9)] = name
+
+        # Spring and Labour Day
+        name = "Spring and Labour Day"
+        self[date(year, 5, 1)] = name
+
+        # Victory Day
+        name = "Victory Day"
+        self[date(year, 5, 9)] = name
+
+        # Independence Day
+        name = "Independence Day"
+        self[date(year, 6, 3)] = name
+
+        # October Revolution Day
+        name = "October Revolution Day"
+        self[date(year, 11, 7)] = name
+
+        # Dec. 25 Christmas Day
+        name = "Christmas Day"
+        self[date(year, 12, 25)] = name
+
+
+class BY(Belarus):
     pass
