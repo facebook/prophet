@@ -7,6 +7,7 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
+from tqdm.autonotebook import tqdm
 from copy import deepcopy
 from functools import reduce
 
@@ -54,7 +55,7 @@ def generate_cutoffs(df, horizon, initial, period):
     logger.info('Making {} forecasts with cutoffs between {} and {}'.format(
         len(result), result[-1], result[0]
     ))
-    return reversed(result)
+    return list(reversed(result))
 
 
 def cross_validation(model, horizon, period=None, initial=None):
@@ -107,7 +108,7 @@ def cross_validation(model, horizon, period=None, initial=None):
 
     cutoffs = generate_cutoffs(df, horizon, initial, period)
     predicts = []
-    for cutoff in cutoffs:
+    for cutoff in tqdm(cutoffs):
         # Generate new object with copying fitting options
         m = prophet_copy(model, cutoff)
         # Train model
