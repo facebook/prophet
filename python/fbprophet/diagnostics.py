@@ -111,15 +111,18 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Fal
     if model.uncertainty_samples:
         predict_columns.extend(['yhat_lower', 'yhat_upper'])
 
-    predicts=[]
-
-    cutoffs = generate_cutoffs(df, horizon, initial, period)
     predicts = []
+    cutoffs = generate_cutoffs(df, horizon, initial, period)
+
     if multiprocess is True:
         with Pool() as pool:
             logger.info('Running cross validation in multiprocessing mode')
             input_df = ([df, model, cutoff, horizon, predict_columns] for cutoff in tqdm(cutoffs))
             predicts = pool.starmap(single_cutoff_forecast, input_df)
+    else:
+        if multiprocess is False:
+            for cutoff in cutoffs:
+                predicts.append(single_cutoff_forecast(df, model, cutoff, horizon, predict_columns))
 
     # Combine all predicted pd.DataFrame into one pd.DataFrame
     return pd.concat(predicts, axis=0).reset_index(drop=True)
@@ -131,14 +134,14 @@ def single_cutoff_forecast(df, model, cutoff, horizon, predict_columns):
 
     Parameters
     ----------
-    df: pd.DataFrame
+    df: pd.DataFrame.
         DataFrame with history to be used for single
-        cutoff forecast
+        cutoff forecast.
     model: Prophet model object.
-    cutoff: pd.Timedelta.
+    cutoff: pd.Timestamp cutoff date.
         Simulated Forecast will start from this date.
-    horizon: pd.Timestamp
-    predict_columns: List of strings e.g. ['ds', 'yhat']
+    horizon: pd.Timedelta forecast horizon.
+    predict_columns: List of strings e.g. ['ds', 'yhat'].
         Columns with date and forecast to be returned in output.
 
     Returns

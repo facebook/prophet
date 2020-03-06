@@ -39,7 +39,7 @@ class TestDiagnostics(TestCase):
         period = pd.Timedelta('10 days')
         initial = pd.Timedelta('115 days')
         # Run for both cases of multiprocess on or off
-        for multiprocess in [None, True]:
+        for multiprocess in [False, True]:
             df_cv = diagnostics.cross_validation(
                 m, horizon='4 days', period='10 days', initial='115 days',
                 multiprocess=multiprocess)
@@ -69,15 +69,11 @@ class TestDiagnostics(TestCase):
         period = pd.Timedelta('10 days')
         initial = pd.Timedelta('115 days')
         # Run for both cases of multiprocess on or off
-        for multiprocess in [False, 1, 'yes']:
-            with self.assertRaises(ValueError) as e:
+        for multiprocess in [1, 'yes']:
+            with self.assertRaises(ValueError):
                 df_cv = diagnostics.cross_validation(
                     m, horizon='4 days', period='10 days', initial='115 days',
                     multiprocess=multiprocess)
-            err = e.exception
-            self.assertEqual(str(err), f"{multiprocess} is not a valid "
-                                       f"assignment to multiprocess argument."
-                                       f"Valid options are 'None' or 'True'")
 
     def test_cross_validation_logistic(self):
         df = self.__df.copy()
