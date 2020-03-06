@@ -114,7 +114,6 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Non
     predicts=[]
 
     cutoffs = generate_cutoffs(df, horizon, initial, period)
-<<<<<<< 3b7c4e17004965451cfe52a0797cb061360d3dde
     predicts = []
     for cutoff in tqdm(cutoffs):
         # Generate new object with copying fitting options
