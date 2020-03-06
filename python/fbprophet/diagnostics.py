@@ -117,11 +117,11 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Fal
     if multiprocess is True:
         with Pool() as pool:
             logger.info('Running cross validation in multiprocessing mode')
-            input_df = ([df, model, cutoff, horizon, predict_columns] for cutoff in tqdm(cutoffs))
+            input_df = ((df, model, cutoff, horizon, predict_columns) for cutoff in tqdm(cutoffs))
             predicts = pool.starmap(single_cutoff_forecast, input_df)
     else:
         if multiprocess is False:
-            for cutoff in cutoffs:
+            for cutoff in tqdm(cutoffs):
                 predicts.append(single_cutoff_forecast(df, model, cutoff, horizon, predict_columns))
 
     # Combine all predicted pd.DataFrame into one pd.DataFrame
