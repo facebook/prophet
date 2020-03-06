@@ -1185,7 +1185,7 @@ class Egypt(HolidayBase):
         # The Monday following Orthodox Easter
         name = "Sham El Nessim"
         for offset in range(-1, 2, 1):
-            orthodox_easter = easter(year + offset, method=2)
+            orthodox_easter = easter(year + offset, method=EASTER_ORTHODOX)
             ds = orthodox_easter + timedelta(days=1)
             if ds.year == year:
                 self[ds] = name
@@ -1478,7 +1478,7 @@ class Belarus(HolidayBase):
 
         # Independence Day
         name = "Independence Day"
-        self[date(year, 6, 3)] = name
+        self[date(year, 7, 3)] = name
 
         # October Revolution Day
         name = "October Revolution Day"
