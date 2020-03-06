@@ -11,9 +11,11 @@ from __future__ import unicode_literals
 import itertools
 import os
 from unittest import TestCase
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
+import datetime
 
 from fbprophet import Prophet
 from fbprophet import diagnostics
@@ -74,6 +76,28 @@ class TestDiagnostics(TestCase):
                 df_cv = diagnostics.cross_validation(
                     m, horizon='4 days', period='10 days', initial='115 days',
                     multiprocess=multiprocess)
+
+
+    def test_check_single_cutoff_forecast_func_calls(self):
+        m = Prophet()
+        m.fit(self.__df)
+        mock_predict = pd.DataFrame({'ds':pd.date_range(start='2012-09-17', periods=3),
+                                     'yhat':np.arange(16, 19),
+                                     'yhat_lower':np.arange(15, 18),
+                                     'yhat_upper': np.arange(17, 20),
+                                      'y': np.arange(16.5, 19.5),
+                                     'cutoff': [datetime.date(2012, 9, 15)]*3})
+
+        # cross validation  with 3 and 7 forecasts
+        for args, forecasts in ((['4 days', '10 days', '115 days'], 3),
+                            (['4 days', '4 days', '115 days'], 7)):
+            with patch('fbprophet.diagnostics.single_cutoff_forecast') as mock_func:
+                mock_func.return_value = mock_predict
+                df_cv = diagnostics.cross_validation(m, *args)
+                # check single forecast function called expected number of times
+                self.assertEqual(diagnostics.single_cutoff_forecast.call_count,
+                                 forecasts)
+
 
     def test_cross_validation_logistic(self):
         df = self.__df.copy()
