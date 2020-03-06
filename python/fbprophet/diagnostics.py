@@ -59,7 +59,7 @@ def generate_cutoffs(df, horizon, initial, period):
     return list(reversed(result))
 
 
-def cross_validation(model, horizon, period=None, initial=None, multiprocess=None):
+def cross_validation(model, horizon, period=None, initial=None, multiprocess=False):
     """Cross-Validation for time series.
 
     Computes forecasts from historical cutoff points. Beginning from
@@ -78,7 +78,7 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Non
         be done at every this period. If not provided, 0.5 * horizon is used.
     initial: string with pd.Timedelta compatible style. The first training
         period will begin here. If not provided, 3 * horizon is used.
-    multiprocess: None, True, Optional (defaults to None). If `True`, use the
+    multiprocess: True, False, Optional (defaults to False). If `True`, use the
         `multiprocessing` module to distribute each task to a different processor
         core.
 
@@ -115,56 +115,17 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Non
 
     cutoffs = generate_cutoffs(df, horizon, initial, period)
     predicts = []
-    for cutoff in tqdm(cutoffs):
-        # Generate new object with copying fitting options
-        m = prophet_copy(model, cutoff)
-        # Train model
-        history_c = df[df['ds'] <= cutoff]
-        if history_c.shape[0] < 2:
-            raise Exception(
-                'Less than two datapoints before cutoff. '
-                'Increase initial window.'
-            )
-        m.fit(history_c, **model.fit_kwargs)
-        # Calculate yhat
-        index_predicted = (df['ds'] > cutoff) & (df['ds'] <= cutoff + horizon)
-        # Get the columns for the future dataframe
-        columns = ['ds']
-        if m.growth == 'logistic':
-            columns.append('cap')
-            if m.logistic_floor:
-                columns.append('floor')
-        columns.extend(m.extra_regressors.keys())
-        columns.extend([
-            props['condition_name']
-            for props in m.seasonalities.values()
-            if props['condition_name'] is not None])
-        yhat = m.predict(df[index_predicted][columns])
-        # Merge yhat(predicts), y(df, original data) and cutoff
-        predicts.append(pd.concat([
-            yhat[predict_columns],
-            df[index_predicted][['y']].reset_index(drop=True),
-            pd.DataFrame({'cutoff': [cutoff] * len(yhat)})
-        ], axis=1))
     if multiprocess is True:
         with Pool() as pool:
             logger.info('Running cross validation in multiprocessing mode')
-            input_df = [[df, model, cutoff, horizon, predict_columns] for cutoff in cutoffs]
+            input_df = ([df, model, cutoff, horizon, predict_columns] for cutoff in tqdm(cutoffs))
             predicts = pool.starmap(single_cutoff_forecast, input_df)
-    elif multiprocess is None:
-        predicts = []
-        for cutoff in cutoffs:
-            predicts.append(single_cutoff_forecast(df, model, cutoff, horizon, predict_columns))
-    else:
-        raise ValueError(f"{multiprocess} is not a valid assignment to multiprocess argument.Valid "
-                         f"options are 'None' or 'True'")
-
 
     # Combine all predicted pd.DataFrame into one pd.DataFrame
     return pd.concat(predicts, axis=0).reset_index(drop=True)
 
 
-def single_cutoff_forecast(df, m, cutoff, horizon, predict_columns):
+def single_cutoff_forecast(df, model, cutoff, horizon, predict_columns):
     """Forecast for single cutoff. Used in cross validation function
     when evaluating for multiple cutoffs either sequentially or in parallel .
 
@@ -173,11 +134,10 @@ def single_cutoff_forecast(df, m, cutoff, horizon, predict_columns):
     df: pd.DataFrame
         DataFrame with history to be used for single
         cutoff forecast
-    m: Prophet model.
-    cutoff: string with pd.Timedelta compatible style.
+    model: Prophet model object.
+    cutoff: pd.Timedelta.
         Simulated Forecast will start from this date.
-    horizon: string with pd.Timedelta compatible style, e.g., '5 days',
-        '3 hours', '10 seconds'.
+    horizon: pd.Timestamp
     predict_columns: List of strings e.g. ['ds', 'yhat']
         Columns with date and forecast to be returned in output.
 
@@ -188,7 +148,7 @@ def single_cutoff_forecast(df, m, cutoff, horizon, predict_columns):
     """
 
     # Generate new object with copying fitting options
-    m = prophet_copy(m, cutoff)
+    m = prophet_copy(model, cutoff)
     # Train model
     history_c = df[df['ds'] <= cutoff]
     if history_c.shape[0] < 2:
@@ -196,7 +156,7 @@ def single_cutoff_forecast(df, m, cutoff, horizon, predict_columns):
             'Less than two datapoints before cutoff. '
             'Increase initial window.'
         )
-    m.fit(history_c, **m.fit_kwargs)
+    m.fit(history_c, **model.fit_kwargs)
     # Calculate yhat
     index_predicted = (df['ds'] > cutoff) & (df['ds'] <= cutoff + horizon)
     # Get the columns for the future dataframe
