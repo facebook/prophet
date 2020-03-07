@@ -19,6 +19,7 @@ class IStanBackend(ABC):
     def __init__(self, logger):
         self.model = self.load_model()
         self.logger = logger
+        self.stan_fit = None
 
     @staticmethod
     @abstractmethod
@@ -74,7 +75,7 @@ class CmdStanPyBackend(IStanBackend):
             kwargs['algorithm'] = 'Newton' if stan_data['T'] < 100 else 'LBFGS'
         iterations = int(1e4)
         try:
-            stan_fit = self.model.optimize(data=stan_data,
+            self.stan_fit = self.model.optimize(data=stan_data,
                                            inits=stan_init,
                                            iter=iterations,
                                            **kwargs)
@@ -85,14 +86,14 @@ class CmdStanPyBackend(IStanBackend):
                     'Optimization terminated abnormally. Falling back to Newton.'
                 )
                 kwargs['algorithm'] = 'Newton'
-                stan_fit = self.model.optimize(data=stan_data,
+                self.stan_fit = self.model.optimize(data=stan_data,
                                                inits=stan_init,
                                                iter=iterations,
                                                **kwargs)
             else:
                 raise e
 
-        params = self.stan_to_dict_numpy(stan_fit.column_names, stan_fit.optimized_params_np)
+        params = self.stan_to_dict_numpy(self.stan_fit.column_names, self.stan_fit.optimized_params_np)
         for par in params:
             params[par] = params[par].reshape((1, -1))
         return params
@@ -105,14 +106,14 @@ class CmdStanPyBackend(IStanBackend):
         if 'warmup_iters' not in kwargs:
             kwargs['warmup_iters'] = samples // 2
 
-        stan_fit = self.model.sample(data=stan_data,
+        self.stan_fit = self.model.sample(data=stan_data,
                                      inits=stan_init,
                                      sampling_iters=samples,
                                      **kwargs)
-        res = stan_fit.sample
+        res = self.stan_fit.sample
         (samples, c, columns) = res.shape
         res = res.reshape((samples * c, columns))
-        params = self.stan_to_dict_numpy(stan_fit.column_names, res)
+        params = self.stan_to_dict_numpy(self.stan_fit.column_names, res)
 
         for par in params:
             s = params[par].shape
@@ -220,10 +221,10 @@ class PyStanBackend(IStanBackend):
             iter=samples,
         )
         args.update(kwargs)
-        stan_fit = self.model.sampling(**args)
+        self.stan_fit = self.model.sampling(**args)
         out = dict()
-        for par in stan_fit.model_pars:
-            out[par] = stan_fit[par]
+        for par in self.stan_fit.model_pars:
+            out[par] = self.stan_fit[par]
             # Shape vector parameters
             if par in ['delta', 'beta'] and len(out[par].shape) < 2:
                 out[par] = out[par].reshape((-1, 1))
@@ -239,17 +240,19 @@ class PyStanBackend(IStanBackend):
         )
         args.update(kwargs)
         try:
-            params = self.model.optimizing(**args)
+            self.stan_fit = self.model.optimizing(**args)
         except RuntimeError:
             # Fall back on Newton
             self.logger.warning(
                 'Optimization terminated abnormally. Falling back to Newton.'
             )
             args['algorithm'] = 'Newton'
-            params = self.model.optimizing(**args)
+            self.stan_fit = self.model.optimizing(**args)
 
-        for par in params:
-            params[par] = params[par].reshape((1, -1))
+        params = dict()
+
+        for par in self.stan_fit.keys():
+            params[par] = self.stan_fit[par].reshape((1, -1))
 
         return params
 
