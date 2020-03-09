@@ -11,9 +11,11 @@ from __future__ import unicode_literals
 import itertools
 import os
 from unittest import TestCase
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
+import datetime
 
 from fbprophet import Prophet
 from fbprophet import diagnostics
@@ -38,25 +40,64 @@ class TestDiagnostics(TestCase):
         horizon = pd.Timedelta('4 days')
         period = pd.Timedelta('10 days')
         initial = pd.Timedelta('115 days')
-        df_cv = diagnostics.cross_validation(
-            m, horizon='4 days', period='10 days', initial='115 days')
-        self.assertEqual(len(np.unique(df_cv['cutoff'])), 3)
-        self.assertEqual(max(df_cv['ds'] - df_cv['cutoff']), horizon)
-        self.assertTrue(min(df_cv['cutoff']) >= min(self.__df['ds']) + initial)
-        dc = df_cv['cutoff'].diff()
-        dc = dc[dc > pd.Timedelta(0)].min()
-        self.assertTrue(dc >= period)
-        self.assertTrue((df_cv['cutoff'] < df_cv['ds']).all())
-        # Each y in df_cv and self.__df with same ds should be equal
-        df_merged = pd.merge(df_cv, self.__df, 'left', on='ds')
-        self.assertAlmostEqual(
-            np.sum((df_merged['y_x'] - df_merged['y_y']) ** 2), 0.0)
-        df_cv = diagnostics.cross_validation(
-            m, horizon='4 days', period='10 days', initial='135 days')
-        self.assertEqual(len(np.unique(df_cv['cutoff'])), 1)
-        with self.assertRaises(ValueError):
-            diagnostics.cross_validation(
-                m, horizon='10 days', period='10 days', initial='140 days')
+        # Run for both cases of multiprocess on or off
+        for multiprocess in [False, True]:
+            df_cv = diagnostics.cross_validation(
+                m, horizon='4 days', period='10 days', initial='115 days',
+                multiprocess=multiprocess)
+            self.assertEqual(len(np.unique(df_cv['cutoff'])), 3)
+            self.assertEqual(max(df_cv['ds'] - df_cv['cutoff']), horizon)
+            self.assertTrue(min(df_cv['cutoff']) >= min(self.__df['ds']) + initial)
+            dc = df_cv['cutoff'].diff()
+            dc = dc[dc > pd.Timedelta(0)].min()
+            self.assertTrue(dc >= period)
+            self.assertTrue((df_cv['cutoff'] < df_cv['ds']).all())
+            # Each y in df_cv and self.__df with same ds should be equal
+            df_merged = pd.merge(df_cv, self.__df, 'left', on='ds')
+            self.assertAlmostEqual(
+                np.sum((df_merged['y_x'] - df_merged['y_y']) ** 2), 0.0)
+            df_cv = diagnostics.cross_validation(
+                m, horizon='4 days', period='10 days', initial='135 days')
+            self.assertEqual(len(np.unique(df_cv['cutoff'])), 1)
+            with self.assertRaises(ValueError):
+                diagnostics.cross_validation(
+                    m, horizon='10 days', period='10 days', initial='140 days')
+
+    def test_invalid_args_multiprocess(self):
+        m = Prophet()
+        m.fit(self.__df)
+        # Calculate the number of cutoff points(k)
+        horizon = pd.Timedelta('4 days')
+        period = pd.Timedelta('10 days')
+        initial = pd.Timedelta('115 days')
+        # Run for both cases of multiprocess on or off
+        for multiprocess in [1, 'yes']:
+            with self.assertRaises(ValueError):
+                df_cv = diagnostics.cross_validation(
+                    m, horizon='4 days', period='10 days', initial='115 days',
+                    multiprocess=multiprocess)
+
+
+    def test_check_single_cutoff_forecast_func_calls(self):
+        m = Prophet()
+        m.fit(self.__df)
+        mock_predict = pd.DataFrame({'ds':pd.date_range(start='2012-09-17', periods=3),
+                                     'yhat':np.arange(16, 19),
+                                     'yhat_lower':np.arange(15, 18),
+                                     'yhat_upper': np.arange(17, 20),
+                                      'y': np.arange(16.5, 19.5),
+                                     'cutoff': [datetime.date(2012, 9, 15)]*3})
+
+        # cross validation  with 3 and 7 forecasts
+        for args, forecasts in ((['4 days', '10 days', '115 days'], 3),
+                            (['4 days', '4 days', '115 days'], 7)):
+            with patch('fbprophet.diagnostics.single_cutoff_forecast') as mock_func:
+                mock_func.return_value = mock_predict
+                df_cv = diagnostics.cross_validation(m, *args)
+                # check single forecast function called expected number of times
+                self.assertEqual(diagnostics.single_cutoff_forecast.call_count,
+                                 forecasts)
+
 
     def test_cross_validation_logistic(self):
         df = self.__df.copy()
