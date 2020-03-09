@@ -63,21 +63,6 @@ class TestDiagnostics(TestCase):
                 diagnostics.cross_validation(
                     m, horizon='10 days', period='10 days', initial='140 days')
 
-    def test_invalid_args_multiprocess(self):
-        m = Prophet()
-        m.fit(self.__df)
-        # Calculate the number of cutoff points(k)
-        horizon = pd.Timedelta('4 days')
-        period = pd.Timedelta('10 days')
-        initial = pd.Timedelta('115 days')
-        # Run for both cases of multiprocess on or off
-        for multiprocess in [1, 'yes']:
-            with self.assertRaises(ValueError):
-                df_cv = diagnostics.cross_validation(
-                    m, horizon='4 days', period='10 days', initial='115 days',
-                    multiprocess=multiprocess)
-
-
     def test_check_single_cutoff_forecast_func_calls(self):
         m = Prophet()
         m.fit(self.__df)
