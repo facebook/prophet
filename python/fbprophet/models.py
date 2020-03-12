@@ -103,12 +103,13 @@ class CmdStanPyBackend(IStanBackend):
 
         if 'chains' not in kwargs:
             kwargs['chains'] = 4
-        if 'warmup_iters' not in kwargs:
-            kwargs['warmup_iters'] = samples // 2
+        iter_half = samples // 2
+        if 'iter_warmup' not in kwargs:
+            kwargs['iter_warmup'] = iter_half
 
         self.stan_fit = self.model.sample(data=stan_data,
                                      inits=stan_init,
-                                     sampling_iters=samples,
+                                     iter_sampling=iter_half,
                                      **kwargs)
         res = self.stan_fit.sample
         (samples, c, columns) = res.shape
