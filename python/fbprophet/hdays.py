@@ -1491,3 +1491,85 @@ class Belarus(HolidayBase):
 
 class BY(Belarus):
     pass
+
+
+# ------------ Holidays in United Arab Emirates---------------------
+class UnitedArabEmirates(HolidayBase):
+    """
+    Implement public holidays in United Arab Emirates
+
+    Reference:
+    https://en.wikipedia.org/wiki/Public_holidays_in_the_United_Arab_Emirates
+    """
+    
+    def __init__(self, **kwargs):
+        self.country = "AE"
+        HolidayBase.__init__(self, **kwargs)
+        
+    def _populate(self, year):
+        # New Year's Day
+        name = "New Year's Day"
+        self[date(year, 1, 1)] = name
+        
+        # Eid al-Fitr
+        name = "Eid al-Fitr"
+        for offset in range(-1, 2, 1):
+            islam_year = from_gregorian(year + offset, 6, 15)[0]
+            y1, m1, d1 = to_gregorian(islam_year, 9, 29)
+            y2, m2, d2 = to_gregorian(islam_year, 9, 30) # Note: Ramadan day count is determined by Moon Sighting
+            y3, m3, d3 = to_gregorian(islam_year, 10, 1)
+            y4, m4, d4 = to_gregorian(islam_year, 10, 2)
+            y5, m5, d5 = to_gregorian(islam_year, 10, 3)
+            if y1 == year:
+                self[date(y1, m1, d1)] = name
+            if y2 == year:
+                self[date(y2, m2, d2)] = name
+            if y3 == year:
+                self[date(y3, m3, d3)] = name
+            if y4 == year:
+                self[date(y4, m4, d4)] = name
+            if y5 == year:
+                self[date(y5, m5, d5)] = name
+
+        # Day of Arafah
+        name = "Day of Arafah"
+        for offset in range(-1, 2, 1):
+            islam_year = from_gregorian(year + offset, 8, 22)[0]
+            y, m, d = to_gregorian(islam_year, 12, 9)
+            if y == year:
+                self[date(y, m, d)] = name
+        
+        # Feast of the Sacrifice
+        name = "Feast of the Sacrifice"
+        for offset in range(-1, 2, 1):
+            islam_year = from_gregorian(year + offset, 8, 22)[0]
+            y1, m1, d1 = to_gregorian(islam_year, 12, 10)
+            y2, m2, d2 = to_gregorian(islam_year, 12, 11)
+            y3, m3, d3 = to_gregorian(islam_year, 12, 12)
+            if y1 == year:
+                self[date(y1, m1, d1)] = name
+            if y2 == year:
+                self[date(y2, m2, d2)] = name
+            if y3 == year:
+                self[date(y3, m3, d3)] = name
+
+        # Islamic New Year
+        name = "Islamic New Year"
+        for offset in range(-1, 2, 1):
+            islam_year = from_gregorian(year + offset, 9, 11)[0]
+            y, m, d = to_gregorian(islam_year + 1, 1, 1)
+            if y == year:
+                self[date(y, m, d)] = name
+        
+        # Commemoration Day
+        name = "Commemoration Day"
+        self[date(year, 11, 30)] = name
+        
+        # National Day
+        name = "National Day"
+        self[date(year, 12, 2)] = name
+        self[date(year, 12, 3)] = name
+    
+    
+class AE(UnitedArabEmirates):
+    pass
