@@ -59,12 +59,12 @@ def generate_cutoffs(df, horizon, initial, period):
     return list(reversed(result))
 
 
-def cross_validation(model, horizon, period=None, initial=None, multiprocess=False):
+def cross_validation(model, horizon, period=None, initial=None, multiprocess=False, cutoffs=None):
     """Cross-Validation for time series.
 
-    Computes forecasts from historical cutoff points. Beginning from
-    (end - horizon), works backwards making cutoffs with a spacing of period
-    until initial is reached.
+    Computes forecasts from historical cutoff points, which user can input.
+    If not provided beginning from (end - horizon), works backwards making 
+    cutoffs with a spacing of period until initial is reached.
 
     When period is equal to the time interval of the data, this is the
     technique described in https://robjhyndman.com/hyndsight/tscv/ .
@@ -78,6 +78,10 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Fal
         be done at every this period. If not provided, 0.5 * horizon is used.
     initial: string with pd.Timedelta compatible style. The first training
         period will begin here. If not provided, 3 * horizon is used.
+    cutoffs: list of pd.Timestamp representing cutoff to be used during
+        cross-validtation. If not provided works beginning from
+        (end - horizon), works backwards making cutoffs with a spacing of period
+        until initial is reached.
     multiprocess: True, False, Optional (defaults to False). If `True`, use the
         `multiprocessing` module to distribute each task to a different processor
         core.
@@ -111,7 +115,8 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Fal
     if model.uncertainty_samples:
         predict_columns.extend(['yhat_lower', 'yhat_upper'])
 
-    cutoffs = generate_cutoffs(df, horizon, initial, period)
+    if cutoffs is None:
+        cutoffs = generate_cutoffs(df, horizon, initial, period)
 
     if multiprocess is True:
         with Pool() as pool:
