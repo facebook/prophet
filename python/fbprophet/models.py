@@ -57,7 +57,7 @@ class CmdStanPyBackend(IStanBackend):
         model_name = 'prophet.stan'
         target_name = 'prophet_model.bin'
 
-        sm = cmdstanpy.Model(stan_file=os.path.join(model_dir, model_name))
+        sm = cmdstanpy.CmdStanModel(stan_file=os.path.join(model_dir, model_name))
         sm.compile()
         copy(sm.exe_file, os.path.join(target_dir, target_name))
 
@@ -67,7 +67,7 @@ class CmdStanPyBackend(IStanBackend):
             'fbprophet',
             'stan_model/prophet_model.bin',
         )
-        return cmdstanpy.Model(exe_file=model_file)
+        return cmdstanpy.CmdStanModel(exe_file=model_file)
 
     def fit(self, stan_init, stan_data, **kwargs):
         (stan_init, stan_data) = self.prepare_data(stan_init, stan_data)
