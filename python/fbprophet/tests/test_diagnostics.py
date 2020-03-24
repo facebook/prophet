@@ -10,6 +10,8 @@ from __future__ import unicode_literals
 
 import itertools
 import os
+# new line added
+import unittest
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -121,15 +123,24 @@ class TestDiagnostics(TestCase):
     def test_cross_validation_default_value_check(self):
         m = Prophet()
         m.fit(self.__df)
-        # Default value of initial should be equal to 3 * horizon
+        # When specify a list of cutoffs
+        #  the cutoff dates in df_cv are those specified
         df_cv1 = diagnostics.cross_validation(
-            m, horizon='32 days', period='10 days')
+            m,
+            horizon='32 days',
+            period='10 days',
+            cutoffs=[pd.Timestamp('2012-07-31'), pd.Timestamp('2012-08-31')])
+        self.assertCountEqual(
+            (df_cv1['cutoff'].unique(), [pd.Timestamp('2012-07-31'), pd.Timestamp('2012-08-31')]))
+        # Default value of initial should be equal to 3 * horizon
         df_cv2 = diagnostics.cross_validation(
+            m, horizon='32 days', period='10 days')
+        df_cv3 = diagnostics.cross_validation(
             m, horizon='32 days', period='10 days', initial='96 days')
         self.assertAlmostEqual(
-            ((df_cv1['y'] - df_cv2['y']) ** 2).sum(), 0.0)
+            ((df_cv2['y'] - df_cv3['y']) ** 2).sum(), 0.0)
         self.assertAlmostEqual(
-            ((df_cv1['yhat'] - df_cv2['yhat']) ** 2).sum(), 0.0)
+            ((df_cv2['yhat'] - df_cv3['yhat']) ** 2).sum(), 0.0)
 
     def test_cross_validation_uncertainty_disabled(self):
         df = self.__df.copy()
@@ -313,3 +324,7 @@ class TestDiagnostics(TestCase):
         self.assertTrue((changepoints == m2.changepoints).all())
         self.assertTrue('custom' in m2.seasonalities)
         self.assertTrue('binary_feature' in m2.extra_regressors)
+
+# new lines added
+if __name__ == "__main__":
+    unittest.main()

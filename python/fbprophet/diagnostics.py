@@ -119,7 +119,6 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Fal
         # Compute Cutoffs
         cutoffs = generate_cutoffs(df, horizon, initial, period)
 
-        
 
     if multiprocess is True:
         with Pool() as pool:
