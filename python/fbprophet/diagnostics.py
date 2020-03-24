@@ -93,30 +93,33 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Fal
 
     df = model.history.copy().reset_index(drop=True)
     horizon = pd.Timedelta(horizon)
-    # Set period
-    period = 0.5 * horizon if period is None else pd.Timedelta(period)
-    # Identify largest seasonality period
-    period_max = 0.
-    for s in model.seasonalities.values():
-        period_max = max(period_max, s['period'])
-    seasonality_dt = pd.Timedelta(str(period_max) + ' days')
-    # Set initial
-    if initial is None:
-        initial = max(3 * horizon, seasonality_dt)
-    else:
-        initial = pd.Timedelta(initial)
-        if initial < seasonality_dt:
-            msg = 'Seasonality has period of {} days '.format(period_max)
-            msg += 'which is larger than initial window. '
-            msg += 'Consider increasing initial.'
-            logger.warning(msg)
 
     predict_columns = ['ds', 'yhat']
     if model.uncertainty_samples:
         predict_columns.extend(['yhat_lower', 'yhat_upper'])
 
     if cutoffs is None:
+        # Set period
+        period = 0.5 * horizon if period is None else pd.Timedelta(period)
+        # Identify largest seasonality period
+        period_max = 0.
+        for s in model.seasonalities.values():
+            period_max = max(period_max, s['period'])
+        seasonality_dt = pd.Timedelta(str(period_max) + ' days')
+        # Set initial
+        if initial is None:
+            initial = max(3 * horizon, seasonality_dt)
+        else:
+            initial = pd.Timedelta(initial)
+        if initial < seasonality_dt:
+            msg = 'Seasonality has period of {} days '.format(period_max)
+            msg += 'which is larger than initial window. '
+            msg += 'Consider increasing initial.'
+            logger.warning(msg)
+        # Compute Cutoffs
         cutoffs = generate_cutoffs(df, horizon, initial, period)
+
+        
 
     if multiprocess is True:
         with Pool() as pool:
