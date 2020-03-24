@@ -97,15 +97,17 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Fal
     predict_columns = ['ds', 'yhat']
     if model.uncertainty_samples:
         predict_columns.extend(['yhat_lower', 'yhat_upper'])
+        
+    # Identify largest seasonality period
+    period_max = 0.
+    for s in model.seasonalities.values():
+        period_max = max(period_max, s['period'])
+    seasonality_dt = pd.Timedelta(str(period_max) + ' days')    
 
     if cutoffs is None:
         # Set period
         period = 0.5 * horizon if period is None else pd.Timedelta(period)
-        # Identify largest seasonality period
-        period_max = 0.
-        for s in model.seasonalities.values():
-            period_max = max(period_max, s['period'])
-        seasonality_dt = pd.Timedelta(str(period_max) + ' days')
+        
         # Set initial
         if initial is None:
             initial = max(3 * horizon, seasonality_dt)
@@ -118,7 +120,8 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Fal
             logger.warning(msg)
         # Compute Cutoffs
         cutoffs = generate_cutoffs(df, horizon, initial, period)
-
+    else:
+        initial = cutoffs[0] - df['ds'].min()
 
     if multiprocess is True:
         with Pool() as pool:
