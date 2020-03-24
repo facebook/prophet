@@ -113,15 +113,19 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Fal
             initial = max(3 * horizon, seasonality_dt)
         else:
             initial = pd.Timedelta(initial)
-        if initial < seasonality_dt:
-            msg = 'Seasonality has period of {} days '.format(period_max)
-            msg += 'which is larger than initial window. '
-            msg += 'Consider increasing initial.'
-            logger.warning(msg)
         # Compute Cutoffs
         cutoffs = generate_cutoffs(df, horizon, initial, period)
     else:
         initial = cutoffs[0] - df['ds'].min()
+        
+    # Check if the initial window 
+    # (that is, the amount of time between the start of the history and the first cutoff)
+    # is less than the maximum seasonality period
+    if initial < seasonality_dt:
+            msg = 'Seasonality has period of {} days '.format(period_max)
+            msg += 'which is larger than initial window. '
+            msg += 'Consider increasing initial.'
+            logger.warning(msg)
 
     if multiprocess is True:
         with Pool() as pool:
