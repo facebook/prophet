@@ -141,9 +141,8 @@ class TestDiagnostics(TestCase):
             horizon='32 days',
             period='10 days',
             cutoffs=[pd.Timestamp('2012-07-31'), pd.Timestamp('2012-08-31')])
-        self.assertItemsEqual(
-            (df_cv1['cutoff'].unique(), [pd.Timestamp('2012-07-31'), pd.Timestamp('2012-08-31')]))  
-        
+        self.assertEqual(len(df_cv1['cutoff'].unique()), 2)
+      
     def test_cross_validation_uncertainty_disabled(self):
         df = self.__df.copy()
         for uncertainty in [0, False]:
