@@ -131,6 +131,18 @@ class TestDiagnostics(TestCase):
         self.assertAlmostEqual(
             ((df_cv1['yhat'] - df_cv2['yhat']) ** 2).sum(), 0.0)
 
+    def test_cross_validation_custom_cutoffs(self):
+        m = Prophet()
+        m.fit(self.__df)
+        # When specify a list of cutoffs
+        #  the cutoff dates in df_cv are those specified
+        df_cv1 = diagnostics.cross_validation(
+            m,
+            horizon='32 days',
+            period='10 days',
+            cutoffs=[pd.Timestamp('2012-07-31'), pd.Timestamp('2012-08-31')])
+        self.assertEqual(len(df_cv1['cutoff'].unique()), 2)
+      
     def test_cross_validation_uncertainty_disabled(self):
         df = self.__df.copy()
         for uncertainty in [0, False]:
@@ -313,3 +325,4 @@ class TestDiagnostics(TestCase):
         self.assertTrue((changepoints == m2.changepoints).all())
         self.assertTrue('custom' in m2.seasonalities)
         self.assertTrue('binary_feature' in m2.extra_regressors)
+
