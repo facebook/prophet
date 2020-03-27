@@ -6,7 +6,7 @@ pandas>=0.23.4
 matplotlib>=2.0.0
 LunarCalendar>=0.0.9
 convertdate>=2.1.2
-holidays>=0.9.5
+holidays>=0.9.5,<=0.9.12
 setuptools-git>=1.2
 python-dateutil>=2.8.0
 tqdm>=4.36.1
