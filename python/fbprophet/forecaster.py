@@ -97,7 +97,7 @@ class Prophet(object):
     ):
         self.growth = growth
 
-        self.changepoints = pd.to_datetime(changepoints)
+        self.changepoints = pd.Series(pd.to_datetime(changepoints), name='ds')
         if self.changepoints is not None:
             self.n_changepoints = len(self.changepoints)
             self.specified_changepoints = True
@@ -405,7 +405,7 @@ class Prophet(object):
                 )
             else:
                 # set empty changepoints
-                self.changepoints = pd.to_datetime([])
+                self.changepoints = pd.Series(pd.to_datetime([]), name='ds')
         if len(self.changepoints) > 0:
             self.changepoints_t = np.sort(np.array(
                 (self.changepoints - self.start) / self.t_scale))

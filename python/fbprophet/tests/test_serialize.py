@@ -80,7 +80,11 @@ class TestSerialize(TestCase):
             'upper_window': [1] * 2,
         })
         # Test with holidays and country_holidays
-        m = Prophet(holidays=holidays, seasonality_mode='multiplicative')
+        m = Prophet(
+            holidays=holidays,
+            seasonality_mode='multiplicative',
+            changepoints=['2012-07-01', '2012-10-01', '2013-01-01'],
+        )
         m.add_country_holidays(country_name='US')
         m.add_seasonality(name='conditional_weekly', period=7, fourier_order=3,
                           prior_scale=2., condition_name='is_conditional_week')
