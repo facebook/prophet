@@ -405,7 +405,7 @@ class Prophet(object):
                 )
             else:
                 # set empty changepoints
-                self.changepoints = []
+                self.changepoints = pd.to_datetime([])
         if len(self.changepoints) > 0:
             self.changepoints_t = np.sort(np.array(
                 (self.changepoints - self.start) / self.t_scale))

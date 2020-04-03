@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from fbprophet.forecaster import Prophet
+from fbprophet import __version__
 
 
 SIMPLE_ATTRIBUTES = [
@@ -84,6 +85,7 @@ def model_to_json(model):
     # Params (Dict[str, np.ndarray])
     model_json['params'] = {k: v.tolist() for k, v in model.params.items()}
     # Attributes that are skipped: stan_fit, stan_backend
+    model_json['__fbprophet_version'] = __version__
     return json.dumps(model_json)
 
 

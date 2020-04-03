@@ -8,6 +8,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import json
 import os
 import sys
 from unittest import TestCase, skipUnless
@@ -39,6 +40,8 @@ class TestSerialize(TestCase):
         model_str = model_to_json(m)
         # Make sure json doesn't get too large in the future
         self.assertTrue(len(model_str) < 200000)
+        z = json.loads(model_str)
+        self.assertEqual(z['__fbprophet_version'], '0.6')
 
         m2 = model_from_json(model_str)
 
@@ -128,7 +131,3 @@ class TestSerialize(TestCase):
         fcst2 = m2.predict(test)
 
         self.assertTrue(np.array_equal(fcst['yhat'].values, fcst2['yhat'].values))
-
-
-
-
