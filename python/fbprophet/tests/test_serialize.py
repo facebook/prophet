@@ -107,6 +107,7 @@ class TestSerialize(TestCase):
         test = df.tail(100)
 
         m.fit(train)
+        future = m.make_future_dataframe(periods=100, include_history=False)
         fcst = m.predict(test)
         # Serialize!
         m2 = model_from_json(model_to_json(m))
@@ -132,6 +133,7 @@ class TestSerialize(TestCase):
         self.assertTrue(m2.stan_backend is None)
 
         # Check that m2 makes the same forecast
+        future = m2.make_future_dataframe(periods=100, include_history=False)
         fcst2 = m2.predict(test)
 
         self.assertTrue(np.array_equal(fcst['yhat'].values, fcst2['yhat'].values))

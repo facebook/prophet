@@ -65,7 +65,9 @@ def model_to_json(model):
         if getattr(model, attribute) is None:
             model_json[attribute] = None
         else:
-            model_json[attribute] = getattr(model, attribute).to_json(orient='split')
+            model_json[attribute] = getattr(model, attribute).to_json(
+                orient='split', date_format='iso'
+            )
     for attribute in PD_TIMESTAMP:
         model_json[attribute] = getattr(model, attribute).timestamp()
     for attribute in PD_TIMEDELTA:
@@ -111,7 +113,10 @@ def model_from_json(model_json):
         if attr_dict[attribute] is None:
             setattr(model, attribute, None)
         else:
-            setattr(model, attribute, pd.read_json(attr_dict[attribute], typ='series', orient='split'))
+            s = pd.read_json(attr_dict[attribute], typ='series', orient='split')
+            if s.name == 'ds':
+                s = s.dt.tz_convert(None)
+            setattr(model, attribute, s)
     for attribute in PD_TIMESTAMP:
         setattr(model, attribute, pd.Timestamp.utcfromtimestamp(attr_dict[attribute]))
     for attribute in PD_TIMEDELTA:
