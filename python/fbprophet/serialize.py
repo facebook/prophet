@@ -115,7 +115,9 @@ def model_from_json(model_json):
         else:
             s = pd.read_json(attr_dict[attribute], typ='series', orient='split')
             if s.name == 'ds':
-                s = s.dt.tz_convert(None)
+                if len(s) == 0:
+                    s = pd.to_datetime(s)
+                s = s.dt.tz_localize(None)
             setattr(model, attribute, s)
     for attribute in PD_TIMESTAMP:
         setattr(model, attribute, pd.Timestamp.utcfromtimestamp(attr_dict[attribute]))
