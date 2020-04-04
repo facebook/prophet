@@ -288,7 +288,10 @@ class TestDiagnostics(TestCase):
             self.assertEqual(m1.growth, m2.growth)
             self.assertEqual(m1.n_changepoints, m2.n_changepoints)
             self.assertEqual(m1.changepoint_range, m2.changepoint_range)
-            self.assertEqual(m1.changepoints, m2.changepoints)
+            if m1.changepoints is None:
+                self.assertEqual(m1.changepoints, m2.changepoints)
+            else:
+                self.assertTrue(m1.changepoints.equals(m2.changepoints))
             self.assertEqual(False, m2.yearly_seasonality)
             self.assertEqual(False, m2.weekly_seasonality)
             self.assertEqual(False, m2.daily_seasonality)
