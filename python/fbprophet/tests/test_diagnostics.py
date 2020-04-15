@@ -43,7 +43,8 @@ class TestDiagnostics(TestCase):
         methods = [None, 'processes', 'threads']
 
         try:
-            import dask
+            from dask.distributed import Client
+            client = Client()
             methods.append("dask")
         except ImportError:
             pass
