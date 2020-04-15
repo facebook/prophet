@@ -40,11 +40,10 @@ class TestDiagnostics(TestCase):
         horizon = pd.Timedelta('4 days')
         period = pd.Timedelta('10 days')
         initial = pd.Timedelta('115 days')
-        # Run for both cases of multiprocess on or off
-        for multiprocess in [False, True]:
+        for parallel in [None, 'processes', 'threads']:
             df_cv = diagnostics.cross_validation(
                 m, horizon='4 days', period='10 days', initial='115 days',
-                multiprocess=multiprocess)
+                parallel=parallel)
             self.assertEqual(len(np.unique(df_cv['cutoff'])), 3)
             self.assertEqual(max(df_cv['ds'] - df_cv['cutoff']), horizon)
             self.assertTrue(min(df_cv['cutoff']) >= min(self.__df['ds']) + initial)

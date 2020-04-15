@@ -10,10 +10,11 @@ import logging
 from tqdm.autonotebook import tqdm
 from copy import deepcopy
 from functools import reduce
+import concurrent.futures
+import itertools
 
 import numpy as np
 import pandas as pd
-from multiprocessing import Pool
 
 logger = logging.getLogger('fbprophet')
 
@@ -59,7 +60,7 @@ def generate_cutoffs(df, horizon, initial, period):
     return list(reversed(result))
 
 
-def cross_validation(model, horizon, period=None, initial=None, multiprocess=False, cutoffs=None):
+def cross_validation(model, horizon, period=None, initial=None, parallel=None, cutoffs=None):
     """Cross-Validation for time series.
 
     Computes forecasts from historical cutoff points, which user can input.
@@ -82,9 +83,17 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Fal
         cross-validtation. If not provided works beginning from
         (end - horizon), works backwards making cutoffs with a spacing of period
         until initial is reached.
-    multiprocess: True, False, Optional (defaults to False). If `True`, use the
-        `multiprocessing` module to distribute each task to a different processor
-        core.
+    parallel : {None, 'processes', 'threads'}
+
+        How to parallelize the forecast computation. By default no parallelism
+        is used.
+
+        * None : No parallelism.
+        * 'processes' : Parallelize with concurrent.futures.ProcessPoolExectuor.
+        * 'threads' : Parallelize with concurrent.futures.ThreadPoolExecutor.
+            Note that some operations currently hold Python's Global Interpreter
+            Lock, so parallelizing with threads may be slower than training
+            sequentially.
 
     Returns
     -------
@@ -127,11 +136,26 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Fal
             msg += 'Consider increasing initial.'
             logger.warning(msg)
 
-    if multiprocess is True:
-        with Pool() as pool:
-            logger.info('Running cross validation in multiprocessing mode')
-            input_df = ((df, model, cutoff, horizon, predict_columns) for cutoff in cutoffs)
-            predicts = pool.starmap(single_cutoff_forecast, input_df)
+    if parallel:
+        if parallel not in {"threads", "processes"}:
+            raise ValueError("'parallel' must be one of 'threads' or "
+                             "'processes'. Got '{}' instead".format(parallel))
+
+        if parallel == "threads":
+            pool = concurrent.futures.ThreadPoolExecutor()
+        elif parallel == "processes":
+            pool = concurrent.futures.ProcessPoolExecutor()
+
+        iterables = [
+            itertools.cycle([df]),
+            itertools.cycle([model]),
+            cutoffs,
+            itertools.cycle([horizon]),
+            itertools.cycle([predict_columns]),
+        ]
+
+        predicts = pool.map(single_cutoff_forecast, *iterables)
+
     else:
         predicts = [
             single_cutoff_forecast(df, model, cutoff, horizon, predict_columns)
