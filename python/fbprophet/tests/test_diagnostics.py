@@ -71,6 +71,10 @@ class TestDiagnostics(TestCase):
                 diagnostics.cross_validation(
                     m, horizon='10 days', period='10 days', initial='140 days')
 
+        # invalid raises
+        with self.assertRaises(ValueError):
+            diagnostics.cross_validation(m, horizon="4 days", parallel="bad")
+
     def test_check_single_cutoff_forecast_func_calls(self):
         m = Prophet()
         m.fit(self.__df)
