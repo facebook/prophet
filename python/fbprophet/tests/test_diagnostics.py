@@ -40,7 +40,15 @@ class TestDiagnostics(TestCase):
         horizon = pd.Timedelta('4 days')
         period = pd.Timedelta('10 days')
         initial = pd.Timedelta('115 days')
-        for parallel in [None, 'processes', 'threads']:
+        methods = [None, 'processes', 'threads']
+
+        try:
+            import dask
+            methods.append("dask")
+        except ImportError:
+            pass
+
+        for parallel in methods:
             df_cv = diagnostics.cross_validation(
                 m, horizon='4 days', period='10 days', initial='115 days',
                 parallel=parallel)

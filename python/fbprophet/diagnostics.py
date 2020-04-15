@@ -94,6 +94,8 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
             Note that some operations currently hold Python's Global Interpreter
             Lock, so parallelizing with threads may be slower than training
             sequentially.
+        * 'dask': Parallelize with Dask.
+           This requires that a dask.distributed Client be created.
 
     Returns
     -------
@@ -137,14 +139,24 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
             logger.warning(msg)
 
     if parallel:
-        if parallel not in {"threads", "processes"}:
-            raise ValueError("'parallel' must be one of 'threads' or "
-                             "'processes'. Got '{}' instead".format(parallel))
+        if parallel not in {"threads", "processes", "dask"}:
+            raise ValueError("'parallel' must be one of 'threads', 'processes',"
+                             " or 'dask'. Got '{}' instead".format(parallel))
 
         if parallel == "threads":
             pool = concurrent.futures.ThreadPoolExecutor()
         elif parallel == "processes":
             pool = concurrent.futures.ProcessPoolExecutor()
+        elif parallel == "dask":
+            try:
+                import dask
+                from dask.distributed import get_client
+            except ImportError:
+                raise ImportError("parallel='dask' requies the optional "
+                                  "dependency dask.")
+            pool = get_client()
+            # delay df and model to avoid large objects in task graph.
+            df, model = pool.scatter([df, model])
 
         iterables = [
             itertools.cycle([df]),
@@ -155,6 +167,9 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         ]
 
         predicts = pool.map(single_cutoff_forecast, *iterables)
+        if parallel == "dask":
+            # convert Futures to DataFrames
+            predicts = pool.gather(predicts)
 
     else:
         predicts = [
