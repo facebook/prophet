@@ -44,7 +44,7 @@ class TestDiagnostics(TestCase):
 
         try:
             from dask.distributed import Client
-            client = Client()
+            client = Client(processes=False)  # noqa
             methods.append("dask")
         except ImportError:
             pass
