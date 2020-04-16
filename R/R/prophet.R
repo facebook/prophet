@@ -249,9 +249,9 @@ compile_stan_model <- function() {
   )
 
   if (.Platform$OS.type == "windows") {
-    dest <- file.path(path.package("prophet"), 'libs', .Platform$r_arch)
+    dest <- file.path(system.file(package="prophet"), 'libs', .Platform$r_arch)
   } else {
-    dest <- file.path(path.package("prophet"), 'libs')
+    dest <- file.path(system.file(package="prophet"), 'libs')
   }  
   dir.create(dest, recursive = TRUE, showWarnings = FALSE)
 
