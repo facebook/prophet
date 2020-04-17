@@ -83,7 +83,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         cross-validtation. If not provided works beginning from
         (end - horizon), works backwards making cutoffs with a spacing of period
         until initial is reached.
-    parallel : {None, 'processes', 'threads'}
+    parallel : {None, 'processes', 'threads', 'dask'}
 
         How to parallelize the forecast computation. By default no parallelism
         is used.
