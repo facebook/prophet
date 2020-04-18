@@ -127,6 +127,7 @@ setup(
     license='MIT',
     packages=find_packages(),
     setup_requires=[
+        "pystan>=2.14",
     ],
     install_requires=install_requires,
     zip_safe=False,
