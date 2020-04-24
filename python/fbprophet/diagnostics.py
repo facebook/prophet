@@ -9,9 +9,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 from tqdm.autonotebook import tqdm
 from copy import deepcopy
-from functools import reduce
 import concurrent.futures
-import itertools
 
 import numpy as np
 import pandas as pd
@@ -175,13 +173,9 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
                    "'map' method".format(', '.join(valid)))
             raise ValueError(msg)
 
-        iterables = [
-            itertools.cycle([df]),
-            itertools.cycle([model]),
-            cutoffs,
-            itertools.cycle([horizon]),
-            itertools.cycle([predict_columns]),
-        ]
+        iterables = ((df, model, cutoff, horizon, predict_columns)
+                     for cutoff in cutoffs)
+        iterables = zip(*iterables)
 
         logger.info("Applying in parallel with %s", pool)
         predicts = pool.map(single_cutoff_forecast, *iterables)
