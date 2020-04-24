@@ -83,7 +83,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         cross-validtation. If not provided works beginning from
         (end - horizon), works backwards making cutoffs with a spacing of period
         until initial is reached.
-    parallel : {None, 'processes', 'threads', 'dask'}
+    parallel : {None, 'processes', 'threads', 'dask', object}
 
         How to parallelize the forecast computation. By default no parallelism
         is used.
@@ -96,6 +96,20 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
             sequentially.
         * 'dask': Parallelize with Dask.
            This requires that a dask.distributed Client be created.
+        * object : Any instance with a `.map` method. This method will
+          be called with :func:`single_cutoff_forecast` and a sequence of
+          iterables where each element is the tuple of arguments to pass to
+          :func:`single_cutoff_forecast`
+
+          .. code-block::
+
+             class MyBackend:
+                 def map(self, func, *iterables):
+                     results = [
+                        func(*args)
+                        for args in zip(*iterables)
+                     ]
+                     return results
 
     Returns
     -------
@@ -139,9 +153,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
             logger.warning(msg)
 
     if parallel:
-        if parallel not in {"threads", "processes", "dask"}:
-            raise ValueError("'parallel' must be one of 'threads', 'processes',"
-                             " or 'dask'. Got '{}' instead".format(parallel))
+        valid = {"threads", "processes", "dask"}
 
         if parallel == "threads":
             pool = concurrent.futures.ThreadPoolExecutor()
@@ -149,7 +161,6 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
             pool = concurrent.futures.ProcessPoolExecutor()
         elif parallel == "dask":
             try:
-                import dask
                 from dask.distributed import get_client
             except ImportError:
                 raise ImportError("parallel='dask' requies the optional "
@@ -157,6 +168,12 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
             pool = get_client()
             # delay df and model to avoid large objects in task graph.
             df, model = pool.scatter([df, model])
+        elif hasattr(parallel, "map"):
+            pool = parallel
+        else:
+            msg = ("'parallel' should be one of {} for an instance with a "
+                   "'map' method".format(', '.join(valid)))
+            raise ValueError(msg)
 
         iterables = [
             itertools.cycle([df]),
@@ -166,6 +183,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
             itertools.cycle([predict_columns]),
         ]
 
+        logger.info("Applying in parallel with %s", pool)
         predicts = pool.map(single_cutoff_forecast, *iterables)
         if parallel == "dask":
             # convert Futures to DataFrames

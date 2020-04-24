@@ -26,6 +26,12 @@ DATA_all = pd.read_csv(
 DATA = DATA_all.head(100)
 
 
+class CustomParallelBackend:
+    def map(self, func, *iterables):
+        results = [func(*args) for args in zip(*iterables)]
+        return results
+
+
 class TestDiagnostics(TestCase):
 
     def __init__(self, *args, **kwargs):
@@ -40,7 +46,7 @@ class TestDiagnostics(TestCase):
         horizon = pd.Timedelta('4 days')
         period = pd.Timedelta('10 days')
         initial = pd.Timedelta('115 days')
-        methods = [None, 'processes', 'threads']
+        methods = [None, 'processes', 'threads', CustomParallelBackend()]
 
         try:
             from dask.distributed import Client
@@ -71,9 +77,14 @@ class TestDiagnostics(TestCase):
                 diagnostics.cross_validation(
                     m, horizon='10 days', period='10 days', initial='140 days')
 
-        # invalid raises
-        with self.assertRaises(ValueError):
+        # invalid alias
+        with self.assertRaises(ValueError, match="'parallel' should be one"):
             diagnostics.cross_validation(m, horizon="4 days", parallel="bad")
+
+        # no map method
+        with self.assertRaises(ValueError, match="'parallel' should be one"):
+            diagnostics.cross_validation(m, horizon="4 days", parallel=object())
+
 
     def test_check_single_cutoff_forecast_func_calls(self):
         m = Prophet()
