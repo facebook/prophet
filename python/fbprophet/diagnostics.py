@@ -176,8 +176,11 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
             raise ValueError(msg)
 
         iterables = [
-            (df, model, cutoff, horizon, predict_columns)
-            for cutoff in cutoffs
+            itertools.cycle([df]),
+            itertools.cycle([model]),
+            cutoffs,
+            itertools.cycle([horizon]),
+            itertools.cycle([predict_columns]),
         ]
 
         logger.info("Applying in parallel with %s", pool)
