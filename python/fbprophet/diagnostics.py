@@ -164,7 +164,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
                 from dask.distributed import get_client
             except ImportError as e:
                 raise ImportError("parallel='dask' requies the optional "
-                                  "dependency dask.") as e
+                                  "dependency dask.") from e
             pool = get_client()
             # delay df and model to avoid large objects in task graph.
             df, model = pool.scatter([df, model])
@@ -175,10 +175,10 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
                    "'map' method".format(', '.join(valid)))
             raise ValueError(msg)
 
-        iterables = (
+        iterables = [
             (df, model, cutoff, horizon, predict_columns)
             for cutoff in cutoffs
-        )
+        ]
 
         logger.info("Applying in parallel with %s", pool)
         predicts = pool.map(single_cutoff_forecast, *iterables)
