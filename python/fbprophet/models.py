@@ -11,14 +11,15 @@ from collections import OrderedDict
 from enum import Enum
 import pickle
 import pkg_resources
-
 import os
+import logging
+
+logger = logging.getLogger('fbprophet.models')
 
 
 class IStanBackend(ABC):
-    def __init__(self, logger):
+    def __init__(self):
         self.model = self.load_model()
-        self.logger = logger
         self.stan_fit = None
 
     @staticmethod
@@ -82,7 +83,7 @@ class CmdStanPyBackend(IStanBackend):
         except RuntimeError as e:
             # Fall back on Newton
             if kwargs['algorithm'] != 'Newton':
-                self.logger.warning(
+                logger.warning(
                     'Optimization terminated abnormally. Falling back to Newton.'
                 )
                 kwargs['algorithm'] = 'Newton'
@@ -244,7 +245,7 @@ class PyStanBackend(IStanBackend):
             self.stan_fit = self.model.optimizing(**args)
         except RuntimeError:
             # Fall back on Newton
-            self.logger.warning(
+            logger.warning(
                 'Optimization terminated abnormally. Falling back to Newton.'
             )
             args['algorithm'] = 'Newton'
