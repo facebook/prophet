@@ -12,8 +12,8 @@ from enum import Enum
 import pickle
 import pkg_resources
 import os
-import logging
 
+import logging
 logger = logging.getLogger('fbprophet.models')
 
 
