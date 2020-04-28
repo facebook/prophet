@@ -14,13 +14,11 @@ Prophet has two implementations: [R](#installation-in-r) and [Python](#installat
 
 <a href="#r"></a>
 
-## Installation in R
-
-Prophet is a [CRAN package](https://cran.r-project.org/package=prophet) and you can use `install.packages`. For OSX, be sure to choose a source install:
+Prophet is temporarily not on CRAN so you can use the `devtools` package to install it directly from github:
 
 ```
 # R
-> install.packages('prophet', type="source")
+> devtools::install_github("facebook/prophet", subdir='R', ref="8306ae3")
 ```
 
 After installation, you can [get started!](quick_start.html#r-api)
