@@ -4,7 +4,9 @@
 \name{generated_holidays}
 \alias{generated_holidays}
 \title{holidays table}
-\format{A data frame with five variables: ds, holiday, country, year}
+\format{
+A data frame with five variables: ds, holiday, country, year
+}
 \usage{
 generated_holidays
 }
