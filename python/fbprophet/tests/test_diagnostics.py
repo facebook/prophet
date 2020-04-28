@@ -26,6 +26,12 @@ DATA_all = pd.read_csv(
 DATA = DATA_all.head(100)
 
 
+class CustomParallelBackend:
+    def map(self, func, *iterables):
+        results = [func(*args) for args in zip(*iterables)]
+        return results
+
+
 class TestDiagnostics(TestCase):
 
     def __init__(self, *args, **kwargs):
@@ -40,11 +46,19 @@ class TestDiagnostics(TestCase):
         horizon = pd.Timedelta('4 days')
         period = pd.Timedelta('10 days')
         initial = pd.Timedelta('115 days')
-        # Run for both cases of multiprocess on or off
-        for multiprocess in [False, True]:
+        methods = [None, 'processes', 'threads', CustomParallelBackend()]
+
+        try:
+            from dask.distributed import Client
+            client = Client(processes=False)  # noqa
+            methods.append("dask")
+        except ImportError:
+            pass
+
+        for parallel in methods:
             df_cv = diagnostics.cross_validation(
                 m, horizon='4 days', period='10 days', initial='115 days',
-                multiprocess=multiprocess)
+                parallel=parallel)
             self.assertEqual(len(np.unique(df_cv['cutoff'])), 3)
             self.assertEqual(max(df_cv['ds'] - df_cv['cutoff']), horizon)
             self.assertTrue(min(df_cv['cutoff']) >= min(self.__df['ds']) + initial)
@@ -62,6 +76,15 @@ class TestDiagnostics(TestCase):
             with self.assertRaises(ValueError):
                 diagnostics.cross_validation(
                     m, horizon='10 days', period='10 days', initial='140 days')
+
+        # invalid alias
+        with self.assertRaises(ValueError, match="'parallel' should be one"):
+            diagnostics.cross_validation(m, horizon="4 days", parallel="bad")
+
+        # no map method
+        with self.assertRaises(ValueError, match="'parallel' should be one"):
+            diagnostics.cross_validation(m, horizon="4 days", parallel=object())
+
 
     def test_check_single_cutoff_forecast_func_calls(self):
         m = Prophet()

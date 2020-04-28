@@ -9,11 +9,10 @@ from __future__ import absolute_import, division, print_function
 import logging
 from tqdm.autonotebook import tqdm
 from copy import deepcopy
-from functools import reduce
+import concurrent.futures
 
 import numpy as np
 import pandas as pd
-from multiprocessing import Pool
 
 logger = logging.getLogger('fbprophet')
 
@@ -59,7 +58,7 @@ def generate_cutoffs(df, horizon, initial, period):
     return list(reversed(result))
 
 
-def cross_validation(model, horizon, period=None, initial=None, multiprocess=False, cutoffs=None):
+def cross_validation(model, horizon, period=None, initial=None, parallel=None, cutoffs=None):
     """Cross-Validation for time series.
 
     Computes forecasts from historical cutoff points, which user can input.
@@ -82,9 +81,33 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Fal
         cross-validtation. If not provided works beginning from
         (end - horizon), works backwards making cutoffs with a spacing of period
         until initial is reached.
-    multiprocess: True, False, Optional (defaults to False). If `True`, use the
-        `multiprocessing` module to distribute each task to a different processor
-        core.
+    parallel : {None, 'processes', 'threads', 'dask', object}
+
+        How to parallelize the forecast computation. By default no parallelism
+        is used.
+
+        * None : No parallelism.
+        * 'processes' : Parallelize with concurrent.futures.ProcessPoolExectuor.
+        * 'threads' : Parallelize with concurrent.futures.ThreadPoolExecutor.
+            Note that some operations currently hold Python's Global Interpreter
+            Lock, so parallelizing with threads may be slower than training
+            sequentially.
+        * 'dask': Parallelize with Dask.
+           This requires that a dask.distributed Client be created.
+        * object : Any instance with a `.map` method. This method will
+          be called with :func:`single_cutoff_forecast` and a sequence of
+          iterables where each element is the tuple of arguments to pass to
+          :func:`single_cutoff_forecast`
+
+          .. code-block::
+
+             class MyBackend:
+                 def map(self, func, *iterables):
+                     results = [
+                        func(*args)
+                        for args in zip(*iterables)
+                     ]
+                     return results
 
     Returns
     -------
@@ -127,11 +150,39 @@ def cross_validation(model, horizon, period=None, initial=None, multiprocess=Fal
             msg += 'Consider increasing initial.'
             logger.warning(msg)
 
-    if multiprocess is True:
-        with Pool() as pool:
-            logger.info('Running cross validation in multiprocessing mode')
-            input_df = ((df, model, cutoff, horizon, predict_columns) for cutoff in cutoffs)
-            predicts = pool.starmap(single_cutoff_forecast, input_df)
+    if parallel:
+        valid = {"threads", "processes", "dask"}
+
+        if parallel == "threads":
+            pool = concurrent.futures.ThreadPoolExecutor()
+        elif parallel == "processes":
+            pool = concurrent.futures.ProcessPoolExecutor()
+        elif parallel == "dask":
+            try:
+                from dask.distributed import get_client
+            except ImportError as e:
+                raise ImportError("parallel='dask' requies the optional "
+                                  "dependency dask.") from e
+            pool = get_client()
+            # delay df and model to avoid large objects in task graph.
+            df, model = pool.scatter([df, model])
+        elif hasattr(parallel, "map"):
+            pool = parallel
+        else:
+            msg = ("'parallel' should be one of {} for an instance with a "
+                   "'map' method".format(', '.join(valid)))
+            raise ValueError(msg)
+
+        iterables = ((df, model, cutoff, horizon, predict_columns)
+                     for cutoff in cutoffs)
+        iterables = zip(*iterables)
+
+        logger.info("Applying in parallel with %s", pool)
+        predicts = pool.map(single_cutoff_forecast, *iterables)
+        if parallel == "dask":
+            # convert Futures to DataFrames
+            predicts = pool.gather(predicts)
+
     else:
         predicts = [
             single_cutoff_forecast(df, model, cutoff, horizon, predict_columns)
