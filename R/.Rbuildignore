@@ -2,3 +2,5 @@
 ^libs$
 ^doc$
 ^Meta$
+^.*\.Rproj$
+^\.Rproj\.user$

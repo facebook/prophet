@@ -80,6 +80,7 @@ globalVariables(c(
 #' @importFrom dplyr "%>%"
 #' @import Rcpp
 #' @import rlang
+#' @useDynLib prophet, .registration = TRUE
 prophet <- function(df = NULL,
                     growth = 'linear',
                     changepoints = NULL,
@@ -236,44 +237,6 @@ validate_column_name <- function(
   }
 }
 
-#' Compile Stan model
-#'
-#' @return Stan model.
-#'
-#' @keywords internal
-compile_stan_model <- function() {
-  packageStartupMessage('Compiling model (this will take a few minutes...)')
-  packageStartupMessage(
-    'If this is the first time fitting a model since package install, this is normal. ',
-    'You should not see this message more than once after install.'
-  )
-
-  if (.Platform$OS.type == "windows") {
-    dest <- file.path(system.file(package="prophet"), 'libs', .Platform$r_arch)
-  } else {
-    dest <- file.path(system.file(package="prophet"), 'libs')
-  }  
-  dir.create(dest, recursive = TRUE, showWarnings = FALSE)
-
-  packageStartupMessage(paste('Writing model to:', dest))
-  packageStartupMessage(paste('Compiling using binary:', R.home('bin')))
-
-  fn <- 'stan/prophet.stan'
-  stan.src <- system.file(fn, package = 'prophet', mustWork = TRUE)
-  model.binary <- file.path(dest, 'prophet_stan_model.RData')
-
-  stanc <- rstan::stanc(stan.src)
-  model.stanm <- rstan::stan_model(
-    stanc_ret = stanc,
-    model_name = 'prophet_model'
-  )
-  save('model.stanm', file = model.binary)
-  packageStartupMessage('------ Model successfully compiled!')
-  packageStartupMessage('You can ignore any compiler warnings above.')
-  assign(".prophet.stan.model", model.stanm, envir = prophet_model_env)
-  return(model.stanm)
-}
-
 #' Convert date vector
 #'
 #' Convert the date to POSIXct object
@@ -365,7 +328,7 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
       df[[condition.name]] <- as.logical(df[[condition.name]])
     }
   }
-  
+
   df <- df %>%
     dplyr::arrange(ds)
 
@@ -724,7 +687,7 @@ add_regressor <- function(
 #' specified, m$seasonality.mode will be used (defaults to 'additive').
 #' Additive means the seasonality will be added to the trend, multiplicative
 #' means it will multiply the trend.
-#' 
+#'
 #' If condition.name is provided, the dataframe passed to `fit` and `predict`
 #' should have a column with the specified condition.name containing booleans
 #' which decides when to apply seasonality.
@@ -741,7 +704,7 @@ add_regressor <- function(
 #'
 #' @export
 add_seasonality <- function(
-  m, name, period, fourier.order, prior.scale = NULL, mode = NULL, 
+  m, name, period, fourier.order, prior.scale = NULL, mode = NULL,
   condition.name = NULL
 ) {
   if (!is.null(m$history)) {
@@ -1231,7 +1194,7 @@ fit.prophet <- function(m, df, ...) {
   if (exists(".prophet.stan.model", where = prophet_model_env)) {
     model <- get('.prophet.stan.model', envir = prophet_model_env)
   } else {
-    model <- compile_stan_model()
+    model <- stanmodels$prophet
   }
 
   stan_init <- function() {
@@ -1280,7 +1243,7 @@ fit.prophet <- function(m, df, ...) {
     m$params <- m$stan.fit$par
     n.iteration <- 1
   }
-  
+
   # Cast the parameters to have consistent form, whether full bayes or MAP
   for (name in c('delta', 'beta')){
     m$params[[name]] <- matrix(m$params[[name]], nrow = n.iteration)
@@ -1340,7 +1303,7 @@ predict.prophet <- function(object, df = NULL, ...) {
   } else {
     intervals <- NULL
     }
- 
+
   # Drop columns except ds, cap, floor, and trend
   cols <- c('ds', 'trend')
   if ('cap' %in% colnames(df)) {

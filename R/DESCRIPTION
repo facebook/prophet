@@ -12,8 +12,10 @@ Description: Implements a procedure for forecasting time series data based on
     that have strong seasonal effects and several seasons of historical data.
     Prophet is robust to missing data and shifts in the trend, and typically
     handles outliers well.
+URL: https://github.com/facebook/prophet
+BugReports: https://github.com/facebook/prophet/issues
 Depends:
-    R (>= 3.2.3),
+    R (>= 3.4.0),
     Rcpp (>= 0.12.0),
     rlang (>= 0.3.0.1)
 Imports:
@@ -22,7 +24,9 @@ Imports:
     extraDistr,
     ggplot2,
     grid,
-    rstan (>= 2.14.0),
+    methods,
+    rstan (>= 2.18.1),
+    rstantools (>= 2.0.0),
     scales,
     stats,
     tidyr (>= 0.6.1),
@@ -32,11 +36,16 @@ Suggests:
     testthat,
     readr,
     rmarkdown
+SystemRequirements: GNU make, C++11
+Biarch: true
 License: MIT + file LICENSE
-URL: https://github.com/facebook/prophet
-BugReports: https://github.com/facebook/prophet/issues
+LinkingTo: 
+    BH (>= 1.66.0),
+    Rcpp (>= 0.12.0),
+    RcppEigen (>= 0.3.3.3.0),
+    rstan (>= 2.18.1),
+    StanHeaders (>= 2.18.0)
 LazyData: true
-RoxygenNote: 7.0.2
 VignetteBuilder: knitr
-SystemRequirements: C++11
 Encoding: UTF-8
+RoxygenNote: 7.1.0

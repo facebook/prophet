@@ -21,11 +21,11 @@ Prophet is [open source software](https://code.facebook.com/projects/) released 
 
 ## Installation in R
 
-Prophet is temporarily not on CRAN so you can use the `devtools` package to install it directly from github:
+Prophet is temporarily not on CRAN so you can use the `devtools` package to install it directly from GitHub:
 
-```
-# R
-> devtools::install_github("facebook/prophet", subdir='R', ref="8306ae3")
+```R
+# install.packages("remotes")
+remotes::install_github("facebook/prophet", subdir = "R")
 ```
 
 After installation, you can [get started!](https://facebook.github.io/prophet/docs/quick_start.html#r-api)
@@ -38,11 +38,10 @@ If you have custom Stan compiler settings, install from source rather than the C
 
 ## Installation in Python
 
-Prophet is on PyPI, so you can use pip to install it:
+Prophet is on PyPI, so you can use `pip` to install it:
 
-```
-# bash
-$ pip install fbprophet
+```bash
+pip install fbprophet
 ```
 
 The default dependency that Prophet has is `pystan`. PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install fbprophet.
