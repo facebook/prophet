@@ -6,12 +6,12 @@
 library(prophet)
 context("Prophet tests")
 
-DATA <- read.csv('data.csv')
+DATA <- read.csv(test_path('data.csv'))
 N <- nrow(DATA)
 train <- DATA[1:floor(N / 2), ]
 future <- DATA[(ceiling(N/2) + 1):N, ]
 
-DATA2 <- read.csv('data2.csv')
+DATA2 <- read.csv(test_path('data2.csv'))
 
 DATA$ds <- prophet:::set_date(DATA$ds)
 DATA2$ds <- prophet:::set_date(DATA2$ds)
@@ -623,6 +623,7 @@ test_that("conditional_custom_seasonality", {
   out <- prophet:::make_all_seasonality_features(m, df)
   #Confirm that only values without is_conditional_week has non zero entries
   nonzero.weekly = out$seasonal.features %>%
+    dplyr::as_tibble() %>%
     dplyr::select(dplyr::starts_with('conditional_weekly')) %>%
     dplyr::mutate_all(~ . != 0) %>%
     dplyr::mutate(nonzero = rowSums(. != 0) > 0) %>% 
