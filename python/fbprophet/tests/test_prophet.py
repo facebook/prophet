@@ -49,6 +49,7 @@ class TestProphet(TestCase):
         res = self.rmse(future['yhat'], test['y'])
         self.assertTrue(15 > res > 5, msg="backend: {}".format(forecaster.stan_backend))
 
+
     def test_fit_predict_newton(self):
         days = 30
         N = DATA.shape[0]
@@ -206,22 +207,46 @@ class TestProphet(TestCase):
         # Check for approximate shift invariance
         self.assertTrue((np.abs(fcst1['yhat'] - fcst2['yhat']) < 1).all())
 
-    def test_get_changepoints(self):
-        m = Prophet()
+    def test_constant_trend(self):
+        m = Prophet(growth='constant')
         N = DATA.shape[0]
         history = DATA.head(N // 2).copy()
+        test = DATA.tail(N // 2).copy()
+        m.fit(history)
+        future = m.make_future_dataframe(N // 2, include_history=False)
+        fcst = m.predict(future)
 
-        history = m.setup_dataframe(history, initialize_scales=True)
-        m.history = history
-
-        m.set_changepoints()
+        k = m.params['k']
+        delta = m.params['delta']
+        m_ = m.params['m']
+        self.assertEqual(k.shape, (1,1))
+        self.assertEqual(k[0], 0)
+        self.assertEqual(delta.shape, (1,1))
+        self.assertEqual(delta[0], 0)
+        self.assertEqual(fcst['trend'].unique(), m_*m.y_scale)
 
         cp = m.changepoints_t
-        self.assertEqual(cp.shape[0], m.n_changepoints)
-        self.assertEqual(len(cp.shape), 1)
-        self.assertTrue(cp.min() > 0)
-        cp_indx = int(np.ceil(0.8 * history.shape[0]))
-        self.assertTrue(cp.max() <= history['t'].values[cp_indx])
+        self.assertEqual(m.n_changepoints, 0)
+        self.assertEqual(cp.shape[0], 1)
+        self.assertEqual(cp[0], 0)
+
+
+    def test_get_changepoints(self):
+            m = Prophet()
+            N = DATA.shape[0]
+            history = DATA.head(N // 2).copy()
+
+            history = m.setup_dataframe(history, initialize_scales=True)
+            m.history = history
+
+            m.set_changepoints()
+
+            cp = m.changepoints_t
+            self.assertEqual(cp.shape[0], m.n_changepoints)
+            self.assertEqual(len(cp.shape), 1)
+            self.assertTrue(cp.min() > 0)
+            cp_indx = int(np.ceil(0.8 * history.shape[0]))
+            self.assertTrue(cp.max() <= history['t'].values[cp_indx])
 
     def test_set_changepoint_range(self):
         m = Prophet(changepoint_range=0.4)

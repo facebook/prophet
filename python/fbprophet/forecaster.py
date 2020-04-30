@@ -1147,11 +1147,12 @@ class Prophet(object):
             self.params['delta'] = (np.zeros(self.params['delta'].shape)
                                       .reshape((-1, 1)))
 
-        # for constant trend, replace k and delta with 0s
+        # for constant trend, replace k, delta, n_changepoints with 0s
         if self.growth == 'constant':
+            self.n_changepoints = 0
+            self.changepoints_t = np.array([0])
             self.params['k'] = np.zeros((1, 1))
-            self.params['delta'] = (np.zeros(self.params['delta'].shape)
-                                      .reshape((-1, 1)))
+            self.params['delta'] = np.zeros((1, 1))
 
         return self
 
