@@ -1128,12 +1128,9 @@ class Prophet(object):
             'sigma_obs': 1,
         }
 
-        if history['y'].min() == history['y'].max():
-            if self.growth == 'linear':
-                self.params = stan_init
-            elif self.growth == 'constant':
-                self.params = stan_init
-                self.params['k'] = 0
+        if history['y'].min() == history['y'].max() and \
+                (self.growth == 'linear' or self.growth == 'constant'):
+            self.params = stan_init
             self.params['sigma_obs'] = 1e-9
             for par in self.params:
                 self.params[par] = np.array([self.params[par]])
@@ -1142,11 +1139,17 @@ class Prophet(object):
         else:
             self.params = self.stan_backend.fit(stan_init, dat, **kwargs)
 
-        # If no changepoints were requested or constant growth rate set, replace delta with 0s
-        if len(self.changepoints) == 0 or self.growth == 'constant':
+        # If no changepoints were requested, replace delta with 0s
+        if len(self.changepoints) == 0:
             # Fold delta into the base rate k
             self.params['k'] = (self.params['k']
                                 + self.params['delta'].reshape(-1))
+            self.params['delta'] = (np.zeros(self.params['delta'].shape)
+                                      .reshape((-1, 1)))
+
+        # for constant trend, replace k and delta with 0s
+        if self.growth == 'constant':
+            self.params['k'] = np.zeros((1, 1))
             self.params['delta'] = (np.zeros(self.params['delta'].shape)
                                       .reshape((-1, 1)))
 
