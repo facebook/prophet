@@ -155,9 +155,9 @@ class Prophet(object):
 
     def validate_inputs(self):
         """Validates the inputs to Prophet."""
-        if self.growth not in ('linear', 'logistic'):
+        if self.growth not in ('linear', 'logistic', 'constant'):
             raise ValueError(
-                'Parameter "growth" should be "linear" or "logistic".')
+                'Parameter "growth" should be "linear", "logistic" or "constant.')
         if ((self.changepoint_range < 0) or (self.changepoint_range > 1)):
             raise ValueError('Parameter "changepoint_range" must be in [0, 1]')
         if self.holidays is not None:
@@ -1113,7 +1113,7 @@ class Prophet(object):
             's_m': component_cols['multiplicative_terms'],
         }
 
-        if self.growth == 'linear':
+        if self.growth == 'linear' or self.growth == 'constant':
             dat['cap'] = np.zeros(self.history.shape[0])
             kinit = self.linear_growth_init(history)
         else:
@@ -1128,10 +1128,12 @@ class Prophet(object):
             'sigma_obs': 1,
         }
 
-        if (history['y'].min() == history['y'].max()
-            and self.growth == 'linear'):
-            # Nothing to fit.
-            self.params = stan_init
+        if history['y'].min() == history['y'].max():
+            if self.growth == 'linear':
+                self.params = stan_init
+            elif self.growth == 'constant':
+                self.params = stan_init
+                self.params['k'] = 0
             self.params['sigma_obs'] = 1e-9
             for par in self.params:
                 self.params[par] = np.array([self.params[par]])
@@ -1140,8 +1142,8 @@ class Prophet(object):
         else:
             self.params = self.stan_backend.fit(stan_init, dat, **kwargs)
 
-        # If no changepoints were requested, replace delta with 0s
-        if len(self.changepoints) == 0:
+        # If no changepoints were requested or constant growth rate set, replace delta with 0s
+        if len(self.changepoints) == 0 or self.growth == 'constant':
             # Fold delta into the base rate k
             self.params['k'] = (self.params['k']
                                 + self.params['delta'].reshape(-1))
@@ -1255,6 +1257,7 @@ class Prophet(object):
             m_t[indx] += gammas[s]
         return cap / (1 + np.exp(-k_t * (t - m_t)))
 
+
     def predict_trend(self, df):
         """Predict trend using the prophet model.
 
@@ -1273,10 +1276,13 @@ class Prophet(object):
         t = np.array(df['t'])
         if self.growth == 'linear':
             trend = self.piecewise_linear(t, deltas, k, m, self.changepoints_t)
-        else:
+        elif self.growth == 'logistic':
             cap = df['cap_scaled']
             trend = self.piecewise_logistic(
                 t, cap, deltas, k, m, self.changepoints_t)
+        else:
+            # constant trend
+            trend = m * np.ones_like(t)
 
         return trend * self.y_scale + df['floor']
 
@@ -1470,10 +1476,12 @@ class Prophet(object):
 
         if self.growth == 'linear':
             trend = self.piecewise_linear(t, deltas, k, m, changepoint_ts)
-        else:
+        elif self.growth == 'logistic':
             cap = df['cap_scaled']
             trend = self.piecewise_logistic(t, cap, deltas, k, m,
                                             changepoint_ts)
+        else:
+            trend = m * np.ones_like(t)
 
         return trend * self.y_scale + df['floor']
 
