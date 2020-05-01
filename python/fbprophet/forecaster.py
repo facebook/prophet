@@ -155,9 +155,9 @@ class Prophet(object):
 
     def validate_inputs(self):
         """Validates the inputs to Prophet."""
-        if self.growth not in ('linear', 'logistic', 'constant'):
+        if self.growth not in ('linear', 'logistic', 'flat'):
             raise ValueError(
-                'Parameter "growth" should be "linear", "logistic" or "constant.')
+                'Parameter "growth" should be "linear", "logistic" or "flat".')
         if ((self.changepoint_range < 0) or (self.changepoint_range > 1)):
             raise ValueError('Parameter "changepoint_range" must be in [0, 1]')
         if self.holidays is not None:
@@ -1113,7 +1113,7 @@ class Prophet(object):
             's_m': component_cols['multiplicative_terms'],
         }
 
-        if self.growth == 'linear' or self.growth == 'constant':
+        if self.growth == 'linear' or self.growth == 'flat':
             dat['cap'] = np.zeros(self.history.shape[0])
             kinit = self.linear_growth_init(history)
         else:
@@ -1129,7 +1129,7 @@ class Prophet(object):
         }
 
         if history['y'].min() == history['y'].max() and \
-                (self.growth == 'linear' or self.growth == 'constant'):
+                (self.growth == 'linear' or self.growth == 'flat'):
             self.params = stan_init
             self.params['sigma_obs'] = 1e-9
             for par in self.params:
@@ -1148,7 +1148,7 @@ class Prophet(object):
                                       .reshape((-1, 1)))
 
         # for constant trend, replace k, delta, n_changepoints with 0s
-        if self.growth == 'constant':
+        if self.growth == 'flat':
             self.n_changepoints = 0
             self.changepoints_t = np.array([0])
             self.params['k'] = np.zeros((1, 1))

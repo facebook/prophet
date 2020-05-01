@@ -207,8 +207,8 @@ class TestProphet(TestCase):
         # Check for approximate shift invariance
         self.assertTrue((np.abs(fcst1['yhat'] - fcst2['yhat']) < 1).all())
 
-    def test_constant_trend(self):
-        m = Prophet(growth='constant')
+    def test_flat_growth(self):
+        m = Prophet(growth='flat')
         N = DATA.shape[0]
         history = DATA.head(N // 2).copy()
         test = DATA.tail(N // 2).copy()
@@ -230,6 +230,11 @@ class TestProphet(TestCase):
         self.assertEqual(cp.shape[0], 1)
         self.assertEqual(cp[0], 0)
 
+    def test_invalid_growth_input(self):
+        msg = 'Parameter "growth" should be "linear", ' \
+              '"logistic" or "flat".'
+        with self.assertRaisesRegex(ValueError, msg):
+            Prophet(growth="constant")
 
     def test_get_changepoints(self):
             m = Prophet()

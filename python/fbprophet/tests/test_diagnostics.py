@@ -106,8 +106,8 @@ class TestDiagnostics(TestCase):
                 self.assertEqual(diagnostics.single_cutoff_forecast.call_count,
                                  forecasts)
 
-    def test_cross_validation_logistic_or_constant_trend(self):
-        params = (x for x in ['logistic', 'constant'])
+    def test_cross_validation_logistic_or_flat_growth(self):
+        params = (x for x in ['logistic', 'flat'])
         for growth in params:
             with self.subTest(i=growth):
                 df = self.__df.copy()
