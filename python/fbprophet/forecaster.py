@@ -71,7 +71,6 @@ class Prophet(object):
     uncertainty_samples: Number of simulated draws used to estimate
         uncertainty intervals. Settings this value to 0 or False will disable
         uncertainty estimation and speed up the calculation.
-        uncertainty intervals.
     stan_backend: str as defined in StanBackendEnum default: None - will try to
         iterate over all available backends and find the working one
     """
