@@ -21,11 +21,10 @@ Prophet is [open source software](https://code.facebook.com/projects/) released 
 
 ## Installation in R
 
-Prophet is temporarily not on CRAN so you can use the `devtools` package to install it directly from GitHub:
+Prophet is a [CRAN package](https://cran.r-project.org/package=prophet) so you can use `install.packages`.
 
 ```R
-# install.packages("remotes")
-remotes::install_github("facebook/prophet", subdir = "R")
+install.packages('prophet')
 ```
 
 After installation, you can [get started!](https://facebook.github.io/prophet/docs/quick_start.html#r-api)
