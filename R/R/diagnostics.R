@@ -337,6 +337,61 @@ rolling_mean_by_h <- function(x, h, w, name) {
   return(res)
 }
 
+
+#' Compute a rolling median of x, after first aggregating by h
+#'
+#' Right-aligned. Computes a single median for each unique value of h. Each median
+#' is over at least w samples.
+#' 
+#' For each h where there are fewer than w samples, we take samples from the previous h,
+#  moving backwards. (In other words, we ~ assume that the x's are shuffled within each h.)
+#'
+#' @param x Array.
+#' @param h Array of horizon for each value in x.
+#' @param w Integer window size (number of elements).
+#' @param name String name for metric in result dataframe.
+#'
+#' @return Dataframe with columns horizon and name, the rolling median of x.
+#'
+#' @importFrom dplyr "%>%"
+#' @keywords internal
+rolling_median_by_h <- function(x, h, w, name) {
+  # Aggregate over h
+  df <- data.frame(x=x, h=h)
+  df2 <- df %>%
+    dplyr::group_by(h) %>%
+    dplyr::summarise(mean = mean(x), n = dplyr::n())
+  
+  hs <- df2$h
+  
+  res <- data.frame(horizon=c())
+  res[[name]] <- c()
+  # Start from the right and work backwards
+  i <- length(hs)
+  while (i > 0) {
+    # Construct a mean of at least w samples
+    h_i <- hs[i]
+    xs <- group_by(h)
+    next_idx_to_add = np.array(h == h_i).argmax() - 1
+    while ((length(xs) < w) & (next_idx_to_add > 0)) {
+      # Include points from the previous horizon. All of them if still less
+      # than w, otherwise just enough to get to w.
+      xs <- rbind(x[next_idx_to_add], xs) 
+      next_idx_to_add = next_idx_to_add - 1 
+    }
+    if (length(xs) < w) {
+      # Ran out of horizons before enough points.
+      break
+    }
+    res.i <- data.frame(horizon=hs[i])
+    res.i[[name]] <- median(xs)
+    res <- rbind(res.i, res)
+    i <- i - 1
+  }
+  return(res)
+}
+
+
 # The functions below specify performance metrics for cross-validation results.
 # Each takes as input the output of cross_validation, and returns the statistic
 # as a dataframe, given a window size for rolling aggregation.

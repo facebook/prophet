@@ -174,6 +174,59 @@ test_that("rolling_mean", {
   expect_equal(c(4.5), df$x)
 })
 
+
+test_that("rolling_mean", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  x <- 0:9
+  h <- 0:9
+  df <- prophet:::rolling_mean_by_h(x=x, h=h, w=1, name='x')
+  expect_equal(x, df$x)
+  expect_equal(h, df$horizon)
+  
+  df <- prophet:::rolling_mean_by_h(x=x, h=h, w=4, name='x')
+  expect_equal(x[4:10] - 1.5, df$x)
+  expect_equal(3:9, df$horizon)
+  
+  h <- c(1., 2., 3., 4., 4., 4., 4., 4., 7., 7.)
+  x.true <- c(1., 5., 22/3)
+  h.true <- c(3., 4., 7.)
+  df <- prophet:::rolling_mean_by_h(x=x, h=h, w=3, name='x')
+  expect_equal(x.true, df$x)
+  expect_equal(h.true, df$horizon)
+  
+  df <- prophet:::rolling_mean_by_h(x=x, h=h, w=10, name='x')
+  expect_equal(c(7.), df$horizon)
+  expect_equal(c(4.5), df$x)
+})
+
+
+test_that("rolling_median", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  x <- 0:9
+  h <- 0:9
+  df <- prophet:::rolling_median_by_h(x=x, h=h, w=1, name='x')
+  expect_equal(x, df$x)
+  expect_equal(h, df$horizon)
+  
+  df <- prophet:::rolling_median_by_h(x=x, h=h, w=4, name='x')
+  x.true <- x[4:10] - 1.5 
+  expect_equal(x.true, df$x)
+  expect_equal(3:9, df$horizon)
+  
+  h <- c(1., 2., 3., 4., 4., 4., 4., 4., 7., 7.)
+  x.true <- c(1., 5., 22/3)
+  h.true <- c(3., 4., 7.)
+  df <- prophet:::rolling_median_by_h(x=x, h=h, w=3, name='x')
+  expect_equal(x.true, df$x)
+  expect_equal(h.true, df$horizon)
+  
+  df <- prophet:::rolling_median_by_h(x=x, h=h, w=10, name='x')
+  expect_equal(c(7.), df$horizon)
+  expect_equal(c(4.5), df$x)
+})
+
+
+
 test_that("copy", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   df <- DATA_all
