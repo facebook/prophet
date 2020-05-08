@@ -76,7 +76,7 @@ functions {
 
   vector flat_trend(
     real m,
-    int T,
+    int T
   ) {
     return rep_row_vector(m, T);
   }
