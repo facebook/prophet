@@ -49,7 +49,6 @@ class TestProphet(TestCase):
         res = self.rmse(future['yhat'], test['y'])
         self.assertTrue(15 > res > 5, msg="backend: {}".format(forecaster.stan_backend))
 
-
     def test_fit_predict_newton(self):
         days = 30
         N = DATA.shape[0]
@@ -362,6 +361,18 @@ class TestProphet(TestCase):
         cap = cap[8:]
         y = model.piecewise_logistic(t, cap, deltas, k, m, changepoint_ts)
         self.assertAlmostEqual((y - y_true).sum(), 0.0, places=5)
+
+    def test_flat_trend(self):
+        model = Prophet()
+        t = np.arange(11)
+        m = 0.5
+        y = model.flat_trend(t, m)
+        y_true = np.array([0.5]*11)
+        self.assertEqual((y - y_true).sum(), 0)
+        t = t[8:]
+        y_true = y_true[8:]
+        y = model.flat_trend(t, m)
+        self.assertEqual((y - y_true).sum(), 0)
 
     def test_holidays(self):
         holidays = pd.DataFrame({
