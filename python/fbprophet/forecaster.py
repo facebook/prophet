@@ -1134,12 +1134,6 @@ class Prophet(object):
                 (self.growth == 'linear' or self.growth == 'flat'):
             self.params = stan_init
             self.params['sigma_obs'] = 1e-9
-            # for constant trend, replace k, delta, n_changepoints with 0s
-            if self.growth == 'flat':
-                self.n_changepoints = 0
-                self.changepoints_t = np.array([0])
-                self.params['k'] = np.zeros((1, 1))
-                self.params['delta'] = np.zeros((1, 1))
             for par in self.params:
                 self.params[par] = np.array([self.params[par]])
         elif self.mcmc_samples > 0:
@@ -1154,6 +1148,10 @@ class Prophet(object):
                                 + self.params['delta'].reshape(-1))
             self.params['delta'] = (np.zeros(self.params['delta'].shape)
                                       .reshape((-1, 1)))
+
+        # for constant trend, reset growth param to 0
+        if self.growth == 'flat':
+            self.params['k'] = np.zeros((1, 1))
 
         return self
 
@@ -1262,6 +1260,22 @@ class Prophet(object):
             m_t[indx] += gammas[s]
         return cap / (1 + np.exp(-k_t * (t - m_t)))
 
+    @staticmethod
+    def flat_trend(t, m):
+        """Evaluate the flat trend function.
+
+        Parameters
+        ----------
+        t: np.array of times on which the function is evaluated.
+        m: Float initial offset.
+
+        Returns
+        -------
+        Vector y(t).
+        """
+        m_t = m * np.ones_like(t)
+        return m_t
+
     def predict_trend(self, df):
         """Predict trend using the prophet model.
 
@@ -1286,7 +1300,7 @@ class Prophet(object):
                 t, cap, deltas, k, m, self.changepoints_t)
         elif self.growth == 'flat':
             # constant trend
-            trend = m * np.ones_like(t)
+            trend = self.flat_trend(t, m)
 
         return trend * self.y_scale + df['floor']
 
@@ -1485,7 +1499,7 @@ class Prophet(object):
             trend = self.piecewise_logistic(t, cap, deltas, k, m,
                                             changepoint_ts)
         elif self.growth == 'flat':
-            trend = m * np.ones_like(t)
+            trend = self.flat_trend(t, m)
 
         return trend * self.y_scale + df['floor']
 

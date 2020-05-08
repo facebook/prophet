@@ -215,20 +215,11 @@ class TestProphet(TestCase):
         m.fit(history)
         future = m.make_future_dataframe(N // 2, include_history=False)
         fcst = m.predict(future)
-
-        k = m.params['k']
-        delta = m.params['delta']
         m_ = m.params['m']
-        self.assertEqual(k.shape, (1,1))
-        self.assertEqual(k[0], 0)
-        self.assertEqual(delta.shape, (1,1))
-        self.assertEqual(delta[0], 0)
+        k = m.params['k']
+        self.assertEqual(k[0, 0], 0)
         self.assertEqual(fcst['trend'].unique(), m_*m.y_scale)
-
-        cp = m.changepoints_t
-        self.assertEqual(m.n_changepoints, 0)
-        self.assertEqual(cp.shape[0], 1)
-        self.assertEqual(cp[0], 0)
+        self.assertEqual(np.round(m_[0,0]*m.y_scale), 28)
 
     def test_invalid_growth_input(self):
         msg = 'Parameter "growth" should be "linear", ' \
