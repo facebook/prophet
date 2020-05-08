@@ -1098,6 +1098,8 @@ class Prophet(object):
 
         self.set_changepoints()
 
+        trend_indicator = {'linear': 0, 'logistic': 1, 'flat': 2}
+
         dat = {
             'T': history.shape[0],
             'K': seasonal_features.shape[1],
@@ -1108,7 +1110,7 @@ class Prophet(object):
             'X': seasonal_features,
             'sigmas': prior_scales,
             'tau': self.changepoint_prior_scale,
-            'trend_indicator': int(self.growth == 'logistic'),
+            'trend_indicator': trend_indicator[self.growth],
             's_a': component_cols['additive_terms'],
             's_m': component_cols['multiplicative_terms'],
         }
@@ -1132,6 +1134,12 @@ class Prophet(object):
                 (self.growth == 'linear' or self.growth == 'flat'):
             self.params = stan_init
             self.params['sigma_obs'] = 1e-9
+            # for constant trend, replace k, delta, n_changepoints with 0s
+            if self.growth == 'flat':
+                self.n_changepoints = 0
+                self.changepoints_t = np.array([0])
+                self.params['k'] = np.zeros((1, 1))
+                self.params['delta'] = np.zeros((1, 1))
             for par in self.params:
                 self.params[par] = np.array([self.params[par]])
         elif self.mcmc_samples > 0:
@@ -1146,13 +1154,6 @@ class Prophet(object):
                                 + self.params['delta'].reshape(-1))
             self.params['delta'] = (np.zeros(self.params['delta'].shape)
                                       .reshape((-1, 1)))
-
-        # for constant trend, replace k, delta, n_changepoints with 0s
-        if self.growth == 'flat':
-            self.n_changepoints = 0
-            self.changepoints_t = np.array([0])
-            self.params['k'] = np.zeros((1, 1))
-            self.params['delta'] = np.zeros((1, 1))
 
         return self
 
@@ -1261,7 +1262,6 @@ class Prophet(object):
             m_t[indx] += gammas[s]
         return cap / (1 + np.exp(-k_t * (t - m_t)))
 
-
     def predict_trend(self, df):
         """Predict trend using the prophet model.
 
@@ -1284,7 +1284,7 @@ class Prophet(object):
             cap = df['cap_scaled']
             trend = self.piecewise_logistic(
                 t, cap, deltas, k, m, self.changepoints_t)
-        else:
+        elif self.growth == 'flat':
             # constant trend
             trend = m * np.ones_like(t)
 
@@ -1484,7 +1484,7 @@ class Prophet(object):
             cap = df['cap_scaled']
             trend = self.piecewise_logistic(t, cap, deltas, k, m,
                                             changepoint_ts)
-        else:
+        elif self.growth == 'flat':
             trend = m * np.ones_like(t)
 
         return trend * self.y_scale + df['floor']

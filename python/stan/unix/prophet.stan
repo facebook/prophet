@@ -74,17 +74,12 @@ functions {
     return (k + A * delta) .* t + (m + A * (-t_change .* delta));
   }
 
-    vector flat_trend(
-    real k,
+  vector flat_trend(
     real m,
-    vector delta,
-    vector t,
-    matrix A,
-    vector t_change
+    int T,
   ) {
-    return m;
+    return rep_row_vector(m, T);
   }
-
 
 }
 
@@ -117,6 +112,17 @@ parameters {
   vector[K] beta;           // Regressor coefficients
 }
 
+transformed_parameters {
+  vector trend;
+  if (trend_indicator == 0) {
+    trend = linear_trend(k, m, delta, t, A, t_change);
+  } else if (trend_indicator == 1) {
+    trend = logistic_trend(k, m, delta, t, cap, A, t_change, S);
+  } else if (trend_indicator == 2) {
+    trend = flat_trend(m, T);
+  }
+}
+
 model {
   //priors
   k ~ normal(0, 5);
@@ -126,26 +132,7 @@ model {
   beta ~ normal(0, sigmas);
 
   // Likelihood
-  if (trend_indicator == 0) {
-    y ~ normal(
-      linear_trend(k, m, delta, t, A, t_change)
-      .* (1 + X * (beta .* s_m))
-      + X * (beta .* s_a),
-      sigma_obs
-    );
-  } else if (trend_indicator == 1) {
-    y ~ normal(
-      logistic_trend(k, m, delta, t, cap, A, t_change, S)
-      .* (1 + X * (beta .* s_m))
-      + X * (beta .* s_a),
-      sigma_obs
-    );
-  } else if (trend_indicator == 2) {
-    y ~ normal(
-      flat_trend(k, m, delta, t, A, t_change)
-      .* (1 + X * (beta .* s_m))
-      + X * (beta .* s_a),
-      sigma_obs
-    );
-  }
+  y ~ normal(
+  trend.* (1 + X * (beta .* s_m)) + X * (beta .* s_a), sigma_obs
+  );
 }
