@@ -239,7 +239,7 @@ prophet_copy <- function(m, cutoff = NULL) {
 #'
 #' @export
 performance_metrics <- function(df, metrics = NULL, rolling_window = 0.1) {
-  valid_metrics <- c('mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage')
+  valid_metrics <- c('mse', 'rmse', 'mae', 'mape', 'coverage')
   if (is.null(metrics)) {
     metrics <- valid_metrics
   }
@@ -364,22 +364,25 @@ rolling_median_by_h <- function(x, h, w, name) {
   df <- data.frame(x=x, h=h)
   grouped <- df %>% dplyr::group_by(h)
   df2 <- grouped %>%
-    mutate(Temp = max(x)) %>%
-    arrange(h) %>%
-    select(h, Temp)
+    dplyr::summarise(size=dplyr::n()) %>%
+    dplyr::arrange(size) %>%
+    dplyr::select(h, size)
 
   hs <- df2$h
-
   res <- data.frame(horizon=c())
   res[[name]] <- c()
+
   # Start from the right and work backwards
   i <- length(hs)
-  while (i >= 0) {
+  while (i > 0) {
     h_i <- hs[i]
-    xs <- list(filter(grouped, h==h_i)$x)
-    next_idx_to_add = ramify::argmax(array(h == h_i)) - 1
-    print(next_idx_to_add)
-    while ((length(xs) < w) & (next_idx_to_add >= 0)) {
+    xs <- grouped  %>%
+      dplyr::filter(h==h_i)
+    xs <- xs$x
+
+    next_idx_to_add = which.max(h==h_i) - 1
+
+    while ((length(xs) < w) & (next_idx_to_add > 0)) {
       # Include points from the previous horizon. All of them if still less
       # than w, otherwise just enough to get to w.
       xs <- rbind(x[next_idx_to_add], xs)

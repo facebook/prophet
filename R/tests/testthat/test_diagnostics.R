@@ -113,7 +113,7 @@ test_that("performance_metrics", {
   df_none <- performance_metrics(df_cv, rolling_window = -1)
   expect_true(all(
     sort(colnames(df_none))
-    == sort(c('horizon', 'coverage', 'mae', 'mape', 'mse', 'mdape', 'rmse'))
+    == sort(c('horizon', 'coverage', 'mae', 'mape', 'mse', 'rmse'))
   ))
   expect_equal(nrow(df_none), 16)
   # Aggregation level 0
@@ -127,7 +127,7 @@ test_that("performance_metrics", {
   # Aggregation level all
   df_all <- performance_metrics(df_cv, rolling_window = 1)
   expect_equal(nrow(df_all), 1)
-  for (metric in c('mse', 'mape', 'mae', 'mdape', 'coverage')) {
+  for (metric in c('mse', 'mape', 'mae', 'coverage')) {
     expect_equal(df_all[[metric]][1], mean(df_none[[metric]]))
   }
   # Custom list of metrics
@@ -137,7 +137,7 @@ test_that("performance_metrics", {
   ))
   # Skip MAPE and MDAPE
   df_cv$y[1] <- 0.
-  df_horizon <- performance_metrics(df_cv, metrics = c('coverage', 'mape', 'mdape'))
+  df_horizon <- performance_metrics(df_cv, metrics = c('coverage', 'mape'))
   expect_true(all(
     sort(colnames(df_horizon)) == sort(c('coverage', 'horizon'))
   ))
@@ -146,7 +146,7 @@ test_that("performance_metrics", {
   # List of metrics containing non valid metrics
   expect_error(
      performance_metrics(df_cv, metrics = c('mse', 'error_metric')),
-     'Valid values for metrics are: mse, rmse, mae, mape, mdape, coverage'
+     'Valid values for metrics are: mse, rmse, mae, mape, coverage'
   )
 })
 
@@ -189,7 +189,7 @@ test_that("rolling_median", {
   expect_equal(3:9, df$horizon)
 
   h <- c(1., 2., 3., 4., 4., 4., 4., 4., 7., 7.)
-  x.true <- c(1., 5., 22/3)
+  x.true <- c(1., 5., 8.)
   h.true <- c(3., 4., 7.)
   df <- prophet:::rolling_median_by_h(x=x, h=h, w=3, name='x')
   expect_equal(x.true, df$x)
