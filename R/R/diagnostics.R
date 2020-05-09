@@ -99,7 +99,7 @@ cross_validation <- function(
         'is larger than initial window. Consider increasing initial.'))
     }
   }
-  
+
   predict_columns <- c('ds', 'yhat')
   if (model$uncertainty.samples){
     predict_columns <- append(predict_columns, c('yhat_lower', 'yhat_upper'))
@@ -206,6 +206,7 @@ prophet_copy <- function(m, cutoff = NULL) {
 #' 'rmse': root mean squared error
 #' 'mae': mean absolute error
 #' 'mape': mean percent error
+#' 'mdape': median percent error
 #' 'coverage': coverage of the upper and lower intervals
 #'
 #' A subset of these can be specified by passing a list of names as the
@@ -238,7 +239,7 @@ prophet_copy <- function(m, cutoff = NULL) {
 #'
 #' @export
 performance_metrics <- function(df, metrics = NULL, rolling_window = 0.1) {
-  valid_metrics <- c('mse', 'rmse', 'mae', 'mape', 'coverage')
+  valid_metrics <- c('mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage')
   if (is.null(metrics)) {
     metrics <- valid_metrics
   }
@@ -260,6 +261,10 @@ performance_metrics <- function(df, metrics = NULL, rolling_window = 0.1) {
   if (('mape' %in% metrics) & (min(abs(df_m$y)) < 1e-8)) {
     message('Skipping MAPE because y close to 0')
     metrics <- metrics[metrics != 'mape']
+  }
+  if (('mdape' %in% metrics) & (min(abs(df_m$y)) < 1e-8)) {
+    message('Skipping MDAPE because y close to 0')
+    metrics <- metrics[metrics != 'mdape']
   }
   if (length(metrics) == 0) {
     return(NULL)
@@ -342,7 +347,7 @@ rolling_mean_by_h <- function(x, h, w, name) {
 #'
 #' Right-aligned. Computes a single median for each unique value of h. Each median
 #' is over at least w samples.
-#' 
+#'
 #' For each h where there are fewer than w samples, we take samples from the previous h,
 #  moving backwards. (In other words, we ~ assume that the x's are shuffled within each h.)
 #'
@@ -354,16 +359,16 @@ rolling_mean_by_h <- function(x, h, w, name) {
 #' @return Dataframe with columns horizon and name, the rolling median of x.
 #'
 #' @importFrom dplyr "%>%"
-#' @keywords internal
+#'
 rolling_median_by_h <- function(x, h, w, name) {
   # Aggregate over h
   df <- data.frame(x=x, h=h)
   df2 <- df %>%
     dplyr::group_by(h) %>%
     dplyr::summarise(mean = mean(x), n = dplyr::n())
-  
+
   hs <- df2$h
-  
+
   res <- data.frame(horizon=c())
   res[[name]] <- c()
   # Start from the right and work backwards
@@ -372,12 +377,12 @@ rolling_median_by_h <- function(x, h, w, name) {
     # Construct a mean of at least w samples
     h_i <- hs[i]
     xs <- group_by(h)
-    next_idx_to_add = np.array(h == h_i).argmax() - 1
+    next_idx_to_add = argmax(np.array(h == h_i)) - 1
     while ((length(xs) < w) & (next_idx_to_add > 0)) {
       # Include points from the previous horizon. All of them if still less
       # than w, otherwise just enough to get to w.
-      xs <- rbind(x[next_idx_to_add], xs) 
-      next_idx_to_add = next_idx_to_add - 1 
+      xs <- rbind(x[next_idx_to_add], xs)
+      next_idx_to_add = next_idx_to_add - 1
     }
     if (length(xs) < w) {
       # Ran out of horizons before enough points.
@@ -458,6 +463,24 @@ mape <- function(df, w) {
   }
   return(rolling_mean_by_h(x = ape, h = df$horizon, w = w, name = 'mape'))
 }
+
+
+#' Median absolute percent error
+#'
+#' @param df Cross-validation results dataframe.
+#' @param w Aggregation window size.
+#'
+#' @return Array of median absolute percent errors.
+#'
+#' @keywords internal
+mdape <- function(df, w) {
+  ape <- abs((df$y - df$yhat) / df$y)
+  if (w < 0) {
+    return(data.frame(horizon = df$horizon, mdape = ape))
+  }
+  return(rolling_median_by_h(x = ape, h = df$horizon, w = w, name = 'mdape'))
+}
+
 
 #' Coverage
 #'
