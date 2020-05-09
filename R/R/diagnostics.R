@@ -359,13 +359,14 @@ rolling_mean_by_h <- function(x, h, w, name) {
 #' @return Dataframe with columns horizon and name, the rolling median of x.
 #'
 #' @importFrom dplyr "%>%"
-#'
 rolling_median_by_h <- function(x, h, w, name) {
   # Aggregate over h
   df <- data.frame(x=x, h=h)
-  df2 <- df %>%
-    dplyr::group_by(h) %>%
-    dplyr::summarise(mean = mean(x), n = dplyr::n())
+  grouped <- df %>% dplyr::group_by(h)
+  df2 <- grouped %>%
+    mutate(Temp = max(x)) %>%
+    arrange(h) %>%
+    select(h, Temp)
 
   hs <- df2$h
 
@@ -373,12 +374,12 @@ rolling_median_by_h <- function(x, h, w, name) {
   res[[name]] <- c()
   # Start from the right and work backwards
   i <- length(hs)
-  while (i > 0) {
-    # Construct a mean of at least w samples
+  while (i >= 0) {
     h_i <- hs[i]
-    xs <- group_by(h)
-    next_idx_to_add = argmax(np.array(h == h_i)) - 1
-    while ((length(xs) < w) & (next_idx_to_add > 0)) {
+    xs <- list(filter(grouped, h==h_i)$x)
+    next_idx_to_add = ramify::argmax(array(h == h_i)) - 1
+    print(next_idx_to_add)
+    while ((length(xs) < w) & (next_idx_to_add >= 0)) {
       # Include points from the previous horizon. All of them if still less
       # than w, otherwise just enough to get to w.
       xs <- rbind(x[next_idx_to_add], xs)
@@ -395,7 +396,6 @@ rolling_median_by_h <- function(x, h, w, name) {
   }
   return(res)
 }
-
 
 # The functions below specify performance metrics for cross-validation results.
 # Each takes as input the output of cross_validation, and returns the statistic
