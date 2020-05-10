@@ -67,7 +67,7 @@ generate_cutoffs <- function(df, horizon, initial, period) {
 #'  horizon. If not provided, 0.5 * horizon is used.
 #' @param initial Integer size of the first training period. If not provided,
 #'  3 * horizon is used. Same units as horizon.
-#'  @param cutoffs Vector of cutoff dates to be used during
+#' @param cutoffs Vector of cutoff dates to be used during
 #'  cross-validtation. If not provided works beginning from (end - horizon),
 #'  works backwards making cutoffs with a spacing of period until initial is
 #'  reached.
