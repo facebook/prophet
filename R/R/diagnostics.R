@@ -53,9 +53,9 @@ generate_cutoffs <- function(df, horizon, initial, period) {
 
 #' Cross-validation for time series.
 #'
-#' Computes forecasts from historical cutoff points. Beginning from
-#' (end - horizon), works backwards making cutoffs with a spacing of period
-#' until initial is reached.
+#' Computes forecasts from historical cutoff points which user can input.If
+#' not provided, these are computed beginning from (end - horizon), and working
+#' backwards making cutoffs with a spacing of period until initial is reached.
 #'
 #' When period is equal to the time interval of the data, this is the
 #' technique described in https://robjhyndman.com/hyndsight/tscv/ .
@@ -67,6 +67,10 @@ generate_cutoffs <- function(df, horizon, initial, period) {
 #'  horizon. If not provided, 0.5 * horizon is used.
 #' @param initial Integer size of the first training period. If not provided,
 #'  3 * horizon is used. Same units as horizon.
+#'  @param cutoffs Vector of cutoff dates to be used during
+#'  cross-validtation. If not provided works beginning from (end - horizon),
+#'  works backwards making cutoffs with a spacing of period until initial is
+#'  reached.
 #'
 #' @return A dataframe with the forecast, actual value, and cutoff date.
 #'
