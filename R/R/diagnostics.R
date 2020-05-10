@@ -72,12 +72,13 @@ generate_cutoffs <- function(df, horizon, initial, period) {
 #'
 #' @export
 cross_validation <- function(
-    model, horizon, units, period = NULL, initial = NULL) {
+    model, horizon, units, period = NULL, initial = NULL, cutoffs=NULL) {
   df <- model$history
   horizon.dt <- as.difftime(horizon, units = units)
-  # Set period
-  if (is.null(period)) {
-    period <- 0.5 * horizon
+
+  predict_columns <- c('ds', 'yhat')
+  if (model$uncertainty.samples){
+    predict_columns <- append(predict_columns, c('yhat_lower', 'yhat_upper'))
   }
   period.dt <- as.difftime(period, units = units)
   # Identify largest seasonality period
@@ -86,30 +87,38 @@ cross_validation <- function(
     period.max <- max(period.max, s$period)
   }
   seasonality.dt <- as.difftime(period.max, units = 'days')
-  # Set initial
-  if (is.null(initial)) {
-    initial.dt <- max(
-      as.difftime(3 * horizon, units = units),
-      seasonality.dt
-    )
-  } else {
-    initial.dt <- as.difftime(initial, units = units)
-    if (initial.dt < seasonality.dt) {
-      warning(paste0('Seasonality has period of ', period.max, ' days which ',
-        'is larger than initial window. Consider increasing initial.'))
+
+  if (is.null(cutoffs)){
+
+    # Set period
+    if (is.null(period)) {
+      period <- 0.5 * horizon
     }
-  }
-  
-  predict_columns <- c('ds', 'yhat')
-  if (model$uncertainty.samples){
-    predict_columns <- append(predict_columns, c('yhat_lower', 'yhat_upper'))
+    # Set initial
+    if (is.null(initial)) {
+      initial.dt <- max(
+        as.difftime(3 * horizon, units = units),
+        seasonality.dt
+      )
+    }else {
+      initial.dt <- as.difftime(initial, units = units)
+    }
+    cutoffs <- generate_cutoffs(df, horizon.dt, initial.dt, period.dt)
+  }else{
+    initial.dt <- cutoffs[1] - min(df$ds)
   }
 
-  cutoffs <- generate_cutoffs(df, horizon.dt, initial.dt, period.dt)
+  # Check if the initial window  (that is, the amount of time between the
+  # start of the history and the first cutoff) is less than the
+  # maximum seasonality period
+  if (initial.dt < seasonality.dt) {
+    warning(paste0('Seasonality has period of ', period.max, ' days which ',
+      'is larger than initial window. Consider increasing initial.'))
+  }
 
   predicts <- data.frame()
   for (i in 1:length(cutoffs)) {
-    cutoff <- cutoffs[i]
+    cutoff <- as.POSIXct(cutoffs[i])
     # Copy the model
     m <- prophet_copy(model, cutoff)
     # Train model

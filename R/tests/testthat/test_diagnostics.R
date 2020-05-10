@@ -95,10 +95,10 @@ test_that("cross_validation_custom_cutoffs", {
   m <- prophet(DATA)
   # When specify a list of cutoffs the cutoff dates in df.cv1
   # are those specified
-  df.cv1 <- cross_validation(
-    m, horizon = 32, units = "days", period = 10,
-    cutoffs=c(as.Date('2012-07-31'), as.Date('2012-08-31')))
-  expect_equal(length(unique(df.cv1$cutoff)), 2)
+  cutoffs=c(as.Date('2012-07-31'), as.Date('2012-08-31'))
+  df.cv <-cross_validation(
+    m, horizon = 32, units = "days", period = 10, cutoffs=cutoffs)
+  expect_equal(length(unique(df.cv$cutoff)), 2)
 })
 
 test_that("cross_validation_uncertainty_disabled", {
