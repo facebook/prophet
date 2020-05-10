@@ -37,7 +37,7 @@ If you have custom Stan compiler settings, install from source rather than the C
 
 ## Installation in Python
 
-Prophet is on PyPI, so you can use `pip` to install it:
+Prophet is on PyPI, so you can use `pip` to install it. From v0.6 onwards, Python 2 is no longer supported.
 
 ```bash
 pip install fbprophet
@@ -84,6 +84,7 @@ Make sure compilers (gcc, g++, build-essential) and Python development tools (py
 - Fix bugs related to upstream changes in `holidays` and `pandas` packages.
 - Compile model during first use, not during install (to comply with CRAN policy)
 - `cmdstanpy` backend now available in Python
+- Python 2 no longer supported
 
 ### Version 0.5 (2019.05.14)
 
