@@ -207,7 +207,7 @@ class PyStanBackend(IStanBackend):
     @staticmethod
     def build_model(target_dir, model_dir):
         import pystan
-        model_name = 'prophet.stan'
+        model_name = 'positive_prophet.stan'
         target_name = 'prophet_model.pkl'
         with open(os.path.join(model_dir, model_name)) as f:
             model_code = f.read()
