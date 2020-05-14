@@ -129,6 +129,7 @@ setup(
     setup_requires=[
     ],
     install_requires=install_requires,
+    python_requires='>=3',
     zip_safe=False,
     include_package_data=True,
     cmdclass={
@@ -139,7 +140,6 @@ setup(
     test_suite='fbprophet.tests',
     classifiers=[
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
     ],
