@@ -1008,20 +1008,21 @@ class Prophet(object):
         y0, y1 = df['y_scaled'].iloc[i0], df['y_scaled'].iloc[i1]
         var = df['y_scaled'].var()
         
+        def log1exp(x):
+            if x > 20:
+                return x
+            return log(1+ exp(x))
+        
         def eqs(p):
             k_a, m_a, k_b, m_b = p
-            alpha0 = log(1 + exp(m_a + k_a *t0))
-            alpha1 = log(1 + exp(m_a + k_a *t1))
-            beta0 = log(1 + exp(m_b + k_b *t0))
-            beta1 = log(1 + exp(m_b + k_b *t1))
+            alpha0 = log1exp(m_a + k_a *t0)
+            alpha1 = log1exp(m_a + k_a *t1)
+            beta0 = log1exp(m_b + k_b *t0)
+            beta1 = log1exp(m_b + k_b *t1)
             return (alpha0/beta0 - y0, alpha1/beta1 - y1, alpha0/(beta0*beta0) - var, alpha1/(beta1*beta1) - var)
         
         k_a, m_a, k_b, m_b = fsolve(eqs, (-1,1,-1,1))
-        logger.info("BB init: %s|%s|%s|%s" % (k_a, m_a, k_b, m_b))
-        
-        #T = df['t'].iloc[i1] - df['t'].iloc[i0]
-        #k = (df['y_scaled'].iloc[i1] - df['y_scaled'].iloc[i0]) / T
-        #m = df['y_scaled'].iloc[i0] - k * df['t'].iloc[i0]
+
         return (k_a, m_a, k_b, m_b)
 
     @staticmethod
@@ -1195,6 +1196,7 @@ class Prophet(object):
         trend_alpha, trend_beta = self.predict_trends(df)
         df['trend_alpha'] = trend_alpha
         df['trend_beta'] = trend_beta
+        df['yscale'] = self.y_scale
         seasonal_components = self.predict_seasonal_components(df)
         if self.uncertainty_samples:
             intervals = self.predict_uncertainty(df)
@@ -1202,7 +1204,7 @@ class Prophet(object):
             intervals = None
 
         # Drop columns except ds, cap, floor, and trend
-        cols = ['ds', 'trend_alpha', 'trend_beta']
+        cols = ['ds', 'trend_alpha', 'trend_beta', 'yscale']
         # Add in forecast components
         df2 = pd.concat((df[cols], intervals, seasonal_components), axis=1)
         
@@ -1216,10 +1218,6 @@ class Prophet(object):
         
         df2['yhat'] = np.divide(alphas, betas) * self.y_scale
         
-        #df2['yhat'] = np.log(1 + np.exp(
-        #        df2['trend'] * (1 + df2['multiplicative_terms'])
-        #        + df2['additive_terms'])
-        #) * self.yscale
         return df2
 
     @staticmethod
@@ -1294,7 +1292,6 @@ class Prophet(object):
         -------
         Vector with trend on prediction dates.
         """
-        logger.info(self.params)
         k_a = np.nanmean(self.params['k_a'])
         m_a = np.nanmean(self.params['m_a'])
         k_b = np.nanmean(self.params['k_b'])
@@ -1332,8 +1329,7 @@ class Prophet(object):
                 p_c = self.params[param] * component_cols[component].values
 
                 comp = np.matmul(X, p_c.transpose())
-                #if component in self.component_modes['additive']:
-                #    comp *= self.y_scale
+
                 data[component + "_" + param] = np.nanmean(comp, axis=1)
                 if self.uncertainty_samples:
                     data[component + "_" + param + '_lower'] = self.percentile(
@@ -1456,14 +1452,8 @@ class Prophet(object):
         b_draws = trend_beta * (1 + Xb_mb) + Xb_ab
         alpha_draws = np.log(1 + np.exp(a_draws))
         beta_draws = np.log(1 + np.exp(b_draws))
-        
-        
-
-        #sigma = self.params['sigma_obs'][iteration]
-        #noise = np.random.normal(0, sigma, df.shape[0]) * self.y_scale
 
         return pd.DataFrame({
-            #'yhat': (trend * (1 + Xb_m) + Xb_a + noise) * self.yscale,
             'yhat': np.random.gamma(alpha_draws, 1.0/beta_draws, df.shape[0]) * self.y_scale,
             'trend_alpha': trend_alpha,
             'trend_beta': trend_beta
