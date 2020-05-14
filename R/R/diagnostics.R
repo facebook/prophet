@@ -84,7 +84,6 @@ cross_validation <- function(
   if (model$uncertainty.samples){
     predict_columns <- append(predict_columns, c('yhat_lower', 'yhat_upper'))
   }
-  period.dt <- as.difftime(period, units = units)
   # Identify largest seasonality period
   period.max <- 0
   for (s in model$seasonalities) {
@@ -98,6 +97,7 @@ cross_validation <- function(
     if (is.null(period)) {
       period <- 0.5 * horizon
     }
+    period.dt <- as.difftime(period, units = units)
     # Set initial
     if (is.null(initial)) {
       initial.dt <- max(

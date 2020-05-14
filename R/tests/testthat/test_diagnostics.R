@@ -99,6 +99,10 @@ test_that("cross_validation_custom_cutoffs", {
   df.cv <-cross_validation(
     m, horizon = 32, units = "days", period = 10, cutoffs=cutoffs)
   expect_equal(length(unique(df.cv$cutoff)), 2)
+  # test this works ok when periods is NULL
+  df.cv <-cross_validation(
+    m, horizon = 32, units = "days", cutoffs=cutoffs)
+  expect_equal(length(unique(df.cv$cutoff)), 2)
 })
 
 test_that("cross_validation_uncertainty_disabled", {
