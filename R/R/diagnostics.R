@@ -109,6 +109,7 @@ cross_validation <- function(
     }
     cutoffs <- generate_cutoffs(df, horizon.dt, initial.dt, period.dt)
   }else{
+    cutoffs <- set_date(ds=cutoffs)
     initial.dt <- cutoffs[1] - min(df$ds)
   }
 
@@ -122,8 +123,8 @@ cross_validation <- function(
 
   predicts <- data.frame()
   for (i in 1:length(cutoffs)) {
-    cutoff <- as.POSIXct(cutoffs[i])
     # Copy the model
+    cutoff <- cutoffs[i]
     m <- prophet_copy(model, cutoff)
     # Train model
     history.c <- dplyr::filter(df, ds <= cutoff)
