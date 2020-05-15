@@ -321,6 +321,10 @@ class TestProphet(TestCase):
         self.assertAlmostEqual(k, 1.507925, places=4)
         self.assertAlmostEqual(m, -0.08167497, places=4)
 
+        k,m = model.flat_growth_init(history)
+        self.assertEqual(k, 0)
+        self.assertAlmostEqual(m,  0.49335657, places=4)
+
     def test_piecewise_linear(self):
         model = Prophet()
 

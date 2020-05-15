@@ -1049,6 +1049,27 @@ class Prophet(object):
         k = (L0 - L1) / T
         return (k, m)
 
+    @staticmethod
+    def flat_growth_init(df):
+        """Initialize flat growth.
+
+        Provides a strong initialization for flat growth. Sets the growth to 0
+        and offset parameter as mean of history y_scaled values.
+
+        Parameters
+        ----------
+        df: pd.DataFrame with columns ds (date), y_scaled (scaled time series),
+            and t (scaled time).
+
+        Returns
+        -------
+        A tuple (k, m) with the rate (k) and offset (m) of the linear growth
+        function.
+        """
+        k = 0
+        m = df['y_scaled'].mean()
+        return k, m
+
     def fit(self, df, **kwargs):
         """Fit the Prophet model.
 
@@ -1115,9 +1136,12 @@ class Prophet(object):
             's_m': component_cols['multiplicative_terms'],
         }
 
-        if self.growth == 'linear' or self.growth == 'flat':
+        if self.growth == 'linear':
             dat['cap'] = np.zeros(self.history.shape[0])
             kinit = self.linear_growth_init(history)
+        elif self.growth == 'flat':
+            dat['cap'] = np.zeros(self.history.shape[0])
+            kinit = self.flat_growth_init(history)
         else:
             dat['cap'] = history['cap_scaled']
             kinit = self.logistic_growth_init(history)
@@ -1148,10 +1172,6 @@ class Prophet(object):
                                 + self.params['delta'].reshape(-1))
             self.params['delta'] = (np.zeros(self.params['delta'].shape)
                                       .reshape((-1, 1)))
-
-        # for constant trend, reset growth param to 0
-        if self.growth == 'flat':
-            self.params['k'] = np.zeros((1, 1))
 
         return self
 
