@@ -106,18 +106,21 @@ class TestDiagnostics(TestCase):
                 self.assertEqual(diagnostics.single_cutoff_forecast.call_count,
                                  forecasts)
 
-
-    def test_cross_validation_logistic(self):
-        df = self.__df.copy()
-        df['cap'] = 40
-        m = Prophet(growth='logistic').fit(df)
-        df_cv = diagnostics.cross_validation(
-            m, horizon='1 days', period='1 days', initial='140 days')
-        self.assertEqual(len(np.unique(df_cv['cutoff'])), 2)
-        self.assertTrue((df_cv['cutoff'] < df_cv['ds']).all())
-        df_merged = pd.merge(df_cv, self.__df, 'left', on='ds')
-        self.assertAlmostEqual(
-            np.sum((df_merged['y_x'] - df_merged['y_y']) ** 2), 0.0)
+    def test_cross_validation_logistic_or_flat_growth(self):
+        params = (x for x in ['logistic', 'flat'])
+        for growth in params:
+            with self.subTest(i=growth):
+                df = self.__df.copy()
+                if growth == "logistic":
+                    df['cap'] = 40
+                m = Prophet(growth=growth).fit(df)
+                df_cv = diagnostics.cross_validation(
+                    m, horizon='1 days', period='1 days', initial='140 days')
+                self.assertEqual(len(np.unique(df_cv['cutoff'])), 2)
+                self.assertTrue((df_cv['cutoff'] < df_cv['ds']).all())
+                df_merged = pd.merge(df_cv, self.__df, 'left', on='ds')
+                self.assertAlmostEqual(
+                    np.sum((df_merged['y_x'] - df_merged['y_y']) ** 2), 0.0)
 
     def test_cross_validation_extra_regressors(self):
         df = self.__df.copy()

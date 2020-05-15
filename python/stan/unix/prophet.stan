@@ -73,6 +73,15 @@ functions {
   ) {
     return (k + A * delta) .* t + (m + A * (-t_change .* delta));
   }
+
+  // Flat trend function
+
+  vector flat_trend(
+    real m,
+    int T
+  ) {
+    return rep_vector(m, T);
+  }
 }
 
 data {
@@ -86,7 +95,7 @@ data {
   matrix[T,K] X;        // Regressors
   vector[K] sigmas;     // Scale on seasonality prior
   real<lower=0> tau;    // Scale on changepoints prior
-  int trend_indicator;  // 0 for linear, 1 for logistic
+  int trend_indicator;  // 0 for linear, 1 for logistic, 2 for flat
   vector[K] s_a;        // Indicator of additive features
   vector[K] s_m;        // Indicator of multiplicative features
 }
@@ -104,6 +113,17 @@ parameters {
   vector[K] beta;           // Regressor coefficients
 }
 
+transformed parameters {
+  vector[T] trend;
+  if (trend_indicator == 0) {
+    trend = linear_trend(k, m, delta, t, A, t_change);
+  } else if (trend_indicator == 1) {
+    trend = logistic_trend(k, m, delta, t, cap, A, t_change, S);
+  } else if (trend_indicator == 2) {
+    trend = flat_trend(m, T);
+  }
+}
+
 model {
   //priors
   k ~ normal(0, 5);
@@ -113,19 +133,10 @@ model {
   beta ~ normal(0, sigmas);
 
   // Likelihood
-  if (trend_indicator == 0) {
-    y ~ normal(
-      linear_trend(k, m, delta, t, A, t_change)
-      .* (1 + X * (beta .* s_m))
-      + X * (beta .* s_a),
-      sigma_obs
-    );
-  } else if (trend_indicator == 1) {
-    y ~ normal(
-      logistic_trend(k, m, delta, t, cap, A, t_change, S)
-      .* (1 + X * (beta .* s_m))
-      + X * (beta .* s_a),
-      sigma_obs
-    );
-  }
+  y ~ normal(
+  trend
+  .* (1 + X * (beta .* s_m))
+  + X * (beta .* s_a),
+  sigma_obs
+  );
 }
