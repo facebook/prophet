@@ -210,7 +210,6 @@ class TestProphet(TestCase):
         m = Prophet(growth='flat')
         N = DATA.shape[0]
         history = DATA.head(N // 2).copy()
-        test = DATA.tail(N // 2).copy()
         m.fit(history)
         future = m.make_future_dataframe(N // 2, include_history=False)
         fcst = m.predict(future)
@@ -218,7 +217,7 @@ class TestProphet(TestCase):
         k = m.params['k']
         self.assertEqual(k[0, 0], 0)
         self.assertEqual(fcst['trend'].unique(), m_*m.y_scale)
-        self.assertEqual(np.round(m_[0,0]*m.y_scale), 28)
+        self.assertEqual(np.round(m_[0,0]*m.y_scale), 26)
 
     def test_invalid_growth_input(self):
         msg = 'Parameter "growth" should be "linear", ' \
