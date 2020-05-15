@@ -63,8 +63,8 @@ test_that("cross_validation_extra_regressors", {
   df$is_conditional_week <- seq(0, nrow(df) - 1) %/% 7 %% 2
   m <- prophet()
   m <- add_seasonality(m, name = 'monthly', period = 30.5, fourier.order = 5)
-  m <- add_seasonality(m, name = 'conditional_weekly', period = 7, 
-                       fourier.order = 3, prior.scale = 2., 
+  m <- add_seasonality(m, name = 'conditional_weekly', period = 7,
+                       fourier.order = 3, prior.scale = 2.,
                        condition.name = 'is_conditional_week')
   m <- add_regressor(m, 'extra')
   m <- fit.prophet(m, df)
@@ -88,6 +88,21 @@ test_that("cross_validation_default_value_check", {
   df.cv2 <- cross_validation(
     m, horizon = 32, units = 'days', period = 10, initial = 96)
   expect_equal(sum(dplyr::select(df.cv1 - df.cv2, y, yhat)), 0)
+})
+
+test_that("cross_validation_custom_cutoffs", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  m <- prophet(DATA)
+  # When specify a list of cutoffs the cutoff dates in df.cv1
+  # are those specified
+  cutoffs=c(as.Date('2012-07-31'), as.Date('2012-08-31'))
+  df.cv <-cross_validation(
+    m, horizon = 32, units = "days", period = 10, cutoffs=cutoffs)
+  expect_equal(length(unique(df.cv$cutoff)), 2)
+  # test this works ok when periods is NULL
+  df.cv <-cross_validation(
+    m, horizon = 32, units = "days", cutoffs=cutoffs)
+  expect_equal(length(unique(df.cv$cutoff)), 2)
 })
 
 test_that("cross_validation_uncertainty_disabled", {
