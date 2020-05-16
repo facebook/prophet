@@ -155,9 +155,9 @@ class Prophet(object):
 
     def validate_inputs(self):
         """Validates the inputs to Prophet."""
-        if self.growth not in ('linear', 'logistic'):
+        if self.growth not in ('linear', 'logistic', 'flat'):
             raise ValueError(
-                'Parameter "growth" should be "linear" or "logistic".')
+                'Parameter "growth" should be "linear", "logistic" or "flat".')
         if ((self.changepoint_range < 0) or (self.changepoint_range > 1)):
             raise ValueError('Parameter "changepoint_range" must be in [0, 1]')
         if self.holidays is not None:
@@ -1049,6 +1049,27 @@ class Prophet(object):
         k = (L0 - L1) / T
         return (k, m)
 
+    @staticmethod
+    def flat_growth_init(df):
+        """Initialize flat growth.
+
+        Provides a strong initialization for flat growth. Sets the growth to 0
+        and offset parameter as mean of history y_scaled values.
+
+        Parameters
+        ----------
+        df: pd.DataFrame with columns ds (date), y_scaled (scaled time series),
+            and t (scaled time).
+
+        Returns
+        -------
+        A tuple (k, m) with the rate (k) and offset (m) of the linear growth
+        function.
+        """
+        k = 0
+        m = df['y_scaled'].mean()
+        return k, m
+
     def fit(self, df, **kwargs):
         """Fit the Prophet model.
 
@@ -1098,6 +1119,8 @@ class Prophet(object):
 
         self.set_changepoints()
 
+        trend_indicator = {'linear': 0, 'logistic': 1, 'flat': 2}
+
         dat = {
             'T': history.shape[0],
             'K': seasonal_features.shape[1],
@@ -1108,7 +1131,7 @@ class Prophet(object):
             'X': seasonal_features,
             'sigmas': prior_scales,
             'tau': self.changepoint_prior_scale,
-            'trend_indicator': int(self.growth == 'logistic'),
+            'trend_indicator': trend_indicator[self.growth],
             's_a': component_cols['additive_terms'],
             's_m': component_cols['multiplicative_terms'],
         }
@@ -1116,6 +1139,9 @@ class Prophet(object):
         if self.growth == 'linear':
             dat['cap'] = np.zeros(self.history.shape[0])
             kinit = self.linear_growth_init(history)
+        elif self.growth == 'flat':
+            dat['cap'] = np.zeros(self.history.shape[0])
+            kinit = self.flat_growth_init(history)
         else:
             dat['cap'] = history['cap_scaled']
             kinit = self.logistic_growth_init(history)
@@ -1128,9 +1154,8 @@ class Prophet(object):
             'sigma_obs': 1,
         }
 
-        if (history['y'].min() == history['y'].max()
-            and self.growth == 'linear'):
-            # Nothing to fit.
+        if history['y'].min() == history['y'].max() and \
+                (self.growth == 'linear' or self.growth == 'flat'):
             self.params = stan_init
             self.params['sigma_obs'] = 1e-9
             for par in self.params:
@@ -1255,6 +1280,22 @@ class Prophet(object):
             m_t[indx] += gammas[s]
         return cap / (1 + np.exp(-k_t * (t - m_t)))
 
+    @staticmethod
+    def flat_trend(t, m):
+        """Evaluate the flat trend function.
+
+        Parameters
+        ----------
+        t: np.array of times on which the function is evaluated.
+        m: Float initial offset.
+
+        Returns
+        -------
+        Vector y(t).
+        """
+        m_t = m * np.ones_like(t)
+        return m_t
+
     def predict_trend(self, df):
         """Predict trend using the prophet model.
 
@@ -1273,10 +1314,13 @@ class Prophet(object):
         t = np.array(df['t'])
         if self.growth == 'linear':
             trend = self.piecewise_linear(t, deltas, k, m, self.changepoints_t)
-        else:
+        elif self.growth == 'logistic':
             cap = df['cap_scaled']
             trend = self.piecewise_logistic(
                 t, cap, deltas, k, m, self.changepoints_t)
+        elif self.growth == 'flat':
+            # constant trend
+            trend = self.flat_trend(t, m)
 
         return trend * self.y_scale + df['floor']
 
@@ -1470,10 +1514,12 @@ class Prophet(object):
 
         if self.growth == 'linear':
             trend = self.piecewise_linear(t, deltas, k, m, changepoint_ts)
-        else:
+        elif self.growth == 'logistic':
             cap = df['cap_scaled']
             trend = self.piecewise_logistic(t, cap, deltas, k, m,
                                             changepoint_ts)
+        elif self.growth == 'flat':
+            trend = self.flat_trend(t, m)
 
         return trend * self.y_scale + df['floor']
 

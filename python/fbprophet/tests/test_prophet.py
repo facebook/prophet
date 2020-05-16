@@ -206,22 +206,41 @@ class TestProphet(TestCase):
         # Check for approximate shift invariance
         self.assertTrue((np.abs(fcst1['yhat'] - fcst2['yhat']) < 1).all())
 
-    def test_get_changepoints(self):
-        m = Prophet()
+    def test_flat_growth(self):
+        m = Prophet(growth='flat')
         N = DATA.shape[0]
         history = DATA.head(N // 2).copy()
+        m.fit(history)
+        future = m.make_future_dataframe(N // 2, include_history=False)
+        fcst = m.predict(future)
+        m_ = m.params['m']
+        k = m.params['k']
+        self.assertEqual(k[0, 0], 0)
+        self.assertEqual(fcst['trend'].unique(), m_*m.y_scale)
+        self.assertEqual(np.round(m_[0,0]*m.y_scale), 26)
 
-        history = m.setup_dataframe(history, initialize_scales=True)
-        m.history = history
+    def test_invalid_growth_input(self):
+        msg = 'Parameter "growth" should be "linear", ' \
+              '"logistic" or "flat".'
+        with self.assertRaisesRegex(ValueError, msg):
+            Prophet(growth="constant")
 
-        m.set_changepoints()
+    def test_get_changepoints(self):
+            m = Prophet()
+            N = DATA.shape[0]
+            history = DATA.head(N // 2).copy()
 
-        cp = m.changepoints_t
-        self.assertEqual(cp.shape[0], m.n_changepoints)
-        self.assertEqual(len(cp.shape), 1)
-        self.assertTrue(cp.min() > 0)
-        cp_indx = int(np.ceil(0.8 * history.shape[0]))
-        self.assertTrue(cp.max() <= history['t'].values[cp_indx])
+            history = m.setup_dataframe(history, initialize_scales=True)
+            m.history = history
+
+            m.set_changepoints()
+
+            cp = m.changepoints_t
+            self.assertEqual(cp.shape[0], m.n_changepoints)
+            self.assertEqual(len(cp.shape), 1)
+            self.assertTrue(cp.min() > 0)
+            cp_indx = int(np.ceil(0.8 * history.shape[0]))
+            self.assertTrue(cp.max() <= history['t'].values[cp_indx])
 
     def test_set_changepoint_range(self):
         m = Prophet(changepoint_range=0.4)
@@ -301,6 +320,10 @@ class TestProphet(TestCase):
         self.assertAlmostEqual(k, 1.507925, places=4)
         self.assertAlmostEqual(m, -0.08167497, places=4)
 
+        k,m = model.flat_growth_init(history)
+        self.assertEqual(k, 0)
+        self.assertAlmostEqual(m,  0.49335657, places=4)
+
     def test_piecewise_linear(self):
         model = Prophet()
 
@@ -341,6 +364,18 @@ class TestProphet(TestCase):
         cap = cap[8:]
         y = model.piecewise_logistic(t, cap, deltas, k, m, changepoint_ts)
         self.assertAlmostEqual((y - y_true).sum(), 0.0, places=5)
+
+    def test_flat_trend(self):
+        model = Prophet()
+        t = np.arange(11)
+        m = 0.5
+        y = model.flat_trend(t, m)
+        y_true = np.array([0.5]*11)
+        self.assertEqual((y - y_true).sum(), 0)
+        t = t[8:]
+        y_true = y_true[8:]
+        y = model.flat_trend(t, m)
+        self.assertEqual((y - y_true).sum(), 0)
 
     def test_holidays(self):
         holidays = pd.DataFrame({

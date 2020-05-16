@@ -94,6 +94,17 @@ functions {
     }
     return Y;
   }
+
+   // Flat trend function
+
+    real[] flat_trend(
+    real m,
+    int T
+  ) {
+    return rep_array(m, T);
+  }
+
+
 }
 
 data {
@@ -107,7 +118,7 @@ data {
   real X[T,K];         // Regressors
   vector[K] sigmas;     // Scale on seasonality prior
   real<lower=0> tau;    // Scale on changepoints prior
-  int trend_indicator;  // 0 for linear, 1 for logistic
+  int trend_indicator;  // 0 for linear, 1 for logistic, 2 for flat
   real s_a[K];          // Indicator of additive features
   real s_m[K];          // Indicator of multiplicative features
 }
@@ -135,6 +146,8 @@ transformed parameters {
     trend = linear_trend(k, m, delta, t, A, t_change, S, T);
   } else if (trend_indicator == 1) {
     trend = logistic_trend(k, m, delta, t, cap, A, t_change, S, T);
+  } else if (trend_indicator == 2){
+    trend = flat_trend(m, T);
   }
 
   for (i in 1:K) {

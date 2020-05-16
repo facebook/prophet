@@ -90,6 +90,21 @@ test_that("cross_validation_default_value_check", {
   expect_equal(sum(dplyr::select(df.cv1 - df.cv2, y, yhat)), 0)
 })
 
+test_that("cross_validation_custom_cutoffs", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  m <- prophet(DATA)
+  # When specify a list of cutoffs the cutoff dates in df.cv1
+  # are those specified
+  cutoffs=c(as.Date('2012-07-31'), as.Date('2012-08-31'))
+  df.cv <-cross_validation(
+    m, horizon = 32, units = "days", period = 10, cutoffs=cutoffs)
+  expect_equal(length(unique(df.cv$cutoff)), 2)
+  # test this works ok when periods is NULL
+  df.cv <-cross_validation(
+    m, horizon = 32, units = "days", cutoffs=cutoffs)
+  expect_equal(length(unique(df.cv$cutoff)), 2)
+})
+
 test_that("cross_validation_uncertainty_disabled", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   for (uncertainty in c(0, FALSE)) {

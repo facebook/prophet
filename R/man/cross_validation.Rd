@@ -4,7 +4,14 @@
 \alias{cross_validation}
 \title{Cross-validation for time series.}
 \usage{
-cross_validation(model, horizon, units, period = NULL, initial = NULL)
+cross_validation(
+  model,
+  horizon,
+  units,
+  period = NULL,
+  initial = NULL,
+  cutoffs = NULL
+)
 }
 \arguments{
 \item{model}{Fitted Prophet model.}
@@ -18,14 +25,19 @@ horizon. If not provided, 0.5 * horizon is used.}
 
 \item{initial}{Integer size of the first training period. If not provided,
 3 * horizon is used. Same units as horizon.}
+
+\item{cutoffs}{Vector of cutoff dates to be used during
+cross-validtation. If not provided works beginning from (end - horizon),
+works backwards making cutoffs with a spacing of period until initial is
+reached.}
 }
 \value{
 A dataframe with the forecast, actual value, and cutoff date.
 }
 \description{
-Computes forecasts from historical cutoff points. Beginning from
-(end - horizon), works backwards making cutoffs with a spacing of period
-until initial is reached.
+Computes forecasts from historical cutoff points which user can input.If
+not provided, these are computed beginning from (end - horizon), and working
+backwards making cutoffs with a spacing of period until initial is reached.
 }
 \details{
 When period is equal to the time interval of the data, this is the
