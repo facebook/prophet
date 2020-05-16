@@ -365,7 +365,7 @@ rolling_median_by_h <- function(x, h, w, name) {
   grouped <- df %>% dplyr::group_by(h)
   df2 <- grouped %>%
     dplyr::summarise(size=dplyr::n()) %>%
-    dplyr::arrange(size) %>%
+    dplyr::arrange(h) %>%
     dplyr::select(h, size)
 
   hs <- df2$h
