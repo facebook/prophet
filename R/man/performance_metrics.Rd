@@ -10,7 +10,7 @@ performance_metrics(df, metrics = NULL, rolling_window = 0.1)
 \item{df}{The dataframe returned by cross_validation.}
 
 \item{metrics}{An array of performance metrics to compute. If not provided,
-will use c('mse', 'rmse', 'mae', 'mape', 'coverage').}
+will use c('mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage').}
 
 \item{rolling_window}{Proportion of data to use in each rolling window for
 computing the metrics. Should be in [0, 1] to average.}
@@ -21,11 +21,11 @@ A dataframe with a column for each metric, and column 'horizon'.
 \description{
 Computes a suite of performance metrics on the output of cross-validation.
 By default the following metrics are included:
-'mse': mean squared error
-'rmse': root mean squared error
-'mae': mean absolute error
-'mape': mean percent error
-'mdape': median percent error
+'mse': mean squared error,
+'rmse': root mean squared error,
+'mae': mean absolute error,
+'mape': mean percent error,
+'mdape': median percent error,
 'coverage': coverage of the upper and lower intervals
 }
 \details{
