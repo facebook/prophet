@@ -399,7 +399,7 @@ rolling_median_by_h <- function(x, h, w, name) {
     while ((length(xs) < w) & (next_idx_to_add > 0)) {
       # Include points from the previous horizon. All of them if still less
       # than w, otherwise just enough to get to w.
-      xs <- rbind(x[next_idx_to_add], xs)
+      xs <- c(x[next_idx_to_add], xs)
       next_idx_to_add = next_idx_to_add - 1
     }
     if (length(xs) < w) {
