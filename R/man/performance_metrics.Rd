@@ -25,6 +25,7 @@ By default the following metrics are included:
 'rmse': root mean squared error
 'mae': mean absolute error
 'mape': mean percent error
+'mdape': median percent error
 'coverage': coverage of the upper and lower intervals
 }
 \details{
