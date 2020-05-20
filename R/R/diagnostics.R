@@ -216,10 +216,11 @@ prophet_copy <- function(m, cutoff = NULL) {
 #'
 #' Computes a suite of performance metrics on the output of cross-validation.
 #' By default the following metrics are included:
-#' 'mse': mean squared error
-#' 'rmse': root mean squared error
-#' 'mae': mean absolute error
-#' 'mape': mean percent error
+#' 'mse': mean squared error,
+#' 'rmse': root mean squared error,
+#' 'mae': mean absolute error,
+#' 'mape': mean percent error,
+#' 'mdape': median percent error,
 #' 'coverage': coverage of the upper and lower intervals
 #'
 #' A subset of these can be specified by passing a list of names as the
@@ -244,7 +245,7 @@ prophet_copy <- function(m, cutoff = NULL) {
 #'
 #' @param df The dataframe returned by cross_validation.
 #' @param metrics An array of performance metrics to compute. If not provided,
-#'  will use c('mse', 'rmse', 'mae', 'mape', 'coverage').
+#'  will use c('mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage').
 #' @param rolling_window Proportion of data to use in each rolling window for
 #'  computing the metrics. Should be in [0, 1] to average.
 #'
@@ -274,6 +275,10 @@ performance_metrics <- function(df, metrics = NULL, rolling_window = 0.1) {
   if (('mape' %in% metrics) & (min(abs(df_m$y)) < 1e-8)) {
     message('Skipping MAPE because y close to 0')
     metrics <- metrics[metrics != 'mape']
+  }
+  if (('mdape' %in% metrics) & (min(abs(df_m$y)) < 1e-8)) {
+    message('Skipping MDAPE because y close to 0')
+    metrics <- metrics[metrics != 'mdape']
   }
   if (length(metrics) == 0) {
     return(NULL)
@@ -351,6 +356,64 @@ rolling_mean_by_h <- function(x, h, w, name) {
   return(res)
 }
 
+
+#' Compute a rolling median of x, after first aggregating by h
+#'
+#' Right-aligned. Computes a single median for each unique value of h. Each median
+#' is over at least w samples.
+#'
+#' For each h where there are fewer than w samples, we take samples from the previous h,
+#  moving backwards. (In other words, we ~ assume that the x's are shuffled within each h.)
+#'
+#' @param x Array.
+#' @param h Array of horizon for each value in x.
+#' @param w Integer window size (number of elements).
+#' @param name String name for metric in result dataframe.
+#'
+#' @return Dataframe with columns horizon and name, the rolling median of x.
+#'
+#' @importFrom dplyr "%>%"
+rolling_median_by_h <- function(x, h, w, name) {
+  # Aggregate over h
+  df <- data.frame(x=x, h=h)
+  grouped <- df %>% dplyr::group_by(h)
+  df2 <- grouped %>%
+    dplyr::summarise(size=dplyr::n()) %>%
+    dplyr::arrange(h) %>%
+    dplyr::select(h, size)
+
+  hs <- df2$h
+  res <- data.frame(horizon=c())
+  res[[name]] <- c()
+
+  # Start from the right and work backwards
+  i <- length(hs)
+  while (i > 0) {
+    h_i <- hs[i]
+    xs <- grouped  %>%
+      dplyr::filter(h==h_i)
+    xs <- xs$x
+
+    next_idx_to_add = which.max(h==h_i) - 1
+
+    while ((length(xs) < w) & (next_idx_to_add > 0)) {
+      # Include points from the previous horizon. All of them if still less
+      # than w, otherwise just enough to get to w.
+      xs <- c(x[next_idx_to_add], xs)
+      next_idx_to_add = next_idx_to_add - 1
+    }
+    if (length(xs) < w) {
+      # Ran out of horizons before enough points.
+      break
+    }
+    res.i <- data.frame(horizon=hs[i])
+    res.i[[name]] <- median(xs)
+    res <- rbind(res.i, res)
+    i <- i - 1
+  }
+  return(res)
+}
+
 # The functions below specify performance metrics for cross-validation results.
 # Each takes as input the output of cross_validation, and returns the statistic
 # as a dataframe, given a window size for rolling aggregation.
@@ -417,6 +480,24 @@ mape <- function(df, w) {
   }
   return(rolling_mean_by_h(x = ape, h = df$horizon, w = w, name = 'mape'))
 }
+
+
+#' Median absolute percent error
+#'
+#' @param df Cross-validation results dataframe.
+#' @param w Aggregation window size.
+#'
+#' @return Array of median absolute percent errors.
+#'
+#' @keywords internal
+mdape <- function(df, w) {
+  ape <- abs((df$y - df$yhat) / df$y)
+  if (w < 0) {
+    return(data.frame(horizon = df$horizon, mdape = ape))
+  }
+  return(rolling_median_by_h(x = ape, h = df$horizon, w = w, name = 'mdape'))
+}
+
 
 #' Coverage
 #'
