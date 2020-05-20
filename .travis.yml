@@ -1,14 +1,14 @@
 dist: xenial
-matrix:
+language: python
+
+jobs:
   include:
     - language: python
       python:
         - "3.7"
-
       install:
         - pip install --upgrade pip
         - pip install -U -r python/requirements.txt dask[dataframe] distributed
-
       script:
         - cd python && python setup.py develop test
         - python setup.py clean
@@ -18,8 +18,12 @@ matrix:
         - make -C /tmp/cmdstan-2.22.1/ build > /dev/null
         - CMDSTAN=/tmp/cmdstan-2.22.1 STAN_BACKEND=CMDSTANPY python setup.py develop test
 
-    - language: R
-
+    - language: r
+      r:
+        - devel
+      install:
+        - R -e 'install.packages("remotes")'
+        - R -e 'remotes::install_deps("R", dependencies = TRUE)'
       script:
         - cd R
         - R CMD build .
