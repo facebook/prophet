@@ -307,7 +307,8 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     'mse': mean squared error
     'rmse': root mean squared error
     'mae': mean absolute error
-    'mape': mean percent error
+    'mape': mean absolute percent error
+    'mdape': median absolute percent error
     'coverage': coverage of the upper and lower intervals
 
     A subset of these can be specified by passing a list of names as the
@@ -334,7 +335,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     ----------
     df: The dataframe returned by cross_validation.
     metrics: A list of performance metrics to compute. If not provided, will
-        use ['mse', 'rmse', 'mae', 'mape', 'coverage'].
+        use ['mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage'].
     rolling_window: Proportion of data to use in each rolling window for
         computing the metrics. Should be in [0, 1] to average
 
