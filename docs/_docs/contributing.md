@@ -20,13 +20,13 @@ The R and Python versions are kept feature identical, but new features can be im
 ## Making a pull request 
 
 Now that you have an issue you want to fix, enhancement to add, or documentation
-to improve, you need to learn how to work with GitHub and the *fbprophet* code base.
+to improve, you need to learn how to work with GitHub and the fbprophet code base.
 
 
 ## Forking
 
-You will need your own fork to work on the code. Go to the `fbprophet project
-page <https://github.com/facebook/prophet>` and hit the ``Fork`` button. You will
+You will need your own fork to work on the code. Go to the fbprophet project
+page https://github.com/facebook/prophet and hit the ``Fork`` button. You will
 want to clone your fork to your machine::
 
     git https://github.com/your-user-name/prophet.git
@@ -34,7 +34,7 @@ want to clone your fork to your machine::
     git remote add upstream https://github.com/facebook/prophet.git
 
 This creates the directory `prophet` and connects your repository to
-the upstream (main project) *prophet* repository.
+the upstream (main project) fbprophet repository.
 
 
 ## Creating a development environment
@@ -162,8 +162,6 @@ reapplied after updating.
 fbprophet is serious about testing and strongly encourages contributors to embrace test-driven development (TDD). This development process “relies on the repetition of a very short development cycle: first the developer writes an (initially failing) automated test case that defines a desired improvement or new function, then produces the minimum amount of code to pass that test.” So, before actually writing any code, you should write your tests. Often the test can be taken from the original GitHub issue. However, it is always worth considering additional use cases and writing corresponding tests.
 
 Adding tests is one of the most common requests after code is pushed to xarray. Therefore, it is worth getting in the habit of writing tests ahead of time so this is never an issue. The prophet test suite runs automatically the Azure Pipelines, continuous integration service, once your pull request is submitted. A pull-request will be considered for merging when you have an all ‘green’ build. If any tests are failing, then you will get a red ‘X’, where you can click through to see the individual failed tests.
-
-## Writing Tests
 
 Prophet uses the ``unnittest`` package for running tests in Python and ``testthat`` package for testing in R. All tests should go into the tests subdirectory in either the Python or R folders. 
 
@@ -331,8 +329,8 @@ devtools::document()
 * Test that the documentation builds correctly. See “Generating documentation”.
 
 * Test your code.
-  ** Write new tests if needed. See “Test-driven development/code writing”.
-  ** Test the code using unittest. Running all tests takes a while, so feel free to only run the tests you think are needed based on your PR. CI will catch any failing tests.
+  - Write new tests if needed. See "Testing with Continuous Integration"
+  - Test the code using unittest. Running all tests takes a while, so feel free to only run the tests you think are needed based on your PR. CI will catch any failing tests.
 
 * Push your code and create a PR on GitHub.
 * Use a helpful title for your pull request by summarizing the main contributions rather than using the latest commit message. If this addresses an issue, please reference it.
