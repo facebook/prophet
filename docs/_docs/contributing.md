@@ -40,11 +40,12 @@ the upstream (main project) fbprophet repository.
 ## Creating a development environment
 
 Before starting any development, you'll need to create an isolated prophet
-development environment. 
+development environment. This should contain the required dependencies and 
+the development version of fbprophet
 
-1. The first step is to build an environment with dependencies.
+### Installing a new environment with dependencies.
 
-In Python
+#### Python
 
 - Install either Anaconda (https://www.anaconda.com/download/) or miniconda (https://conda.io/miniconda.html)
 - Make sure your conda is up to date (``conda update conda``)
@@ -64,7 +65,7 @@ $ source prophet/bin/activate
 $ pip install -r requirements.txt
 ```
 
-In R
+#### R
 
 Dependencies can be managed through ``Packrat`` (https://rstudio.github.io/packrat/) or ``renv`` (https://rstudio.github.io/renv/articles/renv.html).
 
@@ -88,10 +89,9 @@ renv::restore()
 ```
 
 
-2. The next step is to build and install the development version of prophet
+### Build and install the development version of prophet
 
-
-In Python
+#### Python
 
 ```
 $ python setup.py develop
@@ -120,7 +120,7 @@ $ conda deactivate
 
 See the full conda docs here http://conda.pydata.org/docs.
 
-in R
+#### R
 
 ```
 R CMD BUILD 
@@ -163,6 +163,8 @@ fbprophet is serious about testing and strongly encourages contributors to embra
 
 Adding tests is one of the most common requests after code is pushed to xarray. Therefore, it is worth getting in the habit of writing tests ahead of time so this is never an issue. The prophet test suite runs automatically the Azure Pipelines, continuous integration service, once your pull request is submitted. A pull-request will be considered for merging when you have an all ‘green’ build. If any tests are failing, then you will get a red ‘X’, where you can click through to see the individual failed tests.
 
+#### Python
+
 Prophet uses the ``unnittest`` package for running tests in Python and ``testthat`` package for testing in R. All tests should go into the tests subdirectory in either the Python or R folders. 
 
 
@@ -171,7 +173,7 @@ The entire test suite can be run by typing:
 python setup.py tests
 ```
 
-In R
+#### R
 
 
 The entire test suite can be run from R or the terminal by typing:
@@ -184,15 +186,12 @@ devtools::test()
 $ Rscript testthat.R
 ```
 
-
 or just running a single test script:
-
 
 ```
 
 Rscript testthat.R
 ```
-
 
 ## Committing your code
 
@@ -313,10 +312,9 @@ $ make notebooks
 
 Make sure you have installed [rpy2](https://rpy2.bitbucket.io/) so that the R code can be run as well.
 
-
 In R, the documentation for the source code must also generated if new parameters are added or a new function is created. This is documented with ``roxygen``. 
 
-Run the command below before submitting, otherwise the CI check will error:
+Run the command below before submitting a PR with any changes to the R code, otherwise the CI check will error:
 
 ```
 devtools::document() 
