@@ -8,7 +8,7 @@ subsections:
     title: Generating documentation
 ---
 
-Prophet has a non-fixed release cycle but we will be making bugfixes in response to user feedback and adding features.  Its current state is Beta (v0.5), we expect no obvious bugs. Please let us know if you encounter a bug by [filing an issue](https://github.com/facebook/prophet/issues). Github issues is also the right place to ask questions about using Prophet.
+Prophet has a non-fixed release cycle but we will be making bugfixes in response to user feedback and adding features. Please let us know if you encounter a bug by [filing an issue](https://github.com/facebook/prophet/issues). Github issues is also the right place to ask questions about using Prophet.
 
 We appreciate all contributions. If you are planning to contribute back bug-fixes, please do so without any further discussion.
 
@@ -16,34 +16,29 @@ If you plan to contribute new features or extensions to the core, please first o
 
 The R and Python versions are kept feature identical, but new features can be implemented for each method in separate commits.
 
+The following sections will describe how you can submit a pull request for adding enhancements, documentation changes or bug fixes to the codebase.
 
-## Making a pull request 
-
-Now that you have an issue you want to fix, enhancement to add, or documentation
-to improve, you need to learn how to work with GitHub and the fbprophet code base.
-
-
-## Forking
+## 1. Forking the Prophet Repo
 
 You will need your own fork to work on the code. Go to the fbprophet project
 page https://github.com/facebook/prophet and hit the ``Fork`` button. You will
 want to clone your fork to your machine::
 
-    git https://github.com/your-user-name/prophet.git
-    cd prophet
-    git remote add upstream https://github.com/facebook/prophet.git
-
+```
+$ git clone https://github.com/your-user-name/prophet.git
+$ cd prophet
+$ git remote add upstream https://github.com/facebook/prophet.git
+```
 This creates the directory `prophet` and connects your repository to
 the upstream (main project) fbprophet repository.
 
-
-## Creating a development environment
+## 2. Creating a development environment
 
 Before starting any development, you'll need to create an isolated prophet
 development environment. This should contain the required dependencies and 
 the development version of fbprophet
 
-### Installing a new environment with dependencies.
+### 3. Installing a new environment with dependencies.
 
 #### Python
 
@@ -69,27 +64,29 @@ $ pip install -r requirements.txt
 
 Dependencies can be managed through ``Packrat`` (https://rstudio.github.io/packrat/) or ``renv`` (https://rstudio.github.io/renv/articles/renv.html).
 
-For ``renv`` , you must first initialise a new project local environment. 
+For ``renv``, you must first initialise a new project local environment. 
 ```
-renv::init()
+> setwd("path/to/prophet/R) # set R subdirectory as working directory
+> install.packages('renv')
+> renv::init()
 ```
 
-This should also install the dependencies listed in the NAMESPACE automatically. Any new R packages can be installed as they are needed in the project e.g. ``install.pacakges('devtools')``
+This should also install the dependencies listed in the DESCRIPTION automatically. Any new R packages can be installed as they are needed in the project.
 
 You can save the state of the project: 
 
 ```
-renv::snapshot()
+> renv::snapshot()
 ```
 
 or load the environment: 
 
 ```
-renv::restore()
+> renv::restore()
 ```
 
 
-### Build and install the development version of prophet
+### 4. Build and install the development version of prophet
 
 #### Python
 
@@ -122,14 +119,14 @@ See the full conda docs here http://conda.pydata.org/docs.
 
 #### R
 
+From the terminal, ``cd`` to ``R`` subdirectory and run:
 ```
-R CMD BUILD 
-R CMD INSTALL
+$ R CMD INSTALL .
 ```
 
-Then start R and type library(prophet) to see that it was indeed installed, and then try out one of the functions. 
+Then from the R console you can load the package:``library(prophet)``. 
 
-## Creating a branch
+## 5. Creating a branch
 
 You want your master branch to reflect only production-ready code, so create a
 feature branch for making your changes. For example:
@@ -157,11 +154,11 @@ prior to updating.  This will effectively store your changes and they can be
 reapplied after updating.
 
 
-## Testing with Continuous Integration
+## 6. Testing with Continuous Integration
 
-fbprophet is serious about testing and strongly encourages contributors to embrace test-driven development (TDD). This development process “relies on the repetition of a very short development cycle: first the developer writes an (initially failing) automated test case that defines a desired improvement or new function, then produces the minimum amount of code to pass that test.” So, before actually writing any code, you should write your tests. Often the test can be taken from the original GitHub issue. However, it is always worth considering additional use cases and writing corresponding tests.
+Adding tests is one of the most common requests after code is pushed to prophet. Therefore, it is worth getting in the habit of writing tests ahead of time so this is never an issue. Once your pull request is submitted, the Travis CI (contrinous integration) service automatically triggers Python and R builds for Prophet and runs the tests. A pull-request will be considered for merging when you have an all ‘green’ build. If any tests are failing, then you will get a red ‘X’, where you can click through to see the individual failed tests.
 
-Adding tests is one of the most common requests after code is pushed to xarray. Therefore, it is worth getting in the habit of writing tests ahead of time so this is never an issue. The prophet test suite runs automatically the Azure Pipelines, continuous integration service, once your pull request is submitted. A pull-request will be considered for merging when you have an all ‘green’ build. If any tests are failing, then you will get a red ‘X’, where you can click through to see the individual failed tests.
+All contributors are strongly recommended to embrace Test Driven Development (TDD). First one must write an (initially failing) automated test case that defines a desired improvement or new function, then produce the minimum amount of code to pass that test. So, before actually writing any code, you should write your tests.
 
 #### Python
 
@@ -170,41 +167,64 @@ Prophet uses the ``unnittest`` package for running tests in Python and ``testtha
 
 The entire test suite can be run by typing: 
 ```
-python setup.py tests
+$ python setup.py tests
 ```
 
 #### R
 
 
-The entire test suite can be run from R or the terminal by typing:
+The entire test suite can be run from the R console by installing ``devtools``:
 
 ```
-devtools::test()
+> install.packages('devtools')
+> devtools::test()
+```
 
-# or if running from the terminal after ``cd`` to the ``tests`` directory
-
+Alternatively the test suite can be also run from the terminal after ``cd`` to the ``tests`` directory
+```
 $ Rscript testthat.R
 ```
 
-or just running a single test script:
+or for just running a single test script like ``test_diagnostics.R`` from the R console:
 
 ```
-
-Rscript testthat.R
+> library(testthat)
+> source('test_diagnostics.R')
 ```
 
-## Committing your code
+## 7. Generating documentation
+
+Most of the `doc` pages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebook/prophet/tree/master/notebooks) directory at the base of the source tree.  Please make changes there and then rebuild the docs:
+
+```
+$ cd docs
+$ make notebooks
+```
+
+Make sure you have installed [rpy2](https://rpy2.bitbucket.io/) so that the R code can be run as well.
+
+In R, the documentation for the source code must also generated if new parameters are added or a new function is created. This is documented with ``roxygen``. 
+
+Run the command below before submitting a PR with any changes to the R code, otherwise the CI check will error:
+
+```
+> devtools::document() 
+```
+
+
+
+## 8. Committing your code
 
 Keep style fixes to a separate commit to make your pull request more readable. Once you’ve made changes, you can see them by typing:
 
 ```
-git status
+$ git status
 ```
 
 If you have created a new file, it is not being tracked by git. Add it by typing:
 
 ```
-git add path/to/file-to-be-added.py
+$ git add path/to/file-to-be-added.py
 ```
 
 Doing ‘git status’ again should give something like:
@@ -219,21 +239,21 @@ Doing ‘git status’ again should give something like:
 Now you can commit your changes in your local repository:
 
 ```
-git commit -m
+$ git commit -m
 ```
 
-## Pushing your changes
+## 9. Pushing your changes
 
 When you want your changes to appear publicly on your GitHub page, push your forked feature branch’s commits:
 
 ```
-git push origin new-feature
+$ git push origin new-feature
 ```
 
 Here origin is the default name given to your remote repository on GitHub. You can see the remote repositories:
 
 ```
-git remote -v
+$ git remote -v
 ```
 
 If you added the upstream repository as described above you will see something like:
@@ -247,7 +267,7 @@ upstream	https://github.com/facebook/prophet.git (push)
 
 Now your code is on GitHub, but it is not yet a part of the fbprophet project. For that to happen, a pull request needs to be submitted on GitHub.
 
-## Review your code
+## 10. Review your code
 
 When you’re ready to ask for a code review, file a pull request. Before you do, once again make sure that you have followed all the guidelines outlined in this document regarding code style, tests, performance tests, and documentation. You should also double check your branch changes against the branch it was based on:
 
@@ -257,7 +277,7 @@ When you’re ready to ask for a code review, file a pull request. Before you do
 4. Select the base and compare branches, if necessary. This will be master and new-feature, respectively.
 
 
-## Finally, make the pull request
+## 11. Making a pull request
 
 If everything looks good, you are ready to make a pull request. A pull request is how code from a local repository becomes available to the GitHub community and can be looked at and eventually merged into the master version. This pull request and its associated changes will eventually be committed to the master branch and available in the next release. To submit a pull request:
 
@@ -274,26 +294,26 @@ If everything looks good, you are ready to make a pull request. A pull request i
 This request then goes to the repository maintainers, and they will review the code. If you need to make more changes, you can make them in your branch, add them to a new commit, push them to GitHub, and the pull request will be automatically updated. Pushing them to GitHub again is done by:
 
 ```
-git push origin new-feature
+$ git push origin new-feature
 ```
 
 This will automatically update your pull request with the latest code and restart the Continuous Integration tests.
 
 
-## Delete your merged branch (optional)
+## 12. Delete your merged branch (optional)
 
 Once your feature branch is accepted into upstream, you’ll probably want to get rid of the branch. First, merge upstream master into your branch so git knows it is safe to delete your branch:
 
 ```
-git fetch upstream
-git checkout master
-git merge upstream/master
+$ git fetch upstream
+$ git checkout master
+$ git merge upstream/master
 ```
 
 Then you can do:
 
 ```
-git branch -d new-feature
+$ git branch -d new-feature
 ```
 
 Make sure you use a lower-case -d, or else git won’t warn you if your feature branch has not actually been merged.
@@ -301,26 +321,8 @@ Make sure you use a lower-case -d, or else git won’t warn you if your feature 
 
 <a id="documentation"> </a>
 
-## Generating documentation
 
-Most of the `doc` pages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebook/prophet/tree/master/notebooks) directory at the base of the source tree.  Please make changes there and then rebuild the docs:
-
-```
-$ cd docs
-$ make notebooks
-```
-
-Make sure you have installed [rpy2](https://rpy2.bitbucket.io/) so that the R code can be run as well.
-
-In R, the documentation for the source code must also generated if new parameters are added or a new function is created. This is documented with ``roxygen``. 
-
-Run the command below before submitting a PR with any changes to the R code, otherwise the CI check will error:
-
-```
-devtools::document() 
-```
-
-## PR checklist
+## 13. PR checklist
 
 * Write docstrings for any functions that are included.
 
@@ -330,5 +332,5 @@ devtools::document()
   - Write new tests if needed. See "Testing with Continuous Integration"
   - Test the code using unittest. Running all tests takes a while, so feel free to only run the tests you think are needed based on your PR. CI will catch any failing tests.
 
-* Push your code and create a PR on GitHub.
-* Use a helpful title for your pull request by summarizing the main contributions rather than using the latest commit message. If this addresses an issue, please reference it.
+* Make sure your PR has an informative title which summarizes the main contributions. 
+* If the PR addresses an issue, please reference it e.g. closes #<issue-no.>
