@@ -836,7 +836,8 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
         fcst = fcst[fcst[name] != 0].copy()
         mode = 'markers'
         # Combine holidays into one hover text
-        holiday_features, _, _ = m.make_holiday_features(fcst['ds'], m.holidays)
+        holidays = m.construct_holiday_dataframe(fcst['ds'])
+        holiday_features, _, _ = m.make_holiday_features(fcst['ds'], holidays)
         holiday_features.columns = holiday_features.columns.str.replace('_delim_', '', regex=False)
         holiday_features.columns = holiday_features.columns.str.replace('+0', '', regex=False)
         text = pd.Series(data='', index=holiday_features.index)
