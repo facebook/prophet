@@ -23,9 +23,8 @@ jobs:
         - devel
       install:
         - R -e 'install.packages("devtools")'
-        - R -e 'devtools::install_deps("R", dependencies = TRUE)'
-      script:
         - cd R
         - R CMD build .
         - R CMD INSTALL *tar.gz
-        - R -e 'library(prophet); devtools:test()'
+      script:
+        - R -e 'library(prophet); library(devtools); devtools:test()'
