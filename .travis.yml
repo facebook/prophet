@@ -22,9 +22,10 @@ jobs:
       r:
         - devel
       install:
-        - R -e 'install.packages("remotes")'
-        - R -e 'remotes::install_deps("R", dependencies = TRUE)'
+        - R -e 'install.packages("devtools")'
+        - R -e 'devtools::install_deps("R", dependencies = TRUE)'
       script:
         - cd R
         - R CMD build .
-        - R CMD check *tar.gz
+        - R CMD INSTALL *tar.gz
+        - R -e 'library(prophet); devtools:test()'
