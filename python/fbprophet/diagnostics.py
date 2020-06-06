@@ -7,7 +7,7 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
-from tqdm.autonotebook import tqdm
+from tqdm.auto import tqdm
 from copy import deepcopy
 import concurrent.futures
 
