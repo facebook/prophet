@@ -23,6 +23,7 @@ jobs:
         - devel
       install:
         - R -e 'install.packages("devtools")'
+        - R -e 'devtools::install_deps("R", dependencies = TRUE)'
         - cd R
         - R CMD build .
         - R CMD INSTALL *tar.gz
