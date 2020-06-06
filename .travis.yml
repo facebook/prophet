@@ -28,4 +28,4 @@ jobs:
         - R CMD build .
         - R CMD INSTALL *tar.gz
       script:
-        - R -e 'library(prophet); library(devtools); devtools:test()'
+        - R -e 'library(prophet); library(devtools); devtools::test()'
