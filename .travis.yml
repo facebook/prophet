@@ -19,11 +19,11 @@ jobs:
         - CMDSTAN=/tmp/cmdstan-2.22.1 STAN_BACKEND=CMDSTANPY python setup.py develop test
 
     - language: r
-      os: osx
       r:
         - devel
+      cache: packages
       install:
-        - R -e 'install.packages("devtools", type = "mac.binary")'
+        - R -e 'install.packages("devtools")'
         - R -e 'devtools::install_deps("R", dependencies = TRUE)'
         - cd R
         - R CMD build .
