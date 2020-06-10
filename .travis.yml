@@ -19,6 +19,7 @@ jobs:
         - CMDSTAN=/tmp/cmdstan-2.22.1 STAN_BACKEND=CMDSTANPY python setup.py develop test
 
     - language: r
+      os: osx
       r:
         - devel
       install:
