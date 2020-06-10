@@ -23,7 +23,7 @@ jobs:
       r:
         - devel
       install:
-        - R -e 'install.packages("devtools")'
+        - R -e 'install.packages("devtools", type = "mac.binary")'
         - R -e 'devtools::install_deps("R", dependencies = TRUE)'
         - cd R
         - R CMD build .
