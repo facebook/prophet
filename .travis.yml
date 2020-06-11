@@ -30,3 +30,4 @@ jobs:
         - R CMD INSTALL *tar.gz
       script:
         - R -e 'library(prophet); library(devtools); devtools::test()'
+
