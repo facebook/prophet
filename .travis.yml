@@ -21,6 +21,7 @@ jobs:
     - language: r
       r:
         - devel
+      cache: packages
       install:
         - R -e 'install.packages("devtools")'
         - R -e 'devtools::install_deps("R", dependencies = TRUE)'
@@ -29,3 +30,4 @@ jobs:
         - R CMD INSTALL *tar.gz
       script:
         - R -e 'library(prophet); library(devtools); devtools::test()'
+
