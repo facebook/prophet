@@ -96,8 +96,11 @@ data {
   vector[K] sigmas;     // Scale on seasonality prior
   real<lower=0> tau;    // Scale on changepoints prior
   int trend_indicator;  // 0 for linear, 1 for logistic, 2 for flat
+  int likelihood_indicator; // 0 for Gaussian, 1 for negative binomial
   vector[K] s_a;        // Indicator of additive features
   vector[K] s_m;        // Indicator of multiplicative features
+  real y_scale;         // Scale of y
+  int y_unscaled_int[T];    // unscaled y data
 }
 
 transformed data {
@@ -115,6 +118,7 @@ parameters {
 
 transformed parameters {
   vector[T] trend;
+  vector[T] y_mean;
   if (trend_indicator == 0) {
     trend = linear_trend(k, m, delta, t, A, t_change);
   } else if (trend_indicator == 1) {
@@ -122,6 +126,7 @@ transformed parameters {
   } else if (trend_indicator == 2) {
     trend = flat_trend(m, T);
   }
+  y_mean = trend .* (1 + X * (beta .* s_m)) + X * (beta .* s_a);
 }
 
 model {
@@ -129,14 +134,14 @@ model {
   k ~ normal(0, 5);
   m ~ normal(0, 5);
   delta ~ double_exponential(0, tau);
-  sigma_obs ~ normal(0, 0.5);
   beta ~ normal(0, sigmas);
 
   // Likelihood
-  y ~ normal(
-  trend
-  .* (1 + X * (beta .* s_m))
-  + X * (beta .* s_a),
-  sigma_obs
-  );
+  if (likelihood_indicator == 0) {
+    sigma_obs ~ normal(0, 0.5);
+    y ~ normal(y_mean, sigma_obs);
+  } else if (likelihood_indicator == 1) {
+    sigma_obs ~ normal(0, 10 * y_scale^2);
+    y_unscaled_int ~ neg_binomial_2(y_scale * 0.01 * log1p_exp(100 * y_mean), 1 / sigma_obs);
+  }
 }

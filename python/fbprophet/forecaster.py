@@ -13,6 +13,7 @@ from datetime import timedelta, datetime
 
 import numpy as np
 import pandas as pd
+from scipy.stats import nbinom
 
 from fbprophet.make_holidays import get_holiday_names, make_holidays_df
 from fbprophet.models import StanBackendEnum
@@ -71,6 +72,7 @@ class Prophet(object):
     uncertainty_samples: Number of simulated draws used to estimate
         uncertainty intervals. Settings this value to 0 or False will disable
         uncertainty estimation and speed up the calculation.
+    likelihood: str "Gaussian", "NegBinomial", or "auto". Defaults "auto".
     stan_backend: str as defined in StanBackendEnum default: None - will try to
         iterate over all available backends and find the working one
     """
@@ -92,7 +94,8 @@ class Prophet(object):
             mcmc_samples=0,
             interval_width=0.80,
             uncertainty_samples=1000,
-            stan_backend=None
+            likelihood='auto',
+            stan_backend=None,
     ):
         self.growth = growth
 
@@ -119,6 +122,7 @@ class Prophet(object):
         self.mcmc_samples = mcmc_samples
         self.interval_width = interval_width
         self.uncertainty_samples = uncertainty_samples
+        self.likelihood = likelihood
 
         # Set during fitting or by other methods
         self.start = None
@@ -185,6 +189,11 @@ class Prophet(object):
             raise ValueError(
                 'seasonality_mode must be "additive" or "multiplicative"'
             )
+        if self.likelihood not in ['Gaussian', 'NegBinomial', 'auto']:
+            raise ValueError('Incorrect likelihood specification')
+        if self.likelihood == 'NegBinomial' and self.growth == 'linear':
+            # In the future we can get rid of the requirement for cap, but we must have a positive trend.
+            raise ValueError('Must use logistic trend with NegBinomial likelihood')
 
     def validate_column_name(self, name, check_holidays=True,
                              check_seasonalities=True, check_regressors=True):
@@ -1118,8 +1127,14 @@ class Prophet(object):
         self.fit_kwargs = deepcopy(kwargs)
 
         self.set_changepoints()
+        if self.likelihood == 'auto':
+            self.likelihood = 'Gaussian'  # TODO detect small-int data and use NB by default
 
         trend_indicator = {'linear': 0, 'logistic': 1, 'flat': 2}
+        likelihood_indicator = {'Gaussian': 0, 'NegBinomial': 1}
+        if self.likelihood == 'NegBinomial':
+            assert not self.logistic_floor  # some subtlety here that must be worked out
+            # Should verify that data are actually ints
 
         dat = {
             'T': history.shape[0],
@@ -1132,8 +1147,11 @@ class Prophet(object):
             'sigmas': prior_scales,
             'tau': self.changepoint_prior_scale,
             'trend_indicator': trend_indicator[self.growth],
+            'likelihood_indicator': likelihood_indicator[self.likelihood],
             's_a': component_cols['additive_terms'],
             's_m': component_cols['multiplicative_terms'],
+            'y_scale': self.y_scale,
+            'y_unscaled_int': history['y'].values.astype('int'),
         }
 
         if self.growth == 'linear':
@@ -1217,6 +1235,8 @@ class Prophet(object):
                 df2['trend'] * (1 + df2['multiplicative_terms'])
                 + df2['additive_terms']
         )
+        if self.likelihood == 'NegBinomial':
+            df2['yhat'] = self.y_scale * 0.01 * np.log(1 + np.exp(100 * df2['yhat'] / self.y_scale))
         return df2
 
     @staticmethod
@@ -1463,10 +1483,22 @@ class Prophet(object):
         Xb_m = np.matmul(seasonal_features.values, beta * s_m.values)
 
         sigma = self.params['sigma_obs'][iteration]
-        noise = np.random.normal(0, sigma, df.shape[0]) * self.y_scale
+
+        y_mean = trend * (1 + Xb_m) + Xb_a
+        if self.likelihood == 'Gaussian':
+            noise = np.random.normal(0, sigma, df.shape[0]) * self.y_scale
+            yhat = y_mean + noise
+        elif self.likelihood == 'NegBinomial':
+            # mu and phi in the Stan parameterization notation:
+            phi = 1 / sigma
+            mu = self.y_scale * 0.01 * np.log(1 + np.exp(100 * y_mean / self.y_scale))
+            # Convert to n and p in the scipy parameterization notation:
+            n = phi
+            p = phi / (mu + phi)
+            yhat = nbinom.rvs(n, p)
 
         return pd.DataFrame({
-            'yhat': trend * (1 + Xb_m) + Xb_a + noise,
+            'yhat': yhat,
             'trend': trend
         })
 
