@@ -1619,3 +1619,16 @@ class Prophet(object):
             weekly_start=weekly_start, yearly_start=yearly_start,
             figsize=figsize
         )
+
+
+    def clear_redundancies(self):
+        """Clear the redundant property in a fitted model which only used for prediction.
+
+        predict need `self.history` be not None
+        make_future_dataframe need `self.history_dates` be not None
+        `self.stan_backend` is only used in fit
+        """
+
+        self.history = -1
+        self.history_dates = -1
+        self.stan_backend = None
