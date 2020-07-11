@@ -1582,12 +1582,11 @@ class Prophet(object):
     def regressor_coefficients(self):
         """Summarise the coefficients of the extra regressors used in the model.
 
-        A coefficient represents the incremental impact on `y` of a unit increase
-        in the regressor. For regressors that have been standardized, the unit increase
-        is measured relative to the mean of the regressor (the center value).
+        For additive regressors, the coefficient represents the incremental impact
+        on `y` of a unit increase in the regressor. For multiplicative regressors,
+        the incremental impact is equal to `trend(t)` multiplied by the coefficient.
 
-        Coefficients are always measured on the original scale of the training data
-        (i.e. `y` and `beta` are transformed back to the original scale).
+        Coefficients are measured on the original scale of the training data.
 
         Returns
         -------
