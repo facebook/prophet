@@ -1564,6 +1564,59 @@ class Prophet(object):
 
         return pd.DataFrame({'ds': dates})
 
+    def regressor_index(self, name):
+        """
+        Given the name of a regressor, return its index in the `beta` matrix.
+
+        Parameters
+        ----------
+        name: Name of the regressor, as passed into the `add_regressor` function.
+
+        Returns
+        -------
+        The column index of the regressor in the `beta` matrix.
+        """
+        return np.extract(
+            self.train_component_cols[name] == 1, self.train_component_cols.index
+        )[0]
+
+    def regressor_coefficients(self):
+        """
+        Summarise the coefficients of the extra regressors used in the model.
+
+        Returns
+        -------
+        pd.DataFrame containing:
+        - `regressor`: Name of the regressor
+        - `regressor_mode`: Whether the regressor has an additive or multiplicative effect on `y`.
+        - `center`: If the regressor was standardized, the location parameter. The marginal effect of the regressor is measured relative to its center (i.e. how many units above or below the center is the regressor value.)
+        - `coef_lower`: Lower bound for the estimate of the regressor's coefficient.
+        - `coef`: Mean coefficient estimate for the regressor.
+        - `coef_upper`: Upper bound for the estimate of the regressor's coefficient.
+        """
+        assert len(self.extra_regressors) > 0, 'No extra regressors found.'
+        y_max = self.history['y'].max()
+        coefs = []
+        for regressor, params in self.extra_regressors.items():
+            beta = self.params['beta'][:, self.regressor_index(regressor)]
+            coef = beta * y_max / params['std']
+            quantiles = [
+                (1 - self.interval_width) / 2,
+                1 - (1 - self.interval_width) / 2,
+            ]
+            coef_bounds = np.quantile(coef, q=quantiles)
+            record = {
+                'regressor': regressor,
+                'regressor_mode': params['mode'],
+                'center': params['mu'],
+                'coef_lower': coef_bounds[0],
+                'coef': np.mean(coef),
+                'coef_upper': coef_bounds[1],
+            }
+            coefs.append(record)
+
+        return pd.DataFrame(coefs)
+
     def plot(self, fcst, ax=None, uncertainty=True, plot_cap=True,
              xlabel='ds', ylabel='y', figsize=(10, 6)):
         """Plot the Prophet forecast.
