@@ -1565,8 +1565,7 @@ class Prophet(object):
         return pd.DataFrame({'ds': dates})
 
     def regressor_index(self, name):
-        """
-        Given the name of a regressor, return its index in the `beta` matrix.
+        """Given the name of a regressor, return its (column) index in the `beta` matrix.
 
         Parameters
         ----------
@@ -1581,18 +1580,27 @@ class Prophet(object):
         )[0]
 
     def regressor_coefficients(self):
-        """
-        Summarise the coefficients of the extra regressors used in the model.
+        """Summarise the coefficients of the extra regressors used in the model.
+
+        A coefficient represents the incremental impact on `y` of a unit increase
+        in the regressor. For regressors that have been standardized, the unit increase
+        is measured relative to the mean of the regressor (the center value).
+
+        Coefficients are always measured on the original scale of the training data
+        (i.e. `y` and `beta` are transformed back to the original scale).
 
         Returns
         -------
         pd.DataFrame containing:
         - `regressor`: Name of the regressor
-        - `regressor_mode`: Whether the regressor has an additive or multiplicative effect on `y`.
-        - `center`: If the regressor was standardized, the location parameter. The marginal effect of the regressor is measured relative to its center (i.e. how many units above or below the center is the regressor value.)
-        - `coef_lower`: Lower bound for the estimate of the regressor's coefficient.
-        - `coef`: Mean coefficient estimate for the regressor.
-        - `coef_upper`: Upper bound for the estimate of the regressor's coefficient.
+        - `regressor_mode`: Whether the regressor has an additive or multiplicative
+            effect on `y`.
+        - `center`: The mean of the regressor if it was standardized. Otherwise 0.
+        - `coef_lower`: Lower bound for the coefficient, estimated from the MCMC samples.
+            Only different to `coef` if `mcmc_samples > 0`.
+        - `coef`: Expected value of the coefficient.
+        - `coef_upper`: Upper bound for the coefficient, estimated from MCMC samples.
+            Only to different to `coef` if `mcmc_samples > 0`.
         """
         assert len(self.extra_regressors) > 0, 'No extra regressors found.'
         y_max = self.history['y'].max()
