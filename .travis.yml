@@ -1,4 +1,8 @@
 dist: xenial
+addons:
+  apt:
+    packages:
+      - libv8-dev
 language: python
 
 jobs:
@@ -6,6 +10,7 @@ jobs:
     - language: python
       python:
         - "3.7"
+      cache: pip
       install:
         - pip install --upgrade pip
         - pip install -U -r python/requirements.txt dask[dataframe] distributed
