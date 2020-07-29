@@ -160,7 +160,7 @@ All contributors are strongly recommended to embrace Test Driven Development (TD
 
 ### Python
 
-Prophet uses the ``unnittest`` package for running tests in Python and ``testthat`` package for testing in R. All tests should go into the tests subdirectory in either the Python or R folders. 
+Prophet uses the ``unittest`` package for running tests in Python and ``testthat`` package for testing in R. All tests should go into the tests subdirectory in either the Python or R folders. 
 
 
 The entire test suite can be run by typing: 
