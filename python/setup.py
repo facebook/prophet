@@ -113,6 +113,8 @@ class TestCommand(test_command):
             sys.modules.update(old_modules)
             working_set.__init__()
 
+with open('README.md', 'r', encoding='utf-8') as f:
+    long_description = f.read()
 
 with open('requirements.txt', 'r') as f:
     install_requires = f.read().splitlines()
@@ -143,7 +145,6 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
     ],
-    long_description="""
-Implements a procedure for forecasting time series data based on an additive model where non-linear trends are fit with yearly, weekly, and daily seasonality, plus holiday effects. It works best with time series that have strong seasonal effects and several seasons of historical data. Prophet is robust to missing data and shifts in the trend, and typically handles outliers well.
-"""
+    long_description=long_description,
+    long_description_content_type='text/markdown',
 )
