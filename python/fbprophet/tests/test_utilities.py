@@ -35,8 +35,7 @@ class TestUtilities(TestCase):
         m.fit(df)
 
         coefs = regressor_coefficients(m)
-        self.assertTrue(coefs.shape[0] == 2)
-        self.assertTrue(coefs.shape[1] == 6)
+        self.assertTrue(coefs.shape == (2, 6))
         # No MCMC sampling, so lower and upper should be the same as mean
         self.assertTrue(np.array_equal(coefs['coef_lower'].values, coefs['coef'].values))
         self.assertTrue(np.array_equal(coefs['coef_upper'].values, coefs['coef'].values))
