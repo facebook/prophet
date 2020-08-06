@@ -306,6 +306,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     By default the following metrics are included:
     'mse': mean squared error
     'rmse': root mean squared error
+    'brmse': bayesian root mean squared error
     'mae': mean absolute error
     'mape': mean absolute percent error
     'mdape': median absolute percent error
@@ -335,7 +336,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     ----------
     df: The dataframe returned by cross_validation.
     metrics: A list of performance metrics to compute. If not provided, will
-        use ['mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage'].
+        use ['mse', 'rmse', 'brmse', 'mae', 'mape', 'mdape', 'coverage'].
     rolling_window: Proportion of data to use in each rolling window for
         computing the metrics. Should be in [0, 1] to average
 
@@ -343,7 +344,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     -------
     Dataframe with a column for each metric, and column 'horizon'
     """
-    valid_metrics = ['mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage']
+    valid_metrics = ['mse', 'rmse', 'brmse', 'mae', 'mape', 'mdape', 'coverage']
     if metrics is None:
         metrics = valid_metrics
     if ('yhat_lower' not in df or 'yhat_upper' not in df) and ('coverage' in metrics):
@@ -524,6 +525,28 @@ def rmse(df, w):
     res['mse'] = np.sqrt(res['mse'])
     res.rename({'mse': 'rmse'}, axis='columns', inplace=True)
     return res
+
+
+def brmse(df, w):
+    """Bayesian root mean squared error
+
+    Parameters
+    ----------
+    df: Cross-validation results dataframe.
+    w: Aggregation window size.
+
+    Returns
+    -------
+    Dataframe with columns horizon and brmse.
+    """
+    se = np.array([np.sum((df['y'].values - single_hat)**2) for single_hat in df['yhat'].values])/df['y'].count()
+    if w < 0:
+        return pd.DataFrame({'horizon': df['horizon'], 'brmse': np.sqrt(se)})
+    rmse = rolling_mean_by_h(
+        x=se, h=df['horizon'].values, w=w, name='brmse'
+    )
+    rmse['brmse'] = np.sqrt(rmse['brmse'])
+    return rmse
 
 
 def mae(df, w):
