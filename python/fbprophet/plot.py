@@ -397,7 +397,11 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
             df_y['ds'].dt.to_pydatetime(), seas[name + '_lower'],
             seas[name + '_upper'], color='#0072B2', alpha=0.2)]
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
-    xticks = pd.to_datetime(np.linspace(start.value, end.value, 7)
+    if name == 'weekly' and period > 1:
+        n_ticks = 8
+    else:
+        n_ticks = 7
+    xticks = pd.to_datetime(np.linspace(start.value, end.value, n_ticks)
         ).to_pydatetime()
     ax.set_xticks(xticks)
     if period <= 2:
