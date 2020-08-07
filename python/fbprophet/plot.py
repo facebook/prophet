@@ -150,6 +150,9 @@ def plot_components(
 
     multiplicative_axes = []
 
+    dt = m.history['ds'].diff()
+    min_dt = dt.iloc[dt.values.nonzero()[0]].min() 
+
     for ax, plot_name in zip(axes, components):
         if plot_name == 'trend':
             plot_forecast_component(
