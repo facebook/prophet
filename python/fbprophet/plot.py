@@ -161,9 +161,14 @@ def plot_components(
             )
         elif plot_name in m.seasonalities:
             if plot_name == 'weekly' or m.seasonalities[plot_name]['period'] == 7:
-                plot_weekly(
-                    m=m, name=plot_name, ax=ax, uncertainty=uncertainty, weekly_start=weekly_start
-                )
+                if min_dt < pd.Timedelta(days=1):
+                    plot_seasonality(
+                        m=m, name=plot_name, ax=ax, uncertainty=uncertainty,
+                    )
+                else:
+                    plot_weekly(
+                        m=m, name=plot_name, ax=ax, uncertainty=uncertainty, weekly_start=weekly_start
+                    )
             elif plot_name == 'yearly' or m.seasonalities[plot_name]['period'] == 365.25:
                 plot_yearly(
                     m=m, name=plot_name, ax=ax, uncertainty=uncertainty, yearly_start=yearly_start
