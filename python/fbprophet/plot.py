@@ -402,6 +402,8 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
     ax.set_xticks(xticks)
     if period <= 2:
         fmt_str = '{dt:%T}'
+    elif name == 'weekly':
+        fmt_str = '{dt:%A}'
     elif period < 14:
         fmt_str = '{dt:%m}/{dt:%d} {dt:%R}'
     else:
