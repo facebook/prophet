@@ -9,7 +9,7 @@ Prophet includes functionality for time series cross validation to measure forec
 
 
  
-![png](/prophet/static/diagnostics_files/diagnostics_3_0.png) 
+![png](/docs/static/diagnostics_files/diagnostics_3_0.png) 
 
 
 [The Prophet paper](https://peerj.com/preprints/3190.pdf) gives further description of simulated historical forecasts.
@@ -231,7 +231,7 @@ from fbprophet.plot import plot_cross_validation_metric
 fig = plot_cross_validation_metric(df_cv, metric='mape')
 ```
  
-![png](/prophet/static/diagnostics_files/diagnostics_12_0.png) 
+![png](/docs/static/diagnostics_files/diagnostics_12_0.png) 
 
 
 The size of the rolling window in the figure can be changed with the optional argument `rolling_window`, which specifies the proportion of forecasts to use in each rolling window. The default is 0.1, corresponding to 10% of rows from `df_cv` included in each window; increasing this will lead to a smoother average curve in the figure.
