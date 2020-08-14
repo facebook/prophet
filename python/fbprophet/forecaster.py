@@ -552,7 +552,7 @@ class Prophet(object):
             prior_scales[row.holiday] = ps
 
             for offset in range(lw, uw + 1):
-                occurrence = dt + timedelta(days=offset)
+                occurrence = pd.to_datetime(dt + timedelta(days=offset))
                 try:
                     loc = row_index.get_loc(occurrence)
                 except KeyError:
