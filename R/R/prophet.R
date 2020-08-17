@@ -1148,7 +1148,7 @@ fit.prophet <- function(m, df, ...) {
   if (nrow(history) < 2) {
     stop("Dataframe has less than 2 non-NA rows.")
   }
-  m$history.dates <- sort(set_date(df$ds))
+  m$history.dates <- sort(set_date(unique(df$ds)))
 
   out <- setup_dataframe(m, history, initialize_scales = TRUE)
   history <- out$df
