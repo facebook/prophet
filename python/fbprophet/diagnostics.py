@@ -268,8 +268,9 @@ def prophet_copy(m, cutoff=None):
     if m.specified_changepoints:
         changepoints = m.changepoints
         if cutoff is not None:
-            # Filter change points '<= cutoff'
-            changepoints = changepoints[changepoints <= cutoff]
+            # Filter change points '< cutoff'
+            last_history_date = max(m.history['ds'][m.history['ds'] <= cutoff])
+            changepoints = changepoints[changepoints < last_history_date]
     else:
         changepoints = None
 

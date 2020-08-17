@@ -181,7 +181,8 @@ prophet_copy <- function(m, cutoff = NULL) {
     changepoints <- m$changepoints
     if (!is.null(cutoff)) {
       cutoff <- set_date(cutoff)
-      changepoints <- changepoints[changepoints <= cutoff]
+      last_history_date <- max(m$history$ds[m$history$ds <= cutoff])
+      changepoints <- changepoints[changepoints < last_history_date]
     }
   } else {
     changepoints <- NULL
