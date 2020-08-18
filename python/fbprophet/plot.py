@@ -160,15 +160,13 @@ def plot_components(
                 plot_cap=plot_cap,
             )
         elif plot_name in m.seasonalities:
-            if plot_name == 'weekly' or m.seasonalities[plot_name]['period'] == 7:
-                if min_dt < pd.Timedelta(days=1):
-                    plot_seasonality(
-                        m=m, name=plot_name, ax=ax, uncertainty=uncertainty,
-                    )
-                else:
-                    plot_weekly(
-                        m=m, name=plot_name, ax=ax, uncertainty=uncertainty, weekly_start=weekly_start
-                    )
+            if (
+                (plot_name == 'weekly' or m.seasonalities[plot_name]['period'] == 7)
+                and (min_dt == pd.Timedelta(days=1))
+            ):
+                plot_weekly(
+                    m=m, name=plot_name, ax=ax, uncertainty=uncertainty, weekly_start=weekly_start
+                )
             elif plot_name == 'yearly' or m.seasonalities[plot_name]['period'] == 365.25:
                 plot_yearly(
                     m=m, name=plot_name, ax=ax, uncertainty=uncertainty, yearly_start=yearly_start
@@ -397,10 +395,7 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
             df_y['ds'].dt.to_pydatetime(), seas[name + '_lower'],
             seas[name + '_upper'], color='#0072B2', alpha=0.2)]
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
-    if name == 'weekly' and period > 1:
-        n_ticks = 8
-    else:
-        n_ticks = 7
+    n_ticks = 8
     xticks = pd.to_datetime(np.linspace(start.value, end.value, n_ticks)
         ).to_pydatetime()
     ax.set_xticks(xticks)
