@@ -40,6 +40,9 @@ If you have custom Stan compiler settings, install from source rather than the C
 Prophet is on PyPI, so you can use `pip` to install it. From v0.6 onwards, Python 2 is no longer supported.
 
 ```bash
+# Install pystan with pip before using pip to install fbprophet
+pip install pystan
+
 pip install fbprophet
 ```
 
