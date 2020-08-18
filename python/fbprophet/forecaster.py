@@ -1399,7 +1399,13 @@ class Prophet(object):
         return sim_values
 
     def predictive_samples(self, df):
-        """Sample from the posterior predictive distribution.
+        """Sample from the posterior predictive distribution. Returns samples
+        for the main estimate yhat, and for the trend component. The shape of
+        each output will be (nforecast x nsamples), where nforecast is the
+        number of points being forecasted (the number of rows in the input
+        dataframe) and nsamples is the number of posterior samples drawn.
+        This is the argument `uncertainty_samples` in the Prophet constructor,
+        which defaults to 1000.
 
         Parameters
         ----------

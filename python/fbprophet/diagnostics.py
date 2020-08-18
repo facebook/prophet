@@ -62,7 +62,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
     """Cross-Validation for time series.
 
     Computes forecasts from historical cutoff points, which user can input.
-    If not provided beginning from (end - horizon), works backwards making 
+    If not provided, begins from (end - horizon) and works backwards, making
     cutoffs with a spacing of period until initial is reached.
 
     When period is equal to the time interval of the data, this is the
@@ -70,17 +70,17 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
 
     Parameters
     ----------
-    model: Prophet class object. Fitted Prophet model
+    model: Prophet class object. Fitted Prophet model.
     horizon: string with pd.Timedelta compatible style, e.g., '5 days',
         '3 hours', '10 seconds'.
     period: string with pd.Timedelta compatible style. Simulated forecast will
         be done at every this period. If not provided, 0.5 * horizon is used.
     initial: string with pd.Timedelta compatible style. The first training
-        period will begin here. If not provided, 3 * horizon is used.
-    cutoffs: list of pd.Timestamp representing cutoff to be used during
-        cross-validtation. If not provided works beginning from
-        (end - horizon), works backwards making cutoffs with a spacing of period
-        until initial is reached.
+        period will include at least this much data. If not provided,
+        3 * horizon is used.
+    cutoffs: list of pd.Timestamp specifying cutoffs to be used during
+        cross validtation. If not provided, they are generated as described
+        above.
     parallel : {None, 'processes', 'threads', 'dask', object}
 
         How to parallelize the forecast computation. By default no parallelism
