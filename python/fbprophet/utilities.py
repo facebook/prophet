@@ -52,12 +52,11 @@ def regressor_coefficients(m):
         Only to different to `coef` if `mcmc_samples > 0`.
     """
     assert len(m.extra_regressors) > 0, 'No extra regressors found.'
-    y_max = m.history['y'].max()
     coefs = []
     for regressor, params in m.extra_regressors.items():
         beta = m.params['beta'][:, regressor_index(m, regressor)]
         if params['mode'] == 'additive':
-            coef = beta * y_max / params['std']
+            coef = beta * m.y_scale / params['std']
         else:
             coef = beta / params['std']
         percentiles = [
