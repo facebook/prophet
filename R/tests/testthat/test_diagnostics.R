@@ -282,7 +282,7 @@ test_that("copy", {
   m1 <- add_regressor(m1, 'binary_feature')
   m1 <- fit.prophet(m1, df)
   m2 <- prophet:::prophet_copy(m1, cutoff)
-  changepoints <- changepoints[changepoints <= cutoff]
+  changepoints <- changepoints[changepoints < cutoff]
   expect_equal(prophet:::set_date(changepoints), m2$changepoints)
   expect_true('custom' %in% names(m2$seasonalities))
   expect_true('binary_feature' %in% names(m2$extra_regressors))

@@ -350,7 +350,7 @@ class TestDiagnostics(TestCase):
         m1.add_regressor('binary_feature')
         m1.fit(df)
         m2 = diagnostics.prophet_copy(m1, cutoff=cutoff)
-        changepoints = changepoints[changepoints <= cutoff]
+        changepoints = changepoints[changepoints < cutoff]
         self.assertTrue((changepoints == m2.changepoints).all())
         self.assertTrue('custom' in m2.seasonalities)
         self.assertTrue('binary_feature' in m2.extra_regressors)
