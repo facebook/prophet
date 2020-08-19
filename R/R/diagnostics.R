@@ -5,7 +5,7 @@
 
 ## Makes R CMD CHECK happy due to dplyr syntax below
 globalVariables(c(
-  "ds", "y", "cap", "yhat", "yhat_lower", "yhat_upper"))
+  "ds", "y", "cap", "yhat", "yhat_lower", "yhat_upper", "size"))
 
 #' Generate cutoff dates
 #'
@@ -408,7 +408,7 @@ rolling_median_by_h <- function(x, h, w, name) {
       break
     }
     res.i <- data.frame(horizon=hs[i])
-    res.i[[name]] <- median(xs)
+    res.i[[name]] <- stats::median(xs)
     res <- rbind(res.i, res)
     i <- i - 1
   }
