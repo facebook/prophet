@@ -40,15 +40,11 @@ head(df.cv)
 # Python
 from fbprophet.diagnostics import cross_validation
 df_cv = cross_validation(m, initial='730 days', period='180 days', horizon = '365 days')
+```
+```python
+# Python
 df_cv.head()
 ```
-
-    HBox(children=(FloatProgress(value=0.0, max=11.0), HTML(value='')))
-
-
-    
-
-
 
 
 
@@ -83,8 +79,8 @@ df_cv.head()
       <th>0</th>
       <td>2010-02-16</td>
       <td>8.956828</td>
-      <td>8.479812</td>
-      <td>9.450908</td>
+      <td>8.460272</td>
+      <td>9.476844</td>
       <td>8.242493</td>
       <td>2010-02-15</td>
     </tr>
@@ -92,8 +88,8 @@ df_cv.head()
       <th>1</th>
       <td>2010-02-17</td>
       <td>8.723230</td>
-      <td>8.213162</td>
-      <td>9.217637</td>
+      <td>8.208639</td>
+      <td>9.222179</td>
       <td>8.008033</td>
       <td>2010-02-15</td>
     </tr>
@@ -101,8 +97,8 @@ df_cv.head()
       <th>2</th>
       <td>2010-02-18</td>
       <td>8.607021</td>
-      <td>8.119864</td>
-      <td>9.066214</td>
+      <td>8.106506</td>
+      <td>9.104792</td>
       <td>8.045268</td>
       <td>2010-02-15</td>
     </tr>
@@ -110,8 +106,8 @@ df_cv.head()
       <th>3</th>
       <td>2010-02-19</td>
       <td>8.528870</td>
-      <td>8.088676</td>
-      <td>9.024842</td>
+      <td>8.061701</td>
+      <td>9.024450</td>
       <td>7.928766</td>
       <td>2010-02-15</td>
     </tr>
@@ -119,8 +115,8 @@ df_cv.head()
       <th>4</th>
       <td>2010-02-20</td>
       <td>8.270872</td>
-      <td>7.740251</td>
-      <td>8.760655</td>
+      <td>7.773299</td>
+      <td>8.745526</td>
       <td>7.745003</td>
       <td>2010-02-15</td>
     </tr>
@@ -147,13 +143,6 @@ df.cv2 <- cross_validation(m, cutoffs = cutoffs, horizon = 365, units = 'days')
 cutoffs = pd.to_datetime(['2013-02-15', '2013-08-15', '2014-02-15'])
 df_cv2 = cross_validation(m, cutoffs=cutoffs, horizon='365 days')
 ```
-
-    HBox(children=(FloatProgress(value=0.0, max=3.0), HTML(value='')))
-
-
-    
-
-
 The `performance_metrics` utility can be used to compute some useful statistics of the prediction performance (`yhat`, `yhat_lower`, and `yhat_upper` compared to `y`), as a function of the distance from the cutoff (how far into the future the prediction was). The statistics computed are mean squared error (MSE), root mean squared error (RMSE), mean absolute error (MAE), mean absolute percent error (MAPE), median absolute percent error (MDAPE) and coverage of the `yhat_lower` and `yhat_upper` estimates. These are computed on a rolling window of the predictions in `df_cv` after sorting by horizon (`ds` minus `cutoff`). By default 10% of the predictions will be included in each window, but this can be changed with the `rolling_window` argument.
 
 
@@ -268,7 +257,7 @@ from fbprophet.plot import plot_cross_validation_metric
 fig = plot_cross_validation_metric(df_cv, metric='mape')
 ```
  
-![png](/prophet/static/diagnostics_files/diagnostics_15_0.png) 
+![png](/prophet/static/diagnostics_files/diagnostics_16_0.png) 
 
 
 The size of the rolling window in the figure can be changed with the optional argument `rolling_window`, which specifies the proportion of forecasts to use in each rolling window. The default is 0.1, corresponding to 10% of rows from `df_cv` included in each window; increasing this will lead to a smoother average curve in the figure. The `initial` period should be long enough to capture all of the components of the model, in particular seasonalities and extra regressors: at least a year for yearly seasonality, at least a week for weekly seasonality, etc.
