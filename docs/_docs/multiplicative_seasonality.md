@@ -87,5 +87,5 @@ m = Prophet(seasonality_mode='multiplicative')
 m.add_seasonality('quarterly', period=91.25, fourier_order=8, mode='additive')
 m.add_regressor('regressor', mode='additive')
 ```
-Additive and multiplicative extra regressors will show up in separate panels on the components plot.
+Additive and multiplicative extra regressors will show up in separate panels on the components plot. Note, however, that it is pretty unlikely to have a mix of additive and multiplicative seasonalities, so this will generally only be used if there is a reason to expect that to be the case.
 

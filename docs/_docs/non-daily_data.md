@@ -10,6 +10,8 @@ subsections:
     id: data-with-regular-gaps
   - title: Monthly data
     id: monthly-data
+  - title: Holidays with aggregated data
+    id: holidays-with-aggregated-data
 ---
 <a id="sub-daily-data"> </a>
 
@@ -157,8 +159,12 @@ m = Prophet(seasonality_mode='multiplicative', mcmc_samples=300).fit(df)
 fcst = m.predict(future)
 fig = m.plot_components(fcst)
 ```
+    WARNING:pystan:403 of 600 iterations saturated the maximum tree depth of 10 (67.2 %)
+    WARNING:pystan:Run again with max_treedepth larger than 10 to avoid saturation
+
+
  
-![png](/prophet/static/non-daily_data_files/non-daily_data_19_0.png) 
+![png](/prophet/static/non-daily_data_files/non-daily_data_19_1.png) 
 
 
 The seasonality has low uncertainty at the start of each month where there are data points, but has very high posterior variance in between. When fitting Prophet to monthly data, only make monthly forecasts, which can be done by passing the frequency into `make_future_dataframe`:
@@ -172,10 +178,26 @@ plot(m, fcst)
 ```
 ```python
 # Python
-future = m.make_future_dataframe(periods=120, freq='M')
+future = m.make_future_dataframe(periods=120, freq='MS')
 fcst = m.predict(future)
 fig = m.plot(fcst)
 ```
  
 ![png](/prophet/static/non-daily_data_files/non-daily_data_22_0.png) 
+
+
+In Python, the frequency can be anything from the pandas list of frequency strings here: https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases . Note that `MS` used here is month-start, meaning the data point is placed on the start of each month.
+
+
+
+In monthly data, yearly seasonality can also be modeled with binary extra regressors. In particular, the model can use 12 extra regressors like `is_jan`, `is_feb`, etc. where `is_jan` is 1 if the date is in Jan and 0 otherwise. This approach would avoid the within-month unidentifiability seen above. Be sure to use `yearly_seasonality=False` if monthly extra regressors are being added.
+
+
+<a id="holidays-with-aggregated-data"> </a>
+
+## Holidays with aggregated data
+
+
+
+Holiday effects are applied to the particular date on which the holiday was specified. With data that has been aggregated to weekly or monthly frequency, holidays that don't fall on the particular date used in the data will be ignored: for example, a Monday holiday in a weekly time series where each data point is on a Sunday. To include holiday effects in the model, the holiday will need to be moved to the date in the history dataframe for which the effect is desired. Note that with weekly or monthly aggregated data, many holiday effects will be well-captured by the yearly seasonality, so added holidays may only be necessary for holidays that occur in different weeks throughout the time series.
 
