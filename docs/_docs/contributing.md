@@ -3,9 +3,6 @@ layout: docs
 docid: "contributing"
 title: "Getting Help and Contributing"
 permalink: /docs/contributing.html
-subsections:
-  - id: documentation
-    title: Generating documentation
 ---
 
 Prophet has a non-fixed release cycle but we will be making bugfixes in response to user feedback and adding features. Please let us know if you encounter a bug by [filing an issue](https://github.com/facebook/prophet/issues). Github issues is also the right place to ask questions about using Prophet.
@@ -43,7 +40,7 @@ development environment. This should contain the required dependencies.
 - Make sure your conda is up to date (``conda update conda``)
 - ``cd`` to the *prophet* source directory that you have cloned
 
-```
+```bash
 $ cd python
 
 # with Anaconda 
@@ -62,8 +59,8 @@ $ pip install -r requirements.txt
 Dependencies can be managed through ``Packrat`` (https://rstudio.github.io/packrat/) or ``renv`` (https://rstudio.github.io/renv/articles/renv.html).
 
 For ``renv``, you must first initialise a new project local environment. 
-```
-> setwd("path/to/prophet/R) # set R subdirectory as working directory
+```R
+> setwd("path/to/prophet/R") # set R subdirectory as working directory
 > install.packages('renv')
 > renv::init()
 ```
@@ -72,13 +69,13 @@ This should also install the dependencies listed in the DESCRIPTION automaticall
 
 You can save the state of the project: 
 
-```
+```R
 > renv::snapshot()
 ```
 
 or load the environment: 
 
-```
+```R
 > renv::restore()
 ```
 
@@ -88,24 +85,24 @@ The next step is to build and install the development version of prophet in the 
 
 ### Python
 
-```
+```bash
 $ python setup.py develop
 ```
 
 You should be able to import *fbprophet* from your locally built version:
 
-```
+```bash
 $ python  # start an interpreter
 >>> import fbprophet
 >>> fbprophet.__version__
-'0.6.1.dev0
+'0.6.1.dev0'  # whatever the current github version is
 '0.10.0+dev46.g015daca'
 ```
 
 This will create the new environment, and not touch any of your existing environments,
 nor any existing Python installation. 
 
-```
+```bash
 # to view your environments:
 $ conda info -e
 
@@ -118,18 +115,18 @@ See the full conda docs here http://conda.pydata.org/docs.
 ### R
 
 From the terminal, ``cd`` to ``R`` subdirectory and run:
-```
+```bash
 $ R CMD INSTALL .
 ```
 
-This will build and install the local version of the prophet package. Then from the R console you can load the package:``library(prophet)``. 
+This will build and install the local version of the prophet package. Then from the R console you can load the package: ``library(prophet)``.
 
 ## 4. Creating a branch
 
 You want your master branch to reflect only production-ready code, so create a
 feature branch for making your changes. For example:
 
-```
+```bash
 $ git checkout -b new-feature
 ```
 
@@ -140,7 +137,7 @@ and switch in between them using the ``git checkout`` command.
 
 To update this branch, you need to retrieve the changes from the master branch:
 
-```
+```bash
 $ git fetch upstream
 $ git rebase upstream/master
 ```
@@ -162,9 +159,8 @@ All contributors are strongly recommended to embrace Test Driven Development (TD
 
 Prophet uses the ``unittest`` package for running tests in Python and ``testthat`` package for testing in R. All tests should go into the tests subdirectory in either the Python or R folders. 
 
-
 The entire test suite can be run by typing: 
-```
+```bash
 $ python setup.py tests
 ```
 
@@ -173,19 +169,19 @@ $ python setup.py tests
 
 The entire test suite can be run from the R console by installing ``devtools``:
 
-```
+```R
 > install.packages('devtools')
 > devtools::test()
 ```
 
 Alternatively the test suite can be also run from the terminal after ``cd`` to the ``tests`` directory
-```
+```bash
 $ Rscript testthat.R
 ```
 
 or for just running a single test script like ``test_diagnostics.R`` from the R console:
 
-```
+```R
 > library(testthat)
 > source('test_diagnostics.R')
 ```
@@ -194,7 +190,7 @@ or for just running a single test script like ``test_diagnostics.R`` from the R 
 
 Most of the `doc` pages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebook/prophet/tree/master/notebooks) directory at the base of the source tree.  Please make changes there and then rebuild the docs:
 
-```
+```bash
 $ cd docs
 $ make notebooks
 ```
@@ -203,9 +199,9 @@ Make sure you have installed [rpy2](https://rpy2.bitbucket.io/) so that the R co
 
 In R, the documentation for the source code must also generated if new parameters are added or a new function is created. This is documented with ``roxygen``. 
 
-Run the command below before submitting a PR with any changes to the R code, otherwise the CI check will error:
+Run the command below before submitting a PR with any changes to the R code to update the function documentation:
 
-```
+```R
 > devtools::document() 
 ```
 
@@ -213,19 +209,19 @@ Run the command below before submitting a PR with any changes to the R code, oth
 
 Keep style fixes to a separate commit to make your pull request more readable. Once you’ve made changes, you can see them by typing:
 
-```
+```bash
 $ git status
 ```
 
 If you have created a new file, it is not being tracked by git. Add it by typing:
 
-```
+```bash
 $ git add path/to/file-to-be-added.py
 ```
 
 Doing ‘git status’ again should give something like:
 
-```
+```bash
 # On branch new-feature
 #
 #       modified:   /relative/path/to/file-you-added.py
@@ -234,7 +230,7 @@ Doing ‘git status’ again should give something like:
 
 Now you can commit your changes in your local repository:
 
-```
+```bash
 $ git commit -m
 ```
 
@@ -242,19 +238,19 @@ $ git commit -m
 
 When you want your changes to appear publicly on your GitHub page, push your forked feature branch’s commits:
 
-```
+```bash
 $ git push origin new-feature
 ```
 
 Here origin is the default name given to your remote repository on GitHub. You can see the remote repositories:
 
-```
+```bash
 $ git remote -v
 ```
 
 If you added the upstream repository as described above you will see something like:
 
-```
+```bash
 origin  git@github.com:yourname/prophet.git (fetch)
 origin  git@github.com:yourname/prophet.git (push)
 upstream	https://github.com/facebook/prophet.git (fetch)
@@ -285,7 +281,7 @@ If everything looks good, you are ready to make a pull request. A pull request i
 
 This request then goes to the repository maintainers, and they will review the code. If you need to make more changes, you can make them in your branch, add them to a new commit, push them to GitHub, and the pull request will be automatically updated. Pushing them to GitHub again is done by:
 
-```
+```bash
 $ git push origin new-feature
 ```
 
@@ -296,7 +292,7 @@ This will automatically update your pull request with the latest code and restar
 
 Once your feature branch is merged into ``upstream master``, you can delete your remote branch via the ``Delete branch`` option in the PR and the local copy by running: 
 
-```
+```bash
 $ git branch -d new-feature
 ```
 
@@ -307,6 +303,6 @@ $ git branch -d new-feature
 * Test your code.
   - Write new tests if needed. See "Testing with Continuous Integration"
   - Test the code using unittest. Running all tests takes a while, so feel free to only run the tests you think are needed based on your PR. CI will catch any failing tests.
-* In R, you can also run ``devtools:check()`` for carrying out a number of automated checks all at once, for code problems, documentation, testing, package structure, vignettes etc.
+* In R, you can also run ``devtools:check()`` for carrying out a number of automated checks all at once, for code problems, documentation, testing, package structure, vignettes etc. This will take a few minutes to run.
 * Once you push your changes and make a PR, make sure you use an informative title which summarizes the changes you have made. 
-* If the PR addresses an issue, please reference it e.g. closes #1234
+* If the PR addresses an issue, please reference it e.g. fixes #1234
