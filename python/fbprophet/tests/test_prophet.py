@@ -208,16 +208,19 @@ class TestProphet(TestCase):
 
     def test_flat_growth(self):
         m = Prophet(growth='flat')
-        N = DATA.shape[0]
-        history = DATA.head(N // 2).copy()
+        x = np.linspace(0, 2 * np.pi, 8 * 7)
+        history = pd.DataFrame({
+            'ds': pd.date_range(start='2020-01-01', periods=8 * 7, freq='d'),
+            'y': 30 + np.sin(x * 8.),
+        })
         m.fit(history)
-        future = m.make_future_dataframe(N // 2, include_history=False)
+        future = m.make_future_dataframe(10, include_history=True)
         fcst = m.predict(future)
-        m_ = m.params['m']
-        k = m.params['k']
-        self.assertEqual(k[0, 0], 0)
-        self.assertEqual(fcst['trend'].unique(), m_*m.y_scale)
-        self.assertEqual(np.round(m_[0,0]*m.y_scale), 26)
+        m_ = m.params['m'][0, 0]
+        k = m.params['k'][0, 0]
+        self.assertAlmostEqual(k, 0)
+        self.assertAlmostEqual(fcst['trend'].unique()[0], m_ * m.y_scale)
+        self.assertEqual(np.round(m_ * m.y_scale), 30.0)
 
     def test_invalid_growth_input(self):
         msg = 'Parameter "growth" should be "linear", ' \
