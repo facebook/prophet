@@ -61,7 +61,8 @@ def make_holidays_df(year_list, country, province=None):
         except AttributeError as e:
             raise AttributeError(
                 "Holidays in {} are not currently supported!".format(country)) from e
-    holidays_df = pd.DataFrame(list(holidays.items()), columns=['ds', 'holiday'])
+    holidays_df = pd.DataFrame([(date, holidays.get_list(date)) for date in holidays], columns=['ds', 'holiday'])
+    holidays_df = holidays_df.explode('holiday')
     holidays_df.reset_index(inplace=True, drop=True)
     holidays_df['ds'] = pd.to_datetime(holidays_df['ds'])
     return (holidays_df)
