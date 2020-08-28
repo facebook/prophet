@@ -17,6 +17,7 @@ import numpy as np
 
 import holidays as hdays_part1
 import fbprophet.hdays as hdays_part2
+from fbprophet.make_holidays import make_holidays_df
 
 
 def utf8_to_ascii(text):
@@ -41,39 +42,23 @@ def generate_holidays_file():
     """Generate csv file of all possible holiday names, ds,
      and countries, year combination
     """
-    years = np.arange(1995, 2045, 1)
+    year_list = np.arange(1995, 2045, 1).tolist()
     all_holidays = []
     # class names in holiday packages which are not countries
     # Also cut out countries with utf-8 holidays that don't parse to ascii
-    class_to_exclude = set([
-        'rd', 'date', 'Lunar', 'timedelta', 'Calendar', 'Converter', 'HolidayBase',
-        'DateNotExist', 'Belarus', 'BY', 'Bulgaria', 'BG', 'Japan', 'JP', 'Serbia',
-        'RS', 'Ukraine', 'UA',
-    ])
+    class_to_exclude = set(['rd', 'BY', 'BG', 'JP', 'RS', 'UA', 'KR'])
 
     class_list2 = inspect.getmembers(hdays_part2, inspect.isclass)
-    country_set2 = set(list(zip(*class_list2))[0])
-    country_set2 -= class_to_exclude
-    for country in country_set2:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            temp = getattr(hdays_part2, country)(years=years)
-        temp_df = pd.DataFrame(list(temp.items()),
-                                columns=['ds', 'holiday'])
-        temp_df['country'] = country
-        all_holidays.append(temp_df)
-
+    country_set = set([name for name in list(zip(*class_list2))[0] if len(name) == 2])
     class_list1 = inspect.getmembers(hdays_part1, inspect.isclass)
-    country_set1 = set(list(zip(*class_list1))[0])
-    country_set1 -= class_to_exclude
-    # Avoid overwrting holidays get from hdays_part2
-    country_set1 -= country_set2
-    for country in country_set1:
-        temp = getattr(hdays_part1, country)(years=years)
-        temp_df = pd.DataFrame(list(temp.items()),
-                                columns=['ds', 'holiday'])
-        temp_df['country'] = country
-        all_holidays.append(temp_df)
+    country_set1 = set([name for name in list(zip(*class_list1))[0] if len(name) == 2])
+    country_set.update(country_set1)
+    country_set -= class_to_exclude
+
+    for country in country_set:
+        df = make_holidays_df(year_list=year_list, country=country)
+        df['country'] = country
+        all_holidays.append(df)
 
     generated_holidays = pd.concat(all_holidays, axis=0, ignore_index=True)
     generated_holidays['year'] = generated_holidays.ds.apply(lambda x: x.year)
