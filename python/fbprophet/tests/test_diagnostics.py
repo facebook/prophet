@@ -78,11 +78,11 @@ class TestDiagnostics(TestCase):
                     m, horizon='10 days', period='10 days', initial='140 days')
 
         # invalid alias
-        with self.assertRaises(ValueError, match="'parallel' should be one"):
+        with self.assertRaisesRegex(ValueError, "'parallel' should be one"):
             diagnostics.cross_validation(m, horizon="4 days", parallel="bad")
 
         # no map method
-        with self.assertRaises(ValueError, match="'parallel' should be one"):
+        with self.assertRaisesRegex(ValueError, "'parallel' should be one"):
             diagnostics.cross_validation(m, horizon="4 days", parallel=object())
 
 
