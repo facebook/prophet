@@ -19,7 +19,6 @@ Depends:
     Rcpp (>= 0.12.0),
     rlang (>= 0.3.0.1)
 Imports:
-    StanHeaders,
     dplyr (>= 0.7.7),
     dygraphs (>= 1.1.1.4),
     extraDistr,
@@ -29,6 +28,7 @@ Imports:
     rstan (>= 2.18.1),
     rstantools (>= 2.0.0),
     scales,
+    StanHeaders,
     stats,
     tidyr (>= 0.6.1),
     xts
