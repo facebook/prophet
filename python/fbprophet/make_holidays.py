@@ -54,10 +54,10 @@ def make_holidays_df(year_list, country, province=None, state=None):
     to 'holidays' params in Prophet
     """
     try:
-        holidays = getattr(hdays_part2, country)(years=year_list)
+        holidays = getattr(hdays_part2, country)(years=year_list, expand=False)
     except AttributeError:
         try:
-            holidays = getattr(hdays_part1, country)(prov=province, state=state, years=year_list)
+            holidays = getattr(hdays_part1, country)(prov=province, state=state, years=year_list, expand=False)
         except AttributeError as e:
             raise AttributeError(
                 "Holidays in {} are not currently supported!".format(country)) from e

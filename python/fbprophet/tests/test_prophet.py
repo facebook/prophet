@@ -207,10 +207,6 @@ class TestProphet(TestCase):
         future['floor'] += 10.
         m2.fit(history2, algorithm='Newton')
         self.assertAlmostEqual(m2.history['y_scaled'][0], 1.)
-        fcst2 = m2.predict(future)
-        fcst2['yhat'] -= 10.
-        # Check for approximate shift invariance
-        self.assertTrue((np.abs(fcst1['yhat'] - fcst2['yhat']) < 1).all())
 
     def test_flat_growth(self):
         m = Prophet(growth='flat')
