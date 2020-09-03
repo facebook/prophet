@@ -102,6 +102,12 @@ class TestProphet(TestCase):
         forecaster.fit(train)
         forecaster.predict(future)
 
+    @skipUnless("--test-slow" in sys.argv, "Skipped due to the lack of '--test-slow' argument")
+    def test_fit_predict_no_changepoints_mcmc(self):
+        N = DATA.shape[0]
+        train = DATA.head(N // 2)
+        future = DATA.tail(N // 2)
+        
         forecaster = Prophet(n_changepoints=0, mcmc_samples=100)
         forecaster.fit(train)
         forecaster.predict(future)
