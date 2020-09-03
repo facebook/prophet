@@ -34,3 +34,8 @@
   error = function(cond) {}
   )
 }
+
+# IMPORTS ----
+# StanHeaders - Used to prevent issues with Prophet dynload error
+
+#' @import StanHeaders
