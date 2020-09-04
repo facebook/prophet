@@ -141,10 +141,6 @@ test_that("logistic_floor", {
   future1$floor <- future1$floor + 10.
   m2 <- fit.prophet(m2, history2, algorithm = 'Newton')
   expect_equal(m2$history$y_scaled[1], 1., tolerance = 1e-6)
-  fcst2 <- predict(m, future1)
-  fcst2$yhat <- fcst2$yhat - 10.
-  # Check for approximate shift invariance
-  expect_true(all(abs(fcst1$yhat - fcst2$yhat) < 1))
 })
 
 test_that("get_changepoints", {
