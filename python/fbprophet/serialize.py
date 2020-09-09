@@ -88,6 +88,21 @@ def model_to_json(model):
     model_json['params'] = {k: v.tolist() for k, v in model.params.items()}
     # Attributes that are skipped: stan_fit, stan_backend
     model_json['__fbprophet_version'] = __version__
+    
+    def std_json(level):
+        for k, v in level.items():
+            if isinstance(v, dict):
+                level[k] = std_json(v)
+            elif isinstance(v, list):
+                for i, e in enumerate(v):
+                    if isinstance(e, dict):
+                        v[i] = std_json(e)
+                    elif isinstance(e, np.floating):
+                        v[i] = float(e)
+            elif isinstance(v, np.floating):
+                level[k] = float(v)
+        return level
+    model_json = std_json(model_json)
     return json.dumps(model_json)
 
 
