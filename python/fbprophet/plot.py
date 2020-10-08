@@ -413,7 +413,7 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
         ax.set_xlabel('Hour of day')
     elif period <= 2:
         fmt = FuncFormatter(
-            lambda x,pos=None: '{dt:%T}'.format(dt=num2date(x)))
+            lambda x, pos=None: '{dt:%T}'.format(dt=num2date(x)))
         ax.set_xlabel('Hours')
     else:
         fmt = FuncFormatter(
