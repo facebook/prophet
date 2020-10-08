@@ -399,17 +399,27 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
     xticks = pd.to_datetime(np.linspace(start.value, end.value, n_ticks)
         ).to_pydatetime()
     ax.set_xticks(xticks)
-    if period <= 2:
-        fmt_str = '{dt:%T}'
+    if name == 'yearly':
+        fmt = FuncFormatter(
+            lambda x, pos=None: '{dt:%B} {dt.day}'.format(dt=num2date(x)))
+        ax.set_xlabel('Day of year')
     elif name == 'weekly':
-        fmt_str = '{dt:%A}'
-    elif period < 14:
-        fmt_str = '{dt:%m}/{dt:%d} {dt:%R}'
+        fmt = FuncFormatter(
+            lambda x, pos=None: '{dt:%A}'.format(dt=num2date(x)))
+        ax.set_xlabel('Day of Week')
+    elif name == 'daily':
+        fmt = FuncFormatter(
+            lambda x, pos=None: '{dt:%T}'.format(dt=num2date(x)))
+        ax.set_xlabel('Hour of day')
+    elif period <= 2:
+        fmt = FuncFormatter(
+            lambda x,pos=None: '{dt:%T}'.format(dt=num2date(x)))
+        ax.set_xlabel('Hours')
     else:
-        fmt_str = '{dt:%m}/{dt:%d}'
-    ax.xaxis.set_major_formatter(FuncFormatter(
-        lambda x, pos=None: fmt_str.format(dt=num2date(x))))
-    ax.set_xlabel('ds')
+        fmt = FuncFormatter(
+            lambda x, pos=None: '{:.0f}'.format(pos * period / (n_ticks - 1)))
+        ax.set_xlabel('Days')
+    ax.xaxis.set_major_formatter(fmt)
     ax.set_ylabel(name)
     if m.seasonalities[name]['mode'] == 'multiplicative':
         ax = set_y_as_percent(ax)
