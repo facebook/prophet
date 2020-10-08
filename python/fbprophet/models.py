@@ -21,6 +21,15 @@ class IStanBackend(ABC):
     def __init__(self):
         self.model = self.load_model()
         self.stan_fit = None
+        self.newton_fallback = True
+
+    def set_options(self, **kwargs):
+        """
+        Specify model options as kwargs.
+         * newton_fallback [bool]: whether to fallback to Newton if L-BFGS fails
+        """
+        if 'newton_fallback' in kwargs:
+            self.newton_fallback = kwargs['newton_fallback']
 
     @staticmethod
     @abstractmethod
@@ -58,7 +67,8 @@ class CmdStanPyBackend(IStanBackend):
         model_name = 'prophet.stan'
         target_name = 'prophet_model.bin'
 
-        sm = cmdstanpy.CmdStanModel(stan_file=os.path.join(model_dir, model_name))
+        sm = cmdstanpy.CmdStanModel(
+            stan_file=os.path.join(model_dir, model_name))
         sm.compile()
         copy(sm.exe_file, os.path.join(target_dir, target_name))
 
@@ -77,24 +87,25 @@ class CmdStanPyBackend(IStanBackend):
         iterations = int(1e4)
         try:
             self.stan_fit = self.model.optimize(data=stan_data,
-                                           inits=stan_init,
-                                           iter=iterations,
-                                           **kwargs)
+                                                inits=stan_init,
+                                                iter=iterations,
+                                                **kwargs)
         except RuntimeError as e:
             # Fall back on Newton
-            if kwargs['algorithm'] != 'Newton':
+            if self.newton_fallback and kwargs['algorithm'] != 'Newton':
                 logger.warning(
                     'Optimization terminated abnormally. Falling back to Newton.'
                 )
                 kwargs['algorithm'] = 'Newton'
                 self.stan_fit = self.model.optimize(data=stan_data,
-                                               inits=stan_init,
-                                               iter=iterations,
-                                               **kwargs)
+                                                    inits=stan_init,
+                                                    iter=iterations,
+                                                    **kwargs)
             else:
                 raise e
 
-        params = self.stan_to_dict_numpy(self.stan_fit.column_names, self.stan_fit.optimized_params_np)
+        params = self.stan_to_dict_numpy(
+            self.stan_fit.column_names, self.stan_fit.optimized_params_np)
         for par in params:
             params[par] = params[par].reshape((1, -1))
         return params
@@ -109,9 +120,9 @@ class CmdStanPyBackend(IStanBackend):
             kwargs['iter_warmup'] = iter_half
 
         self.stan_fit = self.model.sample(data=stan_data,
-                                     inits=stan_init,
-                                     iter_sampling=iter_half,
-                                     **kwargs)
+                                          inits=stan_init,
+                                          iter_sampling=iter_half,
+                                          **kwargs)
         res = self.stan_fit.sample
         (samples, c, columns) = res.shape
         res = res.reshape((samples * c, columns))
@@ -243,13 +254,16 @@ class PyStanBackend(IStanBackend):
         args.update(kwargs)
         try:
             self.stan_fit = self.model.optimizing(**args)
-        except RuntimeError:
+        except RuntimeError as e:
             # Fall back on Newton
-            logger.warning(
-                'Optimization terminated abnormally. Falling back to Newton.'
-            )
-            args['algorithm'] = 'Newton'
-            self.stan_fit = self.model.optimizing(**args)
+            if self.newton_fallback and args['algorithm'] != 'Newton':
+                logger.warning(
+                    'Optimization terminated abnormally. Falling back to Newton.'
+                )
+                args['algorithm'] = 'Newton'
+                self.stan_fit = self.model.optimizing(**args)
+            else:
+                raise e
 
         params = dict()
 
