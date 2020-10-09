@@ -117,7 +117,7 @@ with open('README.md', 'r', encoding='utf-8') as f:
     long_description = f.read()
 
 with open('requirements.txt', 'r') as f:
-    install_requires = f.read().splitlines()
+    requirements = f.read().splitlines()
 
 setup(
     name='fbprophet',
@@ -128,9 +128,8 @@ setup(
     author_email='sjtz@pm.me',
     license='MIT',
     packages=find_packages(),
-    setup_requires=[
-    ],
-    install_requires=install_requires,
+    setup_requires=requirements,
+    install_requires=requirements,
     python_requires='>=3',
     zip_safe=False,
     include_package_data=True,

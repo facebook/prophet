@@ -37,13 +37,10 @@ Prophet is on PyPI, so you can use pip to install it:
 
 ```
 # bash
-# Install pystan with pip before using pip to install fbprophet
-$ pip install pystan
-$
 $ pip install fbprophet
 ```
 
-The major dependency that Prophet has is `pystan`. PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install fbprophet.
+The major dependency that Prophet has is `pystan`. PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html).
 
 After installation, you can [get started!](quick_start.html#python-api)
 
