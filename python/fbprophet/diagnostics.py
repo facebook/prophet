@@ -82,6 +82,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         cross validation. If not provided, they are generated as described
         above.
     parallel : {None, 'processes', 'threads', 'dask', object}
+    disable_tqdm: if True it disables the progress bar that would otherwise show up when parallel=None
 
         How to parallelize the forecast computation. By default no parallelism
         is used.
