@@ -58,7 +58,7 @@ def generate_cutoffs(df, horizon, initial, period):
     return list(reversed(result))
 
 
-def cross_validation(model, horizon, period=None, initial=None, parallel=None, cutoffs=None):
+def cross_validation(model, horizon, period=None, initial=None, parallel=None, cutoffs=None, disable_tqdm=False):
     """Cross-Validation for time series.
 
     Computes forecasts from historical cutoff points, which user can input.
@@ -79,7 +79,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         period will include at least this much data. If not provided,
         3 * horizon is used.
     cutoffs: list of pd.Timestamp specifying cutoffs to be used during
-        cross validtation. If not provided, they are generated as described
+        cross validation. If not provided, they are generated as described
         above.
     parallel : {None, 'processes', 'threads', 'dask', object}
 
@@ -186,7 +186,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
     else:
         predicts = [
             single_cutoff_forecast(df, model, cutoff, horizon, predict_columns)
-            for cutoff in tqdm(cutoffs)
+            for cutoff in (tqdm(cutoffs) if disable_tqdm==False else cutoffs)
         ]
 
     # Combine all predicted pd.DataFrame into one pd.DataFrame
