@@ -222,6 +222,7 @@ prophet_copy <- function(m, cutoff = NULL) {
 #' 'mae': mean absolute error,
 #' 'mape': mean percent error,
 #' 'mdape': median percent error,
+#' 'smape': symmetric mean absolute percentage error,
 #' 'coverage': coverage of the upper and lower intervals
 #'
 #' A subset of these can be specified by passing a list of names as the
@@ -254,7 +255,7 @@ prophet_copy <- function(m, cutoff = NULL) {
 #'
 #' @export
 performance_metrics <- function(df, metrics = NULL, rolling_window = 0.1) {
-  valid_metrics <- c('mse', 'rmse', 'mae', 'mape', 'coverage')
+  valid_metrics <- c('mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage')
   if (is.null(metrics)) {
     metrics <- valid_metrics
   }
@@ -497,6 +498,23 @@ mdape <- function(df, w) {
     return(data.frame(horizon = df$horizon, mdape = ape))
   }
   return(rolling_median_by_h(x = ape, h = df$horizon, w = w, name = 'mdape'))
+}
+
+
+#' Symmetric mean absolute percentage error
+#'
+#' @param df Cross-validation results dataframe.
+#' @param w Aggregation window size.
+#'
+#' @return Array of symmetric mean absolute percent errors.
+#'
+#' @keywords internal
+smape <- function(df, w) {
+  sape <- abs(df$yhat - df$y) / ((abs(df$y) + abs(df$yhat)) / 2)
+  if (w < 0) {
+    return(data.frame(horizon = df$horizon, smape = sape))
+  }
+  return(rolling_median_by_h(x = sape, h = df$horizon, w = w, name = 'smape'))
 }
 
 
