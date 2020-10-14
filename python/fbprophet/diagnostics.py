@@ -300,7 +300,7 @@ def prophet_copy(m, cutoff=None):
     return m2
 
 
-def performance_metrics(df, metrics=None, rolling_window=0.1):
+def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
     """Compute performance metrics from cross-validation results.
 
     Computes a suite of performance metrics on the output of cross-validation.
@@ -310,6 +310,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     'mae': mean absolute error
     'mape': mean absolute percent error
     'mdape': median absolute percent error
+    'smape': symmetric mean absolute percentage error
     'coverage': coverage of the upper and lower intervals
 
     A subset of these can be specified by passing a list of names as the
@@ -336,15 +337,18 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     ----------
     df: The dataframe returned by cross_validation.
     metrics: A list of performance metrics to compute. If not provided, will
-        use ['mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage'].
+        use ['mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage'].
     rolling_window: Proportion of data to use in each rolling window for
-        computing the metrics. Should be in [0, 1] to average
+        computing the metrics. Should be in [0, 1] to average.
+    monthly: If using monthly data, monthly=True will compute horizons
+        as numbers of month ends from the cutoff date, starting from 0  
+        for the cutoff month.
 
     Returns
     -------
     Dataframe with a column for each metric, and column 'horizon'
     """
-    valid_metrics = ['mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage']
+    valid_metrics = ['mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage']
     if metrics is None:
         metrics = valid_metrics
     if ('yhat_lower' not in df or 'yhat_upper' not in df) and ('coverage' in metrics):
@@ -356,7 +360,10 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
             'Valid values for metrics are: {}'.format(valid_metrics)
         )
     df_m = df.copy()
-    df_m['horizon'] = df_m['ds'] - df_m['cutoff']
+    if monthly:
+        df_m['horizon'] = df_m['ds'].dt.to_period('M').astype(int) - df_m['cutoff'].dt.to_period('M').astype(int)
+    else:
+        df_m['horizon'] = df_m['ds'] - df_m['cutoff']
     df_m.sort_values('horizon', inplace=True)
     if 'mape' in metrics and df_m['y'].abs().min() < 1e-8:
         logger.info('Skipping MAPE because y close to 0')
