@@ -247,7 +247,7 @@ prophet_copy <- function(m, cutoff = NULL) {
 #'
 #' @param df The dataframe returned by cross_validation.
 #' @param metrics An array of performance metrics to compute. If not provided,
-#'  will use c('mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage').
+#'  will use c('mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage').
 #' @param rolling_window Proportion of data to use in each rolling window for
 #'  computing the metrics. Should be in [0, 1] to average.
 #'
