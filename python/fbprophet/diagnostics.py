@@ -340,9 +340,8 @@ def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
         use ['mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage'].
     rolling_window: Proportion of data to use in each rolling window for
         computing the metrics. Should be in [0, 1] to average.
-    monthly: If using monthly data, monthly=True will compute horizons
-        as numbers of month ends from the cutoff date, starting from 0  
-        for the cutoff month.
+    monthly: monthly=True will compute horizonsas numbers of month ends 
+        from the cutoff date, starting from 0 for the cutoff month.
 
     Returns
     -------
