@@ -186,8 +186,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
 
     else:
         predicts = [
-            single_cutoff_forecast(df, model, cutoff, horizon, predict_columns)
-for cutoff in (tqdm(cutoffs) if not disable_tqdm else cutoffs)
+            single_cutoff_forecast(df, model, cutoff, horizon, predict_columns) for cutoff in (tqdm(cutoffs) if not disable_tqdm else cutoffs)
         ]
 
     # Combine all predicted pd.DataFrame into one pd.DataFrame
