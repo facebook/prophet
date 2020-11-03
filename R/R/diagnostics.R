@@ -502,6 +502,7 @@ mdape <- function(df, w) {
 
 
 #' Symmetric mean absolute percentage error
+#' based on Chen and Yang (2004) formula
 #'
 #' @param df Cross-validation results dataframe.
 #' @param w Aggregation window size.
@@ -510,7 +511,7 @@ mdape <- function(df, w) {
 #'
 #' @keywords internal
 smape <- function(df, w) {
-  sape <- abs(df$yhat - df$y) / ((abs(df$y) + abs(df$yhat)) / 2)
+  sape <- abs(df$y - df$yhat) / ((abs(df$y) + abs(df$yhat)) / 2)
   if (w < 0) {
     return(data.frame(horizon = df$horizon, smape = sape))
   }
