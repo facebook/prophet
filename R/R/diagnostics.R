@@ -515,7 +515,7 @@ smape <- function(df, w) {
   if (w < 0) {
     return(data.frame(horizon = df$horizon, smape = sape))
   }
-  return(rolling_median_by_h(x = sape, h = df$horizon, w = w, name = 'smape'))
+  return(rolling_mean_by_h(x = sape, h = df$horizon, w = w, name = 'smape'))
 }
 
 
