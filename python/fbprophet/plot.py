@@ -429,6 +429,7 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
 def set_y_as_percent(ax):
     yticks = 100 * ax.get_yticks()
     yticklabels = ['{0:.4g}%'.format(y) for y in yticks]
+    ax.set_yticks(ax.get_yticks().tolist())
     ax.set_yticklabels(yticklabels)
     return ax
 
