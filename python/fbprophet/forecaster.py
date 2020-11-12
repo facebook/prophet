@@ -1097,9 +1097,18 @@ class Prophet(object):
         """
        
         if date_col:
-             df.rename(columns={date_col:'ds'}, inplace=True)
+            if (date_col not in df):
+                raise ValueError(
+                        'The value given to date_col \'' + date_col + '\' does not exsist as a column value in the dataframe. \n' 
+                        'use a column value that exsist for date_col.')
+            df.rename(columns={date_col:'ds'}, inplace=True)
+
         if y_col:
-             df.rename(columns={y_col:'y'}, inplace=True)
+            if (y_col not in df):
+                raise ValueError(
+                        'The value given to date_col \'' + date_col + '\' does not exsist as a column value in the dataframe. \n' 
+                        'use a column value that exsist for date_col.')
+            df.rename(columns={y_col:'y'}, inplace=True)
 
         if self.history is not None:
             raise Exception('Prophet object can only be fit once. '
