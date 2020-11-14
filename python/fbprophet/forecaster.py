@@ -92,13 +92,16 @@ class Prophet(object):
             mcmc_samples=0,
             interval_width=0.80,
             uncertainty_samples=1000,
-            stan_backend=None
+            stan_backend=None,
+            date_col='ds',
+            y_col='y'
     ):
         self.growth = growth
-
+        self.date_col = date_col
+        self.y_col = y_col
         self.changepoints = changepoints
         if self.changepoints is not None:
-            self.changepoints = pd.Series(pd.to_datetime(self.changepoints), name='ds')
+            self.changepoints = pd.Series(pd.to_datetime(self.changepoints), name=self.date_col)
             self.n_changepoints = len(self.changepoints)
             self.specified_changepoints = True
         else:
@@ -163,12 +166,12 @@ class Prophet(object):
         if self.holidays is not None:
             if not (
                 isinstance(self.holidays, pd.DataFrame)
-                and 'ds' in self.holidays  # noqa W503
+                and self.date_col in self.holidays  # noqa W503
                 and 'holiday' in self.holidays  # noqa W503
             ):
                 raise ValueError('holidays must be a DataFrame with "ds" and '
                                  '"holiday" columns.')
-            self.holidays['ds'] = pd.to_datetime(self.holidays['ds'])
+            self.holidays[self.date_col] = pd.to_datetime(self.holidays[self.date_col])
             has_lower = 'lower_window' in self.holidays
             has_upper = 'upper_window' in self.holidays
             if has_lower + has_upper == 1:
@@ -209,7 +212,7 @@ class Prophet(object):
         reserved_names.extend(rn_l)
         reserved_names.extend(rn_u)
         reserved_names.extend([
-            'ds', 'y', 'cap', 'floor', 'y_scaled', 'cap_scaled'])
+            self.date_col, self.y_col, 'cap', 'floor', 'y_scaled', 'cap_scaled'])
         if name in reserved_names:
             raise ValueError(
                 'Name {name!r} is reserved.'.format(name=name)
@@ -253,19 +256,19 @@ class Prophet(object):
         -------
         pd.DataFrame prepared for fitting or predicting.
         """
-        if 'y' in df:  # 'y' will be in training data
-            df['y'] = pd.to_numeric(df['y'])
-            if np.isinf(df['y'].values).any():
+        if self.y_col in df:  # 'y' will be in training data
+            df[self.y_col] = pd.to_numeric(df[self.y_col])
+            if np.isinf(df[self.y_col].values).any():
                 raise ValueError('Found infinity in column y.')
-        if df['ds'].dtype == np.int64:
-            df['ds'] = df['ds'].astype(str)
-        df['ds'] = pd.to_datetime(df['ds'])
-        if df['ds'].dt.tz is not None:
+        if df[self.date_col].dtype == np.int64:
+            df[self.date_col] = df[self.date_col].astype(str)
+        df[self.date_col] = pd.to_datetime(df[self.date_col])
+        if df[self.date_col].dt.tz is not None:
             raise ValueError(
                 'Column ds has timezone specified, which is not supported. '
                 'Remove timezone.'
             )
-        if df['ds'].isnull().any():
+        if df[self.date_col].isnull().any():
             raise ValueError('Found NaN in column ds.')
         for name in self.extra_regressors:
             if name not in df:
@@ -293,9 +296,9 @@ class Prophet(object):
                     )
                 df[condition_name] = df[condition_name].astype('bool')
 
-        if df.index.name == 'ds':
+        if df.index.name == self.date_col:
             df.index.name = None
-        df = df.sort_values('ds')
+        df = df.sort_values(self.date_col)
         df = df.reset_index(drop=True)
 
         self.initialize_scales(initialize_scales, df)
@@ -317,9 +320,9 @@ class Prophet(object):
                 )
             df['cap_scaled'] = (df['cap'] - df['floor']) / self.y_scale
 
-        df['t'] = (df['ds'] - self.start) / self.t_scale
-        if 'y' in df:
-            df['y_scaled'] = (df['y'] - df['floor']) / self.y_scale
+        df['t'] = (df[self.date_col] - self.start) / self.t_scale
+        if self.y_col in df:
+            df['y_scaled'] = (df[self.y_col] - df['floor']) / self.y_scale
 
         for name, props in self.extra_regressors.items():
             df[name] = ((df[name] - props['mu']) / props['std'])
@@ -342,11 +345,11 @@ class Prophet(object):
             floor = df['floor']
         else:
             floor = 0.
-        self.y_scale = (df['y'] - floor).abs().max()
+        self.y_scale = (df[self.y_col] - floor).abs().max()
         if self.y_scale == 0:
             self.y_scale = 1
-        self.start = df['ds'].min()
-        self.t_scale = df['ds'].max() - self.start
+        self.start = df[self.date_col].min()
+        self.t_scale = df[self.date_col].max() - self.start
         for name, props in self.extra_regressors.items():
             standardize = props['standardize']
             n_vals = len(df[name].unique())
@@ -377,8 +380,8 @@ class Prophet(object):
             if len(self.changepoints) == 0:
                 pass
             else:
-                too_low = min(self.changepoints) < self.history['ds'].min()
-                too_high = max(self.changepoints) > self.history['ds'].max()
+                too_low = min(self.changepoints) < self.history[self.date_col].min()
+                too_high = max(self.changepoints) > self.history[self.date_col].max()
                 if too_low or too_high:
                     raise ValueError(
                         'Changepoints must fall within training data.')
@@ -401,11 +404,11 @@ class Prophet(object):
                         .astype(np.int)
                 )
                 self.changepoints = (
-                    self.history.iloc[cp_indexes]['ds'].tail(-1)
+                    self.history.iloc[cp_indexes][self.date_col].tail(-1)
                 )
             else:
                 # set empty changepoints
-                self.changepoints = pd.Series(pd.to_datetime([]), name='ds')
+                self.changepoints = pd.Series(pd.to_datetime([]), name=self.date_col)
         if len(self.changepoints) > 0:
             self.changepoints_t = np.sort(np.array(
                 (self.changepoints - self.start) / self.t_scale))
@@ -763,7 +766,7 @@ class Prophet(object):
         # Seasonality features
         for name, props in self.seasonalities.items():
             features = self.make_seasonality_features(
-                df['ds'],
+                df[self.date_col],
                 props['period'],
                 props['fourier_order'],
                 name,
@@ -776,10 +779,10 @@ class Prophet(object):
             modes[props['mode']].append(name)
 
         # Holiday features
-        holidays = self.construct_holiday_dataframe(df['ds'])
+        holidays = self.construct_holiday_dataframe(df[self.date_col])
         if len(holidays) > 0:
             features, holiday_priors, holiday_names = (
-                self.make_holiday_features(df['ds'], holidays)
+                self.make_holiday_features(df[self.date_col], holidays)
             )
             seasonal_features.append(features)
             prior_scales.extend(holiday_priors)
@@ -937,9 +940,9 @@ class Prophet(object):
         Turns on daily seasonality if there is >=2 days of history, and the
         spacing between dates in the history is <1 day.
         """
-        first = self.history['ds'].min()
-        last = self.history['ds'].max()
-        dt = self.history['ds'].diff()
+        first = self.history[self.date_col].min()
+        last = self.history[self.date_col].max()
+        dt = self.history[self.date_col].diff()
         min_dt = dt.iloc[dt.values.nonzero()[0]].min()
 
         # Yearly seasonality
@@ -984,7 +987,7 @@ class Prophet(object):
             }
 
     @staticmethod
-    def linear_growth_init(df):
+    def linear_growth_init(df, date_col='ds'):
         """Initialize linear growth.
 
         Provides a strong initialization for linear growth by calculating the
@@ -1001,7 +1004,7 @@ class Prophet(object):
         A tuple (k, m) with the rate (k) and offset (m) of the linear growth
         function.
         """
-        i0, i1 = df['ds'].idxmin(), df['ds'].idxmax()
+        i0, i1 = df[date_col].idxmin(), df[date_col].idxmax()
         T = df['t'].iloc[i1] - df['t'].iloc[i0]
         k = (df['y_scaled'].iloc[i1] - df['y_scaled'].iloc[i0]) / T
         m = df['y_scaled'].iloc[i0] - k * df['t'].iloc[i0]
@@ -1025,7 +1028,7 @@ class Prophet(object):
         A tuple (k, m) with the rate (k) and offset (m) of the logistic growth
         function.
         """
-        i0, i1 = df['ds'].idxmin(), df['ds'].idxmax()
+        i0, i1 = df[self.date_col].idxmin(), df[self.date_col].idxmax()
         T = df['t'].iloc[i1] - df['t'].iloc[i0]
 
         # Force valid values, in case y > cap or y < 0
@@ -1101,27 +1104,29 @@ class Prophet(object):
                 raise ValueError(
                         'The value given to date_col \'' + date_col + '\' does not exsist as a column value in the dataframe. \n' 
                         'use a column value that exsist for date_col.')
-            df.rename(columns={date_col:'ds'}, inplace=True)
+            self.date_col = date_col
+            #df.rename(columns={date_col:'ds'}, inplace=True)
 
         if y_col:
             if (y_col not in df):
                 raise ValueError(
                         'The value given to date_col \'' + date_col + '\' does not exsist as a column value in the dataframe. \n' 
                         'use a column value that exsist for date_col.')
-            df.rename(columns={y_col:'y'}, inplace=True)
+            self.y_col = y_col
+            #df.rename(columns={y_col:'y'}, inplace=True)
 
         if self.history is not None:
             raise Exception('Prophet object can only be fit once. '
                             'Instantiate a new object.')
-        if ('ds' not in df) or ('y' not in df):
+        if (self.date_col not in df) or (self.y_col not in df):
             raise ValueError(
                 'Dataframe must have columns "ds" and "y" with the dates and '
                 'values respectively.'
             )
-        history = df[df['y'].notnull()].copy()
+        history = df[df[self.y_col].notnull()].copy()
         if history.shape[0] < 2:
             raise ValueError('Dataframe has less than 2 non-NaN rows.')
-        self.history_dates = pd.to_datetime(pd.Series(df['ds'].unique(), name='ds')).sort_values()
+        self.history_dates = pd.to_datetime(pd.Series(df[self.date_col].unique(), name=self.date_col)).sort_values()
 
         history = self.setup_dataframe(history, initialize_scales=True)
         self.history = history
@@ -1153,7 +1158,7 @@ class Prophet(object):
 
         if self.growth == 'linear':
             dat['cap'] = np.zeros(self.history.shape[0])
-            kinit = self.linear_growth_init(history)
+            kinit = self.linear_growth_init(history, date_col=self.date_col)
         elif self.growth == 'flat':
             dat['cap'] = np.zeros(self.history.shape[0])
             kinit = self.flat_growth_init(history)
@@ -1169,7 +1174,7 @@ class Prophet(object):
             'sigma_obs': 1,
         }
 
-        if history['y'].min() == history['y'].max() and \
+        if history[self.y_col].min() == history[self.y_col].max() and \
                 (self.growth == 'linear' or self.growth == 'flat'):
             self.params = stan_init
             self.params['sigma_obs'] = 1e-9
@@ -1221,7 +1226,7 @@ class Prophet(object):
             intervals = None
 
         # Drop columns except ds, cap, floor, and trend
-        cols = ['ds', 'trend']
+        cols = [self.date_col, 'trend']
         if 'cap' in df:
             cols.append('cap')
         if self.logistic_floor:
@@ -1583,10 +1588,9 @@ class Prophet(object):
         if include_history:
             dates = np.concatenate((np.array(self.history_dates), dates))
 
-        return pd.DataFrame({'ds': dates})
+        return pd.DataFrame({self.date_col: dates})
 
-    def plot(self, fcst, ax=None, uncertainty=True, plot_cap=True,
-             xlabel='ds', ylabel='y', figsize=(10, 6)):
+    def plot(self, fcst, ax=None, uncertainty=True, plot_cap=True, figsize=(10, 6)):
         """Plot the Prophet forecast.
 
         Parameters
@@ -1604,10 +1608,10 @@ class Prophet(object):
         -------
         A matplotlib figure.
         """
+        print(self.date_col)
         return plot(
             m=self, fcst=fcst, ax=ax, uncertainty=uncertainty,
-            plot_cap=plot_cap, xlabel=xlabel, ylabel=ylabel,
-            figsize=figsize
+            plot_cap=plot_cap, figsize=figsize
         )
 
     def plot_components(self, fcst, uncertainty=True, plot_cap=True,
@@ -1638,5 +1642,5 @@ class Prophet(object):
         return plot_components(
             m=self, fcst=fcst, uncertainty=uncertainty, plot_cap=plot_cap,
             weekly_start=weekly_start, yearly_start=yearly_start,
-            figsize=figsize
+            figsize=figsize 
         )

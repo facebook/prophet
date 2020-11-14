@@ -40,8 +40,7 @@ except ImportError:
 
 
 def plot(
-    m, fcst, ax=None, uncertainty=True, plot_cap=True, xlabel='ds', ylabel='y',
-    figsize=(10, 6)
+    m, fcst, ax=None, uncertainty=True, plot_cap=True, figsize=(10, 6)
 ):
     """Plot the Prophet forecast.
 
@@ -54,9 +53,7 @@ def plot(
         only be done if m.uncertainty_samples > 0.
     plot_cap: Optional boolean indicating if the capacity should be shown
         in the figure, if available.
-    xlabel: Optional label name on X-axis
-    ylabel: Optional label name on Y-axis
-    figsize: Optional tuple width, height in inches.
+        figsize: Optional tuple width, height in inches.
 
     Returns
     -------
@@ -67,8 +64,8 @@ def plot(
         ax = fig.add_subplot(111)
     else:
         fig = ax.get_figure()
-    fcst_t = fcst['ds'].dt.to_pydatetime()
-    ax.plot(m.history['ds'].dt.to_pydatetime(), m.history['y'], 'k.')
+    fcst_t = fcst[m.date_col].dt.to_pydatetime()
+    ax.plot(m.history[m.date_col].dt.to_pydatetime(), m.history[m.y_col], 'k.')
     ax.plot(fcst_t, fcst['yhat'], ls='-', c='#0072B2')
     if 'cap' in fcst and plot_cap:
         ax.plot(fcst_t, fcst['cap'], ls='--', c='k')
@@ -83,16 +80,15 @@ def plot(
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(formatter)
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
+    ax.set_xlabel(m.date_col)
+    ax.set_ylabel(m.y_col)
     fig.tight_layout()
     return fig
 
 
 def plot_components(
     m, fcst, uncertainty=True, plot_cap=True, weekly_start=0, yearly_start=0,
-    figsize=None
-):
+    figsize=None, ):
     """Plot the Prophet forecast components.
 
     Will plot whichever are available of: trend, holidays, weekly
@@ -150,14 +146,14 @@ def plot_components(
 
     multiplicative_axes = []
 
-    dt = m.history['ds'].diff()
+    dt = m.history[m.date_col].diff()
     min_dt = dt.iloc[dt.values.nonzero()[0]].min() 
 
     for ax, plot_name in zip(axes, components):
         if plot_name == 'trend':
             plot_forecast_component(
                 m=m, fcst=fcst, name='trend', ax=ax, uncertainty=uncertainty,
-                plot_cap=plot_cap,
+                plot_cap=plot_cap 
             )
         elif plot_name in m.seasonalities:
             if (
@@ -182,7 +178,7 @@ def plot_components(
         ]:
             plot_forecast_component(
                 m=m, fcst=fcst, name=plot_name, ax=ax, uncertainty=uncertainty,
-                plot_cap=False,
+                plot_cap=False, xlabel=m.date_col
             )
         if plot_name in m.component_modes['multiplicative']:
             multiplicative_axes.append(ax)
@@ -195,7 +191,7 @@ def plot_components(
 
 
 def plot_forecast_component(
-    m, fcst, name, ax=None, uncertainty=True, plot_cap=False, figsize=(10, 6)
+    m, fcst, name, ax=None, uncertainty=True, plot_cap=False, figsize=(10, 6), 
 ):
     """Plot a particular component of the forecast.
 
@@ -219,7 +215,7 @@ def plot_forecast_component(
     if not ax:
         fig = plt.figure(facecolor='w', figsize=figsize)
         ax = fig.add_subplot(111)
-    fcst_t = fcst['ds'].dt.to_pydatetime()
+    fcst_t = fcst[m.date_col].dt.to_pydatetime()
     artists += ax.plot(fcst_t, fcst[name], ls='-', c='#0072B2')
     if 'cap' in fcst and plot_cap:
         artists += ax.plot(fcst_t, fcst['cap'], ls='--', c='k')
@@ -235,14 +231,14 @@ def plot_forecast_component(
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(formatter)
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
-    ax.set_xlabel('ds')
+    ax.set_xlabel(m.date_col)
     ax.set_ylabel(name)
     if name in m.component_modes['multiplicative']:
         ax = set_y_as_percent(ax)
     return artists
 
 
-def seasonality_plot_df(m, ds):
+def seasonality_plot_df(m, ds, xlabel='ds' ):
     """Prepare dataframe for plotting seasonal components.
 
     Parameters
@@ -254,7 +250,7 @@ def seasonality_plot_df(m, ds):
     -------
     A dataframe with seasonal components on ds.
     """
-    df_dict = {'ds': ds, 'cap': 1., 'floor': 0.}
+    df_dict = {m.date_col: ds, 'cap': 1., 'floor': 0.}
     for name in m.extra_regressors:
         df_dict[name] = 0.
     # Activate all conditional seasonality columns
@@ -262,11 +258,12 @@ def seasonality_plot_df(m, ds):
         if props['condition_name'] is not None:
             df_dict[props['condition_name']] = True
     df = pd.DataFrame(df_dict)
+    display(df)
     df = m.setup_dataframe(df)
     return df
 
 
-def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), name='weekly'):
+def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), name='weekly' ):
     """Plot the weekly component of the forecast.
 
     Parameters
@@ -293,7 +290,7 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), n
     # Compute weekly seasonality for a Sun-Sat sequence of dates.
     days = (pd.date_range(start='2017-01-01', periods=7) +
             pd.Timedelta(days=weekly_start))
-    df_w = seasonality_plot_df(m, days)
+    df_w = seasonality_plot_df(m, days, xlabel='weekly')
     seas = m.predict_seasonal_components(df_w)
     days = days.day_name()
     artists += ax.plot(range(len(days)), seas[name], ls='-',
@@ -312,7 +309,7 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), n
     return artists
 
 
-def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6), name='yearly'):
+def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6), name='yearly',):
     """Plot the yearly component of the forecast.
 
     Parameters
@@ -339,13 +336,13 @@ def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6), n
     # Compute yearly seasonality for a Jan 1 - Dec 31 sequence of dates.
     days = (pd.date_range(start='2017-01-01', periods=365) +
             pd.Timedelta(days=yearly_start))
-    df_y = seasonality_plot_df(m, days)
+    df_y = seasonality_plot_df(m, days, xlabel=m.date_col)
     seas = m.predict_seasonal_components(df_y)
     artists += ax.plot(
-        df_y['ds'].dt.to_pydatetime(), seas[name], ls='-', c='#0072B2')
+        df_y[m.date_col].dt.to_pydatetime(), seas[name], ls='-', c='#0072B2')
     if uncertainty and m.uncertainty_samples:
         artists += [ax.fill_between(
-            df_y['ds'].dt.to_pydatetime(), seas[name + '_lower'],
+            df_y[m.date_col].dt.to_pydatetime(), seas[name + '_lower'],
             seas[name + '_upper'], color='#0072B2', alpha=0.2)]
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
     months = MonthLocator(range(1, 13), bymonthday=1, interval=2)
@@ -359,7 +356,7 @@ def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6), n
     return artists
 
 
-def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
+def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6), ):
     """Plot a custom seasonal component.
 
     Parameters
@@ -386,13 +383,13 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
     end = start + pd.Timedelta(days=period)
     plot_points = 200
     days = pd.to_datetime(np.linspace(start.value, end.value, plot_points))
-    df_y = seasonality_plot_df(m, days)
+    df_y = seasonality_plot_df(m, days, xlabel=m.date_col)
     seas = m.predict_seasonal_components(df_y)
-    artists += ax.plot(df_y['ds'].dt.to_pydatetime(), seas[name], ls='-',
+    artists += ax.plot(df_y[m.date_col].dt.to_pydatetime(), seas[name], ls='-',
                         c='#0072B2')
     if uncertainty and m.uncertainty_samples:
         artists += [ax.fill_between(
-            df_y['ds'].dt.to_pydatetime(), seas[name + '_lower'],
+            df_y[m.date_col].dt.to_pydatetime(), seas[name + '_lower'],
             seas[name + '_upper'], color='#0072B2', alpha=0.2)]
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
     n_ticks = 8
@@ -435,8 +432,7 @@ def set_y_as_percent(ax):
 
 
 def add_changepoints_to_plot(
-    ax, m, fcst, threshold=0.01, cp_color='r', cp_linestyle='--', trend=True,
-):
+    ax, m, fcst, threshold=0.01, cp_color='r', cp_linestyle='--', trend=True, ):
     """Add markers for significant changepoints to prophet forecast plot.
 
     Example:
@@ -459,7 +455,7 @@ def add_changepoints_to_plot(
     """
     artists = []
     if trend:
-        artists.append(ax.plot(fcst['ds'], fcst['trend'], c=cp_color))
+        artists.append(ax.plot(fcst[m.date_col], fcst['trend'], c=cp_color))
     signif_changepoints = m.changepoints[
         np.abs(np.nanmean(m.params['delta'], axis=0)) >= threshold
     ] if len(m.changepoints) > 0 else []
@@ -547,7 +543,7 @@ def plot_cross_validation_metric(
 
 
 def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoints=False,
-                changepoints_threshold=0.01, xlabel='ds', ylabel='y', figsize=(900, 600)):
+                changepoints_threshold=0.01,  figsize=(900, 600)):
     """Plot the Prophet forecast with Plotly offline.
 
     Plotting in Jupyter Notebook requires initializing plotly.offline.init_notebook_mode():
@@ -568,9 +564,6 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
     trend: Optional boolean to plot trend
     changepoints: Optional boolean to plot changepoints
     changepoints_threshold: Threshold on trend change magnitude for significance.
-    xlabel: Optional label name on X-axis
-    ylabel: Optional label name on Y-axis
-
     Returns
     -------
     A Plotly Figure.
@@ -587,15 +580,15 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
     # Add actual
     data.append(go.Scatter(
         name='Actual',
-        x=m.history['ds'],
-        y=m.history['y'],
+        x=m.history[m.date_col],
+        y=m.history[m.y_col],
         marker=dict(color=actual_color, size=marker_size),
         mode='markers'
     ))
     # Add lower bound
     if uncertainty and m.uncertainty_samples:
         data.append(go.Scatter(
-            x=fcst['ds'],
+            x=fcst[m.date_col],
             y=fcst['yhat_lower'],
             mode='lines',
             line=dict(width=0),
@@ -604,7 +597,7 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
     # Add prediction
     data.append(go.Scatter(
         name='Predicted',
-        x=fcst['ds'],
+        x=fcst[m.date_col],
         y=fcst['yhat'],
         mode='lines',
         line=dict(color=prediction_color, width=line_width),
@@ -614,7 +607,7 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
     # Add upper bound
     if uncertainty and m.uncertainty_samples:
         data.append(go.Scatter(
-            x=fcst['ds'],
+            x=fcst[m.date_col],
             y=fcst['yhat_upper'],
             mode='lines',
             line=dict(width=0),
@@ -626,7 +619,7 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
     if 'cap' in fcst and plot_cap:
         data.append(go.Scatter(
             name='Cap',
-            x=fcst['ds'],
+            x=fcst[m.date_col],
             y=fcst['cap'],
             mode='lines',
             line=dict(color=cap_color, dash='dash', width=line_width),
@@ -634,7 +627,7 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
     if m.logistic_floor and 'floor' in fcst and plot_cap:
         data.append(go.Scatter(
             name='Floor',
-            x=fcst['ds'],
+            x=fcst[m.date_col],
             y=fcst['floor'],
             mode='lines',
             line=dict(color=cap_color, dash='dash', width=line_width),
@@ -643,7 +636,7 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
     if trend:
         data.append(go.Scatter(
             name='Trend',
-            x=fcst['ds'],
+            x=fcst[m.date_col],
             y=fcst['trend'],
             mode='lines',
             line=dict(color=trend_color, width=line_width),
@@ -655,7 +648,7 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
         ]
         data.append(go.Scatter(
             x=signif_changepoints,
-            y=fcst.loc[fcst['ds'].isin(signif_changepoints), 'trend'],
+            y=fcst.loc[fcst[m.date_col].isin(signif_changepoints), 'trend'],
             marker=dict(size=50, symbol='line-ns-open', color=trend_color,
                         line=dict(width=line_width)),
             mode='markers',
@@ -667,10 +660,10 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
         width=figsize[0],
         height=figsize[1],
         yaxis=dict(
-            title=ylabel
+            title=m.y_col
         ),
         xaxis=dict(
-            title=xlabel,
+            title=m.date_col,
             type='date',
             rangeselector=dict(
                 buttons=list([
@@ -824,7 +817,7 @@ def plot_seasonality_plotly(m, name, uncertainty=True, figsize=(900, 300)):
     return fig
 
 
-def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_cap=False):
+def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_cap=False, ):
     """Prepares a dictionary for plotting the selected forecast component with Plotly
 
     Parameters
@@ -847,16 +840,16 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
     zeroline_color = '#AAA'
     line_width = 2
 
-    range_margin = (fcst['ds'].max() - fcst['ds'].min()) * 0.05
-    range_x = [fcst['ds'].min() - range_margin, fcst['ds'].max() + range_margin]
+    range_margin = (fcst[m.date_col].max() - fcst[m.date_col].min()) * 0.05
+    range_x = [fcst[m.date_col].min() - range_margin, fcst[m.date_col].max() + range_margin]
 
     text = None
     mode = 'lines'
     if name == 'holidays':
         
         # Combine holidays into one hover text
-        holidays = m.construct_holiday_dataframe(fcst['ds'])
-        holiday_features, _, _ = m.make_holiday_features(fcst['ds'], holidays)
+        holidays = m.construct_holiday_dataframe(fcst[m.date_col])
+        holiday_features, _, _ = m.make_holiday_features(fcst[m.date_col], holidays)
         holiday_features.columns = holiday_features.columns.str.replace('_delim_', '', regex=False)
         holiday_features.columns = holiday_features.columns.str.replace('+0', '', regex=False)
         text = pd.Series(data='', index=holiday_features.index)
@@ -867,7 +860,7 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
     traces = []
     traces.append(go.Scatter(
         name=name,
-        x=fcst['ds'],
+        x=fcst[m.date_col],
         y=fcst[name],
         mode=mode,
         line=go.scatter.Line(color=prediction_color, width=line_width),
@@ -888,14 +881,14 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
         else:
             traces.append(go.Scatter(
                 name=name + '_upper',
-                x=fcst['ds'],
+                x=fcst[m.date_col],
                 y=fcst[name + '_upper'],
                 mode=mode,
                 line=go.scatter.Line(width=0, color=error_color)
             ))
             traces.append(go.Scatter(
                 name=name + '_lower',
-                x=fcst['ds'],
+                x=fcst[m.date_col],
                 y=fcst[name + '_lower'],
                 mode=mode,
                 line=go.scatter.Line(width=0, color=error_color),
@@ -905,7 +898,7 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
     if 'cap' in fcst and plot_cap:
         traces.append(go.Scatter(
             name='Cap',
-            x=fcst['ds'],
+            x=fcst[m.date_col],
             y=fcst['cap'],
             mode='lines',
             line=go.scatter.Line(color=cap_color, dash='dash', width=line_width),
@@ -913,7 +906,7 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
     if m.logistic_floor and 'floor' in fcst and plot_cap:
         traces.append(go.Scatter(
             name='Floor',
-            x=fcst['ds'],
+            x=fcst[m.date_col],
             y=fcst['floor'],
             mode='lines',
             line=go.scatter.Line(color=cap_color, dash='dash', width=line_width),
@@ -930,7 +923,7 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
     return {'traces': traces, 'xaxis': xaxis, 'yaxis': yaxis}
 
 
-def get_seasonality_plotly_props(m, name, uncertainty=True):
+def get_seasonality_plotly_props(m, name, uncertainty=True, ):
     """Prepares a dictionary for plotting the selected seasonality with Plotly
 
     Parameters
@@ -953,20 +946,20 @@ def get_seasonality_plotly_props(m, name, uncertainty=True):
     start = pd.to_datetime('2017-01-01 0000')
     period = m.seasonalities[name]['period']
     end = start + pd.Timedelta(days=period)
-    if (m.history['ds'].dt.hour == 0).all():  # Day Precision
+    if (m.history[m.date_col].dt.hour == 0).all():  # Day Precision
         plot_points = np.floor(period).astype(int)
-    elif (m.history['ds'].dt.minute == 0).all():  # Hour Precision
+    elif (m.history[m.date_col].dt.minute == 0).all():  # Hour Precision
         plot_points = np.floor(period * 24).astype(int)
     else:  # Minute Precision
         plot_points = np.floor(period * 24 * 60).astype(int)
     days = pd.to_datetime(np.linspace(start.value, end.value, plot_points, endpoint=False))
-    df_y = seasonality_plot_df(m, days)
+    df_y = seasonality_plot_df(m, days, xlabel=m.date_col)
     seas = m.predict_seasonal_components(df_y)
 
     traces = []
     traces.append(go.Scatter(
         name=name,
-        x=df_y['ds'],
+        x=df_y[m.date_col],
         y=seas[name],
         mode='lines',
         line=go.scatter.Line(color=prediction_color, width=line_width)
@@ -974,14 +967,14 @@ def get_seasonality_plotly_props(m, name, uncertainty=True):
     if uncertainty and m.uncertainty_samples and (seas[name + '_upper'] != seas[name + '_lower']).any():
         traces.append(go.Scatter(
             name=name + '_upper',
-            x=df_y['ds'],
+            x=df_y[m.date_col],
             y=seas[name + '_upper'],
             mode='lines',
             line=go.scatter.Line(width=0, color=error_color)
         ))
         traces.append(go.Scatter(
             name=name + '_lower',
-            x=df_y['ds'],
+            x=df_y[m.date_col],
             y=seas[name + '_lower'],
             mode='lines',
             line=go.scatter.Line(width=0, color=error_color),
@@ -999,11 +992,11 @@ def get_seasonality_plotly_props(m, name, uncertainty=True):
     else:
         tickformat = '%B %e'  # "January  6"
 
-    range_margin = (df_y['ds'].max() - df_y['ds'].min()) * 0.05
+    range_margin = (df_y[m.date_col].max() - df_y[m.date_col].min()) * 0.05
     xaxis = go.layout.XAxis(
         tickformat=tickformat,
         type='date',
-        range=[df_y['ds'].min() - range_margin, df_y['ds'].max() + range_margin]
+        range=[df_y[m.date_col].min() - range_margin, df_y[m.date_col].max() + range_margin]
     )
 
     yaxis = go.layout.YAxis(title=go.layout.yaxis.Title(text=name),
