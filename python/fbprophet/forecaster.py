@@ -1607,7 +1607,6 @@ class Prophet(object):
         -------
         A matplotlib figure.
         """
-        print(self.date_col)
         return plot(
             m=self, fcst=fcst, ax=ax, uncertainty=uncertainty,
             plot_cap=plot_cap, figsize=figsize
