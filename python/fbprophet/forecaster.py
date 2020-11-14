@@ -1011,7 +1011,7 @@ class Prophet(object):
         return (k, m)
 
     @staticmethod
-    def logistic_growth_init(df):
+    def logistic_growth_init(df, date_col='ds'):
         """Initialize logistic growth.
 
         Provides a strong initialization for logistic growth by calculating the
@@ -1028,7 +1028,7 @@ class Prophet(object):
         A tuple (k, m) with the rate (k) and offset (m) of the logistic growth
         function.
         """
-        i0, i1 = df[self.date_col].idxmin(), df[self.date_col].idxmax()
+        i0, i1 = df[date_col].idxmin(), df[date_col].idxmax()
         T = df['t'].iloc[i1] - df['t'].iloc[i0]
 
         # Force valid values, in case y > cap or y < 0
