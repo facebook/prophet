@@ -88,7 +88,7 @@ def plot(
 
 def plot_components(
     m, fcst, uncertainty=True, plot_cap=True, weekly_start=0, yearly_start=0,
-    figsize=None 
+    figsize=None
 ):
     """Plot the Prophet forecast components.
 
@@ -154,7 +154,7 @@ def plot_components(
         if plot_name == 'trend':
             plot_forecast_component(
                 m=m, fcst=fcst, name='trend', ax=ax, uncertainty=uncertainty,
-                plot_cap=plot_cap, 
+                plot_cap=plot_cap,
             )
         elif plot_name in m.seasonalities:
             if (
@@ -192,7 +192,7 @@ def plot_components(
 
 
 def plot_forecast_component(
-    m, fcst, name, ax=None, uncertainty=True, plot_cap=False, figsize=(10, 6), 
+    m, fcst, name, ax=None, uncertainty=True, plot_cap=False, figsize=(10, 6),
 ):
     """Plot a particular component of the forecast.
 
@@ -239,7 +239,7 @@ def plot_forecast_component(
     return artists
 
 
-def seasonality_plot_df(m, ds ):
+def seasonality_plot_df(m, ds):
     """Prepare dataframe for plotting seasonal components.
 
     Parameters
@@ -259,12 +259,11 @@ def seasonality_plot_df(m, ds ):
         if props['condition_name'] is not None:
             df_dict[props['condition_name']] = True
     df = pd.DataFrame(df_dict)
-    display(df)
     df = m.setup_dataframe(df)
     return df
 
 
-def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), name='weekly' ):
+def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), name='weekly'):
     """Plot the weekly component of the forecast.
 
     Parameters
@@ -291,7 +290,7 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), n
     # Compute weekly seasonality for a Sun-Sat sequence of dates.
     days = (pd.date_range(start='2017-01-01', periods=7) +
             pd.Timedelta(days=weekly_start))
-    df_w = seasonality_plot_df(m, days )
+    df_w = seasonality_plot_df(m, days)
     seas = m.predict_seasonal_components(df_w)
     days = days.day_name()
     artists += ax.plot(range(len(days)), seas[name], ls='-',
@@ -310,7 +309,7 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), n
     return artists
 
 
-def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6), name='yearly',):
+def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6), name='yearly'):
     """Plot the yearly component of the forecast.
 
     Parameters
@@ -357,7 +356,7 @@ def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6), n
     return artists
 
 
-def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6), ):
+def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
     """Plot a custom seasonal component.
 
     Parameters
@@ -433,7 +432,8 @@ def set_y_as_percent(ax):
 
 
 def add_changepoints_to_plot(
-    ax, m, fcst, threshold=0.01, cp_color='r', cp_linestyle='--', trend=True, ):
+    ax, m, fcst, threshold=0.01, cp_color='r', cp_linestyle='--', trend=True, 
+):
     """Add markers for significant changepoints to prophet forecast plot.
 
     Example:
@@ -818,7 +818,7 @@ def plot_seasonality_plotly(m, name, uncertainty=True, figsize=(900, 300)):
     return fig
 
 
-def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_cap=False, ):
+def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_cap=False):
     """Prepares a dictionary for plotting the selected forecast component with Plotly
 
     Parameters
@@ -924,7 +924,7 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
     return {'traces': traces, 'xaxis': xaxis, 'yaxis': yaxis}
 
 
-def get_seasonality_plotly_props(m, name, uncertainty=True, ):
+def get_seasonality_plotly_props(m, name, uncertainty=True):
     """Prepares a dictionary for plotting the selected seasonality with Plotly
 
     Parameters
