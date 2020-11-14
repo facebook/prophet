@@ -88,7 +88,8 @@ def plot(
 
 def plot_components(
     m, fcst, uncertainty=True, plot_cap=True, weekly_start=0, yearly_start=0,
-    figsize=None, ):
+    figsize=None 
+):
     """Plot the Prophet forecast components.
 
     Will plot whichever are available of: trend, holidays, weekly
@@ -153,7 +154,7 @@ def plot_components(
         if plot_name == 'trend':
             plot_forecast_component(
                 m=m, fcst=fcst, name='trend', ax=ax, uncertainty=uncertainty,
-                plot_cap=plot_cap 
+                plot_cap=plot_cap, 
             )
         elif plot_name in m.seasonalities:
             if (
@@ -178,7 +179,7 @@ def plot_components(
         ]:
             plot_forecast_component(
                 m=m, fcst=fcst, name=plot_name, ax=ax, uncertainty=uncertainty,
-                plot_cap=False, xlabel=m.date_col
+                plot_cap=False,
             )
         if plot_name in m.component_modes['multiplicative']:
             multiplicative_axes.append(ax)
@@ -238,7 +239,7 @@ def plot_forecast_component(
     return artists
 
 
-def seasonality_plot_df(m, ds, xlabel='ds' ):
+def seasonality_plot_df(m, ds ):
     """Prepare dataframe for plotting seasonal components.
 
     Parameters
@@ -290,7 +291,7 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), n
     # Compute weekly seasonality for a Sun-Sat sequence of dates.
     days = (pd.date_range(start='2017-01-01', periods=7) +
             pd.Timedelta(days=weekly_start))
-    df_w = seasonality_plot_df(m, days, xlabel='weekly')
+    df_w = seasonality_plot_df(m, days )
     seas = m.predict_seasonal_components(df_w)
     days = days.day_name()
     artists += ax.plot(range(len(days)), seas[name], ls='-',
@@ -336,7 +337,7 @@ def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6), n
     # Compute yearly seasonality for a Jan 1 - Dec 31 sequence of dates.
     days = (pd.date_range(start='2017-01-01', periods=365) +
             pd.Timedelta(days=yearly_start))
-    df_y = seasonality_plot_df(m, days, xlabel=m.date_col)
+    df_y = seasonality_plot_df(m, days)
     seas = m.predict_seasonal_components(df_y)
     artists += ax.plot(
         df_y[m.date_col].dt.to_pydatetime(), seas[name], ls='-', c='#0072B2')
@@ -383,7 +384,7 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6), ):
     end = start + pd.Timedelta(days=period)
     plot_points = 200
     days = pd.to_datetime(np.linspace(start.value, end.value, plot_points))
-    df_y = seasonality_plot_df(m, days, xlabel=m.date_col)
+    df_y = seasonality_plot_df(m, days)
     seas = m.predict_seasonal_components(df_y)
     artists += ax.plot(df_y[m.date_col].dt.to_pydatetime(), seas[name], ls='-',
                         c='#0072B2')
@@ -953,7 +954,7 @@ def get_seasonality_plotly_props(m, name, uncertainty=True, ):
     else:  # Minute Precision
         plot_points = np.floor(period * 24 * 60).astype(int)
     days = pd.to_datetime(np.linspace(start.value, end.value, plot_points, endpoint=False))
-    df_y = seasonality_plot_df(m, days, xlabel=m.date_col)
+    df_y = seasonality_plot_df(m, days )
     seas = m.predict_seasonal_components(df_y)
 
     traces = []

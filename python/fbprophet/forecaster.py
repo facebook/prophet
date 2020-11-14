@@ -486,7 +486,7 @@ class Prophet(object):
         if self.country_holidays is not None:
             year_list = list({x.year for x in dates})
             country_holidays_df = make_holidays_df(
-                year_list=year_list, country=self.country_holidays
+                year_list=year_list, country=self.country_holidays, xlabel=self.date_col
             )
             all_holidays = pd.concat((all_holidays, country_holidays_df),
                                      sort=False)
@@ -1105,7 +1105,6 @@ class Prophet(object):
                         'The value given to date_col \'' + date_col + '\' does not exsist as a column value in the dataframe. \n' 
                         'use a column value that exsist for date_col.')
             self.date_col = date_col
-            #df.rename(columns={date_col:'ds'}, inplace=True)
 
         if y_col:
             if (y_col not in df):
@@ -1113,7 +1112,6 @@ class Prophet(object):
                         'The value given to date_col \'' + date_col + '\' does not exsist as a column value in the dataframe. \n' 
                         'use a column value that exsist for date_col.')
             self.y_col = y_col
-            #df.rename(columns={y_col:'y'}, inplace=True)
 
         if self.history is not None:
             raise Exception('Prophet object can only be fit once. '
