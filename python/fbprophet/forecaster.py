@@ -1119,7 +1119,8 @@ class Prophet(object):
         if (self.date_col not in df) or (self.y_col not in df):
             raise ValueError(
                 'Dataframe must have columns "ds" and "y" with the dates and '
-                'values respectively.'
+                'values respectively. Else must be defined with `date_col` and `y_col`'
+                'arguments'
             )
         history = df[df[self.y_col].notnull()].copy()
         if history.shape[0] < 2:
