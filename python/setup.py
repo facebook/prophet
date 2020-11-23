@@ -70,6 +70,7 @@ class TestCommand(test_command):
         ('test-runner=', 'r', "Test runner to use"),
         ('test-slow', 'w', "Test slow suites (default off)"),
     ]
+    test_slow = None
 
     def initialize_options(self):
         super(TestCommand, self).initialize_options()
