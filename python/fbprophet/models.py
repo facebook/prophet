@@ -235,7 +235,7 @@ class PyStanBackend(IStanBackend):
         )
         args.update(kwargs)
         self.stan_fit = self.model.sampling(**args)
-        out = dict()
+        out = {}
         for par in self.stan_fit.model_pars:
             out[par] = self.stan_fit[par]
             # Shape vector parameters
@@ -265,7 +265,7 @@ class PyStanBackend(IStanBackend):
             else:
                 raise e
 
-        params = dict()
+        params = {}
 
         for par in self.stan_fit.keys():
             params[par] = self.stan_fit[par].reshape((1, -1))
