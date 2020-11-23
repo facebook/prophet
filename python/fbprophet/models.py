@@ -175,7 +175,7 @@ class CmdStanPyBackend(IStanBackend):
 
         start = 0
         end = 0
-        two_dims = True if len(data.shape) > 1 else False
+        two_dims = len(data.shape) > 1
         for cname in column_names:
             parsed = cname.split(".")
 
