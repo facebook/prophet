@@ -353,7 +353,7 @@ class Prophet(object):
             if n_vals < 2:
                 standardize = False
             if standardize == 'auto':
-                if set(df[name].unique()) == set([1, 0]):
+                if set(df[name].unique()) == {1, 0}:
                     standardize = False #  Don't standardize binary variables.
                 else:
                     standardize = True

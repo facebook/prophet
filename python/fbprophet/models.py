@@ -175,7 +175,7 @@ class CmdStanPyBackend(IStanBackend):
 
         start = 0
         end = 0
-        two_dims = True if len(data.shape) > 1 else False
+        two_dims = len(data.shape) > 1
         for cname in column_names:
             parsed = cname.split(".")
 
@@ -235,7 +235,7 @@ class PyStanBackend(IStanBackend):
         )
         args.update(kwargs)
         self.stan_fit = self.model.sampling(**args)
-        out = dict()
+        out = {}
         for par in self.stan_fit.model_pars:
             out[par] = self.stan_fit[par]
             # Shape vector parameters
@@ -265,7 +265,7 @@ class PyStanBackend(IStanBackend):
             else:
                 raise e
 
-        params = dict()
+        params = {}
 
         for par in self.stan_fit.keys():
             params[par] = self.stan_fit[par].reshape((1, -1))

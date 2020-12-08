@@ -531,7 +531,7 @@ class Malaysia(HolidayBase):
                 if monthcal[i][5].month == 6:
                     saturdays.append(monthcal[i][5])
             self[saturdays[0]] = name
-        elif (year >= 2017) and (year <= 2021):
+        elif 2017 <= year <= 2021:
             c = Calendar(firstweekday=MONDAY)
             monthcal = c.monthdatescalendar(year, 7)
 

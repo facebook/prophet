@@ -46,12 +46,12 @@ def generate_holidays_file():
     all_holidays = []
     # class names in holiday packages which are not countries
     # Also cut out countries with utf-8 holidays that don't parse to ascii
-    class_to_exclude = set(['rd', 'BY', 'BG', 'JP', 'RS', 'UA', 'KR'])
+    class_to_exclude = {'rd', 'BY', 'BG', 'JP', 'RS', 'UA', 'KR'}
 
     class_list2 = inspect.getmembers(hdays_part2, inspect.isclass)
-    country_set = set([name for name in list(zip(*class_list2))[0] if len(name) == 2])
+    country_set = {name for name in list(zip(*class_list2))[0] if len(name) == 2}
     class_list1 = inspect.getmembers(hdays_part1, inspect.isclass)
-    country_set1 = set([name for name in list(zip(*class_list1))[0] if len(name) == 2])
+    country_set1 = {name for name in list(zip(*class_list1))[0] if len(name) == 2}
     country_set.update(country_set1)
     country_set -= class_to_exclude
 
