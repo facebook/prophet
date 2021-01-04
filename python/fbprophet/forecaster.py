@@ -1069,7 +1069,7 @@ class Prophet(object):
         m = df['y_scaled'].mean()
         return k, m
 
-    def fit(self, df, iter=1e4, **kwargs):
+    def fit(self, df, iter=1000, tol_param=1e-8, **kwargs):
         """Fit the Prophet model.
 
         This sets self.params to contain the fitted model parameters. It is a
@@ -1087,6 +1087,10 @@ class Prophet(object):
             type) and y, the time series. If self.growth is 'logistic', then
             df must also have a column cap that specifies the capacity at
             each ds.
+        iter: (int, optional) – The maximum number of iterations.
+        tol_param : float, optional; tolerance to be converged
+            For BFGS and LBFGS, default is 1e-8.
+
         kwargs: Additional arguments passed to the optimizing or sampling
             functions in Stan.
 
@@ -1153,6 +1157,7 @@ class Prophet(object):
             'sigma_obs': 1,
         }
 
+        kwargs['iter'], kwargs['tol_param'] = iter, tol_param
         if history['y'].min() == history['y'].max() and \
                 (self.growth == 'linear' or self.growth == 'flat'):
             self.params = stan_init
@@ -1160,9 +1165,9 @@ class Prophet(object):
             for par in self.params:
                 self.params[par] = np.array([self.params[par]])
         elif self.mcmc_samples > 0:
-            self.params = self.stan_backend.sampling(stan_init, dat, self.mcmc_samples, iter=iter, **kwargs)
+            self.params = self.stan_backend.sampling(stan_init, dat, self.mcmc_samples, **kwargs)
         else:
-            self.params = self.stan_backend.fit(stan_init, dat, iter=iter, **kwargs)
+            self.params = self.stan_backend.fit(stan_init, dat, **kwargs)
 
         # If no changepoints were requested, replace delta with 0s
         if len(self.changepoints) == 0:

@@ -41,7 +41,7 @@ class IStanBackend(ABC):
         pass
 
     @abstractmethod
-    def fit(self, stan_init, stan_data, **kwargs) -> dict:
+    def fit(self, stan_init, stan_data, iter, **kwargs) -> dict:
         pass
 
     @abstractmethod
@@ -80,7 +80,7 @@ class CmdStanPyBackend(IStanBackend):
         )
         return cmdstanpy.CmdStanModel(exe_file=model_file)
 
-    def fit(self, stan_init, stan_data, **kwargs):
+    def fit(self, stan_init, stan_data, iter, **kwargs):
         (stan_init, stan_data) = self.prepare_data(stan_init, stan_data)
         if 'algorithm' not in kwargs:
             kwargs['algorithm'] = 'Newton' if stan_data['T'] < 100 else 'LBFGS'
@@ -243,13 +243,13 @@ class PyStanBackend(IStanBackend):
                 out[par] = out[par].reshape((-1, 1))
         return out
 
-    def fit(self, stan_init, stan_data, **kwargs) -> dict:
-
+    def fit(self, stan_init, stan_data, iter, **kwargs) -> dict:
+        print('here')
         args = dict(
             data=stan_data,
             init=lambda: stan_init,
             algorithm='Newton' if stan_data['T'] < 100 else 'LBFGS',
-            iter=1e4,
+            iter=iter,
         )
         args.update(kwargs)
         try:
