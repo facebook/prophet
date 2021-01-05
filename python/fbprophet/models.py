@@ -84,11 +84,11 @@ class CmdStanPyBackend(IStanBackend):
         (stan_init, stan_data) = self.prepare_data(stan_init, stan_data)
         if 'algorithm' not in kwargs:
             kwargs['algorithm'] = 'Newton' if stan_data['T'] < 100 else 'LBFGS'
-        iterations = int(1e4)
+        # iterations = int(1e4)
         try:
             self.stan_fit = self.model.optimize(data=stan_data,
                                                 inits=stan_init,
-                                                iter=iterations,
+                                                # iter=iterations,
                                                 **kwargs)
         except RuntimeError as e:
             # Fall back on Newton
@@ -99,7 +99,7 @@ class CmdStanPyBackend(IStanBackend):
                 kwargs['algorithm'] = 'Newton'
                 self.stan_fit = self.model.optimize(data=stan_data,
                                                     inits=stan_init,
-                                                    iter=iterations,
+                                                    # iter=iterations,
                                                     **kwargs)
             else:
                 raise e
