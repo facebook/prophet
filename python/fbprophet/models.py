@@ -249,7 +249,7 @@ class PyStanBackend(IStanBackend):
             data=stan_data,
             init=lambda: stan_init,
             algorithm='Newton' if stan_data['T'] < 100 else 'LBFGS',
-            iter=1e4,
+
         )
         args.update(kwargs)
         try:
