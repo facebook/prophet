@@ -1070,7 +1070,7 @@ class Prophet(object):
         m = df['y_scaled'].mean()
         return k, m
 
-    def fit(self, df, iter=1e4, tol_param=1e-8, **kwargs):
+    def fit(self, df, iter=1e4, **kwargs):
         """Fit the Prophet model.
 
         This sets self.params to contain the fitted model parameters. It is a
@@ -1153,7 +1153,7 @@ class Prophet(object):
             'beta': np.zeros(seasonal_features.shape[1]),
             'sigma_obs': 1,
         }
-        kwargs['iter'], kwargs['tol_param'] = int(iter), tol_param
+        kwargs['iter'] = int(iter)
         if history['y'].min() == history['y'].max() and \
                 (self.growth == 'linear' or self.growth == 'flat'):
             self.params = stan_init
