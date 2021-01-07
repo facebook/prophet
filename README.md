@@ -1,6 +1,6 @@
 # Prophet: Automatic Forecasting Procedure
 
-[![Build Status](https://travis-ci.com/facebook/prophet.svg?branch=master)](https://travis-ci.com/facebook/prophet)
+![Build](https://github.com/facebook/prophet/workflows/Build/badge.svg)
 [![Pypi_Version](https://img.shields.io/pypi/v/fbprophet.svg)](https://pypi.python.org/pypi/fbprophet)
 [![Conda_Version](https://anaconda.org/conda-forge/fbprophet/badges/version.svg)](https://anaconda.org/conda-forge/fbprophet/)
 
