@@ -1,4 +1,4 @@
-name: Build and Test Workflow
+name: Build
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  tests-and-coverage:
+  build-and-test:
 
     runs-on: ubuntu-latest
     strategy:
