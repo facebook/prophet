@@ -469,7 +469,7 @@ def add_changepoints_to_plot(
 
 
 def plot_cross_validation_metric(
-    df_cv, metric, rolling_window=0.1, ax=None, figsize=(10, 6), colour='b'
+    df_cv, metric, rolling_window=0.1, ax=None, figsize=(10, 6), color='b'
 ):
     """Plot a performance metric vs. forecast horizon from cross validation.
 
@@ -498,7 +498,7 @@ def plot_cross_validation_metric(
     ax: Optional matplotlib axis on which to plot. If not given, a new figure
         will be created.
     figsize: Optional tuple width, height in inches.
-    colour: Optional colour for plot and error points, useful when plotting
+    color: Optional color for plot and error points, useful when plotting
         multiple model performances on one axis for comparison.
 
     Returns
@@ -539,8 +539,8 @@ def plot_cross_validation_metric(
     x_plt = df_none['horizon'].astype('timedelta64[ns]').astype(np.int64) / float(dt_conversions[i])
     x_plt_h = df_h['horizon'].astype('timedelta64[ns]').astype(np.int64) / float(dt_conversions[i])
 
-    ax.plot(x_plt, df_none[metric], '.', alpha=0.1, c=colour)
-    ax.plot(x_plt_h, df_h[metric], '-', c=colour)
+    ax.plot(x_plt, df_none[metric], '.', alpha=0.1, c=color)
+    ax.plot(x_plt_h, df_h[metric], '-', c=color)
     ax.grid(True)
 
     ax.set_xlabel('Horizon ({})'.format(dt_names[i]))
