@@ -136,5 +136,4 @@ model {
       + X * (beta .* s_a),
       sigma_obs
     );
-  }
 }
