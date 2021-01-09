@@ -1198,7 +1198,7 @@ fit.prophet <- function(m, df, ...) {
     X = as.matrix(seasonal.features),
     sigmas = array(prior.scales),
     tau = m$changepoint.prior.scale,
-    trend_indicator = as.numeric(m$growth == 'logistic'),
+    trend_indicator = switch(m$growth, 'linear'=0, 'logistic'=1, 'flat'=2),
     s_a = array(component.cols$additive_terms),
     s_m = array(component.cols$multiplicative_terms)
   )
@@ -1207,6 +1207,9 @@ fit.prophet <- function(m, df, ...) {
   if (m$growth == 'linear') {
     dat$cap <- rep(0, nrow(history)) # Unused inside Stan
     kinit <- linear_growth_init(history)
+  } else if (m$growth == 'flat') {
+    dat$cap <- rep(0, nrow(history)) # Unused inside Stan
+    kinit <- flat_growth_init(history)
   } else {
     dat$cap <- history$cap_scaled # Add capacities to the Stan data
     kinit <- logistic_growth_init(history)
@@ -1227,7 +1230,8 @@ fit.prophet <- function(m, df, ...) {
     )
   }
 
-  if (min(history$y) == max(history$y)) {
+  if (min(history$y) == max(history$y) & 
+        (m$growth %in% c('linear', 'flat'))) {
     # Nothing to fit.
     m$params <- stan_init()
     m$params$sigma_obs <- 0.
