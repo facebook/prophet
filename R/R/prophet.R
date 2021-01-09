@@ -1343,6 +1343,19 @@ predict.prophet <- function(object, df = NULL, ...) {
   return(df)
 }
 
+#' Evaluate the flat trend function.
+#'
+#' @param t Vector of times on which the function is evaluated.
+#' @param m Float initial offset.
+#'
+#' @return Vector y(t).
+#'
+#' @keywords internal
+flat_trend <- function(t, m) {
+  y <- rep(m, length(t))
+  return(y)
+}
+
 #' Evaluate the piecewise linear function.
 #'
 #' @param t Vector of times on which the function is evaluated.
@@ -1417,7 +1430,9 @@ predict_trend <- function(model, df) {
   t <- df$t
   if (model$growth == 'linear') {
     trend <- piecewise_linear(t, deltas, k, param.m, model$changepoints.t)
-  } else {
+  } else if (model$growth == 'flat') {
+     trend <- flat_trend(t, param.m)
+  } else if (model$growth == 'logistic') {
     cap <- df$cap_scaled
     trend <- piecewise_logistic(
       t, cap, deltas, k, param.m, model$changepoints.t)
@@ -1617,7 +1632,9 @@ sample_predictive_trend <- function(model, df, iteration) {
   # Get the corresponding trend
   if (model$growth == 'linear') {
     trend <- piecewise_linear(t, deltas, k, param.m, changepoint.ts)
-  } else {
+  } else if (model$growth == 'flat') {
+     flat_trend(t, param.m)
+  } else if (model$growth == 'logistic') {
     cap <- df$cap_scaled
     trend <- piecewise_logistic(t, cap, deltas, k, param.m, changepoint.ts)
   }
