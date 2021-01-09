@@ -121,7 +121,7 @@ prophet <- function(df = NULL,
     interval.width = interval.width,
     uncertainty.samples = uncertainty.samples,
     specified.changepoints = !is.null(changepoints),
-    start = NULL,  # This and following attributes are set during fitting
+    start = NULL, # This and following attributes are set during fitting
     y.scale = NULL,
     logistic.floor = FALSE,
     t.scale = NULL,
@@ -175,10 +175,10 @@ validate_inputs <- function(m) {
                  'or neither.'))
     }
     if (has.lower) {
-      if(max(m$holidays$lower_window, na.rm=TRUE) > 0) {
+      if (max(m$holidays$lower_window, na.rm = TRUE) > 0) {
         stop('Holiday lower_window should be <= 0')
       }
-      if(min(m$holidays$upper_window, na.rm=TRUE) < 0) {
+      if (min(m$holidays$upper_window, na.rm = TRUE) < 0) {
         stop('Holiday upper_window should be >= 0')
       }
     }
@@ -213,26 +213,26 @@ validate_column_name <- function(
     'holidays', 'zeros', 'extra_regressors_additive', 'yhat',
     'extra_regressors_multiplicative', 'multiplicative_terms'
   )
-  rn_l = paste(reserved_names,"_lower",sep="")
-  rn_u = paste(reserved_names,"_upper",sep="")
+  rn_l = paste(reserved_names, "_lower", sep = "")
+  rn_u = paste(reserved_names, "_upper", sep = "")
   reserved_names = c(reserved_names, rn_l, rn_u,
     c("ds", "y", "cap", "floor", "y_scaled", "cap_scaled"))
-  if(name %in% reserved_names){
+  if (name %in% reserved_names) {
     stop("Name ", name, " is reserved.")
   }
-  if(check_holidays & !is.null(m$holidays) &
-     (name %in% unique(m$holidays$holiday))){
+  if (check_holidays & !is.null(m$holidays) &
+     (name %in% unique(m$holidays$holiday))) {
     stop("Name ", name, " already used for a holiday.")
   }
-  if(check_holidays & !is.null(m$country_holidays)){
-    if(name %in% get_holiday_names(m$country_holidays)){
+  if (check_holidays & !is.null(m$country_holidays)) {
+    if (name %in% get_holiday_names(m$country_holidays)) {
       stop("Name ", name, " is a holiday name in ", m$country_holidays, ".")
     }
   }
-  if(check_seasonalities & (!is.null(m$seasonalities[[name]]))){
+  if (check_seasonalities & (!is.null(m$seasonalities[[name]]))) {
     stop("Name ", name, " already used for a seasonality.")
   }
-  if(check_regressors & (!is.null(m$seasonalities[[name]]))){
+  if (check_regressors & (!is.null(m$seasonalities[[name]]))) {
     stop("Name ", name, " already used for an added regressor.")
   }
 }
@@ -256,7 +256,7 @@ set_date <- function(ds = NULL, tz = "GMT") {
     ds <- as.character(ds)
   }
 
-  if (min(nchar(ds), na.rm=TRUE) < 12) {
+  if (min(nchar(ds), na.rm = TRUE) < 12) {
     ds <- as.POSIXct(ds, format = "%Y-%m-%d", tz = tz)
   } else {
     ds <- as.POSIXct(ds, format = "%Y-%m-%d %H:%M:%S", tz = tz)
@@ -295,7 +295,7 @@ time_diff <- function(ds1, ds2, units = "days") {
 #'
 #' @keywords internal
 setup_dataframe <- function(m, df, initialize_scales = FALSE) {
-  if (exists('y', where=df)) {
+  if (exists('y', where = df)) {
     df$y <- as.numeric(df$y)
     if (any(is.infinite(df$y))) {
       stop("Found infinity in column y.")
@@ -322,7 +322,7 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
       if (!(condition.name %in% colnames(df))) {
         stop('Condition "', name, '" missing from dataframe')
       }
-      if(!all(df[[condition.name]] %in% c(FALSE,TRUE))) {
+      if (!all(df[[condition.name]] %in% c(FALSE, TRUE))) {
         stop('Found non-boolean in column ', name)
       }
       df[[condition.name]] <- as.logical(df[[condition.name]])
@@ -343,7 +343,7 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
   }
 
   if (m$growth == 'logistic') {
-    if (!(exists('cap', where=df))) {
+    if (!(exists('cap', where = df))) {
       stop('Capacities must be supplied for logistic growth.')
     }
     if (any(df$cap <= df$floor)) {
@@ -354,7 +354,7 @@ setup_dataframe <- function(m, df, initialize_scales = FALSE) {
   }
 
   df$t <- time_diff(df$ds, m$start, "secs") / m$t.scale
-  if (exists('y', where=df)) {
+  if (exists('y', where = df)) {
     df$y_scaled <- (df$y - df$floor) / m$y.scale
   }
 
@@ -460,7 +460,7 @@ set_changepoints <- function(m) {
     m$changepoints.t <- sort(
       time_diff(m$changepoints, m$start, "secs")) / m$t.scale
   } else {
-    m$changepoints.t <- c(0)  # dummy changepoint
+    m$changepoints.t <- c(0) # dummy changepoint
   }
   return(m)
 }
@@ -513,7 +513,7 @@ make_seasonality_features <- function(dates, period, series.order, prefix) {
 #' @keywords internal
 construct_holiday_dataframe <- function(m, dates) {
   all.holidays <- data.frame()
-  if (!is.null(m$holidays)){
+  if (!is.null(m$holidays)) {
     all.holidays <- m$holidays
   }
   if (!is.null(m$country_holidays)) {
@@ -527,7 +527,7 @@ construct_holiday_dataframe <- function(m, dates) {
     row.to.keep <- which(all.holidays$holiday %in% m$train.holiday.names)
     all.holidays <- all.holidays[row.to.keep,]
     holidays.to.add <- data.frame(
-      holiday=setdiff(m$train.holiday.names, all.holidays$holiday)
+      holiday = setdiff(m$train.holiday.names, all.holidays$holiday)
     )
     all.holidays <- suppressWarnings(dplyr::bind_rows(all.holidays, holidays.to.add))
   }
@@ -556,16 +556,16 @@ make_holiday_features <- function(m, dates, holidays) {
     dplyr::group_by(holiday, ds) %>%
     dplyr::filter(dplyr::row_number() == 1) %>%
     dplyr::do({
-      if (exists('lower_window', where = .) && !is.na(.$lower_window)
+    if (exists('lower_window', where = .) && !is.na(.$lower_window)
           && !is.na(.$upper_window)) {
-        offsets <- seq(.$lower_window, .$upper_window)
-      } else {
-        offsets <- c(0)
-      }
-      names <- paste(.$holiday, '_delim_', ifelse(offsets < 0, '-', '+'),
+      offsets <- seq(.$lower_window, .$upper_window)
+    } else {
+      offsets <- c(0)
+    }
+    names <- paste(.$holiday, '_delim_', ifelse(offsets < 0, '-', '+'),
                      abs(offsets), sep = '')
-      dplyr::tibble(ds = .$ds + offsets * 24 * 3600, holiday = names)
-    }) %>%
+    dplyr::tibble(ds = .$ds + offsets * 24 * 3600, holiday = names)
+  }) %>%
     dplyr::mutate(x = 1.) %>%
     tidyr::spread(holiday, x, fill = 0)
 
@@ -582,7 +582,7 @@ make_holiday_features <- function(m, dates, holidays) {
   }
   prior.scales.list <- list()
   for (name in unique(holidays$holiday)) {
-    df.h <- holidays[holidays$holiday == name, ]
+    df.h <- holidays[holidays$holiday == name,]
     ps <- unique(df.h$prior_scale)
     if (length(ps) > 1) {
       stop('Holiday ', name, ' does not have a consistent prior scale ',
@@ -603,7 +603,7 @@ make_holiday_features <- function(m, dates, holidays) {
     prior.scales <- c(prior.scales, prior.scales.list[[sn]])
   }
   holiday.names <- names(prior.scales.list)
-  if (is.null(m$train.holiday.names)){
+  if (is.null(m$train.holiday.names)) {
     m$train.holiday.names <- holiday.names
   }
   return(list(m = m,
@@ -640,7 +640,7 @@ make_holiday_features <- function(m, dates, holidays) {
 #' @export
 add_regressor <- function(
   m, name, prior.scale = NULL, standardize = 'auto', mode = NULL
-){
+) {
   if (!is.null(m$history)) {
     stop('Regressors must be added prior to model fitting.')
   }
@@ -656,7 +656,7 @@ add_regressor <- function(
   if (is.null(mode)) {
     mode <- m$seasonality.mode
   }
-  if(prior.scale <= 0) {
+  if (prior.scale <= 0) {
     stop("Prior scale must be > 0.")
   }
   if (!(mode %in% c('additive', 'multiplicative'))) {
@@ -770,9 +770,9 @@ add_country_holidays <- function(m, country_name) {
   if (!is.null(m$history)) {
     stop("Country holidays must be added prior to model fitting.")
   }
-  if (!(country_name %in% generated_holidays$country)){
-      stop("Holidays in ", country_name," are not currently supported!")
-    }
+  if (!(country_name %in% generated_holidays$country)) {
+    stop("Holidays in ", country_name, " are not currently supported!")
+  }
   # Validate names.
   for (name in get_holiday_names(country_name)) {
     # Allow merging with existing holidays
@@ -884,7 +884,7 @@ regressor_column_matrix <- function(m, seasonal.features, modes) {
                     extra = "merge", fill = "right") %>%
     dplyr::select(col, component)
   # Add total for holidays
-  if(!is.null(m$train.holiday.names)){
+  if (!is.null(m$train.holiday.names)) {
     components <- add_group_component(
       components, 'holidays', unique(m$train.holiday.names))
   }
@@ -911,7 +911,7 @@ regressor_column_matrix <- function(m, seasonal.features, modes) {
     table(components$col, components$component)
   )
   component.cols <- (
-    component.cols[order(as.numeric(row.names(component.cols))), ,
+    component.cols[order(as.numeric(row.names(component.cols))),,
                    drop = FALSE]
   )
   # Add columns for additive and multiplicative terms, if missing
@@ -950,10 +950,10 @@ regressor_column_matrix <- function(m, seasonal.features, modes) {
 #'
 #' @keywords internal
 add_group_component <- function(components, name, group) {
-  new_comp <- components[(components$component %in% group), ]
+  new_comp <- components[(components$component %in% group),]
   group_cols <- unique(new_comp$col)
   if (length(group_cols) > 0) {
-    new_comp <- data.frame(col=group_cols, component=name)
+    new_comp <- data.frame(col = group_cols, component = name)
     components <- rbind(components, new_comp)
   }
   return(components)
@@ -1053,7 +1053,28 @@ set_auto_seasonalities <- function(m) {
   return(m)
 }
 
-#' Initialize linear growth.
+#' Initialize flat growth.
+#'
+#' Provides a strong initialization for flat growth by setting the
+#' growth to 0 and calculates the offset parameter that pass the 
+#' function through the mean of the the y_scaled values.
+#'
+#' @param df Data frame with columns ds (date), y_scaled (scaled time series),
+#'  and t (scaled time).
+#'
+#' @return A vector (k, m) with the rate (k) and offset (m) of the flat
+#'  growth function.
+#'
+#' @keywords internal
+flat_growth_init <- function(df) {
+  # Initialize the rate
+  k <- 0
+  # And the offset
+  m <- mean(df$y_scaled)
+  return(c(k, m))
+}
+
+#' Initialize constant growth.
 #'
 #' Provides a strong initialization for linear growth by calculating the
 #' growth and offset parameters that pass the function through the first and
@@ -1184,10 +1205,10 @@ fit.prophet <- function(m, df, ...) {
 
   # Run stan
   if (m$growth == 'linear') {
-    dat$cap <- rep(0, nrow(history))  # Unused inside Stan
+    dat$cap <- rep(0, nrow(history)) # Unused inside Stan
     kinit <- linear_growth_init(history)
   } else {
-    dat$cap <- history$cap_scaled  # Add capacities to the Stan data
+    dat$cap <- history$cap_scaled # Add capacities to the Stan data
     kinit <- logistic_growth_init(history)
   }
 
@@ -1227,7 +1248,7 @@ fit.prophet <- function(m, df, ...) {
       object = model,
       data = dat,
       init = stan_init,
-      algorithm = if(dat$T < 100) {'Newton'} else {'LBFGS'},
+      algorithm = if (dat$T < 100) { 'Newton' } else { 'LBFGS' },
       iter = 1e4,
       as_vector = FALSE
     )
@@ -1245,11 +1266,11 @@ fit.prophet <- function(m, df, ...) {
   }
 
   # Cast the parameters to have consistent form, whether full bayes or MAP
-  for (name in c('delta', 'beta')){
+  for (name in c('delta', 'beta')) {
     m$params[[name]] <- matrix(m$params[[name]], nrow = n.iteration)
   }
   # rstan::sampling returns 1d arrays; converts to atomic vectors.
-  for (name in c('k', 'm', 'sigma_obs')){
+  for (name in c('k', 'm', 'sigma_obs')) {
     m$params[[name]] <- c(m$params[[name]])
   }
   # If no changepoints were requested, replace delta with 0s
@@ -1302,7 +1323,7 @@ predict.prophet <- function(object, df = NULL, ...) {
     intervals <- predict_uncertainty(object, df)
   } else {
     intervals <- NULL
-    }
+  }
 
   # Drop columns except ds, cap, floor, and trend
   cols <- c('ds', 'trend')
@@ -1413,9 +1434,9 @@ predict_seasonal_components <- function(m, df) {
   m <- out$m
   seasonal.features <- out$seasonal.features
   component.cols <- out$component.cols
-  if (m$uncertainty.samples){
-    lower.p <- (1 - m$interval.width)/2
-    upper.p <- (1 + m$interval.width)/2
+  if (m$uncertainty.samples) {
+    lower.p <- (1 - m$interval.width) / 2
+    upper.p <- (1 + m$interval.width) / 2
   }
 
   X <- as.matrix(seasonal.features)
@@ -1428,7 +1449,7 @@ predict_seasonal_components <- function(m, df) {
       comp <- comp * m$y.scale
     }
     component.predictions[[component]] <- rowMeans(comp, na.rm = TRUE)
-    if (m$uncertainty.samples){
+    if (m$uncertainty.samples) {
       component.predictions[[paste0(component, '_lower')]] <- apply(
         comp, 1, stats::quantile, lower.p, na.rm = TRUE)
       component.predictions[[paste0(component, '_upper')]] <- apply(
@@ -1451,7 +1472,7 @@ sample_posterior_predictive <- function(m, df) {
   # Sample trend, seasonality, and yhat from the extrapolation model.
   n.iterations <- length(m$params$k)
   samp.per.iter <- max(1, ceiling(m$uncertainty.samples / n.iterations))
-  nsamp <- n.iterations * samp.per.iter  # The actual number of samples
+  nsamp <- n.iterations * samp.per.iter # The actual number of samples
 
   out <- make_all_seasonality_features(m, df)
   seasonal.features <- out$seasonal.features
@@ -1473,7 +1494,7 @@ sample_posterior_predictive <- function(m, df) {
       )
       # Store the results
       for (key in c("trend", "yhat")) {
-        sim.values[[key]][,(i - 1) * samp.per.iter + j] <- sim[[key]]
+        sim.values[[key]][, (i - 1) * samp.per.iter + j] <- sim[[key]]
       }
     }
   }
@@ -1507,8 +1528,8 @@ predictive_samples <- function(m, df) {
 predict_uncertainty <- function(m, df) {
   sim.values <- sample_posterior_predictive(m, df)
   # Add uncertainty estimates
-  lower.p <- (1 - m$interval.width)/2
-  upper.p <- (1 + m$interval.width)/2
+  lower.p <- (1 - m$interval.width) / 2
+  upper.p <- (1 + m$interval.width) / 2
 
   intervals <- cbind(
     t(apply(t(sim.values$yhat), 2, stats::quantile, c(lower.p, upper.p),
@@ -1517,7 +1538,7 @@ predict_uncertainty <- function(m, df) {
             na.rm = TRUE))
   )
 
-  colnames(intervals) <- paste(rep(c('yhat', 'trend'), each=2),
+  colnames(intervals) <- paste(rep(c('yhat', 'trend'), each = 2),
                                c('lower', 'upper'), sep = "_")
 
   return(dplyr::as_tibble(intervals))
@@ -1621,7 +1642,7 @@ make_future_dataframe <- function(m, periods, freq = 'day',
     stop('Model must be fit before this can be used.')
   }
   dates <- seq(max(m$history.dates), length.out = periods + 1, by = freq)
-  dates <- dates[2:(periods + 1)]  # Drop the first, which is max(history$ds)
+  dates <- dates[2:(periods + 1)] # Drop the first, which is max(history$ds)
   if (include_history) {
     dates <- c(m$history.dates, dates)
     attr(dates, "tzone") <- "GMT"
