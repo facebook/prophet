@@ -154,8 +154,8 @@ prophet <- function(df = NULL,
 #'
 #' @keywords internal
 validate_inputs <- function(m) {
-  if (!(m$growth %in% c('linear', 'logistic'))) {
-    stop("Parameter 'growth' should be 'linear' or 'logistic'.")
+  if (!(m$growth %in% c('linear', 'logistic', 'flat'))) {
+    stop("Parameter 'growth' should be 'linear', 'logistic', or 'flat'.")
   }
   if ((m$changepoint.range < 0) | (m$changepoint.range > 1)) {
     stop("Parameter 'changepoint.range' must be in [0, 1]")
