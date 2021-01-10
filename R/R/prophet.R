@@ -1633,7 +1633,7 @@ sample_predictive_trend <- function(model, df, iteration) {
   if (model$growth == 'linear') {
     trend <- piecewise_linear(t, deltas, k, param.m, changepoint.ts)
   } else if (model$growth == 'flat') {
-     flat_trend(t, param.m)
+    trend <- flat_trend(t, param.m)
   } else if (model$growth == 'logistic') {
     cap <- df$cap_scaled
     trend <- piecewise_logistic(t, cap, deltas, k, param.m, changepoint.ts)
