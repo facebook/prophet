@@ -213,8 +213,8 @@ validate_column_name <- function(
     'holidays', 'zeros', 'extra_regressors_additive', 'yhat',
     'extra_regressors_multiplicative', 'multiplicative_terms'
   )
-  rn_l = paste(reserved_names, "_lower", sep="")
-  rn_u = paste(reserved_names, "_upper", sep="")
+  rn_l = paste(reserved_names,"_lower",sep="")
+  rn_u = paste(reserved_names,"_upper",sep="")
   reserved_names = c(reserved_names, rn_l, rn_u,
     c("ds", "y", "cap", "floor", "y_scaled", "cap_scaled"))
   if(name %in% reserved_names){
@@ -460,7 +460,7 @@ set_changepoints <- function(m) {
     m$changepoints.t <- sort(
       time_diff(m$changepoints, m$start, "secs")) / m$t.scale
   } else {
-    m$changepoints.t <- c(0) # dummy changepoint
+    m$changepoints.t <- c(0)  # dummy changepoint
   }
   return(m)
 }
@@ -557,13 +557,13 @@ make_holiday_features <- function(m, dates, holidays) {
     dplyr::filter(dplyr::row_number() == 1) %>%
     dplyr::do({
       if (exists('lower_window', where = .) && !is.na(.$lower_window)
-            && !is.na(.$upper_window)) {
+              && !is.na(.$upper_window)) {
         offsets <- seq(.$lower_window, .$upper_window)
       } else {
         offsets <- c(0)
       }
       names <- paste(.$holiday, '_delim_', ifelse(offsets < 0, '-', '+'),
-                      abs(offsets), sep = '')
+                     abs(offsets), sep = '')
       dplyr::tibble(ds = .$ds + offsets * 24 * 3600, holiday = names)
     }) %>%
     dplyr::mutate(x = 1.) %>%
@@ -767,12 +767,12 @@ add_seasonality <- function(
 #'
 #' @export
 add_country_holidays <- function(m, country_name) {
-  if (!is.null(m$history)){
+  if (!is.null(m$history)) {
     stop("Country holidays must be added prior to model fitting.")
   }
-  if (!(country_name %in% generated_holidays$country)) {
-    stop("Holidays in ", country_name," are not currently supported!")
-  }
+  if (!(country_name %in% generated_holidays$country)){
+      stop("Holidays in ", country_name," are not currently supported!")
+    }
   # Validate names.
   for (name in get_holiday_names(country_name)) {
     # Allow merging with existing holidays
@@ -1210,7 +1210,7 @@ fit.prophet <- function(m, df, ...) {
   } else if (m$growth == 'flat') {
     dat$cap <- rep(0, nrow(history)) # Unused inside Stan
     kinit <- flat_growth_init(history)
-  } else {
+  } else if (m$growth == 'logistic') {
     dat$cap <- history$cap_scaled  # Add capacities to the Stan data
     kinit <- logistic_growth_init(history)
   }
@@ -1454,8 +1454,8 @@ predict_seasonal_components <- function(m, df) {
   seasonal.features <- out$seasonal.features
   component.cols <- out$component.cols
   if (m$uncertainty.samples){
-    upper.p <- (1 + m$interval.width)/2
     lower.p <- (1 - m$interval.width)/2
+    upper.p <- (1 + m$interval.width)/2
   }
 
   X <- as.matrix(seasonal.features)
