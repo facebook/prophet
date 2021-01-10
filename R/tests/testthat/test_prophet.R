@@ -237,9 +237,13 @@ test_that("growth_init", {
   expect_equal(params[2], 0.5307511, tolerance = 1e-6)
 
   params <- prophet:::logistic_growth_init(history)
-  
   expect_equal(params[1], 1.507925, tolerance = 1e-6)
   expect_equal(params[2], -0.08167497, tolerance = 1e-6)
+
+  params <- prophet:::flat_growth_init(history)
+  expect_equal(params[1], 0, tolerance = 1e-6)
+  expect_equal(params[2], 0.49335657, tolerance = 1e-6)
+
 })
 
 test_that("piecewise_linear", {
@@ -276,6 +280,19 @@ test_that("piecewise_logistic", {
   y.true <- y.true[8:length(y.true)]
   cap <- cap[8:length(cap)]
   y <- prophet:::piecewise_logistic(t, cap, deltas, k, m, changepoint.ts)
+  expect_equal(y, y.true, tolerance = 1e-6)
+})
+
+test_that("flat_trend", {
+  t <- seq(0, 10)
+  m <- 0.5
+  y = prophet:::flat_trend(t, m)
+  y.true <- rep(0.5, length(t))
+  expect_equal(y, y.true, tolerance = 1e-6)
+
+  t <- t[8:length(t)]
+  y = prophet:::flat_trend(t, m)
+  y.true <- y.true[8:length(y.true)]
   expect_equal(y, y.true, tolerance = 1e-6)
 })
 

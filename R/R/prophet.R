@@ -557,7 +557,7 @@ make_holiday_features <- function(m, dates, holidays) {
     dplyr::filter(dplyr::row_number() == 1) %>%
     dplyr::do({
       if (exists('lower_window', where = .) && !is.na(.$lower_window)
-              && !is.na(.$upper_window)) {
+          && !is.na(.$upper_window)) {
         offsets <- seq(.$lower_window, .$upper_window)
       } else {
         offsets <- c(0)
