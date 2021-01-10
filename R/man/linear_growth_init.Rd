@@ -2,7 +2,7 @@
 % Please edit documentation in R/prophet.R
 \name{linear_growth_init}
 \alias{linear_growth_init}
-\title{Initialize linear growth.}
+\title{Initialize constant growth.}
 \usage{
 linear_growth_init(df)
 }
