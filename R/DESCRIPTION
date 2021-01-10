@@ -25,6 +25,7 @@ Imports:
     ggplot2,
     grid,
     methods,
+    RcppParallel (>= 5.0.1),
     rstan (>= 2.18.1),
     rstantools (>= 2.0.0),
     scales,
@@ -43,6 +44,7 @@ License: MIT + file LICENSE
 LinkingTo: 
     BH (>= 1.66.0),
     Rcpp (>= 0.12.0),
+    RcppParallel (>= 5.0.1),
     RcppEigen (>= 0.3.3.3.0),
     rstan (>= 2.18.1),
     StanHeaders (>= 2.18.0)
