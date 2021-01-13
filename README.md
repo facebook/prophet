@@ -14,6 +14,7 @@ Prophet is [open source software](https://code.facebook.com/projects/) released 
 - HTML documentation: https://facebook.github.io/prophet/docs/quick_start.html
 - Issue tracker: https://github.com/facebook/prophet/issues
 - Source code repository: https://github.com/facebook/prophet
+- Contributing: https://facebook.github.io/prophet/docs/contributing.html
 - Prophet R package: https://cran.r-project.org/package=prophet
 - Prophet Python package: https://pypi.python.org/pypi/fbprophet/
 - Release blogpost: https://research.fb.com/prophet-forecasting-at-scale/
