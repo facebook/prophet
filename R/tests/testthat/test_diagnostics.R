@@ -56,6 +56,18 @@ test_that("cross_validation_logistic", {
   expect_equal(sum((df.merged$y.x - df.merged$y.y) ** 2), 0)
 })
 
+test_that("cross_validation_flat", {
+  skip_if_not(Sys.getenv('R_ARCH') != '/i386')
+  df <- DATA
+  m <- prophet(df, growth = 'flat')
+  df.cv <- cross_validation(
+    m, horizon = 1, units = "days", period = 1, initial = 140)
+  expect_equal(length(unique(df.cv$cutoff)), 2)
+  expect_true(all(df.cv$cutoff < df.cv$ds))
+  df.merged <- dplyr::left_join(df.cv, m$history, by="ds")
+  expect_equal(sum((df.merged$y.x - df.merged$y.y) ** 2), 0)
+})
+
 test_that("cross_validation_extra_regressors", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   df <- DATA
@@ -222,7 +234,7 @@ test_that("copy", {
   df$cap <- 200.
   df$binary_feature <- c(rep(0, 255), rep(1, 255))
   inputs <- list(
-    growth = c('linear', 'logistic'),
+    growth = c('linear', 'logistic', 'flat'),
     yearly.seasonality = c(TRUE, FALSE),
     weekly.seasonality = c(TRUE, FALSE),
     daily.seasonality = c(TRUE, FALSE),
