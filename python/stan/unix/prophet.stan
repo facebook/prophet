@@ -92,6 +92,8 @@ functions {
     vector t,
     matrix A,
     vector t_change,
+    int S,
+    int T,
     vector y
   ) {
     vector[S+1] avg;
