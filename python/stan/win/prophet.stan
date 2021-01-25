@@ -104,7 +104,49 @@ functions {
     return rep_array(m, T);
   }
 
+  // Stepwise trend
 
+  real[] stepwise(
+    real k,
+    real m,
+    real[] delta,
+    real[] t,
+    real[ , ] A,
+    real[] t_change,
+    int S,
+    int T,
+    real[] y
+  ) {
+    real avg[S+1];
+    real Y[T];
+    real selec[T, S+1];
+    real sl[T];
+    
+    // Has real changepoints
+    if (t_change[1] != 0) { 
+      // Create selection matrix
+      sl = rep_array(1, T);
+      for (i in 1:S) {
+        for (j in 1:T) {
+          sl[j] = sl[j] -A[j,i];
+        }
+        selec[:,i] = sl;
+        avg[i] = dot_product(sl, y)/sum(sl);
+        sl = A[:,i];
+      }
+    } else {
+      avg[S] = 0;
+      selec[:,S] = rep_array(0, T);
+    }
+    sl = A[:,S];
+    avg[S+1] = dot_product(sl, y)/sum(sl);
+    selec[:,S+1] = sl;
+ 
+    for (i in 1:T) {
+      Y[i] =  dot_product(selec[i,:], avg);
+    }
+    return Y;
+  }
 }
 
 data {
@@ -148,6 +190,8 @@ transformed parameters {
     trend = logistic_trend(k, m, delta, t, cap, A, t_change, S, T);
   } else if (trend_indicator == 2){
     trend = flat_trend(m, T);
+  } else if (trend_indicator == 3){
+    trend = stepwise(k, m, delta, t, A, t_change, S, T, y);
   }
 
   for (i in 1:K) {
