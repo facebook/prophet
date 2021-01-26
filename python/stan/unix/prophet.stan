@@ -110,7 +110,7 @@ functions {
           sl[j] = sl[j] -A[j,i];
         }
         selec[:,i] = sl;
-        avg[i] = (sl * y)/sum(sl);
+        avg[i] = dot_product(sl, y)/sum(sl);
         sl = A[:,i];
       }
     } else {
@@ -118,7 +118,7 @@ functions {
       selec[:,S] = rep_vector(0, T);
     }
     sl = A[:,S];
-    avg[S+1] = (sl * y)/sum(sl);
+    avg[S+1] = dot_product(sl, y)/sum(sl);
     selec[:,S+1] = sl;
  
     for (i in 1:T) {
@@ -166,7 +166,7 @@ transformed parameters {
   } else if (trend_indicator == 2) {
     trend = flat_trend(m, T);
   } else if (trend_indicator == 3) {
-    trend = stepwise(k, m, delta, t, A, t_change, y);
+    trend = stepwise(k, m, delta, t, A, t_change, S, T, y);
   }
 }
 
