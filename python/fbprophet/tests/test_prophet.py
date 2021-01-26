@@ -226,7 +226,7 @@ class TestProphet(TestCase):
 
     def test_invalid_growth_input(self):
         msg = 'Parameter "growth" should be "linear", ' \
-              '"logistic" or "flat".'
+              '"logistic", "flat" or "stepwise".'
         with self.assertRaisesRegex(ValueError, msg):
             Prophet(growth="constant")
 
