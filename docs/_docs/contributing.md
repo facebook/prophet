@@ -161,7 +161,7 @@ Prophet uses the ``unittest`` package for running tests in Python and ``testthat
 
 The entire test suite can be run by typing: 
 ```bash
-$ python setup.py tests
+$ python setup.py test
 ```
 
 ### R
