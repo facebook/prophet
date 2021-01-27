@@ -130,7 +130,7 @@ In R, the argument `units` must be a type accepted by `as.difftime`, which is we
 
 
 
-Custom cutoffs can also be supplied as a list of dates to to the `cutoffs` keyword in the `cross_validation` function in Python and R. For example, three cutoffs six months apart, would need to be passed to the `cutoffs` argument in a date format like:
+Custom cutoffs can also be supplied as a list of dates to the `cutoffs` keyword in the `cross_validation` function in Python and R. For example, three cutoffs six months apart, would need to be passed to the `cutoffs` argument in a date format like:
 
 
 ```R
