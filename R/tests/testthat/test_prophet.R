@@ -141,10 +141,6 @@ test_that("logistic_floor", {
   future1$floor <- future1$floor + 10.
   m2 <- fit.prophet(m2, history2, algorithm = 'Newton')
   expect_equal(m2$history$y_scaled[1], 1., tolerance = 1e-6)
-  fcst2 <- predict(m, future1)
-  fcst2$yhat <- fcst2$yhat - 10.
-  # Check for approximate shift invariance
-  expect_true(all(abs(fcst1$yhat - fcst2$yhat) < 1))
 })
 
 test_that("get_changepoints", {
@@ -241,9 +237,13 @@ test_that("growth_init", {
   expect_equal(params[2], 0.5307511, tolerance = 1e-6)
 
   params <- prophet:::logistic_growth_init(history)
-  
   expect_equal(params[1], 1.507925, tolerance = 1e-6)
   expect_equal(params[2], -0.08167497, tolerance = 1e-6)
+
+  params <- prophet:::flat_growth_init(history)
+  expect_equal(params[1], 0, tolerance = 1e-6)
+  expect_equal(params[2], 0.49335657, tolerance = 1e-6)
+
 })
 
 test_that("piecewise_linear", {
@@ -280,6 +280,19 @@ test_that("piecewise_logistic", {
   y.true <- y.true[8:length(y.true)]
   cap <- cap[8:length(cap)]
   y <- prophet:::piecewise_logistic(t, cap, deltas, k, m, changepoint.ts)
+  expect_equal(y, y.true, tolerance = 1e-6)
+})
+
+test_that("flat_trend", {
+  t <- seq(0, 10)
+  m <- 0.5
+  y = prophet:::flat_trend(t, m)
+  y.true <- rep(0.5, length(t))
+  expect_equal(y, y.true, tolerance = 1e-6)
+
+  t <- t[8:length(t)]
+  y = prophet:::flat_trend(t, m)
+  y.true <- y.true[8:length(y.true)]
   expect_equal(y, y.true, tolerance = 1e-6)
 })
 

@@ -94,6 +94,9 @@ fig = m.plot(forecast)
 ![png](/prophet/static/trend_changepoints_files/trend_changepoints_16_0.png) 
 
 
+When visualizing the forecast, this parameter can be adjusted as needed if the trend seems to be over- or under-fit. In the fully-automated setting, see the documentation on cross validation for recommendations on how this parameter can be tuned.
+
+
 <a id="specifying-the-locations-of-the-changepoints"> </a>
 
 ### Specifying the locations of the changepoints
@@ -115,5 +118,5 @@ forecast = m.fit(df).predict(future)
 fig = m.plot(forecast)
 ```
  
-![png](/prophet/static/trend_changepoints_files/trend_changepoints_20_0.png) 
+![png](/prophet/static/trend_changepoints_files/trend_changepoints_21_0.png) 
 

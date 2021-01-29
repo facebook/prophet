@@ -1,6 +1,6 @@
 # Prophet: Automatic Forecasting Procedure
 
-[![Build Status](https://travis-ci.com/facebook/prophet.svg?branch=master)](https://travis-ci.com/facebook/prophet)
+![Build](https://github.com/facebook/prophet/workflows/Build/badge.svg)
 [![Pypi_Version](https://img.shields.io/pypi/v/fbprophet.svg)](https://pypi.python.org/pypi/fbprophet)
 [![Conda_Version](https://anaconda.org/conda-forge/fbprophet/badges/version.svg)](https://anaconda.org/conda-forge/fbprophet/)
 
@@ -14,6 +14,7 @@ Prophet is [open source software](https://code.facebook.com/projects/) released 
 - HTML documentation: https://facebook.github.io/prophet/docs/quick_start.html
 - Issue tracker: https://github.com/facebook/prophet/issues
 - Source code repository: https://github.com/facebook/prophet
+- Contributing: https://facebook.github.io/prophet/docs/contributing.html
 - Prophet R package: https://cran.r-project.org/package=prophet
 - Prophet Python package: https://pypi.python.org/pypi/fbprophet/
 - Release blogpost: https://research.fb.com/prophet-forecasting-at-scale/
@@ -40,6 +41,9 @@ If you have custom Stan compiler settings, install from source rather than the C
 Prophet is on PyPI, so you can use `pip` to install it. From v0.6 onwards, Python 2 is no longer supported.
 
 ```bash
+# Install pystan with pip before using pip to install fbprophet
+pip install pystan
+
 pip install fbprophet
 ```
 
@@ -132,4 +136,4 @@ Make sure compilers (gcc, g++, build-essential) and Python development tools (py
 
 ## License
 
-Prophet is licensed under the [MIT license](LICENSE.md).
+Prophet is licensed under the [MIT license](LICENSE).

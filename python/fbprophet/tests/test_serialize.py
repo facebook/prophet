@@ -41,7 +41,7 @@ class TestSerialize(TestCase):
         # Make sure json doesn't get too large in the future
         self.assertTrue(len(model_str) < 200000)
         z = json.loads(model_str)
-        self.assertEqual(z['__fbprophet_version'], '0.6.1.dev0')
+        self.assertEqual(z['__fbprophet_version'], '0.7.1')
 
         m2 = model_from_json(model_str)
 
@@ -137,3 +137,22 @@ class TestSerialize(TestCase):
         fcst2 = m2.predict(test)
 
         self.assertTrue(np.array_equal(fcst['yhat'].values, fcst2['yhat'].values))
+
+    def test_backwards_compatibility(self):
+        old_versions = {
+            '0.6.1.dev0': 29.3669923968994,
+        }
+        for v, pred_val in old_versions.items():
+            fname = os.path.join(
+                os.path.dirname(__file__),
+                'serialized_model_v{}.json'.format(v)
+            )
+            with open(fname, 'r') as fin:
+                model_str = json.load(fin)
+            # Check that deserializes
+            m = model_from_json(model_str)
+            self.assertEqual(json.loads(model_str)['__fbprophet_version'], v)
+            # Predict
+            future = m.make_future_dataframe(10)
+            fcst = m.predict(future)
+            self.assertAlmostEqual(fcst['yhat'].values[-1], pred_val)

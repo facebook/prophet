@@ -78,11 +78,11 @@ class TestDiagnostics(TestCase):
                     m, horizon='10 days', period='10 days', initial='140 days')
 
         # invalid alias
-        with self.assertRaises(ValueError, match="'parallel' should be one"):
+        with self.assertRaisesRegex(ValueError, "'parallel' should be one"):
             diagnostics.cross_validation(m, horizon="4 days", parallel="bad")
 
         # no map method
-        with self.assertRaises(ValueError, match="'parallel' should be one"):
+        with self.assertRaisesRegex(ValueError, "'parallel' should be one"):
             diagnostics.cross_validation(m, horizon="4 days", parallel=object())
 
 
@@ -190,7 +190,7 @@ class TestDiagnostics(TestCase):
         df_none = diagnostics.performance_metrics(df_cv, rolling_window=-1)
         self.assertEqual(
             set(df_none.columns),
-            {'horizon', 'coverage', 'mae', 'mape', 'mdape', 'mse', 'rmse'},
+            {'horizon', 'coverage', 'mae', 'mape', 'mdape', 'mse', 'rmse', 'smape'},
         )
         self.assertEqual(df_none.shape[0], 16)
         # Aggregation level 0
@@ -350,7 +350,7 @@ class TestDiagnostics(TestCase):
         m1.add_regressor('binary_feature')
         m1.fit(df)
         m2 = diagnostics.prophet_copy(m1, cutoff=cutoff)
-        changepoints = changepoints[changepoints <= cutoff]
+        changepoints = changepoints[changepoints < cutoff]
         self.assertTrue((changepoints == m2.changepoints).all())
         self.assertTrue('custom' in m2.seasonalities)
         self.assertTrue('binary_feature' in m2.extra_regressors)

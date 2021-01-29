@@ -353,7 +353,7 @@ class Prophet(object):
             if n_vals < 2:
                 standardize = False
             if standardize == 'auto':
-                if set(df[name].unique()) == set([1, 0]):
+                if set(df[name].unique()) == {1, 0}:
                     standardize = False #  Don't standardize binary variables.
                 else:
                     standardize = True
@@ -552,7 +552,7 @@ class Prophet(object):
             prior_scales[row.holiday] = ps
 
             for offset in range(lw, uw + 1):
-                occurrence = dt + timedelta(days=offset)
+                occurrence = pd.to_datetime(dt + timedelta(days=offset))
                 try:
                     loc = row_index.get_loc(occurrence)
                 except KeyError:
@@ -1106,7 +1106,7 @@ class Prophet(object):
         history = df[df['y'].notnull()].copy()
         if history.shape[0] < 2:
             raise ValueError('Dataframe has less than 2 non-NaN rows.')
-        self.history_dates = pd.to_datetime(df['ds']).sort_values()
+        self.history_dates = pd.to_datetime(pd.Series(df['ds'].unique(), name='ds')).sort_values()
 
         history = self.setup_dataframe(history, initialize_scales=True)
         self.history = history
@@ -1399,7 +1399,13 @@ class Prophet(object):
         return sim_values
 
     def predictive_samples(self, df):
-        """Sample from the posterior predictive distribution.
+        """Sample from the posterior predictive distribution. Returns samples
+        for the main estimate yhat, and for the trend component. The shape of
+        each output will be (nforecast x nsamples), where nforecast is the
+        number of points being forecasted (the number of rows in the input
+        dataframe) and nsamples is the number of posterior samples drawn.
+        This is the argument `uncertainty_samples` in the Prophet constructor,
+        which defaults to 1000.
 
         Parameters
         ----------

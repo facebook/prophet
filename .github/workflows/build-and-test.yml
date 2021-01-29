@@ -1,0 +1,33 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-test:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8]
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install and test
+      run: |
+        pip install -U -r python/requirements.txt dask[dataframe] distributed
+        cd python && python setup.py develop test
+        python setup.py clean
+        rm -rf fbprophet/stan_model
+        wget https://github.com/stan-dev/cmdstan/releases/download/v2.22.1/cmdstan-2.22.1.tar.gz -O /tmp/cmdstan.tar.gz > /dev/null
+        tar -xvf /tmp/cmdstan.tar.gz -C /tmp > /dev/null
+        make -C /tmp/cmdstan-2.22.1/ build > /dev/null
+        CMDSTAN=/tmp/cmdstan-2.22.1 STAN_BACKEND=CMDSTANPY python setup.py develop test

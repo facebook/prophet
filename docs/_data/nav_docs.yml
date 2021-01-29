@@ -10,6 +10,7 @@
   - id: outliers
   - id: non-daily_data
   - id: diagnostics
+  - id: additional_topics
   - id: contributing
 
 # n title:, 1 items: per title:, n id: per items:

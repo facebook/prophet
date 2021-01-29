@@ -32,8 +32,8 @@ also have a column cap that specifies the capacity at each ds. If not
 provided, then the model object will be instantiated but not fit; use
 fit.prophet(m, df) to fit the model.}
 
-\item{growth}{String 'linear' or 'logistic' to specify a linear or logistic
-trend.}
+\item{growth}{String 'linear', 'logistic', or 'flat' to specify a linear, logistic
+or flat trend.}
 
 \item{changepoints}{Vector of dates at which to include potential
 changepoints. If not specified, potential changepoints are selected

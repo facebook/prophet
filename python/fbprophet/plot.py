@@ -150,6 +150,9 @@ def plot_components(
 
     multiplicative_axes = []
 
+    dt = m.history['ds'].diff()
+    min_dt = dt.iloc[dt.values.nonzero()[0]].min() 
+
     for ax, plot_name in zip(axes, components):
         if plot_name == 'trend':
             plot_forecast_component(
@@ -157,7 +160,10 @@ def plot_components(
                 plot_cap=plot_cap,
             )
         elif plot_name in m.seasonalities:
-            if plot_name == 'weekly' or m.seasonalities[plot_name]['period'] == 7:
+            if (
+                (plot_name == 'weekly' or m.seasonalities[plot_name]['period'] == 7)
+                and (min_dt == pd.Timedelta(days=1))
+            ):
                 plot_weekly(
                     m=m, name=plot_name, ax=ax, uncertainty=uncertainty, weekly_start=weekly_start
                 )
@@ -389,18 +395,31 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
             df_y['ds'].dt.to_pydatetime(), seas[name + '_lower'],
             seas[name + '_upper'], color='#0072B2', alpha=0.2)]
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
-    xticks = pd.to_datetime(np.linspace(start.value, end.value, 7)
+    n_ticks = 8
+    xticks = pd.to_datetime(np.linspace(start.value, end.value, n_ticks)
         ).to_pydatetime()
     ax.set_xticks(xticks)
-    if period <= 2:
-        fmt_str = '{dt:%T}'
-    elif period < 14:
-        fmt_str = '{dt:%m}/{dt:%d} {dt:%R}'
+    if name == 'yearly':
+        fmt = FuncFormatter(
+            lambda x, pos=None: '{dt:%B} {dt.day}'.format(dt=num2date(x)))
+        ax.set_xlabel('Day of year')
+    elif name == 'weekly':
+        fmt = FuncFormatter(
+            lambda x, pos=None: '{dt:%A}'.format(dt=num2date(x)))
+        ax.set_xlabel('Day of Week')
+    elif name == 'daily':
+        fmt = FuncFormatter(
+            lambda x, pos=None: '{dt:%T}'.format(dt=num2date(x)))
+        ax.set_xlabel('Hour of day')
+    elif period <= 2:
+        fmt = FuncFormatter(
+            lambda x, pos=None: '{dt:%T}'.format(dt=num2date(x)))
+        ax.set_xlabel('Hours')
     else:
-        fmt_str = '{dt:%m}/{dt:%d}'
-    ax.xaxis.set_major_formatter(FuncFormatter(
-        lambda x, pos=None: fmt_str.format(dt=num2date(x))))
-    ax.set_xlabel('ds')
+        fmt = FuncFormatter(
+            lambda x, pos=None: '{:.0f}'.format(pos * period / (n_ticks - 1)))
+        ax.set_xlabel('Days')
+    ax.xaxis.set_major_formatter(fmt)
     ax.set_ylabel(name)
     if m.seasonalities[name]['mode'] == 'multiplicative':
         ax = set_y_as_percent(ax)
@@ -410,6 +429,7 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
 def set_y_as_percent(ax):
     yticks = 100 * ax.get_yticks()
     yticklabels = ['{0:.4g}%'.format(y) for y in yticks]
+    ax.set_yticks(ax.get_yticks().tolist())
     ax.set_yticklabels(yticklabels)
     return ax
 
@@ -449,7 +469,7 @@ def add_changepoints_to_plot(
 
 
 def plot_cross_validation_metric(
-    df_cv, metric, rolling_window=0.1, ax=None, figsize=(10, 6)
+    df_cv, metric, rolling_window=0.1, ax=None, figsize=(10, 6), color='b'
 ):
     """Plot a performance metric vs. forecast horizon from cross validation.
 
@@ -478,6 +498,8 @@ def plot_cross_validation_metric(
     ax: Optional matplotlib axis on which to plot. If not given, a new figure
         will be created.
     figsize: Optional tuple width, height in inches.
+    color: Optional color for plot and error points, useful when plotting
+        multiple model performances on one axis for comparison.
 
     Returns
     -------
@@ -517,8 +539,8 @@ def plot_cross_validation_metric(
     x_plt = df_none['horizon'].astype('timedelta64[ns]').astype(np.int64) / float(dt_conversions[i])
     x_plt_h = df_h['horizon'].astype('timedelta64[ns]').astype(np.int64) / float(dt_conversions[i])
 
-    ax.plot(x_plt, df_none[metric], '.', alpha=0.5, c='gray')
-    ax.plot(x_plt_h, df_h[metric], '-', c='b')
+    ax.plot(x_plt, df_none[metric], '.', alpha=0.1, c=color)
+    ax.plot(x_plt_h, df_h[metric], '-', c=color)
     ax.grid(True)
 
     ax.set_xlabel('Horizon ({})'.format(dt_names[i]))

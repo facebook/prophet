@@ -58,11 +58,11 @@ def generate_cutoffs(df, horizon, initial, period):
     return list(reversed(result))
 
 
-def cross_validation(model, horizon, period=None, initial=None, parallel=None, cutoffs=None):
+def cross_validation(model, horizon, period=None, initial=None, parallel=None, cutoffs=None, disable_tqdm=False):
     """Cross-Validation for time series.
 
     Computes forecasts from historical cutoff points, which user can input.
-    If not provided beginning from (end - horizon), works backwards making 
+    If not provided, begins from (end - horizon) and works backwards, making
     cutoffs with a spacing of period until initial is reached.
 
     When period is equal to the time interval of the data, this is the
@@ -70,18 +70,19 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
 
     Parameters
     ----------
-    model: Prophet class object. Fitted Prophet model
+    model: Prophet class object. Fitted Prophet model.
     horizon: string with pd.Timedelta compatible style, e.g., '5 days',
         '3 hours', '10 seconds'.
     period: string with pd.Timedelta compatible style. Simulated forecast will
         be done at every this period. If not provided, 0.5 * horizon is used.
     initial: string with pd.Timedelta compatible style. The first training
-        period will begin here. If not provided, 3 * horizon is used.
-    cutoffs: list of pd.Timestamp representing cutoff to be used during
-        cross-validtation. If not provided works beginning from
-        (end - horizon), works backwards making cutoffs with a spacing of period
-        until initial is reached.
+        period will include at least this much data. If not provided,
+        3 * horizon is used.
+    cutoffs: list of pd.Timestamp specifying cutoffs to be used during
+        cross validation. If not provided, they are generated as described
+        above.
     parallel : {None, 'processes', 'threads', 'dask', object}
+    disable_tqdm: if True it disables the progress bar that would otherwise show up when parallel=None
 
         How to parallelize the forecast computation. By default no parallelism
         is used.
@@ -139,6 +140,13 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         # Compute Cutoffs
         cutoffs = generate_cutoffs(df, horizon, initial, period)
     else:
+        # add validation of the cutoff to make sure that the min cutoff is strictly greater than the min date in the history
+        if min(cutoffs) <= df['ds'].min(): 
+            raise ValueError("Minimum cutoff value is not strictly greater than min date in history")
+        # max value of cutoffs is <= (end date minus horizon)
+        end_date_minus_horizon = df['ds'].max() - horizon 
+        if max(cutoffs) > end_date_minus_horizon: 
+            raise ValueError("Maximum cutoff value is greater than end date minus horizon, no value for cross-validation remaining")
         initial = cutoffs[0] - df['ds'].min()
         
     # Check if the initial window 
@@ -185,8 +193,8 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
 
     else:
         predicts = [
-            single_cutoff_forecast(df, model, cutoff, horizon, predict_columns)
-            for cutoff in tqdm(cutoffs)
+            single_cutoff_forecast(df, model, cutoff, horizon, predict_columns) 
+            for cutoff in (tqdm(cutoffs) if not disable_tqdm else cutoffs)
         ]
 
     # Combine all predicted pd.DataFrame into one pd.DataFrame
@@ -268,8 +276,9 @@ def prophet_copy(m, cutoff=None):
     if m.specified_changepoints:
         changepoints = m.changepoints
         if cutoff is not None:
-            # Filter change points '<= cutoff'
-            changepoints = changepoints[changepoints <= cutoff]
+            # Filter change points '< cutoff'
+            last_history_date = max(m.history['ds'][m.history['ds'] <= cutoff])
+            changepoints = changepoints[changepoints < last_history_date]
     else:
         changepoints = None
 
@@ -299,7 +308,7 @@ def prophet_copy(m, cutoff=None):
     return m2
 
 
-def performance_metrics(df, metrics=None, rolling_window=0.1):
+def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
     """Compute performance metrics from cross-validation results.
 
     Computes a suite of performance metrics on the output of cross-validation.
@@ -309,6 +318,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     'mae': mean absolute error
     'mape': mean absolute percent error
     'mdape': median absolute percent error
+    'smape': symmetric mean absolute percentage error
     'coverage': coverage of the upper and lower intervals
 
     A subset of these can be specified by passing a list of names as the
@@ -335,15 +345,17 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
     ----------
     df: The dataframe returned by cross_validation.
     metrics: A list of performance metrics to compute. If not provided, will
-        use ['mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage'].
+        use ['mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage'].
     rolling_window: Proportion of data to use in each rolling window for
-        computing the metrics. Should be in [0, 1] to average
+        computing the metrics. Should be in [0, 1] to average.
+    monthly: monthly=True will compute horizons as numbers of calendar months 
+        from the cutoff date, starting from 0 for the cutoff month.
 
     Returns
     -------
     Dataframe with a column for each metric, and column 'horizon'
     """
-    valid_metrics = ['mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage']
+    valid_metrics = ['mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage']
     if metrics is None:
         metrics = valid_metrics
     if ('yhat_lower' not in df or 'yhat_upper' not in df) and ('coverage' in metrics):
@@ -355,7 +367,10 @@ def performance_metrics(df, metrics=None, rolling_window=0.1):
             'Valid values for metrics are: {}'.format(valid_metrics)
         )
     df_m = df.copy()
-    df_m['horizon'] = df_m['ds'] - df_m['cutoff']
+    if monthly:
+        df_m['horizon'] = df_m['ds'].dt.to_period('M').astype(int) - df_m['cutoff'].dt.to_period('M').astype(int)
+    else:
+        df_m['horizon'] = df_m['ds'] - df_m['cutoff']
     df_m.sort_values('horizon', inplace=True)
     if 'mape' in metrics and df_m['y'].abs().min() < 1e-8:
         logger.info('Skipping MAPE because y close to 0')
@@ -588,6 +603,7 @@ def mdape(df, w):
 
 def smape(df, w):
     """Symmetric mean absolute percentage error
+    based on Chen and Yang (2004) formula
 
     Parameters
     ----------
@@ -598,7 +614,7 @@ def smape(df, w):
     -------
     Dataframe with columns horizon and smape.
     """
-    sape = np.abs(df['yhat']-df['y']) / ((np.abs(df['y']) + np.abs(df['yhat'])) /2)
+    sape = np.abs(df['y'] - df['yhat']) / ((np.abs(df['y']) + np.abs(df['yhat'])) / 2)
     if w < 0:
         return pd.DataFrame({'horizon': df['horizon'], 'smape': sape})
     return rolling_mean_by_h(

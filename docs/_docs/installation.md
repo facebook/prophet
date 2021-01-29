@@ -37,6 +37,9 @@ Prophet is on PyPI, so you can use pip to install it:
 
 ```
 # bash
+# Install pystan with pip before using pip to install fbprophet
+$ pip install pystan
+$
 $ pip install fbprophet
 ```
 

@@ -5,7 +5,7 @@
 
 ## Makes R CMD CHECK happy due to dplyr syntax below
 globalVariables(c(
-  "ds", "y", "cap", "yhat", "yhat_lower", "yhat_upper"))
+  "ds", "y", "cap", "yhat", "yhat_lower", "yhat_upper", "size"))
 
 #' Generate cutoff dates
 #'
@@ -181,7 +181,8 @@ prophet_copy <- function(m, cutoff = NULL) {
     changepoints <- m$changepoints
     if (!is.null(cutoff)) {
       cutoff <- set_date(cutoff)
-      changepoints <- changepoints[changepoints <= cutoff]
+      last_history_date <- max(m$history$ds[m$history$ds <= cutoff])
+      changepoints <- changepoints[changepoints < last_history_date]
     }
   } else {
     changepoints <- NULL
@@ -221,6 +222,7 @@ prophet_copy <- function(m, cutoff = NULL) {
 #' 'mae': mean absolute error,
 #' 'mape': mean percent error,
 #' 'mdape': median percent error,
+#' 'smape': symmetric mean absolute percentage error,
 #' 'coverage': coverage of the upper and lower intervals
 #'
 #' A subset of these can be specified by passing a list of names as the
@@ -245,7 +247,7 @@ prophet_copy <- function(m, cutoff = NULL) {
 #'
 #' @param df The dataframe returned by cross_validation.
 #' @param metrics An array of performance metrics to compute. If not provided,
-#'  will use c('mse', 'rmse', 'mae', 'mape', 'mdape', 'coverage').
+#'  will use c('mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage').
 #' @param rolling_window Proportion of data to use in each rolling window for
 #'  computing the metrics. Should be in [0, 1] to average.
 #'
@@ -253,7 +255,7 @@ prophet_copy <- function(m, cutoff = NULL) {
 #'
 #' @export
 performance_metrics <- function(df, metrics = NULL, rolling_window = 0.1) {
-  valid_metrics <- c('mse', 'rmse', 'mae', 'mape', 'coverage')
+  valid_metrics <- c('mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage')
   if (is.null(metrics)) {
     metrics <- valid_metrics
   }
@@ -407,7 +409,7 @@ rolling_median_by_h <- function(x, h, w, name) {
       break
     }
     res.i <- data.frame(horizon=hs[i])
-    res.i[[name]] <- median(xs)
+    res.i[[name]] <- stats::median(xs)
     res <- rbind(res.i, res)
     i <- i - 1
   }
@@ -496,6 +498,24 @@ mdape <- function(df, w) {
     return(data.frame(horizon = df$horizon, mdape = ape))
   }
   return(rolling_median_by_h(x = ape, h = df$horizon, w = w, name = 'mdape'))
+}
+
+
+#' Symmetric mean absolute percentage error
+#' based on Chen and Yang (2004) formula
+#'
+#' @param df Cross-validation results dataframe.
+#' @param w Aggregation window size.
+#'
+#' @return Array of symmetric mean absolute percent errors.
+#'
+#' @keywords internal
+smape <- function(df, w) {
+  sape <- abs(df$y - df$yhat) / ((abs(df$y) + abs(df$yhat)) / 2)
+  if (w < 0) {
+    return(data.frame(horizon = df$horizon, smape = sape))
+  }
+  return(rolling_mean_by_h(x = sape, h = df$horizon, w = w, name = 'smape'))
 }
 
 

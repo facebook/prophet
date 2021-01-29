@@ -14,7 +14,7 @@ from convertdate.islamic import from_gregorian, to_gregorian
 from lunarcalendar import Lunar, Converter
 from lunarcalendar.converter import DateNotExist
 
-from holidays import WEEKEND, HolidayBase
+from holidays import WEEKEND, HolidayBase, Turkey
 from dateutil.easter import easter, EASTER_ORTHODOX
 from dateutil.relativedelta import relativedelta as rd
 
@@ -531,7 +531,7 @@ class Malaysia(HolidayBase):
                 if monthcal[i][5].month == 6:
                     saturdays.append(monthcal[i][5])
             self[saturdays[0]] = name
-        elif (year >= 2017) and (year <= 2021):
+        elif 2017 <= year <= 2021:
             c = Calendar(firstweekday=MONDAY)
             monthcal = c.monthdatescalendar(year, 7)
 
@@ -918,64 +918,8 @@ class PH(Philippines):
 
 
 # ------------ Holidays in Turkey---------------------
-class Turkey(HolidayBase):
-    """
-    Implement public holidays in Turkey
-
-    Reference:
-    https://en.wikipedia.org/wiki/Public_holidays_in_Turkey
-    """
-
-    def __init__(self, **kwargs):
-        self.country = "TU"
-        HolidayBase.__init__(self, **kwargs)
-
-    def _populate(self, year):
-        # New Year's Day
-        name = "New Year's Day"
-        self[date(year, 1, 1)] = name
-
-        # National Sovereignty and Children's Day
-        name = "National Sovereignty and Children's Day	"
-        self[date(year, 4, 23)] = name
-
-        # Labor Day
-        name = "Labor Day"
-        self[date(year, 5, 1)] = name
-
-        # Commemoration of Atatürk, Youth and Sports Day
-        name = u"Commemoration of Atatürk, Youth and Sports Day"
-        self[date(year, 5, 19)] = name
-
-        # Democracy and National Unity Day
-        name = "Democracy and National Unity Day"
-        self[date(year, 7, 15)] = name
-
-        # Victory Day
-        name = "Victory Day"
-        self[date(year, 8, 30)] = name
-
-        # Republic Day
-        name = "Republic Day"
-        self[date(year, 10, 29)] = name
-
-        # Eid al-Fitr
-        name = "Eid al-Fitr"
-        for offset in range(-1, 2, 1):
-            islam_year = from_gregorian(year + offset, 6, 15)[0]
-            y, m, d = to_gregorian(islam_year, 10, 1)
-            ds = date(y, m, d) - timedelta(days=1)
-            if ds.year == year:
-                self[ds] = name
-
-        # Eid al-Adha, i.e., Feast of the Sacrifice
-        name = "Feast of the Sacrifice"
-        for offset in range(-1, 2, 1):
-            islam_year = from_gregorian(year + offset, 8, 22)[0]
-            y, m, d = to_gregorian(islam_year, 12, 10)
-            if y == year:
-                self[date(y, m, d)] = name
-
+# This is now in Holidays, but with alias TR instead of the TU that we used.
+# Include TU as an alias for backwards compatibility.
 
 class TU(Turkey):
     pass
