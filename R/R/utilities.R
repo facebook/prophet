@@ -41,7 +41,12 @@ regressor_coefficients <- function(m){
   beta_indices <- which(m$train.component.cols[, regr_names] == 1, arr.ind = TRUE)[, "row"]
   betas <- m$params$beta[, beta_indices, drop = FALSE]
   # If regressor is additive, multiply by the scale factor to put coefficients on the original training data scale.
-  y_scale_indicator <- matrix(ifelse(regr_modes == "additive", m$y.scale, 1), nrow = nrow(betas), ncol = ncol(betas), byrow = TRUE)
+  y_scale_indicator <- matrix(
+    data = ifelse(regr_modes == "additive", m$y.scale, 1),
+    nrow = nrow(betas),
+    ncol = ncol(betas),
+    byrow = TRUE
+  )
   coefs <- betas * y_scale_indicator  / regr_std
 
   percentiles = c((1 - m$interval.width) / 2, 1 - (1 - m$interval.width) / 2)
