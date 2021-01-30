@@ -47,7 +47,7 @@ regressor_coefficients <- function(m){
     ncol = ncol(betas),
     byrow = TRUE
   )
-  coefs <- betas * y_scale_indicator  / regr_std
+  coefs <- betas * y_scale_indicator  / regr_stds
 
   percentiles = c((1 - m$interval.width) / 2, 1 - (1 - m$interval.width) / 2)
   bounds <- apply(betas, 2, quantile, probs = percentiles)

@@ -7,7 +7,7 @@ library(prophet)
 context("Prophet utilities tests")
 
 DATA <- read.csv('data.csv')
-DATA$ds <- as.Date(DATA_all$ds)
+DATA$ds <- as.Date(DATA$ds)
 
 build_model_with_regressors <- function(data, mcmc.samples = 0) {
   m <- prophet(mcmc.samples = mcmc.samples)
@@ -22,7 +22,7 @@ build_model_with_regressors <- function(data, mcmc.samples = 0) {
   df$numeric_feature <- 0:509
   df$numeric_feature2 <- 0:509
   df$binary_feature2 <- c(rep(1, 100), rep(0, 410))
-  m <- fit.prophet(m, df, show_messages = FALSE)
+  m <- fit.prophet(m, df)
 
   return(m)
 }
@@ -39,10 +39,10 @@ test_that("regressor_coefficients_no_uncertainty", {
 
 test_that("regressor_coefficients_with_uncertainty", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
-  m <- build_model_with_regressors(DATA, mcmc.samples = 100)
+  suppressWarnings(m <- build_model_with_regressors(DATA, mcmc.samples = 100))
   coefs <- regressor_coefficients(m)
 
   expect_equal(dim(coefs), c(4, 6))
-  expect_lte(coefs[, "coef_lower"], coefs[, "coef"])
-  expect_gte(coefs[, "coef_upper"], coefs[, "coef"])
+  expect_true(all(coefs[, "coef_lower"] < coefs[, "coef"]))
+  expect_true(all(coefs[, "coef_upper"] > coefs[, "coef"]))
 })
