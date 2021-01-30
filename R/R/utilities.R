@@ -28,8 +28,6 @@
 #'   }
 #' }
 #'
-#' @examples
-#'
 #' @export
 regressor_coefficients <- function(m){
   if (length(m$extra_regressors) == 0) {
