@@ -1057,7 +1057,7 @@ set_auto_seasonalities <- function(m) {
 #' Initialize flat growth.
 #'
 #' Provides a strong initialization for flat growth by setting the
-#' growth to 0 and calculates the offset parameter that pass the 
+#' growth to 0 and calculates the offset parameter that pass the
 #' function through the mean of the the y_scaled values.
 #'
 #' @param df Data frame with columns ds (date), y_scaled (scaled time series),
@@ -1151,11 +1151,14 @@ logistic_growth_init <- function(df) {
 #'
 #' @param m Prophet object.
 #' @param df Data frame.
+#' @param backend Whether to use the "rstan" or "cmdstanr" backend to fit the model. Default "rstan".
 #' @param ... Additional arguments passed to the \code{optimizing} or
 #'  \code{sampling} functions in Stan.
 #'
 #' @export
-fit.prophet <- function(m, df, ...) {
+fit.prophet <- function(m, df, backend = c("rstan", "cmdstanr"), ...) {
+  backend = rlang::arg_match(backend)
+  if (backend == "cmdstanr") check_cmdstanr()
   if (!is.null(m$history)) {
     stop("Prophet object can only be fit once. Instantiate a new object.")
   }
@@ -1216,11 +1219,7 @@ fit.prophet <- function(m, df, ...) {
     kinit <- logistic_growth_init(history)
   }
 
-  if (exists(".prophet.stan.model", where = prophet_model_env)) {
-    model <- get('.prophet.stan.model', envir = prophet_model_env)
-  } else {
-    model <- stanmodels$prophet
-  }
+  model <- .load_model(backend)
 
   stan_init <- function() {
     list(k = kinit[1],
@@ -1231,45 +1230,26 @@ fit.prophet <- function(m, df, ...) {
     )
   }
 
-  if (min(history$y) == max(history$y) & 
+  if (min(history$y) == max(history$y) &
         (m$growth %in% c('linear', 'flat'))) {
     # Nothing to fit.
     m$params <- stan_init()
     m$params$sigma_obs <- 0.
     n.iteration <- 1.
-  } else if (m$mcmc.samples > 0) {
-    args <- list(
-      object = model,
-      data = dat,
-      init = stan_init,
-      iter = m$mcmc.samples
-    )
-    args <- utils::modifyList(args, list(...))
-    m$stan.fit <- do.call(rstan::sampling, args)
-    m$params <- rstan::extract(m$stan.fit)
-    n.iteration <- length(m$params$k)
   } else {
-    args <- list(
-      object = model,
-      data = dat,
-      init = stan_init,
-      algorithm = if(dat$T < 100) {'Newton'} else {'LBFGS'},
-      iter = 1e4,
-      as_vector = FALSE
-    )
-    args <- utils::modifyList(args, list(...))
-    m$stan.fit <- do.call(rstan::optimizing, args)
-    if (m$stan.fit$return_code != 0) {
-      message(
-        'Optimization terminated abnormally. Falling back to Newton optimizer.'
-      )
-      args$algorithm = 'Newton'
-      m$stan.fit <- do.call(rstan::optimizing, args)
+    if (m$mcmc.samples > 0) {
+      args <- .stan_args(model, dat, stan_init, backend, type = "mcmc", m$mcmc.samples)
+      args <- utils::modifyList(args, list(...))
+      model_output <- .fit(args, backend, type = "mcmc")
+    } else {
+      args <- .stan_args(model, dat, stan_init, backend, type = "optimize")
+      args <- utils::modifyList(args, list(...))
+      model_output <- .fit(args, backend, type = "optimize")
     }
-    m$params <- m$stan.fit$par
-    n.iteration <- 1
+    m$stan.fit <- model_output$stan_fit
+    m$params <- model_output$params
+    n.iteration <- model_output$n_iteration
   }
-
   # Cast the parameters to have consistent form, whether full bayes or MAP
   for (name in c('delta', 'beta')){
     m$params[[name]] <- matrix(m$params[[name]], nrow = n.iteration)
