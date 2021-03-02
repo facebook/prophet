@@ -7,6 +7,12 @@
 # Setuptools distribution folder.
 python/dist/
 
+# test cache
+.pytest_cache
+
+# Python cache
+__pycache__
+
 # Python egg metadata, regenerated from source files by setuptools.
 python/*.egg-info
 build/
@@ -17,3 +23,4 @@ build/
 *.*~
 
 *.idea
+*.vscode
