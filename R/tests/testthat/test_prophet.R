@@ -213,12 +213,12 @@ test_that("fourier_series_weekly", {
   true.values <- c(0.7818315, 0.6234898, 0.9749279, -0.2225209, 0.4338837,
                    -0.9009689)
   mat <- prophet:::fourier_series(DATA$ds, 7, 3)
-    expect_equal(true.values, mat[1, ], tolerance = 1e-6)
+    expect_equal(true.values, mat[177, ], tolerance = 1e-6)
 })
 
 test_that("fourier_series_yearly", {
-  true.values <- c(0.7006152, -0.7135393, -0.9998330, 0.01827656, 0.7262249,
-                   0.6874572)
+  true.values <- c(0.70112651, -0.71303690, -0.99985814, 0.01684324, 0.72474500,
+                   0.68901719)
   mat <- prophet:::fourier_series(DATA$ds, 365.25, 3)
     expect_equal(true.values, mat[1, ], tolerance = 1e-6)
 })

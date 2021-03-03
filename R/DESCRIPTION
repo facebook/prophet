@@ -24,6 +24,7 @@ Imports:
     extraDistr,
     ggplot2,
     grid,
+    lubridate,
     methods,
     RcppParallel (>= 5.0.1),
     rstan (>= 2.18.1),
