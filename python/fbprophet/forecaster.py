@@ -342,9 +342,9 @@ class Prophet(object):
             floor = df['floor']
         else:
             floor = 0.
-        self.y_scale = (df['y'] - floor).abs().max()
+        self.y_scale = float((df['y'] - floor).abs().max())
         if self.y_scale == 0:
-            self.y_scale = 1
+            self.y_scale = 1.0
         self.start = df['ds'].min()
         self.t_scale = df['ds'].max() - self.start
         for name, props in self.extra_regressors.items():
