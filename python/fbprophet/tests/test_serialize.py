@@ -141,6 +141,7 @@ class TestSerialize(TestCase):
     def test_backwards_compatibility(self):
         old_versions = {
             '0.6.1.dev0': 29.3669923968994,
+            '0.7.1': 29.282810844704414,
         }
         for v, pred_val in old_versions.items():
             fname = os.path.join(
