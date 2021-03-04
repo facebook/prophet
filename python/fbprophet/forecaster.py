@@ -169,8 +169,11 @@ class Prophet(object):
                 raise ValueError('holidays must be a DataFrame with "ds" and '
                                  '"holiday" columns.')
             self.holidays['ds'] = pd.to_datetime(self.holidays['ds'])
-            if self.holidays.isnull().any().any():
-                raise ValueError('Found a NaN in holidays dataframe')
+            if (
+                self.holidays['ds'].isnull().any()
+                or self.holidays['holiday'].isnull().any()
+            ):
+                raise ValueError('Found a NaN in holidays dataframe.')
             has_lower = 'lower_window' in self.holidays
             has_upper = 'upper_window' in self.holidays
             if has_lower + has_upper == 1:

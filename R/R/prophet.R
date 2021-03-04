@@ -169,7 +169,7 @@ validate_inputs <- function(m) {
       stop('Holidays dataframe must have ds field.')
     }
     m$holidays$ds <- as.Date(m$holidays$ds)
-    if (any(is.na(m$holidays))) {
+    if (any(is.na(m$holidays$ds)) | any(is.na(m$holidays$holiday))) {
       stop('Found NA in the holidays dataframe.')
     }
     has.lower <- exists('lower_window', where = m$holidays)
