@@ -301,7 +301,10 @@ def prophet_copy(m, cutoff=None):
         mcmc_samples=m.mcmc_samples,
         interval_width=m.interval_width,
         uncertainty_samples=m.uncertainty_samples,
-        stan_backend=m.stan_backend.get_type()
+        stan_backend=(
+            m.stan_backend.get_type() if m.stan_backend is not None
+            else None
+        ),
     )
     m2.extra_regressors = deepcopy(m.extra_regressors)
     m2.seasonalities = deepcopy(m.seasonalities)
