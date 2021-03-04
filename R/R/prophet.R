@@ -243,8 +243,8 @@ validate_column_name <- function(
 
 #' Convert date vector
 #'
-#' Convert the date to POSIXct object. Dates without a specified timezone will
-#' be given system time zone. Dates with specified timezone will keep it.
+#' Convert the date to POSIXct object. Timezones are stripped and replaced
+#' with GMT.
 #'
 #' @param ds Date vector
 #'
@@ -263,17 +263,15 @@ set_date <- function(ds) {
   # Type should be either character, or an object compatible with lubridate
   if (is.character(ds)) {
     if (min(nchar(ds), na.rm=TRUE) < 12) {
-        ds <- as.POSIXct(ds, format = "%Y-%m-%d")
+        ds <- as.POSIXct(ds, format = "%Y-%m-%d", tz = "GMT")
     } else {
-        ds <- as.POSIXct(ds, format = "%Y-%m-%d %H:%M:%S")
+        ds <- as.POSIXct(ds, format = "%Y-%m-%d %H:%M:%S", tz = "GMT")
     }
   } else {
-    if (is.null(attr(ds, "tzone"))) {
-      # Make sure we don't default to GMT timezone
-      ds <- lubridate::force_tz(ds)
-    }
-    ds <- as.POSIXct(ds)
+    # Strip timezone and replace with GMT
+    ds <- as.POSIXct(lubridate::force_tz(ds, "GMT"), tz = "GMT")
   }
+  attr(ds, "tzone") <- "GMT"
   return(ds)
 }
 
@@ -1678,6 +1676,7 @@ make_future_dataframe <- function(m, periods, freq = 'day',
   dates <- dates[2:(periods + 1)]  # Drop the first, which is max(history$ds)
   if (include_history) {
     dates <- c(m$history.dates, dates)
+    attr(dates, "tzone") <- "GMT"
   }
   return(data.frame(ds = dates))
 }
