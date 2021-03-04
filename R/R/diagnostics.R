@@ -110,6 +110,14 @@ cross_validation <- function(
     cutoffs <- generate_cutoffs(df, horizon.dt, initial.dt, period.dt)
   }else{
     cutoffs <- set_date(ds=cutoffs)
+    # Validation
+    if (min(cutoffs) <= min(df$ds)) {
+      stop('Minimum cutoff value is not strictly greater than min date in history')
+    }
+    end_date_minus_horizon <- max(df$ds) - horizon.dt
+    if (max(cutoffs) > end_date_minus_horizon) {
+      stop('Maximum cutoff value is greater than end date minus horizon')
+    }
     initial.dt <- cutoffs[1] - min(df$ds)
   }
 
