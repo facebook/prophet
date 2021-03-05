@@ -8,7 +8,7 @@
 #' on \code{y} of a unit increase in the regressor. For multiplicative regressors,
 #' the incremental impact is equal to \code{trend(t)} multiplied by the coefficient.
 #'
-#' \textbf{Coefficients are measured on the original scale of the training data.}
+#' Coefficients are measured on the original scale of the training data.
 #'
 #' @param m Prophet model object, after fitting.
 #'
@@ -50,7 +50,7 @@ regressor_coefficients <- function(m){
   coefs <- betas * y_scale_indicator  / regr_stds
 
   percentiles = c((1 - m$interval.width) / 2, 1 - (1 - m$interval.width) / 2)
-  bounds <- apply(betas, 2, quantile, probs = percentiles)
+  bounds <- apply(betas, 2, stats::quantile, probs = percentiles)
 
   df <- data.frame(
     regressor = regr_names,

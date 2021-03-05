@@ -16,7 +16,7 @@ regressor_coefficients(m)
 Dataframe with one row per regressor.
 }
 \description{
-\textbf{Coefficients are measured on the original scale of the training data.}
+Coefficients are measured on the original scale of the training data.
 }
 \details{
 Output dataframe columns:
