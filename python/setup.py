@@ -122,7 +122,7 @@ with open('requirements.txt', 'r') as f:
 
 setup(
     name='fbprophet',
-    version='0.7.1',
+    version='1.0',
     description='Automatic Forecasting Procedure',
     url='https://facebook.github.io/prophet/',
     author='Sean J. Taylor <sjtz@pm.me>, Ben Letham <bletham@fb.com>',
