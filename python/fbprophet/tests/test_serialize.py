@@ -41,7 +41,7 @@ class TestSerialize(TestCase):
         # Make sure json doesn't get too large in the future
         self.assertTrue(len(model_str) < 200000)
         z = json.loads(model_str)
-        self.assertEqual(z['__fbprophet_version'], '0.7.1')
+        self.assertEqual(z['__fbprophet_version'], '1.0')
 
         m2 = model_from_json(model_str)
 
