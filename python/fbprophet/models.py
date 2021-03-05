@@ -9,6 +9,7 @@ from abc import abstractmethod, ABC
 from typing import Tuple
 from collections import OrderedDict
 from enum import Enum
+from pathlib import Path
 import pickle
 import pkg_resources
 import os
@@ -282,7 +283,7 @@ class PyStanBackend(IStanBackend):
             'fbprophet',
             'stan_model/prophet_model.pkl',
         )
-        with open(model_file, 'rb') as f:
+        with Path(model_file).open('rb') as f:
             return pickle.load(f)
 
 
