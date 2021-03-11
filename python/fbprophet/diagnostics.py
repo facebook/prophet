@@ -430,10 +430,10 @@ def rolling_mean_by_h(x, h, w, name):
     res_x = []
     while i >= 0 and j >= 0:
         while (n_sum < w) and (j >= 0):
-            n_sum += ns[j]
-            x_sum += xs[j]
+            n_sum += int(ns[j])
+            x_sum += float(xs[j])
             j -= 1
-        n_out = n_sum - w
+        n_out = int(n_sum - w)
         x_mean = (x_sum - n_out * xs[j + 1] / ns[j + 1]) / (n_sum - n_out)
         res_h.append(hs[i])
         res_x.append(x_mean)
