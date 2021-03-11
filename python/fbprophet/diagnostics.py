@@ -398,53 +398,35 @@ def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
 
 
 def rolling_mean_by_h(x, h, w, name):
-    """Compute a rolling mean of x, after first aggregating by h.
-
-    Right-aligned. Computes a single mean for each unique value of h. Each
-    mean is over at least w samples.
-
-    Parameters
-    ----------
-    x: Array.
-    h: Array of horizon for each value in x.
-    w: Integer window size (number of elements).
-    name: Name for metric in result dataframe
-
-    Returns
-    -------
-    Dataframe with columns horizon and name, the rolling mean of x.
-    """
-    # Aggregate over h
     df = pd.DataFrame({'x': x, 'h': h})
     df2 = (
-        df.groupby('h').agg(['mean', 'count']).reset_index().sort_values('h')
+        df.groupby('h').agg(['sum', 'count']).reset_index().sort_values('h')
     )
-    xm = df2['x']['mean'].values
+    xs = df2['x']['sum'].values
     ns = df2['x']['count'].values
     hs = df2['h'].values
-
+    n_sum = 0
+    x_sum = 0
+    i = len(hs) - 1
+    j = i
     res_h = []
     res_x = []
-    # Start from the right and work backwards
-    i = len(hs) - 1
-    while i >= 0:
-        # Construct a mean of at least w samples.
-        n = int(ns[i])
-        xbar = float(xm[i])
-        j = i - 1
-        while ((n < w) and j >= 0):
-            # Include points from the previous horizon. All of them if still
-            # less than w, otherwise just enough to get to w.
-            n2 = min(w - n, ns[j])
-            xbar = xbar * (n / (n + n2)) + xm[j] * (n2 / (n + n2))
-            n += n2
-            j -= 1
-        if n < w:
-            # Ran out of horizons before enough points.
-            break
-        res_h.append(hs[i])
-        res_x.append(xbar)
+    while (n_sum < w) and (j >= 0):
+        n_sum += ns[j]
+        x_sum += xs[j]
+        j -= 1
+    res_h.append(hs[i])
+    res_x.append(x_sum / n_sum)
+    while i >= 0 and j >= 0:
+        n_sum -= ns[i]
+        x_sum -= xs[i]
         i -= 1
+        while (n_sum < w) and (j >= 0):
+            n_sum += ns[j]
+            x_sum += xs[j]
+            j -= 1
+        res_h.append(hs[i])
+        res_x.append(x_sum / n_sum)
     res_h.reverse()
     res_x.reverse()
     return pd.DataFrame({'horizon': res_h, name: res_x})
