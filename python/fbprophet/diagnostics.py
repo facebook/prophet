@@ -121,12 +121,12 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
     predict_columns = ['ds', 'yhat']
     if model.uncertainty_samples:
         predict_columns.extend(['yhat_lower', 'yhat_upper'])
-        
+
     # Identify largest seasonality period
     period_max = 0.
     for s in model.seasonalities.values():
         period_max = max(period_max, s['period'])
-    seasonality_dt = pd.Timedelta(str(period_max) + ' days')    
+    seasonality_dt = pd.Timedelta(str(period_max) + ' days')
 
     if cutoffs is None:
         # Set period
@@ -142,22 +142,23 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         cutoffs = generate_cutoffs(df, horizon, initial, period)
     else:
         # add validation of the cutoff to make sure that the min cutoff is strictly greater than the min date in the history
-        if min(cutoffs) <= df['ds'].min(): 
+        if min(cutoffs) <= df['ds'].min():
             raise ValueError("Minimum cutoff value is not strictly greater than min date in history")
         # max value of cutoffs is <= (end date minus horizon)
-        end_date_minus_horizon = df['ds'].max() - horizon 
-        if max(cutoffs) > end_date_minus_horizon: 
-            raise ValueError("Maximum cutoff value is greater than end date minus horizon, no value for cross-validation remaining")
+        end_date_minus_horizon = df['ds'].max() - horizon
+        if max(cutoffs) > end_date_minus_horizon:
+            raise ValueError(
+                "Maximum cutoff value is greater than end date minus horizon, no value for cross-validation remaining")
         initial = cutoffs[0] - df['ds'].min()
-        
+
     # Check if the initial window 
     # (that is, the amount of time between the start of the history and the first cutoff)
     # is less than the maximum seasonality period
     if initial < seasonality_dt:
-            msg = 'Seasonality has period of {} days '.format(period_max)
-            msg += 'which is larger than initial window. '
-            msg += 'Consider increasing initial.'
-            logger.warning(msg)
+        msg = 'Seasonality has period of {} days '.format(period_max)
+        msg += 'which is larger than initial window. '
+        msg += 'Consider increasing initial.'
+        logger.warning(msg)
 
     if parallel:
         valid = {"threads", "processes", "dask"}
@@ -194,7 +195,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
 
     else:
         predicts = [
-            single_cutoff_forecast(df, model, cutoff, horizon, predict_columns) 
+            single_cutoff_forecast(df, model, cutoff, horizon, predict_columns)
             for cutoff in (tqdm(cutoffs) if not disable_tqdm else cutoffs)
         ]
 
@@ -398,6 +399,22 @@ def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
 
 
 def rolling_mean_by_h(x, h, w, name):
+    """Compute a rolling mean of x, after first aggregating by h.
+
+    Right-aligned. Computes a single mean for each unique value of h. Each
+    mean is over at least w samples.
+
+    Parameters
+    ----------
+    x: Array.
+    h: Array of horizon for each value in x.
+    w: Integer window size (number of elements).
+    name: Name for metric in result dataframe
+
+    Returns
+    -------
+    Dataframe with columns horizon and name, the rolling mean of x.
+    """
     df = pd.DataFrame({'x': x, 'h': h})
     df2 = (
         df.groupby('h').agg(['sum', 'count']).reset_index().sort_values('h')
@@ -411,22 +428,18 @@ def rolling_mean_by_h(x, h, w, name):
     j = i
     res_h = []
     res_x = []
-    while (n_sum < w) and (j >= 0):
-        n_sum += ns[j]
-        x_sum += xs[j]
-        j -= 1
-    res_h.append(hs[i])
-    res_x.append(x_sum / n_sum)
     while i >= 0 and j >= 0:
-        n_sum -= ns[i]
-        x_sum -= xs[i]
-        i -= 1
         while (n_sum < w) and (j >= 0):
             n_sum += ns[j]
             x_sum += xs[j]
             j -= 1
+        n_out = n_sum - w
+        x_mean = (x_sum - n_out * xs[j + 1] / ns[j + 1]) / (n_sum - n_out)
         res_h.append(hs[i])
-        res_x.append(x_sum / n_sum)
+        res_x.append(x_mean)
+        n_sum -= ns[i]
+        x_sum -= xs[i]
+        i -= 1
     res_h.reverse()
     res_x.reverse()
     return pd.DataFrame({'horizon': res_h, name: res_x})
