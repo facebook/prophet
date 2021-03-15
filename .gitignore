@@ -6,16 +6,20 @@
 
 # Setuptools distribution folder.
 python/dist/
+python_shim/dist/
 
 # test cache
 .pytest_cache
+python/prophet/tests/dask-worker-space
 
 # Python cache
 __pycache__
 
 # Python egg metadata, regenerated from source files by setuptools.
 python/*.egg-info
-build/
+python/build/
+python_shim/*.egg-info
+python_shim/build/
 
 # Notebook checkpoints
 .ipynb_checkpoints
