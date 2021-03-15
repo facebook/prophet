@@ -16,8 +16,8 @@ import pandas as pd
 import numpy as np
 
 import holidays as hdays_part1
-import fbprophet.hdays as hdays_part2
-from fbprophet.make_holidays import make_holidays_df
+import prophet.hdays as hdays_part2
+from prophet.make_holidays import make_holidays_df
 
 
 def utf8_to_ascii(text):

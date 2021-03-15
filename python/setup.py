@@ -24,16 +24,16 @@ if platform.platform().startswith('Win'):
     PLATFORM = 'win'
 
 MODEL_DIR = os.path.join('stan', PLATFORM)
-MODEL_TARGET_DIR = os.path.join('fbprophet', 'stan_model')
+MODEL_TARGET_DIR = os.path.join('prophet', 'stan_model')
 
 
 def get_backends_from_env() -> List[str]:
-    from fbprophet.models import StanBackendEnum
+    from prophet.models import StanBackendEnum
     return os.environ.get("STAN_BACKEND", StanBackendEnum.PYSTAN.name).split(",")
 
 
 def build_models(target_dir):
-    from fbprophet.models import StanBackendEnum
+    from prophet.models import StanBackendEnum
     for backend in get_backends_from_env():
         StanBackendEnum.get_backend_class(backend).build_model(target_dir, MODEL_DIR)
 
@@ -121,7 +121,7 @@ with open('requirements.txt', 'r') as f:
     install_requires = f.read().splitlines()
 
 setup(
-    name='fbprophet',
+    name='prophet',
     version='1.0',
     description='Automatic Forecasting Procedure',
     url='https://facebook.github.io/prophet/',
@@ -140,7 +140,7 @@ setup(
         'develop': DevelopCommand,
         'test': TestCommand,
     },
-    test_suite='fbprophet.tests',
+    test_suite='prophet.tests',
     classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
