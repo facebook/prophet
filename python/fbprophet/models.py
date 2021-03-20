@@ -184,7 +184,7 @@ class CmdStanPyBackend(IStanBackend):
         for cname in column_names:
             if "." in cname:
                 parsed = cname.split(".")
-            elif "[" in cname:
+            else:
                 parsed = cname.split("[")
 
             curr = parsed[0]
