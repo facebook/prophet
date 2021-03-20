@@ -9,6 +9,7 @@ from abc import abstractmethod, ABC
 from typing import Tuple
 from collections import OrderedDict
 from enum import Enum
+from pathlib import Path
 import pickle
 import pkg_resources
 import os
@@ -28,8 +29,12 @@ class IStanBackend(ABC):
         Specify model options as kwargs.
          * newton_fallback [bool]: whether to fallback to Newton if L-BFGS fails
         """
-        if 'newton_fallback' in kwargs:
-            self.newton_fallback = kwargs['newton_fallback']
+        for k, v in kwargs.items():
+            if k == 'newton_fallback':
+                self.newton_fallback = v
+            else:
+                raise ValueError(f'Unknown option {k}')
+
 
     @staticmethod
     @abstractmethod
@@ -278,7 +283,7 @@ class PyStanBackend(IStanBackend):
             'fbprophet',
             'stan_model/prophet_model.pkl',
         )
-        with open(model_file, 'rb') as f:
+        with Path(model_file).open('rb') as f:
             return pickle.load(f)
 
 

@@ -175,6 +175,9 @@ validate_inputs <- function(m) {
       stop('Holidays dataframe must have ds field.')
     }
     m$holidays$ds <- as.Date(m$holidays$ds)
+    if (any(is.na(m$holidays$ds)) | any(is.na(m$holidays$holiday))) {
+      stop('Found NA in the holidays dataframe.')
+    }
     has.lower <- exists('lower_window', where = m$holidays)
     has.upper <- exists('upper_window', where = m$holidays)
     if (has.lower + has.upper == 1) {
@@ -246,15 +249,15 @@ validate_column_name <- function(
 
 #' Convert date vector
 #'
-#' Convert the date to POSIXct object
+#' Convert the date to POSIXct object. Timezones are stripped and replaced
+#' with GMT.
 #'
-#' @param ds Date vector, can be consisted of characters
-#' @param tz string time zone
+#' @param ds Date vector
 #'
 #' @return vector of POSIXct object converted from date
 #'
 #' @keywords internal
-set_date <- function(ds = NULL, tz = "GMT") {
+set_date <- function(ds) {
   if (length(ds) == 0) {
     return(NULL)
   }
@@ -263,12 +266,18 @@ set_date <- function(ds = NULL, tz = "GMT") {
     ds <- as.character(ds)
   }
 
-  if (min(nchar(ds), na.rm=TRUE) < 12) {
-    ds <- as.POSIXct(ds, format = "%Y-%m-%d", tz = tz)
+  # Type should be either character, or an object compatible with lubridate
+  if (is.character(ds)) {
+    if (min(nchar(ds), na.rm=TRUE) < 12) {
+        ds <- as.POSIXct(ds, format = "%Y-%m-%d", tz = "GMT")
+    } else {
+        ds <- as.POSIXct(ds, format = "%Y-%m-%d %H:%M:%S", tz = "GMT")
+    }
   } else {
-    ds <- as.POSIXct(ds, format = "%Y-%m-%d %H:%M:%S", tz = tz)
+    # Strip timezone and replace with GMT
+    ds <- as.POSIXct(lubridate::force_tz(ds, "GMT"), tz = "GMT")
   }
-  attr(ds, "tzone") <- tz
+  attr(ds, "tzone") <- "GMT"
   return(ds)
 }
 

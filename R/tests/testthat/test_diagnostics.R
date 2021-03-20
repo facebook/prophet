@@ -140,7 +140,7 @@ test_that("performance_metrics", {
   df_none <- performance_metrics(df_cv, rolling_window = -1)
   expect_true(all(
     sort(colnames(df_none))
-    == sort(c('horizon', 'coverage', 'mae', 'mape', 'mse', 'rmse'))
+    == sort(c('horizon', 'mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage'))
   ))
   expect_equal(nrow(df_none), 16)
   # Aggregation level 0
@@ -173,7 +173,7 @@ test_that("performance_metrics", {
   # List of metrics containing non valid metrics
   expect_error(
      performance_metrics(df_cv, metrics = c('mse', 'error_metric')),
-     'Valid values for metrics are: mse, rmse, mae, mape, coverage'
+     'Valid values for metrics are: mse, rmse, mae, mape, mdape, smape, coverage'
   )
 })
 

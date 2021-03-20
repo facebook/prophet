@@ -131,12 +131,13 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
     if cutoffs is None:
         # Set period
         period = 0.5 * horizon if period is None else pd.Timedelta(period)
-        
+
         # Set initial
-        if initial is None:
-            initial = max(3 * horizon, seasonality_dt)
-        else:
-            initial = pd.Timedelta(initial)
+        initial = (
+            max(3 * horizon, seasonality_dt) if initial is None
+            else pd.Timedelta(initial)
+        )
+
         # Compute Cutoffs
         cutoffs = generate_cutoffs(df, horizon, initial, period)
     else:
@@ -300,7 +301,10 @@ def prophet_copy(m, cutoff=None):
         mcmc_samples=m.mcmc_samples,
         interval_width=m.interval_width,
         uncertainty_samples=m.uncertainty_samples,
-        stan_backend=m.stan_backend.get_type()
+        stan_backend=(
+            m.stan_backend.get_type() if m.stan_backend is not None
+            else None
+        ),
     )
     m2.extra_regressors = deepcopy(m.extra_regressors)
     m2.seasonalities = deepcopy(m.seasonalities)

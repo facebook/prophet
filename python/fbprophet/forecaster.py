@@ -169,6 +169,11 @@ class Prophet(object):
                 raise ValueError('holidays must be a DataFrame with "ds" and '
                                  '"holiday" columns.')
             self.holidays['ds'] = pd.to_datetime(self.holidays['ds'])
+            if (
+                self.holidays['ds'].isnull().any()
+                or self.holidays['holiday'].isnull().any()
+            ):
+                raise ValueError('Found a NaN in holidays dataframe.')
             has_lower = 'lower_window' in self.holidays
             has_upper = 'upper_window' in self.holidays
             if has_lower + has_upper == 1:
@@ -342,9 +347,9 @@ class Prophet(object):
             floor = df['floor']
         else:
             floor = 0.
-        self.y_scale = (df['y'] - floor).abs().max()
+        self.y_scale = float((df['y'] - floor).abs().max())
         if self.y_scale == 0:
-            self.y_scale = 1
+            self.y_scale = 1.0
         self.start = df['ds'].min()
         self.t_scale = df['ds'].max() - self.start
         for name, props in self.extra_regressors.items():

@@ -4,17 +4,16 @@
 \alias{set_date}
 \title{Convert date vector}
 \usage{
-set_date(ds = NULL, tz = "GMT")
+set_date(ds)
 }
 \arguments{
-\item{ds}{Date vector, can be consisted of characters}
-
-\item{tz}{string time zone}
+\item{ds}{Date vector}
 }
 \value{
 vector of POSIXct object converted from date
 }
 \description{
-Convert the date to POSIXct object
+Convert the date to POSIXct object. Timezones are stripped and replaced
+with GMT.
 }
 \keyword{internal}

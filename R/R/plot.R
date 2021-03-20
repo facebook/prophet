@@ -103,6 +103,8 @@ prophet_plot_components <- function(
   m, fcst, uncertainty = TRUE, plot_cap = TRUE, weekly_start = 0,
   yearly_start = 0, render_plot = TRUE
 ) {
+  dt <- diff(time_diff(m$history$ds, m$start))
+  min.dt <- min(dt[dt > 0])
   # Plot the trend
   panels <- list(
     plot_forecast_component(m, fcst, 'trend', uncertainty, plot_cap))
@@ -113,7 +115,11 @@ prophet_plot_components <- function(
   }
   # Plot weekly seasonality, if present
   if ("weekly" %in% colnames(fcst)) {
-    panels[[length(panels) + 1]] <- plot_weekly(m, uncertainty, weekly_start)
+    if (min.dt < 1) {
+      panels[[length(panels) + 1]] <- plot_seasonality(m, 'weekly', uncertainty)
+    } else {
+      panels[[length(panels) + 1]] <- plot_weekly(m, uncertainty, weekly_start)
+    }
   }
   # Plot yearly seasonality, if present
   if ("yearly" %in% colnames(fcst)) {
@@ -348,15 +354,30 @@ plot_seasonality <- function(m, name, uncertainty = TRUE) {
   gg.s <- ggplot2::ggplot(
       seas, ggplot2::aes_string(x = 'ds', y = name, group = 1)) +
     ggplot2::geom_line(color = "#0072B2", na.rm = TRUE)
-  if (period <= 2) {
+
+  date_breaks <- ggplot2::waiver()
+  label <- 'ds'
+  if (name == 'weekly') {
+    fmt.str <- '%a'
+    date_breaks <- '1 day'
+    label <- 'Day of Week'
+  } else if (name == 'daily') {
     fmt.str <- '%T'
+    date_breaks <- '4 hours'
+    label <- 'Hour of day'
+  } else if (period <= 2) {
+    fmt.str <- '%T'
+    label <- 'Hours'
   } else if (period < 14) {
     fmt.str <- '%m/%d %R'
   } else {
     fmt.str <- '%m/%d'
   }
   gg.s <- gg.s +
-    ggplot2::scale_x_datetime(labels = scales::date_format(fmt.str))
+    ggplot2::scale_x_datetime(
+      labels = scales::date_format(fmt.str), date_breaks = date_breaks
+    ) +
+    ggplot2::xlab(label)
   if (uncertainty && m$uncertainty.samples) {
     gg.s <- gg.s +
     ggplot2::geom_ribbon(
