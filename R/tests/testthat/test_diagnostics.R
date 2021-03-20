@@ -121,7 +121,7 @@ test_that("cross_validation_uncertainty_disabled", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   for (uncertainty in c(0, FALSE)) {
     m <- prophet(uncertainty.samples = uncertainty)
-    m <- fit.prophet(m = m, df = DATA, algorithm = "Newton")
+    m <- fit.prophet(m = m, df = DATA)
     df.cv <- cross_validation(
       m, horizon = 4, units = "days", period = 4, initial = 115)
     expected.cols <- c('y', 'ds', 'yhat', 'cutoff')

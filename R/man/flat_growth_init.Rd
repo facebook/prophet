@@ -16,7 +16,7 @@ A vector (k, m) with the rate (k) and offset (m) of the flat
 }
 \description{
 Provides a strong initialization for flat growth by setting the
-growth to 0 and calculates the offset parameter that pass the 
+growth to 0 and calculates the offset parameter that pass the
 function through the mean of the the y_scaled values.
 }
 \keyword{internal}
