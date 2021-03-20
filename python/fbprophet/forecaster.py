@@ -403,7 +403,7 @@ class Prophet(object):
                 cp_indexes = (
                     np.linspace(0, hist_size - 1, self.n_changepoints + 1)
                         .round()
-                        .astype(np.int)
+                        .astype(int)
                 )
                 self.changepoints = (
                     self.history.iloc[cp_indexes]['ds'].tail(-1)
@@ -436,7 +436,7 @@ class Prophet(object):
         t = np.array(
             (dates - datetime(1970, 1, 1))
                 .dt.total_seconds()
-                .astype(np.float)
+                .astype(float)
         ) / (3600 * 24.)
         return np.column_stack([
             fun((2.0 * (i + 1) * np.pi * t / period))
