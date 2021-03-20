@@ -182,7 +182,10 @@ class CmdStanPyBackend(IStanBackend):
         end = 0
         two_dims = len(data.shape) > 1
         for cname in column_names:
-            parsed = cname.split("[")
+            if "." in cname:
+                parsed = cname.split(".")
+            elif "[" in cname:
+                parsed = cname.split("[")
 
             curr = parsed[0]
             if prev is None:
