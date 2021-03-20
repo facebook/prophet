@@ -1170,6 +1170,7 @@ class Prophet(object):
         else:
             self.params = self.stan_backend.fit(stan_init, dat, **kwargs)
 
+        self.stan_fit = self.stan_backend.stan_fit
         # If no changepoints were requested, replace delta with 0s
         if len(self.changepoints) == 0:
             # Fold delta into the base rate k
