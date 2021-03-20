@@ -55,11 +55,15 @@ The json file will be portable across systems, and deserialization is backwards 
 For time series that exhibit strong seasonality patterns rather than trend changes, it may be useful to force the trend growth rate to be flat. This can be achieved simply by passing `growth=flat` when creating the model:
 
 
+```R
+# R
+m <- prophet(df, growth='flat')
+```
 ```python
 # Python
 m = Prophet(growth='flat')
 ```
-This is currently implemented only in the Python version of Prophet. Note that if this is used on a time series that doesn't have a constant trend, any trend will be fit with the noise term and so there will be high predictive uncertainty in the forecast.
+Note that if this is used on a time series that doesn't have a constant trend, any trend will be fit with the noise term and so there will be high predictive uncertainty in the forecast.
 
 
 

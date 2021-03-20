@@ -17,9 +17,9 @@ The following sections will describe how you can submit a pull request for addin
 
 ## 1. Forking the Prophet Repo
 
-You will need your own fork to work on the code. Go to the fbprophet project
-page https://github.com/facebook/prophet and hit the ``Fork`` button. You will
-want to clone your fork to your machine::
+You will need your own fork to work on the code. Go to the [fbprophet project
+page](https://github.com/facebook/prophet) and hit the ``Fork`` button. You will
+want to clone your fork to your machine:
 
 ```
 $ git clone https://github.com/your-user-name/prophet.git
@@ -36,7 +36,7 @@ development environment. This should contain the required dependencies.
 
 ### Python
 
-- Install either Anaconda (https://www.anaconda.com/download/) or miniconda (https://conda.io/miniconda.html)
+- Install either Anaconda [anaconda](https://www.anaconda.com/download/) or [miniconda](https://conda.io/miniconda.html)
 - Make sure your conda is up to date (``conda update conda``)
 - ``cd`` to the *prophet* source directory that you have cloned
 
@@ -56,7 +56,7 @@ $ pip install -r requirements.txt
 
 ### R
 
-Dependencies can be managed through ``Packrat`` (https://rstudio.github.io/packrat/) or ``renv`` (https://rstudio.github.io/renv/articles/renv.html).
+Dependencies can be managed through [``Packrat``](https://rstudio.github.io/packrat/) or [``renv``](https://rstudio.github.io/renv/articles/renv.html).
 
 For ``renv``, you must first initialise a new project local environment. 
 ```R
@@ -110,7 +110,7 @@ $ conda info -e
 $ conda deactivate
 ```
 
-See the full conda docs here http://conda.pydata.org/docs.
+See the full conda docs [here](http://conda.pydata.org/docs).
 
 ### R
 

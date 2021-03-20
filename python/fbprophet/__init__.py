@@ -7,4 +7,4 @@
 
 from fbprophet.forecaster import Prophet
 
-__version__ = '0.7.1'
+__version__ = '1.0'

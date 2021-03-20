@@ -41,7 +41,7 @@ class TestSerialize(TestCase):
         # Make sure json doesn't get too large in the future
         self.assertTrue(len(model_str) < 200000)
         z = json.loads(model_str)
-        self.assertEqual(z['__fbprophet_version'], '0.7.1')
+        self.assertEqual(z['__fbprophet_version'], '1.0')
 
         m2 = model_from_json(model_str)
 
@@ -141,6 +141,7 @@ class TestSerialize(TestCase):
     def test_backwards_compatibility(self):
         old_versions = {
             '0.6.1.dev0': 29.3669923968994,
+            '0.7.1': 29.282810844704414,
         }
         for v, pred_val in old_versions.items():
             fname = os.path.join(
