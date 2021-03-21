@@ -35,7 +35,7 @@ In Python, models should not be saved with pickle; the Stan backend attached to 
 ```python
 # Python
 import json
-from fbprophet.serialize import model_to_json, model_from_json
+from prophet.serialize import model_to_json, model_from_json
 
 with open('serialized_model.json', 'w') as fout:
     json.dump(model_to_json(m), fout)  # Save model
@@ -43,7 +43,7 @@ with open('serialized_model.json', 'w') as fout:
 with open('serialized_model.json', 'r') as fin:
     m = model_from_json(json.load(fin))  # Load model
 ```
-The json file will be portable across systems, and deserialization is backwards compatible with older versions of fbprophet.
+The json file will be portable across systems, and deserialization is backwards compatible with older versions of prophet.
 
 
 <a id="flat-trend-and-custom-trends"> </a>
@@ -67,7 +67,7 @@ Note that if this is used on a time series that doesn't have a constant trend, a
 
 
 
-To use a trend besides these three built-in trend functions (piecewise linear, piecewise logistic growth, and flat), you can download the source code from github, modify the trend function as desired in a local branch, and then install that local version. This PR provides a good illustration of what must be done to implement a custom trend: https://github.com/facebook/prophet/pull/1466/files.
+To use a trend besides these three built-in trend functions (piecewise linear, piecewise logistic growth, and flat), you can download the source code from github, modify the trend function as desired in a local branch, and then install that local version. This PR provides a good illustration of what must be done to implement a custom trend (https://github.com/facebook/prophet/pull/1466/files), as does this one that implements a step function trend (https://github.com/facebook/prophet/pull/1794) and this one for a new trend in R (https://github.com/facebook/prophet/pull/1778).
 
 
 <a id="updating-fitted-models"> </a>
@@ -111,11 +111,11 @@ m1 = Prophet().fit(df1) # A model fit to all data except the last day
 %timeit m2 = Prophet().fit(df)  # Adding the last day, fitting from scratch
 %timeit m2 = Prophet().fit(df, init=stan_init(m1))  # Adding the last day, warm-starting from m1
 ```
-    1.44 s ± 121 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
-    860 ms ± 203 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    1.33 s ± 55.9 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    185 ms ± 4.46 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
 
 
-As can be seen, the parameters from the previous model are passed in to the fitting for the next with the kwarg `init`. In this case, model fitting was almost 2x faster when using warm starting. The speedup will generally depend on how much the optimal model parameters have changed with the addition of the new data.
+As can be seen, the parameters from the previous model are passed in to the fitting for the next with the kwarg `init`. In this case, model fitting was about 5x faster when using warm starting. The speedup will generally depend on how much the optimal model parameters have changed with the addition of the new data.
 
 
 

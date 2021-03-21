@@ -4,16 +4,24 @@ docid: "diagnostics"
 title: "Diagnostics"
 permalink: /docs/diagnostics.html
 subsections:
+  - title: Cross validation
+    id: cross-validation
   - title: Parallelizing cross validation
     id: parallelizing-cross-validation
   - title: Hyperparameter tuning
     id: hyperparameter-tuning
 ---
+<a id="cross-validation"> </a>
+
+### Cross validation
+
+
+
 Prophet includes functionality for time series cross validation to measure forecast error using historical data. This is done by selecting cutoff points in the history, and for each of them fitting the model using data only up to that cutoff point. We can then compare the forecasted values to the actual values. This figure illustrates a simulated historical forecast on the Peyton Manning dataset, where the model was fit to a initial history of 5 years, and a forecast was made on a one year horizon.
 
 
  
-![png](/prophet/static/diagnostics_files/diagnostics_3_0.png) 
+![png](/prophet/static/diagnostics_files/diagnostics_4_0.png) 
 
 
 [The Prophet paper](https://peerj.com/preprints/3190.pdf) gives further description of simulated historical forecasts.
@@ -38,7 +46,7 @@ head(df.cv)
 ```
 ```python
 # Python
-from fbprophet.diagnostics import cross_validation
+from prophet.diagnostics import cross_validation
 df_cv = cross_validation(m, initial='730 days', period='180 days', horizon = '365 days')
 ```
 ```python
@@ -78,45 +86,45 @@ df_cv.head()
     <tr>
       <th>0</th>
       <td>2010-02-16</td>
-      <td>8.956828</td>
-      <td>8.460272</td>
-      <td>9.476844</td>
+      <td>8.959678</td>
+      <td>8.470035</td>
+      <td>9.451618</td>
       <td>8.242493</td>
       <td>2010-02-15</td>
     </tr>
     <tr>
       <th>1</th>
       <td>2010-02-17</td>
-      <td>8.723230</td>
-      <td>8.208639</td>
-      <td>9.222179</td>
+      <td>8.726195</td>
+      <td>8.236734</td>
+      <td>9.219616</td>
       <td>8.008033</td>
       <td>2010-02-15</td>
     </tr>
     <tr>
       <th>2</th>
       <td>2010-02-18</td>
-      <td>8.607021</td>
-      <td>8.106506</td>
-      <td>9.104792</td>
+      <td>8.610011</td>
+      <td>8.104834</td>
+      <td>9.125484</td>
       <td>8.045268</td>
       <td>2010-02-15</td>
     </tr>
     <tr>
       <th>3</th>
       <td>2010-02-19</td>
-      <td>8.528870</td>
-      <td>8.061701</td>
-      <td>9.024450</td>
+      <td>8.532004</td>
+      <td>7.985031</td>
+      <td>9.041575</td>
       <td>7.928766</td>
       <td>2010-02-15</td>
     </tr>
     <tr>
       <th>4</th>
       <td>2010-02-20</td>
-      <td>8.270872</td>
-      <td>7.773299</td>
-      <td>8.745526</td>
+      <td>8.274090</td>
+      <td>7.779034</td>
+      <td>8.745627</td>
       <td>7.745003</td>
       <td>2010-02-15</td>
     </tr>
@@ -153,7 +161,7 @@ head(df.p)
 ```
 ```python
 # Python
-from fbprophet.diagnostics import performance_metrics
+from prophet.diagnostics import performance_metrics
 df_p = performance_metrics(df_cv)
 df_p.head()
 ```
@@ -184,6 +192,7 @@ df_p.head()
       <th>mae</th>
       <th>mape</th>
       <th>mdape</th>
+      <th>smape</th>
       <th>coverage</th>
     </tr>
   </thead>
@@ -191,52 +200,57 @@ df_p.head()
     <tr>
       <th>0</th>
       <td>37 days</td>
-      <td>0.494800</td>
-      <td>0.703420</td>
-      <td>0.505277</td>
-      <td>0.058540</td>
-      <td>0.050149</td>
-      <td>0.676565</td>
+      <td>0.493764</td>
+      <td>0.702683</td>
+      <td>0.504754</td>
+      <td>0.058485</td>
+      <td>0.049922</td>
+      <td>0.058774</td>
+      <td>0.674052</td>
     </tr>
     <tr>
       <th>1</th>
       <td>38 days</td>
-      <td>0.500706</td>
-      <td>0.707606</td>
-      <td>0.510301</td>
-      <td>0.059120</td>
-      <td>0.049955</td>
-      <td>0.675423</td>
+      <td>0.499522</td>
+      <td>0.706769</td>
+      <td>0.509723</td>
+      <td>0.059060</td>
+      <td>0.049389</td>
+      <td>0.059409</td>
+      <td>0.672910</td>
     </tr>
     <tr>
       <th>2</th>
       <td>39 days</td>
-      <td>0.522967</td>
-      <td>0.723165</td>
-      <td>0.516433</td>
-      <td>0.059724</td>
-      <td>0.050078</td>
-      <td>0.672682</td>
+      <td>0.521614</td>
+      <td>0.722229</td>
+      <td>0.515793</td>
+      <td>0.059657</td>
+      <td>0.049540</td>
+      <td>0.060131</td>
+      <td>0.670169</td>
     </tr>
     <tr>
       <th>3</th>
       <td>40 days</td>
-      <td>0.530259</td>
-      <td>0.728189</td>
-      <td>0.519331</td>
-      <td>0.060033</td>
-      <td>0.049706</td>
-      <td>0.678849</td>
+      <td>0.528760</td>
+      <td>0.727159</td>
+      <td>0.518634</td>
+      <td>0.059961</td>
+      <td>0.049232</td>
+      <td>0.060504</td>
+      <td>0.671311</td>
     </tr>
     <tr>
       <th>4</th>
       <td>41 days</td>
-      <td>0.537736</td>
-      <td>0.733305</td>
-      <td>0.520341</td>
-      <td>0.060114</td>
-      <td>0.049955</td>
-      <td>0.685244</td>
+      <td>0.536078</td>
+      <td>0.732174</td>
+      <td>0.519585</td>
+      <td>0.060036</td>
+      <td>0.049389</td>
+      <td>0.060641</td>
+      <td>0.678849</td>
     </tr>
   </tbody>
 </table>
@@ -253,11 +267,11 @@ plot_cross_validation_metric(df.cv, metric = 'mape')
 ```
 ```python
 # Python
-from fbprophet.plot import plot_cross_validation_metric
+from prophet.plot import plot_cross_validation_metric
 fig = plot_cross_validation_metric(df_cv, metric='mape')
 ```
  
-![png](/prophet/static/diagnostics_files/diagnostics_16_0.png) 
+![png](/prophet/static/diagnostics_files/diagnostics_17_0.png) 
 
 
 The size of the rolling window in the figure can be changed with the optional argument `rolling_window`, which specifies the proportion of forecasts to use in each rolling window. The default is 0.1, corresponding to 10% of rows from `df_cv` included in each window; increasing this will lead to a smoother average curve in the figure. The `initial` period should be long enough to capture all of the components of the model, in particular seasonalities and extra regressors: at least a year for yearly seasonality, at least a week for weekly seasonality, etc.
@@ -285,7 +299,7 @@ Cross-validation can also be run in parallel mode in Python, by setting specifyi
 
 
 
-For problems that aren't too big, we recommend using `parallel="processes"`. It will achieve the highest performance when the parallel cross validation can be done on a single machine. For large problems, a [Dask](https://dask.org) cluster can be used to do the cross validation on many machines. You will need to [install Dask](https://docs.dask.org/en/latest/install.html) separately, as it will not be installed with `fbprophet`.
+For problems that aren't too big, we recommend using `parallel="processes"`. It will achieve the highest performance when the parallel cross validation can be done on a single machine. For large problems, a [Dask](https://dask.org) cluster can be used to do the cross validation on many machines. You will need to [install Dask](https://docs.dask.org/en/latest/install.html) separately, as it will not be installed with `prophet`.
 
 
 
@@ -343,22 +357,22 @@ tuning_results['rmse'] = rmses
 print(tuning_results)
 ```
         changepoint_prior_scale  seasonality_prior_scale      rmse
-    0                     0.001                     0.01  0.757489
-    1                     0.001                     0.10  0.745049
-    2                     0.001                     1.00  0.753315
-    3                     0.001                    10.00  0.763111
-    4                     0.010                     0.01  0.536260
-    5                     0.010                     0.10  0.538103
-    6                     0.010                     1.00  0.544326
-    7                     0.010                    10.00  0.520970
-    8                     0.100                     0.01  0.524669
-    9                     0.100                     0.10  0.521302
-    10                    0.100                     1.00  0.520692
-    11                    0.100                    10.00  0.515338
-    12                    0.500                     0.01  0.532103
-    13                    0.500                     0.10  0.528939
-    14                    0.500                     1.00  0.525256
-    15                    0.500                    10.00  0.524619
+    0                     0.001                     0.01  0.757694
+    1                     0.001                     0.10  0.743399
+    2                     0.001                     1.00  0.753387
+    3                     0.001                    10.00  0.762890
+    4                     0.010                     0.01  0.542315
+    5                     0.010                     0.10  0.535546
+    6                     0.010                     1.00  0.527008
+    7                     0.010                    10.00  0.541544
+    8                     0.100                     0.01  0.524835
+    9                     0.100                     0.10  0.516061
+    10                    0.100                     1.00  0.521406
+    11                    0.100                    10.00  0.518580
+    12                    0.500                     0.01  0.532140
+    13                    0.500                     0.10  0.524668
+    14                    0.500                     1.00  0.521130
+    15                    0.500                    10.00  0.522980
 
 
 ```python
@@ -366,7 +380,7 @@ print(tuning_results)
 best_params = all_params[np.argmin(rmses)]
 print(best_params)
 ```
-    {'changepoint_prior_scale': 0.1, 'seasonality_prior_scale': 10.0}
+    {'changepoint_prior_scale': 0.1, 'seasonality_prior_scale': 0.1}
 
 
 Alternatively, parallelization could be done across parameter combinations by parallelizing the loop above.
