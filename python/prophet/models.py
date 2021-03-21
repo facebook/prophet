@@ -128,7 +128,7 @@ class CmdStanPyBackend(IStanBackend):
                                           inits=stan_init,
                                           iter_sampling=iter_half,
                                           **kwargs)
-        res = self.stan_fit.sample
+        res = self.stan_fit.draws()
         (samples, c, columns) = res.shape
         res = res.reshape((samples * c, columns))
         params = self.stan_to_dict_numpy(self.stan_fit.column_names, res)
@@ -182,7 +182,10 @@ class CmdStanPyBackend(IStanBackend):
         end = 0
         two_dims = len(data.shape) > 1
         for cname in column_names:
-            parsed = cname.split(".")
+            if "." in cname:
+                parsed = cname.split(".")
+            else:
+                parsed = cname.split("[")
 
             curr = parsed[0]
             if prev is None:
