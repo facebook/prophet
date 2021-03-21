@@ -21,7 +21,7 @@ Full documentation and examples available at the homepage: https://facebook.gith
 ## Installation
 
 ```shell
-pip install fbprophet
+pip install prophet
 ```
 Note:  Installation requires PyStan, which has its [own installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html).
 On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html).
@@ -31,12 +31,12 @@ On Windows, PyStan requires a compiler so you'll need to [follow the instruction
 
 Simply type `make build` and if everything is fine you should be able to `make shell` or alternative jump directly to `make py-shell`. 
 
-To run the tests, inside the container `cd python/fbprophet` and then `python -m unittest`
+To run the tests, inside the container `cd python/prophet` and then `python -m unittest`
 
 ### Example usage
 
 ```python
-  >>> from fbprophet import Prophet
+  >>> from prophet import Prophet
   >>> m = Prophet()
   >>> m.fit(df)  # df is a pandas.DataFrame with 'y' and 'ds' columns
   >>> future = m.make_future_dataframe(periods=365)
