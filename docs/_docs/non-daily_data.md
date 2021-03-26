@@ -159,7 +159,7 @@ m = Prophet(seasonality_mode='multiplicative', mcmc_samples=300).fit(df)
 fcst = m.predict(future)
 fig = m.plot_components(fcst)
 ```
-    WARNING:pystan:403 of 600 iterations saturated the maximum tree depth of 10 (67.2 %)
+    WARNING:pystan:481 of 600 iterations saturated the maximum tree depth of 10 (80.2 %)
     WARNING:pystan:Run again with max_treedepth larger than 10 to avoid saturation
 
 
