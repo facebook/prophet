@@ -43,7 +43,7 @@ $
 $ pip install prophet
 ```
 
-The major dependency that Prophet has is `pystan`. PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install prophet.
+The major dependency that Prophet has is `pystan`. PyStan has its own [installation instructions](https://pystan.readthedocs.io/en/latest/installation.html). Install pystan with pip before using pip to install prophet.
 
 After installation, you can [get started!](quick_start.html#python-api)
 
