@@ -42,7 +42,8 @@ Prophet is on PyPI, so you can use `pip` to install it. From v0.6 onwards, Pytho
 
 ```bash
 # Install pystan with pip before using pip to install prophet
-pip install pystan
+# pystan>=3.0 is currently not supported
+pip install pystan==2.19.1.1
 
 pip install prophet
 ```
@@ -82,6 +83,21 @@ On Windows, PyStan requires a compiler so you'll need to [follow the instruction
 Make sure compilers (gcc, g++, build-essential) and Python development tools (python-dev, python3-dev) are installed. In Red Hat systems, install the packages gcc64 and gcc64-c++. If you are using a VM, be aware that you will need at least 4GB of memory to install prophet, and at least 2GB of memory to use prophet.
 
 ## Changelog
+
+### Version 1.0 (2021.03.28)
+
+- Python package name changed from fbprophet to prophet
+- Fixed R Windows build issues to get latest version back on CRAN
+- Improvements in serialization, holidays, and R timezone handling
+- Plotting improvements
+
+### Version 0.7 (2020.09.05)
+
+- Built-in json serialization
+- Added "flat" growth option
+- Bugfixes related to `holidays` and `pandas`
+- Plotting improvements
+- Improvements in cross validation, such as parallelization and directly specifying cutoffs
 
 ### Version 0.6 (2020.03.03)
 

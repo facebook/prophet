@@ -38,7 +38,7 @@ Prophet is on PyPI, so you can use pip to install it:
 ```
 # bash
 # Install pystan with pip before using pip to install prophet
-$ pip install pystan
+$ pip install pystan==2.19.1.1
 $
 $ pip install prophet
 ```
