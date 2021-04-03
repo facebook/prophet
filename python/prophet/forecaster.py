@@ -1577,7 +1577,7 @@ class Prophet(object):
         return pd.DataFrame({'ds': dates})
 
     def plot(self, fcst, ax=None, uncertainty=True, plot_cap=True,
-             xlabel='ds', ylabel='y', figsize=(10, 6)):
+             xlabel='ds', ylabel='y', figsize=(10, 6), include_legend=False):
         """Plot the Prophet forecast.
 
         Parameters
@@ -1590,6 +1590,7 @@ class Prophet(object):
         xlabel: Optional label name on X-axis
         ylabel: Optional label name on Y-axis
         figsize: Optional tuple width, height in inches.
+        include_legend: Optional boolean to add legend to the plot.
 
         Returns
         -------
@@ -1598,7 +1599,7 @@ class Prophet(object):
         return plot(
             m=self, fcst=fcst, ax=ax, uncertainty=uncertainty,
             plot_cap=plot_cap, xlabel=xlabel, ylabel=ylabel,
-            figsize=figsize
+            figsize=figsize, include_legend=include_legend
         )
 
     def plot_components(self, fcst, uncertainty=True, plot_cap=True,
