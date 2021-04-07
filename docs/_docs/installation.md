@@ -57,4 +57,4 @@ Make sure compilers (gcc, g++, build-essential) and Python development tools (py
 
 ### Anaconda
 
-Use `conda install gcc` to set up gcc. The easiest way to install Prophet is through conda-forge: `conda install -c conda-forge prophet`.
+Use `conda install gcc` to set up gcc. The easiest way to install Prophet is through conda-forge: `conda install -c conda-forge fbprophet`.
