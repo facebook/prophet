@@ -21,11 +21,8 @@ You may have noticed in the earlier examples in this documentation that real tim
 Prophet detects changepoints by first specifying a large number of *potential changepoints* at which the rate is allowed to change. It then puts a sparse prior on the magnitudes of the rate changes (equivalent to L1 regularization) - this essentially means that Prophet has a large number of *possible* places where the rate can change, but will use as few of them as possible. Consider the Peyton Manning forecast from the Quickstart. By default, Prophet specifies 25 potential changepoints which are uniformly placed in the first 80% of the time series. The vertical lines in this figure indicate where the potential changepoints were placed:
 
 
-    INFO:numexpr.utils:NumExpr defaulting to 8 threads.
-
-
  
-![png](/prophet/static/trend_changepoints_files/trend_changepoints_4_1.png) 
+![png](/prophet/static/trend_changepoints_files/trend_changepoints_4_0.png) 
 
 
 Even though we have a lot of places where the rate can possibly change, because of the sparse prior, most of these changepoints go unused. We can see this by plotting the magnitude of the rate change at each changepoint:

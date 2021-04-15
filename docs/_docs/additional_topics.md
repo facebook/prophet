@@ -10,6 +10,8 @@ subsections:
     id: flat-trend-and-custom-trends
   - title: Updating fitted models
     id: updating-fitted-models
+  - title: External references
+    id: external-references
 ---
 <a id="saving-models"> </a>
 
@@ -67,7 +69,7 @@ Note that if this is used on a time series that doesn't have a constant trend, a
 
 
 
-To use a trend besides these three built-in trend functions (piecewise linear, piecewise logistic growth, and flat), you can download the source code from github, modify the trend function as desired in a local branch, and then install that local version. This PR provides a good illustration of what must be done to implement a custom trend (https://github.com/facebook/prophet/pull/1466/files), as does this one that implements a step function trend (https://github.com/facebook/prophet/pull/1794) and this one for a new trend in R (https://github.com/facebook/prophet/pull/1778).
+To use a trend besides these three built-in trend functions (piecewise linear, piecewise logistic growth, and flat), you can download the source code from github, modify the trend function as desired in a local branch, and then install that local version. [This PR](https://github.com/facebook/prophet/pull/1466/files) provides a good illustration of what must be done to implement a custom trend, as does [this one](https://github.com/facebook/prophet/pull/1794) that implements a step function trend and [this one](https://github.com/facebook/prophet/pull/1778) for a new trend in R.
 
 
 <a id="updating-fitted-models"> </a>
@@ -120,4 +122,15 @@ As can be seen, the parameters from the previous model are passed in to the fitt
 
 
 There are few caveats that should be kept in mind when considering warm-starting. First, warm-starting may work well for small updates to the data (like the addition of one day in the example above) but can be worse than fitting from scratch if there are large changes to the data (i.e., a lot of days have been added). This is because when a large amount of history is added, the location of the changepoints will be very different between the two models, and so the parameters from the previous model may actually produce a bad trend initialization. Second, as a detail, the number of changepoints need to be consistent from one model to the next or else an error will be raised because the changepoint prior parameter `delta` will be the wrong size.
+
+
+<a id="external-references"> </a>
+
+### External references
+
+These github repositories provide examples of building on top of Prophet in ways that may be of broad interest:
+
+* [forecastr](https://github.com/garethcull/forecastr): A web app that provides a UI for Prophet.
+
+* [NeuralProphet](https://github.com/ourownstory/neural_prophet): A Prophet-style model implemented in pytorch, to be more adaptable and extensible.
 
