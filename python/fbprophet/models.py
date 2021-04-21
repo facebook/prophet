@@ -140,7 +140,7 @@ class CmdStanPyBackend(IStanBackend):
         args.update(kwargs)
 
         self.stan_fit = self.model.sample(**args)
-        res = self.stan_fit.sample
+        res = self.stan_fit.draws()
         (samples, c, columns) = res.shape
         res = res.reshape((samples * c, columns))
         params = self.stan_to_dict_numpy(self.stan_fit.column_names, res)
