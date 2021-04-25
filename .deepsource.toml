@@ -1,6 +1,6 @@
 version = 1
 
-test_patterns = ["python/fbprophet/tests/**"]
+test_patterns = ["python/prophet/tests/**"]
 exclude_patterns = ["R/**", "notebooks/**", "docs/**", "examples/**"]
 
 [[analyzers]]

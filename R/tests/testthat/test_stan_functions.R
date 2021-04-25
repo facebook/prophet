@@ -6,6 +6,8 @@
 library(prophet)
 context("Prophet stan model tests")
 
+skip_on_os("windows")
+
 fn <- tryCatch({
   rstan::expose_stan_functions(
     rstan::stanc(file="../../inst/stan/prophet.stan")

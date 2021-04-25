@@ -32,7 +32,7 @@ First we'll import the data:
 ```python
 # Python
 import pandas as pd
-from fbprophet import Prophet
+from prophet import Prophet
 ```
 ```python
 # Python
@@ -202,37 +202,37 @@ forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail()
     <tr>
       <th>3265</th>
       <td>2017-01-15</td>
-      <td>8.204125</td>
-      <td>7.449654</td>
-      <td>8.946255</td>
+      <td>8.211542</td>
+      <td>7.444742</td>
+      <td>8.903545</td>
     </tr>
     <tr>
       <th>3266</th>
       <td>2017-01-16</td>
-      <td>8.529148</td>
-      <td>7.792752</td>
-      <td>9.284594</td>
+      <td>8.536553</td>
+      <td>7.847804</td>
+      <td>9.211145</td>
     </tr>
     <tr>
       <th>3267</th>
       <td>2017-01-17</td>
-      <td>8.316555</td>
-      <td>7.563541</td>
-      <td>9.029357</td>
+      <td>8.323968</td>
+      <td>7.541829</td>
+      <td>9.035461</td>
     </tr>
     <tr>
       <th>3268</th>
       <td>2017-01-18</td>
-      <td>8.149153</td>
-      <td>7.384345</td>
-      <td>8.840279</td>
+      <td>8.156621</td>
+      <td>7.404457</td>
+      <td>8.830642</td>
     </tr>
     <tr>
       <th>3269</th>
       <td>2017-01-19</td>
-      <td>8.161075</td>
-      <td>7.430352</td>
-      <td>8.859482</td>
+      <td>8.168561</td>
+      <td>7.438865</td>
+      <td>8.908668</td>
     </tr>
   </tbody>
 </table>
@@ -262,12 +262,12 @@ fig2 = m.plot_components(forecast)
 ![png](/prophet/static/quick_start_files/quick_start_14_0.png) 
 
 
-An interactive figure of the forecast and components can be created with plotly. You will need to install plotly 4.0 or above separately, as it will not by default be installed with fbprophet. You will also need to install the `notebook` and `ipywidgets` packages.
+An interactive figure of the forecast and components can be created with plotly. You will need to install plotly 4.0 or above separately, as it will not by default be installed with prophet. You will also need to install the `notebook` and `ipywidgets` packages.
 
 
 ```python
 # Python
-from fbprophet.plot import plot_plotly, plot_components_plotly
+from prophet.plot import plot_plotly, plot_components_plotly
 
 plot_plotly(m, forecast)
 ```
@@ -291,6 +291,12 @@ In R, we use the normal model fitting API.  We provide a `prophet` function that
 # R
 library(prophet)
 ```
+    R[write to console]: Loading required package: Rcpp
+    
+    R[write to console]: Loading required package: rlang
+    
+
+
 First we read in the data and create the outcome variable. As in the Python API, this is a dataframe with columns `ds` and `y`, containing the date and numeric value respectively. The ds column should be YYYY-MM-DD for a date, or YYYY-MM-DD HH:MM:SS for a timestamp. As above, we use here the log number of views to Peyton Manning's Wikipedia page, available [here](https://github.com/facebook/prophet/blob/master/examples/example_wp_log_peyton_manning.csv).
 
 
@@ -313,7 +319,6 @@ Predictions are made on a dataframe with a column `ds` containing the dates for 
 future <- make_future_dataframe(m, periods = 365)
 tail(future)
 ```
-
                  ds
     3265 2017-01-14
     3266 2017-01-15
@@ -321,7 +326,6 @@ tail(future)
     3268 2017-01-17
     3269 2017-01-18
     3270 2017-01-19
-
 
 
 As with most modeling procedures in R, we use the generic `predict` function to get our forecast. The `forecast` object is a dataframe with a column `yhat` containing the forecast. It has additional columns for uncertainty intervals and seasonal components.
@@ -332,15 +336,13 @@ As with most modeling procedures in R, we use the generic `predict` function to 
 forecast <- predict(m, future)
 tail(forecast[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
 ```
-
                  ds     yhat yhat_lower yhat_upper
-    3265 2017-01-14 7.824163   7.127881   8.609668
-    3266 2017-01-15 8.205942   7.452071   8.904387
-    3267 2017-01-16 8.530942   7.742400   9.300974
-    3268 2017-01-17 8.318327   7.606534   9.071184
-    3269 2017-01-18 8.150948   7.440224   8.902922
-    3270 2017-01-19 8.162839   7.385953   8.890669
-
+    3265 2017-01-14 7.818359   7.071228   8.550957
+    3266 2017-01-15 8.200125   7.475725   8.869495
+    3267 2017-01-16 8.525104   7.747071   9.226915
+    3268 2017-01-17 8.312482   7.551904   9.046774
+    3269 2017-01-18 8.145098   7.390770   8.863692
+    3270 2017-01-19 8.156964   7.381716   8.866507
 
 
 You can use the generic `plot` function to plot the forecast, by passing in the model and the forecast dataframe.

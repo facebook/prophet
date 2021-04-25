@@ -26,8 +26,8 @@ jobs:
         pip install -U -r python/requirements.txt dask[dataframe] distributed
         cd python && python setup.py develop test
         python setup.py clean
-        rm -rf fbprophet/stan_model
-        wget https://github.com/stan-dev/cmdstan/releases/download/v2.22.1/cmdstan-2.22.1.tar.gz -O /tmp/cmdstan.tar.gz > /dev/null
+        rm -rf prophet/stan_model
+        wget https://github.com/stan-dev/cmdstan/releases/download/v2.26.1/cmdstan-2.26.1.tar.gz -O /tmp/cmdstan.tar.gz > /dev/null
         tar -xvf /tmp/cmdstan.tar.gz -C /tmp > /dev/null
-        make -C /tmp/cmdstan-2.22.1/ build > /dev/null
-        CMDSTAN=/tmp/cmdstan-2.22.1 STAN_BACKEND=CMDSTANPY python setup.py develop test
+        make -C /tmp/cmdstan-2.26.1/ build > /dev/null
+        CMDSTAN=/tmp/cmdstan-2.26.1 STAN_BACKEND=CMDSTANPY python setup.py develop test
