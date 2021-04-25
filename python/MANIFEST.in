@@ -4,8 +4,8 @@ include LICENSE
 include requirements.txt
 
 # Ensure in-place built models do not get included in the source dist.
-prune fbprophet/stan_model
+prune prophet/stan_model
 
 # Necessary for tests to run
-include fbprophet/tests/*.csv
-include fbprophet/tests/*.json
+include prophet/tests/*.csv
+include prophet/tests/*.json

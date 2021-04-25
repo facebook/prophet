@@ -260,17 +260,19 @@ set_date <- function(ds) {
     ds <- as.character(ds)
   }
 
-  # Type should be either character, or an object compatible with lubridate
-  if (is.character(ds)) {
+  # If a datetime, strip timezone and replace with GMT.
+  if (lubridate::is.instant(ds)) {
+    ds <- as.POSIXct(lubridate::force_tz(ds, "GMT"), tz = "GMT")
+  }
+  else {
+    # Assume it can be coerced into POSIXct
     if (min(nchar(ds), na.rm=TRUE) < 12) {
         ds <- as.POSIXct(ds, format = "%Y-%m-%d", tz = "GMT")
     } else {
         ds <- as.POSIXct(ds, format = "%Y-%m-%d %H:%M:%S", tz = "GMT")
     }
-  } else {
-    # Strip timezone and replace with GMT
-    ds <- as.POSIXct(lubridate::force_tz(ds, "GMT"), tz = "GMT")
   }
+
   attr(ds, "tzone") <- "GMT"
   return(ds)
 }

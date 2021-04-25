@@ -41,7 +41,7 @@ plot(m, forecast) + add_changepoints_to_plot(m)
 ```
 ```python
 # Python
-from fbprophet.plot import add_changepoints_to_plot
+from prophet.plot import add_changepoints_to_plot
 fig = m.plot(forecast)
 a = add_changepoints_to_plot(fig.gca(), m, forecast)
 ```
