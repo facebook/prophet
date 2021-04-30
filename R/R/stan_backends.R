@@ -142,7 +142,8 @@ check_cmdstanr <- function() {
       object = model,
       data = dat,
       init = stan_init,
-      algorithm = if(dat$T < 100) {'newton'} else {'lbfgs'},
+      algorithm = 'lbfgs',  # generally fits without failures
+      # algorithm = if(dat$T < 100) {'newton'} else {'lbfgs'},
       iter = 1e4,
       refresh = 0
     )
