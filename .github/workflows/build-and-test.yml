@@ -51,6 +51,10 @@ jobs:
       uses: r-lib/actions/setup-r@v1
       with:
         r-version: ${{ matrix.config.r }}
+    - name: Install remotes
+      run: |
+        install.packages('remotes')
+      shell: Rscript {0}
     - name: Install system dependencies
       if: runner.os == 'Linux'
       run: |
