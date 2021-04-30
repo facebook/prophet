@@ -39,7 +39,7 @@ jobs:
     strategy:
       matrix:
         config:
-          - {os: ubuntu-latest, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+          - {os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
       fail-fast: false
 
     env:
@@ -52,9 +52,12 @@ jobs:
       uses: r-lib/actions/setup-r@v1
       with:
         r-version: ${{ matrix.config.r }}
-    - name: Query dependencies
+    - name: Install remotes
       run: |
         install.packages('remotes')
+      shell: Rscript {0}
+    - name: Query dependencies
+      run: |
         saveRDS(remotes::dev_package_deps(pkgdir = "R/", dependencies = TRUE), ".github/depends.Rds", version = 2)
         writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
       shell: Rscript {0}
@@ -71,7 +74,7 @@ jobs:
         while read -r cmd
         do
           eval sudo $cmd
-        done < <(Rscript -e 'writeLines(remotes::system_requirements(os = "ubuntu", os_release = "latest", path = "R/"))')
+        done < <(Rscript -e 'writeLines(remotes::system_requirements(os = "ubuntu", os_release = "20.04", path = "R/"))')
     - name: Install dependencies
       run: |
         remotes::install_deps(pkgdir = "R/", dependencies = TRUE)
