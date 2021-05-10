@@ -16,54 +16,56 @@ globalVariables(c(
 #' Prophet forecaster.
 #'
 #' @param df (optional) Dataframe containing the history. Must have columns ds
-#'  (date type) and y, the time series. If growth is logistic, then df must
-#'  also have a column cap that specifies the capacity at each ds. If not
-#'  provided, then the model object will be instantiated but not fit; use
-#'  fit.prophet(m, df) to fit the model.
-#' @param growth String 'linear', 'logistic', or 'flat' to specify a linear, logistic
-#'  or flat trend.
+#'   (date type) and y, the time series. If growth is logistic, then df must
+#'   also have a column cap that specifies the capacity at each ds. If not
+#'   provided, then the model object will be instantiated but not fit; use
+#'   fit.prophet(m, df) to fit the model.
+#' @param growth String 'linear', 'logistic', or 'flat' to specify a linear,
+#'   logistic or flat trend.
 #' @param changepoints Vector of dates at which to include potential
-#'  changepoints. If not specified, potential changepoints are selected
-#'  automatically.
+#'   changepoints. If not specified, potential changepoints are selected
+#'   automatically.
 #' @param n.changepoints Number of potential changepoints to include. Not used
-#'  if input `changepoints` is supplied. If `changepoints` is not supplied,
-#'  then n.changepoints potential changepoints are selected uniformly from the
-#'  first `changepoint.range` proportion of df$ds.
+#'   if input `changepoints` is supplied. If `changepoints` is not supplied,
+#'   then n.changepoints potential changepoints are selected uniformly from the
+#'   first `changepoint.range` proportion of df$ds.
 #' @param changepoint.range Proportion of history in which trend changepoints
-#'  will be estimated. Defaults to 0.8 for the first 80%. Not used if
-#'  `changepoints` is specified.
-#' @param yearly.seasonality Fit yearly seasonality. Can be 'auto', TRUE,
-#'  FALSE, or a number of Fourier terms to generate.
-#' @param weekly.seasonality Fit weekly seasonality. Can be 'auto', TRUE,
-#'  FALSE, or a number of Fourier terms to generate.
-#' @param daily.seasonality Fit daily seasonality. Can be 'auto', TRUE,
-#' FALSE, or a number of Fourier terms to generate.
+#'   will be estimated. Defaults to 0.8 for the first 80%. Not used if
+#'   `changepoints` is specified.
+#' @param yearly.seasonality Fit yearly seasonality. Can be 'auto', TRUE, FALSE,
+#'   or a number of Fourier terms to generate.
+#' @param weekly.seasonality Fit weekly seasonality. Can be 'auto', TRUE, FALSE,
+#'   or a number of Fourier terms to generate.
+#' @param daily.seasonality Fit daily seasonality. Can be 'auto', TRUE, FALSE,
+#'   or a number of Fourier terms to generate.
 #' @param holidays data frame with columns holiday (character) and ds (date
-#'  type)and optionally columns lower_window and upper_window which specify a
-#'  range of days around the date to be included as holidays. lower_window=-2
-#'  will include 2 days prior to the date as holidays. Also optionally can have
-#'  a column prior_scale specifying the prior scale for each holiday.
+#'   type)and optionally columns lower_window and upper_window which specify a
+#'   range of days around the date to be included as holidays. lower_window=-2
+#'   will include 2 days prior to the date as holidays. Also optionally can have
+#'   a column prior_scale specifying the prior scale for each holiday.
 #' @param seasonality.mode 'additive' (default) or 'multiplicative'.
 #' @param seasonality.prior.scale Parameter modulating the strength of the
-#'  seasonality model. Larger values allow the model to fit larger seasonal
-#'  fluctuations, smaller values dampen the seasonality. Can be specified for
-#'  individual seasonalities using add_seasonality.
+#'   seasonality model. Larger values allow the model to fit larger seasonal
+#'   fluctuations, smaller values dampen the seasonality. Can be specified for
+#'   individual seasonalities using add_seasonality.
 #' @param holidays.prior.scale Parameter modulating the strength of the holiday
-#'  components model, unless overridden in the holidays input.
+#'   components model, unless overridden in the holidays input.
 #' @param changepoint.prior.scale Parameter modulating the flexibility of the
-#'  automatic changepoint selection. Large values will allow many changepoints,
-#'  small values will allow few changepoints.
+#'   automatic changepoint selection. Large values will allow many changepoints,
+#'   small values will allow few changepoints.
 #' @param mcmc.samples Integer, if greater than 0, will do full Bayesian
-#'  inference with the specified number of MCMC samples. If 0, will do MAP
-#'  estimation.
+#'   inference with the specified number of MCMC samples. If 0, will do MAP
+#'   estimation.
 #' @param interval.width Numeric, width of the uncertainty intervals provided
-#'  for the forecast. If mcmc.samples=0, this will be only the uncertainty
-#'  in the trend using the MAP estimate of the extrapolated generative model.
-#'  If mcmc.samples>0, this will be integrated over all model parameters,
-#'  which will include uncertainty in seasonality.
+#'   for the forecast. If mcmc.samples=0, this will be only the uncertainty in
+#'   the trend using the MAP estimate of the extrapolated generative model. If
+#'   mcmc.samples>0, this will be integrated over all model parameters, which
+#'   will include uncertainty in seasonality.
 #' @param uncertainty.samples Number of simulated draws used to estimate
-#'  uncertainty intervals. Settings this value to 0 or False will disable
-#'  uncertainty estimation and speed up the calculation.
+#'   uncertainty intervals. Settings this value to 0 or False will disable
+#'   uncertainty estimation and speed up the calculation.
+#' @param backend Whether to use the "rstan" or "cmdstanr" backend to fit the
+#'   model. If not provided, uses the R_STAN_BACKEND environment variable.
 #' @param fit Boolean, if FALSE the model is initialized but not fit.
 #' @param ... Additional arguments, passed to \code{\link{fit.prophet}}
 #'
@@ -99,11 +101,14 @@ prophet <- function(df = NULL,
                     interval.width = 0.80,
                     uncertainty.samples = 1000,
                     fit = TRUE,
+                    backend = NULL,
                     ...
 ) {
   if (!is.null(changepoints)) {
     n.changepoints <- length(changepoints)
   }
+
+  if (is.null(backend)) backend <- get_stan_backend()
 
   m <- list(
     growth = growth,
@@ -121,6 +126,7 @@ prophet <- function(df = NULL,
     mcmc.samples = mcmc.samples,
     interval.width = interval.width,
     uncertainty.samples = uncertainty.samples,
+    backend = backend,
     specified.changepoints = !is.null(changepoints),
     start = NULL,  # This and following attributes are set during fitting
     y.scale = NULL,
@@ -1068,7 +1074,7 @@ set_auto_seasonalities <- function(m) {
 #' Initialize flat growth.
 #'
 #' Provides a strong initialization for flat growth by setting the
-#' growth to 0 and calculates the offset parameter that pass the 
+#' growth to 0 and calculates the offset parameter that pass the
 #' function through the mean of the the y_scaled values.
 #'
 #' @param df Data frame with columns ds (date), y_scaled (scaled time series),
@@ -1227,11 +1233,7 @@ fit.prophet <- function(m, df, ...) {
     kinit <- logistic_growth_init(history)
   }
 
-  if (exists(".prophet.stan.model", where = prophet_model_env)) {
-    model <- get('.prophet.stan.model', envir = prophet_model_env)
-  } else {
-    model <- stanmodels$prophet
-  }
+  model <- .load_model(m$backend)
 
   stan_init <- function() {
     list(k = kinit[1],
@@ -1242,45 +1244,24 @@ fit.prophet <- function(m, df, ...) {
     )
   }
 
-  if (min(history$y) == max(history$y) & 
+  if (min(history$y) == max(history$y) &
         (m$growth %in% c('linear', 'flat'))) {
     # Nothing to fit.
     m$params <- stan_init()
     m$params$sigma_obs <- 0.
     n.iteration <- 1.
-  } else if (m$mcmc.samples > 0) {
-    args <- list(
-      object = model,
-      data = dat,
-      init = stan_init,
-      iter = m$mcmc.samples
-    )
-    args <- utils::modifyList(args, list(...))
-    m$stan.fit <- do.call(rstan::sampling, args)
-    m$params <- rstan::extract(m$stan.fit)
-    n.iteration <- length(m$params$k)
   } else {
-    args <- list(
-      object = model,
-      data = dat,
-      init = stan_init,
-      algorithm = if(dat$T < 100) {'Newton'} else {'LBFGS'},
-      iter = 1e4,
-      as_vector = FALSE
-    )
-    args <- utils::modifyList(args, list(...))
-    m$stan.fit <- do.call(rstan::optimizing, args)
-    if (m$stan.fit$return_code != 0) {
-      message(
-        'Optimization terminated abnormally. Falling back to Newton optimizer.'
-      )
-      args$algorithm = 'Newton'
-      m$stan.fit <- do.call(rstan::optimizing, args)
+    if (m$mcmc.samples > 0) {
+      args <- .stan_args(model, dat, stan_init, m$backend, type = "mcmc", m$mcmc.samples, ...)
+      model_output <- .sampling(args, m$backend)
+    } else {
+      args <- .stan_args(model, dat, stan_init, m$backend, type = "optimize", ...)
+      model_output <- .fit(args, m$backend)
     }
-    m$params <- m$stan.fit$par
-    n.iteration <- 1
+    m$stan.fit <- model_output$stan_fit
+    m$params <- model_output$params
+    n.iteration <- model_output$n_iteration
   }
-
   # Cast the parameters to have consistent form, whether full bayes or MAP
   for (name in c('delta', 'beta')){
     m$params[[name]] <- matrix(m$params[[name]], nrow = n.iteration)

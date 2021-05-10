@@ -35,14 +35,18 @@ Imports:
     tidyr (>= 0.6.1),
     xts
 Suggests:
+    cmdstanr,
+    posterior,
     knitr,
     testthat,
     readr,
     rmarkdown
+Additional_repositories:
+    https://mc-stan.org/r-packages/
 SystemRequirements: GNU make, C++11
 Biarch: true
 License: MIT + file LICENSE
-LinkingTo: 
+LinkingTo:
     BH (>= 1.66.0),
     Rcpp (>= 0.12.0),
     RcppParallel (>= 5.0.1),
