@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build-and-test:
+  build-and-test-python:
 
     runs-on: ubuntu-latest
     strategy:
@@ -31,3 +31,65 @@ jobs:
         tar -xvf /tmp/cmdstan.tar.gz -C /tmp > /dev/null
         make -C /tmp/cmdstan-2.26.1/ build > /dev/null
         CMDSTAN=/tmp/cmdstan-2.26.1 STAN_BACKEND=CMDSTANPY python setup.py develop test
+
+  build-and-test-r:
+
+    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    strategy:
+      matrix:
+        config:
+          - {os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+      fail-fast: false
+
+    env:
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      RSPM: ${{ matrix.config.rspm }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up R
+      uses: r-lib/actions/setup-r@v1
+      with:
+        r-version: ${{ matrix.config.r }}
+    - name: Install remotes
+      run: |
+        install.packages('remotes')
+      shell: Rscript {0}
+    - name: Query dependencies
+      run: |
+        saveRDS(remotes::dev_package_deps(pkgdir = "R/", dependencies = TRUE), ".github/depends.Rds", version = 2)
+        writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
+      shell: Rscript {0}
+    - name: Restore R package cache
+      if: runner.os != 'Windows'
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.R_LIBS_USER }}
+        key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
+        restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+    - name: Install system dependencies
+      if: runner.os == 'Linux'
+      run: |
+        while read -r cmd
+        do
+          eval sudo $cmd
+        done < <(Rscript -e 'writeLines(remotes::system_requirements(os = "ubuntu", os_release = "20.04", path = "R/"))')
+    - name: Install dependencies
+      run: |
+        remotes::install_deps(pkgdir = "R/", dependencies = TRUE)
+        remotes::install_cran("rcmdcheck")
+      shell: Rscript {0}
+    - name: Check
+      env:
+        _R_CHECK_CRAN_INCOMING_REMOTE_: false
+      run: |
+        options(crayon.enabled = TRUE)
+        rcmdcheck::rcmdcheck(path = "R/", args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
+      shell: Rscript {0}
+    - name: Upload check results
+      if: failure()
+      uses: actions/upload-artifact@main
+      with:
+        name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+        path: check
