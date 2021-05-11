@@ -35,7 +35,6 @@ jobs:
   build-and-test-r:
 
     runs-on: ${{ matrix.config.os }}
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
     strategy:
       matrix:
         config:
@@ -78,6 +77,8 @@ jobs:
     - name: Install dependencies
       run: |
         remotes::install_deps(pkgdir = "R/", dependencies = TRUE)
+        remove.packages("rstantools")
+        remotes::install_version("rstantools", "2.0.0")
         remotes::install_cran("rcmdcheck")
       shell: Rscript {0}
     - name: Check
