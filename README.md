@@ -97,7 +97,7 @@ Use `conda install gcc` to set up gcc. The easiest way to install Prophet is thr
 
 ### Windows
 
-On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html). The easiest way to install Prophet in Windows is in Anaconda.
+On Windows, PyStan requires a compiler so you'll need to [follow the instructions](https://pystan2.readthedocs.io/en/latest/windows.html). The easiest way to install Prophet in Windows is in Anaconda.
 
 ### Linux
 
