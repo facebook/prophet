@@ -41,8 +41,6 @@ Suggests:
     testthat,
     readr,
     rmarkdown
-Additional_repositories:
-    https://mc-stan.org/r-packages/
 SystemRequirements: GNU make, C++11
 Biarch: true
 License: MIT + file LICENSE
