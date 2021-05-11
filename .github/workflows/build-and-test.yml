@@ -35,7 +35,6 @@ jobs:
   build-and-test-r:
 
     runs-on: ${{ matrix.config.os }}
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
     strategy:
       matrix:
         config:
@@ -77,8 +76,9 @@ jobs:
         done < <(Rscript -e 'writeLines(remotes::system_requirements(os = "ubuntu", os_release = "20.04", path = "R/"))')
     - name: Install dependencies
       run: |
-        remotes::install_deps(pkgdir = "R/", dependencies = TRUE)
+        remotes::install_deps(pkgdir = "R/", dependencies = NA)
         remotes::install_cran("rcmdcheck")
+        install.packages(c("cmdstanr", "posterior"), repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
       shell: Rscript {0}
     - name: Check
       env:
