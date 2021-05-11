@@ -76,9 +76,7 @@ jobs:
         done < <(Rscript -e 'writeLines(remotes::system_requirements(os = "ubuntu", os_release = "20.04", path = "R/"))')
     - name: Install dependencies
       run: |
-        remotes::install_deps(pkgdir = "R/", dependencies = TRUE)
-        remove.packages("rstantools")
-        remotes::install_version("rstantools", "2.0.0")
+        remotes::install_deps(pkgdir = "R/", dependencies = NA)
         remotes::install_cran("rcmdcheck")
       shell: Rscript {0}
     - name: Check
