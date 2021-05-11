@@ -1,3 +1,5 @@
+^renv$
+^renv\.lock$
 ^data-raw$
 ^libs$
 ^doc$
