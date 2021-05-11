@@ -78,6 +78,7 @@ jobs:
       run: |
         remotes::install_deps(pkgdir = "R/", dependencies = NA)
         remotes::install_cran("rcmdcheck")
+        install.packages(c("cmdstanr", "posterior"), repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
       shell: Rscript {0}
     - name: Check
       env:
