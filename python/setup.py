@@ -129,7 +129,7 @@ setup(
     author_email='sjtz@pm.me',
     license='MIT',
     packages=find_packages(),
-    setup_requires=[
+    setup_requires=['pystan~=2.19.1.1'
     ],
     install_requires=install_requires,
     python_requires='>=3',
