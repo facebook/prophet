@@ -32,17 +32,17 @@ As a result of the lockdowns caused by the COVID-19 pandemic, many time series e
 
 
 
-* Online activity - media (Netflix, YouTube, etc.) consumption, e-commerce (Amazon, eBay) purchases, social media - spiking.
+* Online activity spiking - media (Netflix, YouTube, etc.) consumption, e-commerce (Amazon, eBay) purchases, social media, etc.
 
-* Physical activity - restaurant visits, cinema sales, etc. - declining heavily.
-
-
-
-Along with a heavy increase or decline around the time of the lockdown, most of these time series would also afterwards maintain a higher or lower level than historically. These levels may fluctuate again as lockdowns are loosened and tightened.
+* Physical activity declining heavily - restaurant visits, cinema sales, etc.
 
 
 
-Finally, seasonality patterns could have changed: for example, people may have consumed less media (in total hours) on weekdays compared to weekends before the COVID lockdowns, but during lockdowns weekday consumption could be much closer to weekend consumption.
+Along with a heavy increase or decline around the time of the lockdown, most of these time series would also afterwards maintain a higher or lower average level compared to pre-COVID. These levels may fluctuate again as lockdowns are loosened and tightened in response to outbreaks, or with the rollout of vaccines.
+
+
+
+Finally, seasonal patterns could have changed: for example, people may have consumed less media (in total hours) on weekdays compared to weekends before the COVID lockdowns, but during lockdowns weekday consumption could be much closer to weekend consumption.
 
 
 
@@ -52,20 +52,20 @@ All of the above presents some tough challenges for forecasting:
 
 1. Models shouldn't assume the one-off spikes at the beginning of COVID will occur again in the near term.
 
-2. Models should properly capture the changes in trend cause by medium-long-term changes people's activity as a result of lockdowns.
+2. Models should properly capture the changes in the underlying trend cause by medium/long-term changes people's activity as a result of lockdowns.
 
 3. Models should properly capture any changes in seasonality caused by changes in people's routines (work from home, less going out, etc.).
 
 
 
-It's unlikely that our models will be able to do all of the above. Furthermore, other influences like the rollout of vaccines, and repeated lockdowns caused by second/third/fourth waves, are impossible to predict.
+It's unlikely that our models will be able to do all of the above. Furthermore, other influences like the rollout of vaccines, and repeated lockdowns caused by second/third waves, are impossible to predict.
 
 
 
-In this page we suggest some strategies to help _mitigate_ (not 100% solve) the impact of COVID-19 lockdowns in time series projections.
+In this page we suggest some strategies to help _mitigate_ (but not necessarily fully solve) the impact of COVID-19 lockdowns in time series projections.
 
 
-The dataset we will use to demonstrate modelling strategies is [Pedestrian Sensor data from the City of Melbourne](https://data.melbourne.vic.gov.au/Transport/Pedestrian-Counting-System-Monthly-counts-per-hour/b2ak-trbp). This data measures foot traffic from sensors in various places in the Central Business District (CBD) in Melbourne, Australia. For this case study, we've taken data from the sensor with the most volume (`Sensor_ID = 4, Town Hall (West)`), and aggregated the data to the daily level (the original dataset provides hourly counts). The aggregated dataset can be found in the examples folder [here](https://github.com/facebook/prophet/tree/master/examples/example_pedestrians.csv).
+The dataset we will use to demonstrate these strategies is [Pedestrian Sensor data from the City of Melbourne](https://data.melbourne.vic.gov.au/Transport/Pedestrian-Counting-System-Monthly-counts-per-hour/b2ak-trbp). This data measures foot traffic from sensors in various places in the Central Business District (CBD) in Melbourne, Australia. For this case study, we've taken data from the sensor with the most volume (`Sensor_ID = 4, Town Hall (West)`), and aggregated the data to the daily level (the original dataset provides hourly counts) from May 2009 to May 2021. The aggregated dataset can be found in the examples folder [here](https://github.com/facebook/prophet/tree/master/examples/example_pedestrians.csv). 
 
 
 ```python
@@ -86,8 +86,8 @@ df.set_index('ds').plot()
 
 
 
-
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_5_1.png)
+ 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_5_1.png) 
 
 
 Zooming in closer to the COVID impacts:
@@ -104,8 +104,8 @@ df.loc[df['ds'] >= '2019-09-01'].set_index('ds').plot()
 
 
 
-
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_7_1.png)
+ 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_7_1.png) 
 
 
 <a id="default-model-without-any-adjustments"> </a>
@@ -113,7 +113,7 @@ df.loc[df['ds'] >= '2019-09-01'].set_index('ds').plot()
 #### Default model without any adjustments
 
 
-First we'll fit the default Prophet model as the simplest basline:
+First we'll fit a model with the default Prophet settings:
 
 
 ```python
@@ -139,8 +139,8 @@ plt.title('Default Prophet')
 
 
 
-
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_12_1.png)
+ 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_12_1.png) 
 
 
 The forecast from the default Prophet model for this dataset shows the following issues:
@@ -196,8 +196,8 @@ plt.title('Lockdowns as one-off holidays')
 
 
 
-
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_19_1.png)
+ 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_19_1.png) 
 
 
 The forecasts already look more reasonable by specifying the two lockdown periods - they are no longer negative.
@@ -212,8 +212,8 @@ We can also plot the model components to check the magnitude of the effect that 
 m2.plot_components(forecast2)
 plt.show()
 ```
-
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_21_0.png)
+ 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_21_0.png) 
 
 
 * Prophet is sensibly assigning a large negative effect to the days within the lockdown periods.
@@ -230,7 +230,7 @@ However, the trend component is still has a negative slope from 2020 onwards, an
 ### Allowing Prophet to incorporate post-lockdown trends into the forecast
 
 
-How Prophet automatically finds changepoints for the trend component is explained in detail [here](https://facebook.github.io/prophet/docs/trend_changepoints.html).
+How Prophet automatically finds changepoints for the trend component is explained in detail [here](https://facebook.github.io/prophet/docs/trend_changepoints.html). 
 
 
 
@@ -286,8 +286,8 @@ plt.title('Lockdowns as one-off holidays + Incorporate recent data into trend')
 
 
 
-
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_30_1.png)
+ 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_30_1.png) 
 
 
 ```python
@@ -295,17 +295,17 @@ plt.title('Lockdowns as one-off holidays + Incorporate recent data into trend')
 m3.plot_components(forecast3)
 plt.show()
 ```
-
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_31_0.png)
+ 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_31_0.png) 
 
 
 We can see the difference in the trend estimation between this model and the model fitted in the previous section.
 
 
 
-* Instead of the trend continue to slope down, there is a little elbow towards the end of 2020, when the second lockdown was lifted.
+* Instead of the trend continuing to slope down, there is a little elbow towards the end of 2020, when the second lockdown was lifted.
 
-* The projected pedestrian values are now closer to the recent data, instead of hovering close to 0.
+* The projected pedestrian values are now more stable around the level of the most recent data, instead trending downwards towards 0.
 
 
 <a id="changes-in-seasonality-between-pre--and-post-covid"> </a>
@@ -313,7 +313,7 @@ We can see the difference in the trend estimation between this model and the mod
 ### Changes in seasonality between pre- and post-COVID
 
 
-As we mentioned in the introduction, COVID (both the virus and the lockdowns) could also affect people's routines, to the point where seasonality patterns pre-COVID no longer hold.
+As we mentioned in the introduction, COVID (both the virus and the lockdowns) could also affect people's routines, to the point where seasonality patterns pre-COVID no longer hold. 
 
 
 
@@ -392,8 +392,8 @@ plt.title('Lockdowns as one-off holidays + Incorporate recent data into trend + 
 
 
 
-
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_43_1.png)
+ 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_43_1.png) 
 
 
 ```python
@@ -401,13 +401,13 @@ plt.title('Lockdowns as one-off holidays + Incorporate recent data into trend + 
 m4.plot_components(forecast4)
 plt.show()
 ```
-
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_44_0.png)
+ 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_44_0.png) 
 
 
 * Interestingly, the model with conditional seasonalities suggests that, post-COVID, pedestrian activity in this area peaks on Saturdays, instead of Fridays. This could make sense if most people are still working from home and are hence less likely to go out on Friday nights.
 
-* At a glance, the overall level of the predictions don't change too much, but the difference in Friday and Saturday forecasts could make a difference for daily planning.
+* At a glance, the overall level of the predictions don't change too much, but the trend does flatten out more. The difference in the Friday and Saturday forecasts in particular could also affect per-day planning.
 
 * The best way to validate whether this is a better model is to use [cross validation](https://facebook.github.io/prophet/docs/diagnostics.html).
 
@@ -430,3 +430,4 @@ See also these articles:
 
 
 * [How to forecast demand despite COVID](https://medium.com/swlh/how-to-forecast-demand-despite-covid-82d22a0a6ff7)
+
