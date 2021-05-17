@@ -4,6 +4,8 @@ docid: "handling_impact_of_covid-19"
 title: "Handling Impact Of Covid-19"
 permalink: /docs/handling_impact_of_covid-19.html
 subsections:
+  - title: Case Study - Pedestrian Activity
+    id: case-study---pedestrian-activity
   - title: Default model without any adjustments
     id: default-model-without-any-adjustments
   - title: Treating COVID-19 lockdowns as a one-off holidays
@@ -28,7 +30,7 @@ warnings.filterwarnings("ignore")
 
 plt.rcParams['figure.figsize'] = 9, 6
 ```
-As a result of the lockdowns caused by the COVID-19 pandemic, many time series experienced "shocks" during 2020 and into 2021. Some examples are:
+As a result of the lockdowns caused by the COVID-19 pandemic, many time series experienced "shocks" during 2020. Some examples are:
 
 
 
@@ -65,7 +67,12 @@ It's unlikely that our models will be able to do all of the above. Furthermore, 
 In this page we suggest some strategies to help _mitigate_ (but not necessarily fully solve) the impact of COVID-19 lockdowns in time series projections.
 
 
-The dataset we will use to demonstrate these strategies is [Pedestrian Sensor data from the City of Melbourne](https://data.melbourne.vic.gov.au/Transport/Pedestrian-Counting-System-Monthly-counts-per-hour/b2ak-trbp). This data measures foot traffic from sensors in various places in the Central Business District (CBD) in Melbourne, Australia. For this case study, we've taken data from the sensor with the most volume (`Sensor_ID = 4, Town Hall (West)`), and aggregated the data to the daily level (the original dataset provides hourly counts) from May 2009 to May 2021. The aggregated dataset can be found in the examples folder [here](https://github.com/facebook/prophet/tree/master/examples/example_pedestrians.csv). 
+<a id="case-study---pedestrian-activity"> </a>
+
+#### Case Study - Pedestrian Activity
+
+
+The dataset we will use to demonstrate these strategies is [Pedestrian Sensor data from the City of Melbourne](https://data.melbourne.vic.gov.au/Transport/Pedestrian-Counting-System-Monthly-counts-per-hour/b2ak-trbp). This data measures foot traffic from sensors in various places in the Central Business District (CBD) in Melbourne, Australia. For this case study, we've taken data from the sensor with the most volume (`Sensor_ID = 4, Town Hall (West)`), and aggregated the data to the daily level (the original dataset provides hourly counts) from May 2009 to May 2021. The aggregated dataset can be found in the examples folder [here](https://github.com/facebook/prophet/tree/master/examples/example_pedestrians.csv).
 
 
 ```python
@@ -87,7 +94,7 @@ df.set_index('ds').plot()
 
 
  
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_5_1.png) 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_6_1.png) 
 
 
 Zooming in closer to the COVID impacts:
@@ -105,7 +112,20 @@ df.loc[df['ds'] >= '2019-09-01'].set_index('ds').plot()
 
 
  
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_7_1.png) 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_8_1.png) 
+
+
+We can see two key events in the time series:
+
+
+
+* The initial drop in foot traffic around 21 March 2021, which started to recover around 6 June 2020. This corresponds to the declaration of a pandemic by WHO and subsequent lockdowns mandated by the Victorian government.
+
+* After some slow recovery, a second drop in foot traffic around July 9 2020, which began to recover around 27 October 2020. This corresponds to the "second wave" of the pandemic in metropolitan Melbourne.
+
+
+
+There haven't been any significant lockdowns after the second wave; there was strict lockdown in February 2021 but that only lasted roughly 5 days.
 
 
 <a id="default-model-without-any-adjustments"> </a>
@@ -140,7 +160,7 @@ plt.title('Default Prophet')
 
 
  
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_12_1.png) 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_14_1.png) 
 
 
 The forecast from the default Prophet model for this dataset shows the following issues:
@@ -159,7 +179,7 @@ The forecast from the default Prophet model for this dataset shows the following
 ### Treating COVID-19 lockdowns as a one-off holidays
 
 
-This first strategy treats the days impacted by COVID-19 as a holiday that will not repeat again in the future. Adding custom holidays is explained in more detail [here](https://facebook.github.io/prophet/docs/seasonality,_holiday_effects,_and_regressors.html#modeling-holidays-and-special-events).
+This first strategy treats the days impacted by COVID-19 as a holiday that will not repeat again in the future. Adding custom holidays is explained in more detail [here](https://facebook.github.io/prophet/docs/seasonality,_holiday_effects,_and_regressors.html#modeling-holidays-and-special-events). The lockdowns dataframe can be set up like so:
 
 
 ```python
@@ -172,7 +192,66 @@ lockdowns = pd.DataFrame({
     'lower_window': [0, 0],
     'upper_window': [78, 110],
 })
+
+lockdowns
 ```
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>holiday</th>
+      <th>ds</th>
+      <th>lower_window</th>
+      <th>upper_window</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>lockdown1</td>
+      <td>2020-03-21</td>
+      <td>0</td>
+      <td>78</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>lockdown2</td>
+      <td>2020-07-09</td>
+      <td>0</td>
+      <td>110</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+* We have an entry for each lockdown period, with `ds` specifying the start of the lockdown.
+
+* We specify `upper_window` to denote that the effect of the lockdown spans for x days after the start of the lockdown.
+
+
+
+Note that since we don't specify any future dates, Prophet will assume that these holidays will _not_ occur again when creating the future dataframe (and hence they won't affect our projections). This is different to how we would specify a recurring holiday.
+
+
 ```python
 # Python
 m2 = Prophet(holidays=lockdowns)
@@ -197,10 +276,16 @@ plt.title('Lockdowns as one-off holidays')
 
 
  
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_19_1.png) 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_22_1.png) 
 
 
-The forecasts already look more reasonable by specifying the two lockdown periods - they are no longer negative.
+The forecasts already look more reasonable by specifying the two lockdown periods as holidays:
+
+
+
+* The forecasts no longer become negative in late 2021.
+
+* Prophet is able to fit the historical shocks in the time series (with a recovery in between). 
 
 
 
@@ -213,7 +298,7 @@ m2.plot_components(forecast2)
 plt.show()
 ```
  
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_21_0.png) 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_24_0.png) 
 
 
 * Prophet is sensibly assigning a large negative effect to the days within the lockdown periods.
@@ -265,7 +350,7 @@ m3.fit(df)
 
 
 
-    <prophet.forecaster.Prophet at 0x122e1a220>
+    <prophet.forecaster.Prophet at 0x121252b80>
 
 
 
@@ -287,7 +372,7 @@ plt.title('Lockdowns as one-off holidays + Incorporate recent data into trend')
 
 
  
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_30_1.png) 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_33_1.png) 
 
 
 ```python
@@ -296,7 +381,7 @@ m3.plot_components(forecast3)
 plt.show()
 ```
  
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_31_0.png) 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_34_0.png) 
 
 
 We can see the difference in the trend estimation between this model and the model fitted in the previous section.
@@ -320,6 +405,10 @@ As we mentioned in the introduction, COVID (both the virus and the lockdowns) co
 For our case study of pedestrian activity, the day-of-week seasonality of our models in the previous sections shows that there was a lot more activity on Friday (and to an extent Thursday and Saturday) compared to other days of the week. If we're not sure whether this will still hold after lockdowns are lifted (especially given that vaccines weren't yet rolled out widely when the lockdown was lifted), we can add _conditional seasonalities_ to the model. Conditional seasonalities are explained in more detail [here](https://facebook.github.io/prophet/docs/seasonality,_holiday_effects,_and_regressors.html#seasonalities-that-depend-on-other-factors).
 
 
+
+First we define boolean columns in the history dataframe that flag "pre covid" and "post covid" times:
+
+
 ```python
 # Python
 df2 = df.copy()
@@ -332,9 +421,18 @@ df2['pre_covid'] = pd.to_datetime(df2['ds']) < pd.to_datetime('2020-03-21')
 # Python
 df2['post_covid'] = ~df2['pre_covid']
 ```
+The conditional seasonality we're interested in modelling here is the day-of-week ("weekly") seasonality (i.e. is there still a spike in pedestrian activity on Fridays?). To do this, we firstly turn off the default `weekly_seasonality` when we create the Prophet model.
+
+
 ```python
 # Python
 m4 = Prophet(holidays=lockdowns, changepoint_range=0.9930, weekly_seasonality=False)
+```
+We then add this weekly seasonality manually, as two different model components - one for pre-covid, one for post-covid. Note that `fourier_order=3` is the default setting for weekly seasonality. After this we can run `.fit()`.
+
+
+```python
+# Python
 m4.add_seasonality(
     name='weekly_pre_covid',
     period=7,
@@ -351,7 +449,7 @@ m4.add_seasonality(
 
 
 
-    <prophet.forecaster.Prophet at 0x122f71b20>
+    <prophet.forecaster.Prophet at 0x122c6f580>
 
 
 
@@ -362,16 +460,16 @@ m4.fit(df2)
 
 
 
-    <prophet.forecaster.Prophet at 0x122f71b20>
+    <prophet.forecaster.Prophet at 0x122c6f580>
 
+
+
+During the prediction phase, we also need to create the `pre_covid` and `post_covid` flags in the future dataframe. This is so that Prophet can apply the correct weekly seasonality parameters to each datapoint.
 
 
 ```python
 # Python
 future4 = m4.make_future_dataframe(periods=366)
-```
-```python
-# Python
 future4['pre_covid'] = pd.to_datetime(future4['ds']) < pd.to_datetime('2020-03-21')
 future4['post_covid'] = ~future4['pre_covid']
 ```
@@ -393,7 +491,7 @@ plt.title('Lockdowns as one-off holidays + Incorporate recent data into trend + 
 
 
  
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_43_1.png) 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_49_1.png) 
 
 
 ```python
@@ -402,14 +500,16 @@ m4.plot_components(forecast4)
 plt.show()
 ```
  
-![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_44_0.png) 
+![png](/prophet/static/handling_impact_of_covid-19_files/handling_impact_of_covid-19_50_0.png) 
 
 
-* Interestingly, the model with conditional seasonalities suggests that, post-COVID, pedestrian activity in this area peaks on Saturdays, instead of Fridays. This could make sense if most people are still working from home and are hence less likely to go out on Friday nights.
+* Interestingly, the model with conditional seasonalities suggests that, post-COVID, pedestrian activity peaks on Saturdays, instead of Fridays. This could make sense if most people are still working from home and are hence less likely to go out on Friday nights.
 
-* At a glance, the overall level of the predictions don't change too much, but the trend does flatten out more. The difference in the Friday and Saturday forecasts in particular could also affect per-day planning.
+* At a glance, the overall level of the predictions don't change too much, but the trend does flatten out more. The model's predictions of Fridays and Saturdays could also be materially different from our previous models.
 
-* The best way to validate whether this is a better model is to use [cross validation](https://facebook.github.io/prophet/docs/diagnostics.html).
+
+
+This model makes sense intuitively, but if prediction accuracy is the main concern, we'd want to use [cross validation](https://facebook.github.io/prophet/docs/diagnostics.html) to assess whether it performs better than our previous models.
 
 
 <a id="further-reading"> </a>
