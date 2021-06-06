@@ -1,4 +1,0 @@
-include LICENSE
-include requirements.txt
-
-include fbprophet/tests/DATA.csv
