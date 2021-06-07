@@ -10,7 +10,7 @@ with open('requirements.txt', 'r') as f:
     install_requires = f.read().splitlines()
 
 setup(
-    name='holidays-extension',
+    name='holidays-ext',
     version='0.0.1',
     description='Extended holidays package',
     url='https://github.com/kaixuyang/holidays-extension',
