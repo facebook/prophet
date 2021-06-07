@@ -5,7 +5,7 @@
 *.pkl
 
 # Setuptools distribution folder.
-python/dist/
+dist/
 
 # test cache
 .pytest_cache
@@ -14,8 +14,8 @@ python/dist/
 __pycache__
 
 # Python egg metadata, regenerated from source files by setuptools.
-python/*.egg-info
-python/build/
+*.egg-info
+build/
 
 # Notebook checkpoints
 .ipynb_checkpoints
@@ -26,9 +26,3 @@ python/build/
 *.vscode
 *.DS_Store
 
-# Development with Python
-python/prophet/bin/
-python/prophet/etc/
-python/prophet/lib/
-python/prophet/pyvenv.cfg
-python/prophet/share/
