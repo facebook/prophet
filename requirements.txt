@@ -1,6 +1,7 @@
 numpy>=1.15.4
 pandas>=1.0.4
+python-dateutil>=2.8.0
 LunarCalendar>=0.0.9
 convertdate>=2.1.2
 holidays>=0.9.5
-python-dateutil>=2.8.0
+
