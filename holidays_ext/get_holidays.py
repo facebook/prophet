@@ -91,7 +91,7 @@ def get_holiday_df(
     return pd.concat(dfs, axis=0).reset_index(drop=True)[["ts", "country", "holiday", "country_holiday"]]
 
 
-def get_available_holiday_lookup_countries(countries: Optional[List[str]] = None):
+def get_available_holiday_lookup_countries(countries: Optional[List[str]] = None) -> List[str]:
     """Returns a list of available countries for holidays.
 
     Parameters
