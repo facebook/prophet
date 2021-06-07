@@ -47,7 +47,7 @@ def get_holiday(
     return result
 
 
-def make_holidays_df(
+def get_holiday_df(
         country_list: List[str],
         years: List[int]) -> dict:
     """Generates a dataframe with holidays for a given country list and a list of years.
@@ -79,10 +79,11 @@ def make_holidays_df(
     )
     dfs = []
     for country in holidays:
-        temp_df = pd.DataFrame(holidays[country]).transpose().reset_index(drop=True)
-        temp_df.columns = ["ts", "holiday"]
+        temp_df = pd.DataFrame(holidays[country], index=[0]).transpose()
+        temp_df.columns = ["holiday"]
+        temp_df["ts"] = pd.to_datetime(temp_df.index)
         temp_df["country"] = country
         temp_df["country_holiday"] = temp_df["country"] + "_" + temp_df["holiday"]
         temp_df["ts"] = pd.to_datetime(temp_df["ts"])
         dfs.append(temp_df)
-    return pd.concat(dfs, axis=0)
+    return pd.concat(dfs, axis=0).reset_index(drop=True)[["ts", "country", "holiday", "country_holiday"]]

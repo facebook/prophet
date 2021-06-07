@@ -11,7 +11,7 @@ from convertdate.islamic import from_gregorian, to_gregorian
 from lunarcalendar import Lunar, Converter
 from lunarcalendar.converter import DateNotExist
 
-from holidays_ext import WEEKEND, HolidayBase, Turkey
+from holidays import WEEKEND, HolidayBase
 from dateutil.easter import easter, EASTER_ORTHODOX
 from dateutil.relativedelta import relativedelta as rd
 
