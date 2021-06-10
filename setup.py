@@ -11,7 +11,7 @@ with open('requirements.txt', 'r') as f:
 
 setup(
     name='holidays-ext',
-    version='0.0.3',
+    version='0.0.4',
     description='Extended holidays package',
     url='https://github.com/kaixuyang/holidays-extension',
     author='Kaixu Yang',
