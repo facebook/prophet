@@ -106,8 +106,7 @@ def get_available_holiday_lookup_countries(countries: Optional[List[str]] = None
         A list of available countries for holidays.
     """
     base_holidays = [name for name, obj in inspect.getmembers(holidays)
-                     if inspect.isclass(obj) and obj.__module__ == holidays.__name__
-                     and name != "HolidayBase"]
+                     if inspect.isclass(obj) and name != "HolidayBase"]
     ext_holidays = [name for name, obj in inspect.getmembers(holidays_ext)
                     if inspect.isclass(obj) and obj.__module__ == holidays_ext.__name__]
     all_countries = set(base_holidays + ext_holidays)
