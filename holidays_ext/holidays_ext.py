@@ -13,7 +13,7 @@ from lunarcalendar.converter import DateNotExist
 
 from holidays import WEEKEND, HolidayBase
 from dateutil.easter import easter, EASTER_ORTHODOX
-from dateutil.relativedelta import relativedelta as rd
+from dateutil.relativedelta import relativedelta as rd, TU
 
 
 class Brazil(HolidayBase):
