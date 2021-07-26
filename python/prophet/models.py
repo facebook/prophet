@@ -13,6 +13,7 @@ from pathlib import Path
 import pickle
 import pkg_resources
 import os
+from .numpyro_model import find_map, run_mcmc
 
 import logging
 logger = logging.getLogger('prophet.models')
@@ -302,9 +303,29 @@ class PyStanBackend(IStanBackend):
             return pickle.load(f)
 
 
+class NumpyroBackend(IStanBackend):
+
+    @staticmethod
+    def get_type():
+        return StanBackendEnum.PYSTAN.name
+
+    def load_model(self):
+        """No-op since this backend does not rely on a stan model."""
+
+    def fit(self, stan_init, stan_data, **kwargs) -> dict:
+        return find_map(stan_data, stan_init)
+
+    def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
+        return run_mcmc(stan_data, samples)
+
+    def build_model(target_dir, model_dir):
+        """No-op since this backend does not rely on a stan model."""
+
+
 class StanBackendEnum(Enum):
     PYSTAN = PyStanBackend
     CMDSTANPY = CmdStanPyBackend
+    NUMPYRO = NumpyroBackend
 
     @staticmethod
     def get_backend_class(name: str) -> IStanBackend:
