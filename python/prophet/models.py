@@ -307,7 +307,7 @@ class NumpyroBackend(IStanBackend):
 
     @staticmethod
     def get_type():
-        return StanBackendEnum.PYSTAN.name
+        return StanBackendEnum.NUMPYRO.name
 
     def load_model(self):
         """No-op since this backend does not rely on a stan model."""
