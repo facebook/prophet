@@ -170,7 +170,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
             try:
                 from dask.distributed import get_client
             except ImportError as e:
-                raise ImportError("parallel='dask' requies the optional "
+                raise ImportError("parallel='dask' requires the optional "
                                   "dependency dask.") from e
             pool = get_client()
             # delay df and model to avoid large objects in task graph.

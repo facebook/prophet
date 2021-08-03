@@ -16,7 +16,7 @@ added regressors.}
 \value{
 List with items
  seasonal.features: Dataframe with regressor features,
- prior.scales: Array of prior scales for each colum of the features
+ prior.scales: Array of prior scales for each column of the features
    dataframe.
  component.cols: Dataframe with indicators for which regression components
    correspond to which columns.
