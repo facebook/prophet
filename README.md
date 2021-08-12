@@ -67,7 +67,7 @@ pip install pystan==2.19.1.1
 pip install prophet
 ```
 
-The default dependency that Prophet has is `pystan`. PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install prophet.
+The default dependency that Prophet has is `pystan`. PyStan has its own [installation instructions](https://pystan.readthedocs.io/en/latest/installation.html). Install pystan with pip before using pip to install prophet.
 
 #### Experimental backend - cmdstanpy
 
