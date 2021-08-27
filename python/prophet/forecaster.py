@@ -27,8 +27,8 @@ class Prophet(object):
 
     Parameters
     ----------
-    growth: String 'linear' or 'logistic' to specify a linear or logistic
-        trend.
+    growth: String 'linear', 'logistic' or 'flat' to specify a linear, logistic or
+        flat trend.
     changepoints: List of dates at which to include potential changepoints. If
         not specified, potential changepoints are selected automatically.
     n_changepoints: Number of potential changepoints to include. Not used
