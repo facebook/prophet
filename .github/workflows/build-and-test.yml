@@ -77,7 +77,7 @@ jobs:
     - name: Install dependencies
       run: |
         remotes::install_deps(pkgdir = "R/", dependencies = NA)
-        remotes::install_cran("rcmdcheck")
+        remotes::install_cran(c("rcmdcheck", "knitr", "testthat", "readr", "rmarkdown"))
         install.packages(c("cmdstanr", "posterior"), repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
       shell: Rscript {0}
     - name: Check
