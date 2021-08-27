@@ -38,7 +38,7 @@ regressor_coefficients <- function(m){
   regr_mus <- unlist(lapply(m$extra_regressors, function (x) x$mu))
   regr_stds <- unlist(lapply(m$extra_regressors, function(x) x$std))
 
-  beta_indices <- which(m$train.component.cols[, regr_names] == 1, arr.ind = TRUE)[, "row"]
+  beta_indices <- which(m$train.component.cols[, regr_names, drop = FALSE] == 1, arr.ind = TRUE)[, "row"]
   betas <- m$params$beta[, beta_indices, drop = FALSE]
   # If regressor is additive, multiply by the scale factor to put coefficients on the original training data scale.
   y_scale_indicator <- matrix(
