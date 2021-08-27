@@ -68,7 +68,7 @@ fig = m.plot_components(forecast)
 ![png](/prophet/static/multiplicative_seasonality_files/multiplicative_seasonality_10_0.png) 
 
 
-With `seasonality_mode='multiplicative'`, holiday effects will also be modeled as multiplicative. Any added seasonalities or extra regressors will by default use whatever `seasonality_mode` is set to, but can be overriden by specifying `mode='additive'` or `mode='multiplicative'` as an argument when adding the seasonality or regressor.
+With `seasonality_mode='multiplicative'`, holiday effects will also be modeled as multiplicative. Any added seasonalities or extra regressors will by default use whatever `seasonality_mode` is set to, but can be overridden by specifying `mode='additive'` or `mode='multiplicative'` as an argument when adding the seasonality or regressor.
 
 
 
