@@ -4,9 +4,11 @@
 # LICENSE file in the root directory of this source tree.
 
 import os.path
+import pickle
 import platform
 import sys
 import os
+from shutil import copy
 from pkg_resources import (
     normalize_path,
     working_set,
@@ -26,22 +28,38 @@ if platform.platform().startswith('Win'):
 
 MODEL_DIR = os.path.join('stan', PLATFORM)
 MODEL_TARGET_DIR = os.path.join('prophet', 'stan_model')
-
+CMDSTAN_VERSION = "2.26.1"
 
 def get_backends_from_env() -> List[str]:
-    from prophet.models import StanBackendEnum
-    return "PYSTAN,CMDSTANPY"
-    # return os.environ.get("STAN_BACKEND", StanBackendEnum.PYSTAN.name).split(",")
+    return os.environ.get("STAN_BACKEND", "PYSTAN").split(",")
 
+def build_cmdstan_model(target_dir):
+    import cmdstanpy
+    cmdstanpy.install_cmdstan(version=CMDSTAN_VERSION, dir=target_dir, overwrite=True)
+    cmdstanpy.set_cmdstan_path(os.path.join(target_dir, f"cmdstan-{CMDSTAN_VERSION}"))
+    model_name = 'prophet.stan'
+    target_name = 'prophet_model.bin'
+    sm = cmdstanpy.CmdStanModel(stan_file=os.path.join(MODEL_DIR, model_name))
+    sm.compile()
+    copy(sm.exe_file, os.path.join(target_dir, target_name))
+
+def build_pystan_model(target_dir):
+    import pystan
+    model_name = 'prophet.stan'
+    target_name = 'prophet_model.pkl'
+    with open(os.path.join(MODEL_DIR, model_name)) as f:
+        model_code = f.read()
+    sm = pystan.StanModel(model_code=model_code)
+    with open(os.path.join(target_dir, target_name), 'wb') as f:
+        pickle.dump(sm, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 def build_models(target_dir):
-    from prophet.models import StanBackendEnum
     for backend in get_backends_from_env():
+        print(f"Compiling {backend} model")
         if backend == "CMDSTANPY":
-            import cmdstanpy
-            cmdstanpy.install_cmdstan(version="2.26.1", dir="prophet/cmdstan/", overwrite=True, compiler=True)
-            cmdstanpy.set_cmdstan_path("prophet/cmdstan/")
-        StanBackendEnum.get_backend_class(backend).build_model(target_dir, MODEL_DIR)
+            build_cmdstan_model(target_dir)
+        elif backend == "PYSTAN":
+            build_pystan_model(target_dir)
 
 
 class bdist_wheel(_bdist_wheel):
@@ -140,7 +158,7 @@ setup(
     author='Sean J. Taylor <sjtz@pm.me>, Ben Letham <bletham@fb.com>',
     author_email='sjtz@pm.me',
     license='MIT',
-    packages=['prophet', 'prophet.tests'],
+    packages=find_packages(),
     install_requires=install_requires,
     python_requires='>=3',
     zip_safe=False,

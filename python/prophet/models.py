@@ -60,12 +60,13 @@ class IStanBackend(ABC):
 
 
 class CmdStanPyBackend(IStanBackend):
-    def __init__(self, cmdstan_path = None):
+    CMDSTAN_VERSION = "2.26.1"
+    def __init__(self):
         super().__init__()
         import cmdstanpy
-        if cmdstan_path is None:
-            cmdstan_path = pkg_resources.resource_filename("prophet", "cmdstan")
-            cmdstanpy.set_cmdstan_path(cmdstan_path)
+        cmdstanpy.set_cmdstan_path(
+            pkg_resources.resource_filename("prophet", f"stan_model/cmdstan-{self.CMDSTAN_VERSION}")
+        )
 
     @staticmethod
     def get_type():

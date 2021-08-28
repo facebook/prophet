@@ -9,7 +9,7 @@ on:
   #   types: [created]
 
 env:
-  STAN_BACKEND: "CMDSTANPY"
+  STAN_BACKEND: "PYSTAN"
 
 jobs:
   # two jobs are defined make-wheel-win-osx and make-wheel-linux.
@@ -42,12 +42,8 @@ jobs:
       - name: "Create wheel"
         run: |
           python3 -m pip install --upgrade pip
-          cd python
-          python3 -m pip wheel .
-
-      - name: "Install wheel"
-        run: |
-          python3 -m pip install -f dist --no-index prophet
+          python3 -m pip install build
+          cd python && python3 -m build --wheel .
 
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@main
