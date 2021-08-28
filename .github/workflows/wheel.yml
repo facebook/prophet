@@ -22,12 +22,13 @@ jobs:
         os:
           - "windows-latest"
           - "macos-latest"
+          - "ubuntu-latest"
         python-version:
           - "3.8"
         architecture:
           - x64
 
-      fail-fast: true
+      fail-fast: false
 
     steps:
       - name: Checkout repo
@@ -41,9 +42,9 @@ jobs:
 
       - name: "Create wheel"
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install build
-          cd python && python3 -m build --wheel .
+          python -m pip install --upgrade pip
+          python -m pip install build
+          cd python && python -m build --wheel .
 
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@main
