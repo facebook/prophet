@@ -10,6 +10,14 @@ on:
 
 env:
   STAN_BACKEND: "PYSTAN"
+  # Python versions for cibuildwheel
+  CIBW_BUILD: "cp38-*"
+  # Architectures for cibuildwheel
+  CIBW_ARCHS: "native"
+  # Use pypa/build as the build frontend
+  CIBW_BUILD_FRONTEND: "build"
+  # Do not repair wheels
+  CIBW_REPAIR_WHEEL_COMMAND: ""
 
 jobs:
   # two jobs are defined make-wheel-win-osx and make-wheel-linux.
@@ -31,16 +39,16 @@ jobs:
       fail-fast: false
 
     steps:
-      - name: Checkout repo
+      - name: "Checkout repo"
         uses: actions/checkout@v2
 
-      - name: Set up Python
+      - name: "Set up Python"
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.architecture }}
 
-      - name: Install cibuildwheel
+      - name: "Install cibuildwheel"
         run: |
           python -m pip install --upgrade pip
           python -m pip install cibuildwheel build
