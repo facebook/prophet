@@ -23,10 +23,7 @@ jobs:
           - "windows-latest"
           - "macos-latest"
         python-version:
-          - "3.6"
-          - "3.7"
           - "3.8"
-          - "3.9"
         architecture:
           - x64
 
@@ -45,6 +42,7 @@ jobs:
       - name: "Create wheel"
         run: |
           python3 -m pip install --upgrade pip
+          cd python
           STAN_BACKEND=${{ env.STAN_BACKEND }} python setup.py bdist
 
       - name: "Install wheel"

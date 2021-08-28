@@ -140,8 +140,6 @@ setup(
     author_email='sjtz@pm.me',
     license='MIT',
     packages=find_packages(),
-    setup_requires=[
-    ],
     install_requires=install_requires,
     python_requires='>=3',
     zip_safe=False,
