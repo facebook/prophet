@@ -43,7 +43,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           cd python
-          STAN_BACKEND=${{ env.STAN_BACKEND }} python setup.py bdist
+          STAN_BACKEND=${{ env.STAN_BACKEND }} python3 -m pip wheel .
 
       - name: "Install wheel"
         run: |
