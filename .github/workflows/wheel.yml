@@ -1,0 +1,54 @@
+name: "Create Python Wheels"
+
+on:
+  release:
+    types: [created]
+
+env:
+  STAN_BACKEND: "CMDSTANPY"
+
+jobs:
+  # two jobs are defined make-wheel-win-osx and make-wheel-linux.
+  # they do the the same steps, but linux wheels need to be build to target manylinux
+  make-wheel-win-osx:
+    name: ${{ matrix.python-version }}-${{ matrix.architecture }}-${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - "windows-latest"
+          - "macos-latest"
+        python-version:
+          - "3.6"
+          - "3.7"
+          - "3.8"
+          - "3.9"
+        architecture:
+          - x64
+
+      fail-fast: true
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.architecture }}
+
+      - name: "Create wheel"
+        run: |
+          python3 -m pip install --upgrade pip
+          STAN_BACKEND=${{ env.STAN_BACKEND }} python setup.py bdist
+
+      - name: "Install wheel"
+        run: |
+          python3 -m pip install -f dist --no-index prophet
+
+      - name: "Upload wheel as artifact"
+        uses: actions/upload-artifact@main
+        with:
+          name: $python{ matrix.python-version }}-${{ matrix.os }}-arch${{ matrix.architecture }}-binary
+          files: "dist/*.whl"

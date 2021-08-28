@@ -60,6 +60,12 @@ class IStanBackend(ABC):
 
 
 class CmdStanPyBackend(IStanBackend):
+    def __init__(self, cmdstan_path = None):
+        super().__init__()
+        import cmdstanpy
+        if cmdstan_path is None:
+            cmdstan_path = pkg_resources.resource_filename("prophet", "cmdstan")
+            cmdstanpy.set_cmdstan_path(cmdstan_path)
 
     @staticmethod
     def get_type():
@@ -87,7 +93,7 @@ class CmdStanPyBackend(IStanBackend):
 
     def fit(self, stan_init, stan_data, **kwargs):
         (stan_init, stan_data) = self.prepare_data(stan_init, stan_data)
-        
+
         if 'inits' not in kwargs and 'init' in kwargs:
             kwargs['inits'] = self.prepare_data(kwargs['init'], stan_data)[0]
 
@@ -120,7 +126,7 @@ class CmdStanPyBackend(IStanBackend):
 
     def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
         (stan_init, stan_data) = self.prepare_data(stan_init, stan_data)
-        
+
         if 'inits' not in kwargs and 'init' in kwargs:
             kwargs['inits'] = self.prepare_data(kwargs['init'], stan_data)[0]
 
@@ -136,7 +142,7 @@ class CmdStanPyBackend(IStanBackend):
         kwargs['iter_sampling'] = iter_half
         if 'iter_warmup' not in kwargs:
             kwargs['iter_warmup'] = iter_half
-        
+
         args.update(kwargs)
 
         self.stan_fit = self.model.sample(**args)
@@ -181,7 +187,7 @@ class CmdStanPyBackend(IStanBackend):
             'sigma_obs': init['sigma_obs']
         }
         return (cmdstanpy_init, cmdstanpy_data)
-    
+
     @staticmethod
     def stan_to_dict_numpy(column_names: Tuple[str, ...], data: 'np.array'):
         import numpy as np

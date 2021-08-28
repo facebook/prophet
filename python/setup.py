@@ -18,6 +18,7 @@ from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
 from setuptools.command.test import test as test_command
 from typing import List
+from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
 
 PLATFORM = 'unix'
 if platform.platform().startswith('Win'):
@@ -35,7 +36,17 @@ def get_backends_from_env() -> List[str]:
 def build_models(target_dir):
     from prophet.models import StanBackendEnum
     for backend in get_backends_from_env():
+        if backend == "CMDSTANPY":
+            import cmdstanpy
+            cmdstanpy.install_cmdstan(version="2.26.1", dir="prophet/cmdstan/", overwrite=True, compiler=True)
+            cmdstanpy.set_cmdstan_path("prophet/cmdstan/")
         StanBackendEnum.get_backend_class(backend).build_model(target_dir, MODEL_DIR)
+
+
+class bdist_wheel(_bdist_wheel):
+    def finalize_options(self):
+        _bdist_wheel.finalize_options(self)
+        self.root_is_pure = False
 
 
 class BuildPyCommand(build_py):
@@ -136,6 +147,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     cmdclass={
+        'bdist_wheel': bdist_wheel,
         'build_py': BuildPyCommand,
         'develop': DevelopCommand,
         'test': TestCommand,
