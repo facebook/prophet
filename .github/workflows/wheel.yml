@@ -20,15 +20,12 @@ env:
   CIBW_REPAIR_WHEEL_COMMAND: ""
 
 jobs:
-  # two jobs are defined make-wheel-win-osx and make-wheel-linux.
-  # they do the the same steps, but linux wheels need to be build to target manylinux
-  make-wheel-win-osx:
+  make-wheels-macos-linux:
     name: ${{ matrix.python-version }}-${{ matrix.architecture }}-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os:
-          - "windows-latest"
           - "macos-latest"
           - "ubuntu-latest"
         python-version:
@@ -60,4 +57,4 @@ jobs:
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@v2
         with:
-          path: ./wheelhouse/*.whl
+          path: "./**/*.whl"
