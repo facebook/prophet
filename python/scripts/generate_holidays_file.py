@@ -61,7 +61,7 @@ def generate_holidays_file():
         all_holidays.append(df)
 
     generated_holidays = pd.concat(all_holidays, axis=0, ignore_index=True)
-    generated_holidays['year'] = generated_holidays.ds.apply(lambda x: x.year)
+    generated_holidays['year'] = generated_holidays.ds.dt.year
     generated_holidays.sort_values(['country', 'ds', 'holiday'], inplace=True)
 
     # Convert to ASCII, and drop holidays that fail to convert
