@@ -1,7 +1,10 @@
 name: "Create Python Wheels"
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
   # release:
   #   types: [created]
 
