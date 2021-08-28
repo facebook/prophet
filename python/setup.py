@@ -140,7 +140,7 @@ setup(
     author='Sean J. Taylor <sjtz@pm.me>, Ben Letham <bletham@fb.com>',
     author_email='sjtz@pm.me',
     license='MIT',
-    packages=find_packages('prophet'),
+    packages=['prophet', 'prophet.tests'],
     install_requires=install_requires,
     python_requires='>=3',
     zip_safe=False,
