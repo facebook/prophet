@@ -9,7 +9,7 @@ on:
   #   types: [created]
 
 env:
-  STAN_BACKEND: "PYSTAN"
+  STAN_BACKEND: "PYSTAN,CMDSTANPY"
   # Python versions for cibuildwheel
   CIBW_BUILD: "cp38-*"
   # Architectures for cibuildwheel
