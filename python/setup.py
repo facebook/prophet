@@ -17,6 +17,7 @@ from pkg_resources import (
 from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
+from setuptools.command.install import install
 from setuptools.command.test import test as test_command
 from typing import List
 from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
@@ -75,10 +76,18 @@ def build_models(target_dir):
             build_pystan_model(target_dir)
 
 
-class bdist_wheel(_bdist_wheel):
+class BDistWheelNonPure(_bdist_wheel):
     def finalize_options(self):
         _bdist_wheel.finalize_options(self)
         self.root_is_pure = False
+
+
+class InstallPlatlib(install):
+    """Ensure wheel has correct platlib specification when being repaired by auditwheel."""
+    def finalize_options(self):
+        install.finalize_options(self)
+        if self.distribution.has_ext_modules():
+            self.install_lib = self.install_platlib
 
 
 class BuildPyCommand(build_py):
@@ -177,9 +186,10 @@ setup(
     zip_safe=False,
     include_package_data=True,
     cmdclass={
-        'bdist_wheel': bdist_wheel,
+        'bdist_wheel': BDistWheelNonPure,
         'build_py': BuildPyCommand,
         'develop': DevelopCommand,
+        'install': InstallPlatlib,
         'test': TestCommand,
     },
     test_suite='prophet.tests',
