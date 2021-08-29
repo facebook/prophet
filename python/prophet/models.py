@@ -134,7 +134,6 @@ class CmdStanPyBackend(IStanBackend):
         args = dict(
             data=stan_data,
             inits=stan_init,
-            algorithm='Newton' if stan_data['T'] < 100 else 'LBFGS',
         )
 
         if 'chains' not in kwargs:

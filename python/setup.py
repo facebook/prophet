@@ -3,12 +3,11 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import os.path
+import os
 import pickle
 import platform
 import sys
-import os
-from shutil import copy
+from shutil import copy, rmtree
 from pkg_resources import (
     normalize_path,
     working_set,
@@ -33,15 +32,29 @@ CMDSTAN_VERSION = "2.26.1"
 def get_backends_from_env() -> List[str]:
     return os.environ.get("STAN_BACKEND", "PYSTAN").split(",")
 
+def prune_cmdstan_files(cmdstan_dir):
+    """
+    Remove unnecessary folders from the unbundled cmdstan installation.
+    We only need to keep the files that will be used to execute the model binary at runtime.
+    """
+    remove_dirs = ["stan"]
+    for dirname in remove_dirs:
+        rmtree(os.path.join(cmdstan_dir, dirname))
+    raw_binaries = ["linux-stanc", "mac-stanc", "windows-stanc"]  # These are converted into "stanc" in the Make process
+    for fname in raw_binaries:
+        os.remove(os.path.join(cmdstan_dir, f"bin/{fname}"))
+
 def build_cmdstan_model(target_dir):
     import cmdstanpy
     cmdstanpy.install_cmdstan(version=CMDSTAN_VERSION, dir=target_dir, overwrite=True)
-    cmdstanpy.set_cmdstan_path(os.path.join(target_dir, f"cmdstan-{CMDSTAN_VERSION}"))
+    cmdstan_dir = os.path.join(target_dir, f"cmdstan-{CMDSTAN_VERSION}")
+    cmdstanpy.set_cmdstan_path(cmdstan_dir)
     model_name = 'prophet.stan'
     target_name = 'prophet_model.bin'
     sm = cmdstanpy.CmdStanModel(stan_file=os.path.join(MODEL_DIR, model_name))
     sm.compile()
     copy(sm.exe_file, os.path.join(target_dir, target_name))
+    prune_cmdstan_files(cmdstan_dir)
 
 def build_pystan_model(target_dir):
     import pystan

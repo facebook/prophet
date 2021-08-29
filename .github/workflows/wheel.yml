@@ -10,14 +10,14 @@ on:
 
 env:
   STAN_BACKEND: "PYSTAN,CMDSTANPY"
+  # Env vars, required because CIBW may build inside a Docker container
+  CIBW_ENVIRONMENT: STAN_BACKEND="PYSTAN,CMDSTANPY"
   # Python versions for cibuildwheel
   CIBW_BUILD: "cp38-*"
   # Architectures for cibuildwheel
   CIBW_ARCHS: "native"
   # Use pypa/build as the build frontend
   CIBW_BUILD_FRONTEND: "build"
-  # Do not repair wheels
-  CIBW_REPAIR_WHEEL_COMMAND: ""
 
 jobs:
   make-wheels-macos-linux:
@@ -57,4 +57,5 @@ jobs:
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@v2
         with:
+          name: ${{ matrix.os }}-wheel
           path: "./**/*.whl"
