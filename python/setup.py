@@ -17,10 +17,9 @@ from pkg_resources import (
 from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
-from setuptools.command.install import install
 from setuptools.command.test import test as test_command
+from setuptools.dist import Distribution
 from typing import List
-from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
 
 PLATFORM = 'unix'
 if platform.platform().startswith('Win'):
@@ -38,7 +37,7 @@ def prune_cmdstan_files(cmdstan_dir):
     Remove unnecessary folders from the unbundled cmdstan installation.
     We only need to keep the files that will be used to execute the model binary at runtime.
     """
-    remove_dirs = ["stan"]
+    remove_dirs = ["examples", "stan"]
     for dirname in remove_dirs:
         rmtree(os.path.join(cmdstan_dir, dirname))
     raw_binaries = ["linux-stanc", "mac-stanc", "windows-stanc"]  # These are converted into "stanc" in the Make process
@@ -76,18 +75,13 @@ def build_models(target_dir):
             build_pystan_model(target_dir)
 
 
-class BDistWheelNonPure(_bdist_wheel):
-    def finalize_options(self):
-        _bdist_wheel.finalize_options(self)
-        self.root_is_pure = False
+class BinaryDistribution(Distribution):
+    """Distribution which always forces a binary package with platform name"""
+    def has_ext_modules(self):
+        return True
 
-
-class InstallPlatlib(install):
-    """Ensure wheel has correct platlib specification when being repaired by auditwheel."""
-    def finalize_options(self):
-        install.finalize_options(self)
-        if self.distribution.has_ext_modules():
-            self.install_lib = self.install_platlib
+    def is_pure(self):
+        return False
 
 
 class BuildPyCommand(build_py):
@@ -186,10 +180,8 @@ setup(
     zip_safe=False,
     include_package_data=True,
     cmdclass={
-        'bdist_wheel': BDistWheelNonPure,
         'build_py': BuildPyCommand,
         'develop': DevelopCommand,
-        'install': InstallPlatlib,
         'test': TestCommand,
     },
     test_suite='prophet.tests',
@@ -200,4 +192,5 @@ setup(
     ],
     long_description=long_description,
     long_description_content_type='text/markdown',
+    distclass=BinaryDistribution,
 )
