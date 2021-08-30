@@ -1589,6 +1589,7 @@ sample_model <- function(m, df, seasonal.features, iteration, s_a, s_m) {
 #' @param iteration Int sampling iteration to use parameters from.
 #'
 #' @return Vector of simulated trend over df$t.
+#' @importFrom extraDistr rlaplace
 #'
 #' @keywords internal
 sample_predictive_trend <- function(model, df, iteration) {
@@ -1616,7 +1617,7 @@ sample_predictive_trend <- function(model, df, iteration) {
   # Get the empirical scale of the deltas, plus epsilon to avoid NaNs.
   lambda <- mean(abs(c(deltas))) + 1e-8
   # Sample deltas
-  deltas.new <- extraDistr::rlaplace(n.changes, mu = 0, sigma = lambda)
+  deltas.new <- rlaplace(n.changes, mu = 0, sigma = lambda)
 
   # Combine with changepoints from the history
   changepoint.ts <- c(model$changepoints.t, changepoint.ts.new)
