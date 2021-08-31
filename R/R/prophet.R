@@ -1589,6 +1589,7 @@ sample_model <- function(m, df, seasonal.features, iteration, s_a, s_m) {
 #' @param iteration Int sampling iteration to use parameters from.
 #'
 #' @return Vector of simulated trend over df$t.
+#' @importFrom extraDistr rlaplace
 #'
 #' @keywords internal
 sample_predictive_trend <- function(model, df, iteration) {
