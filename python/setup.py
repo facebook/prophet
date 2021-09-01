@@ -29,8 +29,10 @@ MODEL_DIR = os.path.join('stan', PLATFORM)
 MODEL_TARGET_DIR = os.path.join('prophet', 'stan_model')
 CMDSTAN_VERSION = "2.26.1"
 
+
 def get_backends_from_env() -> List[str]:
     return os.environ.get("STAN_BACKEND", "PYSTAN").split(",")
+
 
 def prune_cmdstan_files(cmdstan_dir):
     """
@@ -44,6 +46,7 @@ def prune_cmdstan_files(cmdstan_dir):
     for fname in raw_binaries:
         os.remove(os.path.join(cmdstan_dir, f"bin/{fname}"))
 
+
 def build_cmdstan_model(target_dir):
     import cmdstanpy
     cmdstanpy.install_cmdstan(version=CMDSTAN_VERSION, dir=target_dir, overwrite=True)
@@ -56,6 +59,7 @@ def build_cmdstan_model(target_dir):
     copy(sm.exe_file, os.path.join(target_dir, target_name))
     prune_cmdstan_files(cmdstan_dir)
 
+
 def build_pystan_model(target_dir):
     import pystan
     model_name = 'prophet.stan'
@@ -65,6 +69,7 @@ def build_pystan_model(target_dir):
     sm = pystan.StanModel(model_code=model_code)
     with open(os.path.join(target_dir, target_name), 'wb') as f:
         pickle.dump(sm, f, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 def build_models(target_dir):
     for backend in get_backends_from_env():
