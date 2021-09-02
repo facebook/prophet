@@ -197,7 +197,6 @@ setup(
         'build_py': BuildPyCommand,
         'develop': DevelopCommand,
         'test': TestCommand,
-        'install': InstallPlatlib
     },
     test_suite='prophet.tests',
     classifiers=[
