@@ -20,6 +20,7 @@ from setuptools.command.develop import develop
 from setuptools.command.test import test as test_command
 from setuptools.dist import Distribution
 from typing import List
+from setuptools.command.install import install
 
 PLATFORM = 'unix'
 if platform.platform().startswith('Win'):
@@ -87,6 +88,14 @@ class BinaryDistribution(Distribution):
 
     def is_pure(self):
         return False
+
+
+class InstallPlatlib(install):
+    def finalize_options(self):
+        print("Being called!!")
+        install.finalize_options(self)
+        if self.distribution.has_ext_modules():
+            self.install_lib = self.install_platlib
 
 
 class BuildPyCommand(build_py):
@@ -188,6 +197,7 @@ setup(
         'build_py': BuildPyCommand,
         'develop': DevelopCommand,
         'test': TestCommand,
+        'install': InstallPlatlib
     },
     test_suite='prophet.tests',
     classifiers=[
