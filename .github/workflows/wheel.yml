@@ -18,6 +18,7 @@ env:
   CIBW_ARCHS: "native"
   # Use pypa/build as the build frontend
   CIBW_BUILD_FRONTEND: "build"
+  CIBW_REPAIR_WHEEL_COMMAND: ""
 
 jobs:
   make-wheels-macos-linux:
