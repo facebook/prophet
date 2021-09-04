@@ -3,28 +3,21 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import contextlib
-import subprocess
 import os
 import pickle
 import platform
 import sys
-from shutil import copy, copytree, rmtree
-from pathlib import Path
 from distutils.extension import Extension
-from pkg_resources import (
-    normalize_path,
-    working_set,
-    add_activation_listener,
-    require,
-)
-from setuptools import setup, find_packages
+from pathlib import Path
+from shutil import copy, copytree, rmtree
+from typing import List
+
+from pkg_resources import add_activation_listener, normalize_path, require, working_set
+from setuptools import find_packages, setup
 from setuptools.command.build_ext import build_ext
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
 from setuptools.command.test import test as test_command
-from setuptools.dist import Distribution
-from typing import List, Iterator
 
 PLATFORM = "unix"
 if platform.platform().startswith("Win"):
@@ -35,96 +28,20 @@ MODEL_TARGET_DIR = os.path.join("prophet", "stan_model")
 
 # cmdstan utils
 CMDSTAN_VERSION = "2.26.1"
-EXTENSION = ".exe" if platform.system() == "Windows" else ""
-MAKE = os.getenv("MAKE", "make" if platform.system() != "Windows" else "mingw32-make")
 BINARIES_DIR = "bin"
 BINARIES = ["diagnose", "print", "stanc", "stansummary"]
 TBB_PARENT = "stan/lib/stan_math/lib"
 TBB_DIRS = ["tbb", "tbb_2019_U8"]
 
 
-class CmdStanInstallError(RuntimeError):
-    pass
-
-
-@contextlib.contextmanager
-def pushd(new_dir: str) -> Iterator[None]:
-    """Acts like pushd/popd."""
-    previous_dir = os.getcwd()
-    os.chdir(new_dir)
-    yield
-    os.chdir(previous_dir)
-
-
-def clear_cmdstan(cmdstan_dir: str, verbose: bool = False) -> None:
-    with pushd(cmdstan_dir):
-        cmd = [MAKE, "clean-all"]
-        proc = subprocess.Popen(
-            cmd,
-            cwd=None,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            env=os.environ,
-        )
-        while proc.poll() is None:
-            if proc.stdout:
-                output = proc.stdout.readline().decode("utf-8").strip()
-                if verbose and output:
-                    print(output, flush=True)
-        _, stderr = proc.communicate()
-        if proc.returncode:
-            msgs = ['Command "make clean-all" failed']
-            if stderr:
-                msgs.append(stderr.decode("utf-8").strip())
-            raise CmdStanInstallError("\n".join(msgs))
-
-
-def build_cmdstan(cmdstan_dir: str, verbose: bool = False) -> None:
-    with pushd(cmdstan_dir):
-        cmd = [MAKE, "build"]
-        proc = subprocess.Popen(
-            cmd,
-            cwd=None,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            env=os.environ,
-        )
-        while proc.poll() is None:
-            if proc.stdout:
-
-                output = proc.stdout.readline().decode("utf-8").strip()
-                if verbose and output:
-                    print(output, flush=True)
-        _, stderr = proc.communicate()
-        if proc.returncode:
-            msgs = ['Command "make build" failed']
-            if stderr:
-                msgs.append(stderr.decode("utf-8").strip())
-            raise CmdStanInstallError("\n".join(msgs))
-        if not os.path.exists(os.path.join("bin", "stansummary" + EXTENSION)):
-            raise CmdStanInstallError(
-                f"bin/stansummary{EXTENSION} not found"
-                ", please rebuild or report a bug!"
-            )
-        if not os.path.exists(os.path.join("bin", "diagnose" + EXTENSION)):
-            raise CmdStanInstallError(
-                f"bin/stansummary{EXTENSION} not found"
-                ", please rebuild or report a bug!"
-            )
-
-
 def prune_cmdstan(cmdstan_dir: str) -> None:
     original_dir = Path(cmdstan_dir).resolve()
     parent_dir = original_dir.parent
-    # Create temp dir
     temp_dir = parent_dir / "temp"
     if temp_dir.is_dir():
         rmtree(temp_dir)
-    else:
-        temp_dir.mkdir()
-    # Copy minimal files to temp dir
+    temp_dir.mkdir()
+
     copytree(original_dir / BINARIES_DIR, temp_dir / BINARIES_DIR)
     for f in (temp_dir / BINARIES_DIR).iterdir():
         if f.is_dir():
@@ -133,9 +50,8 @@ def prune_cmdstan(cmdstan_dir: str) -> None:
             os.remove(f)
     for tbb_dir in TBB_DIRS:
         copytree(original_dir / TBB_PARENT / tbb_dir, temp_dir / TBB_PARENT / tbb_dir)
-    # Remove original cmdstan_dir
+
     rmtree(original_dir)
-    # Rename temp dir to original dir
     temp_dir.rename(original_dir)
 
 
@@ -155,15 +71,14 @@ def build_cmdstan_model(target_dir):
 
     if os.path.isdir(cmdstan_cache):
         print(f"Found existing cmdstan library at {cmdstan_cache}")
-        if os.path.isdir(cmdstan_dir):
-            rmtree(cmdstan_dir)
-        copytree(cmdstan_cache, cmdstan_dir)
-        # clear_cmdstan(cmdstan_dir)
-        build_cmdstan(cmdstan_dir)
     else:
         cmdstanpy.install_cmdstan(
-            version=CMDSTAN_VERSION, dir=target_dir, overwrite=True
+            version=CMDSTAN_VERSION, dir=cmdstan_cache, overwrite=True
         )
+
+    if os.path.isdir(cmdstan_dir):
+        rmtree(cmdstan_dir)
+    copytree(cmdstan_cache, cmdstan_dir)
     cmdstanpy.set_cmdstan_path(cmdstan_dir)
 
     model_name = "prophet.stan"
@@ -171,6 +86,17 @@ def build_cmdstan_model(target_dir):
     sm = cmdstanpy.CmdStanModel(stan_file=os.path.join(MODEL_DIR, model_name))
     sm.compile()
     copy(sm.exe_file, os.path.join(target_dir, target_name))
+    # Add tbb to the $PATH on Windows
+    if platform.system() == "Windows":
+        libtbb = Path(cmdstan_dir).resolve() / TBB_PARENT / "tbb"
+        if libtbb not in os.environ["PATH"]:
+            os.environ["PATH"] = ";".join(
+                list(
+                    OrderedDict.fromkeys(
+                        [libtbb] + os.environ.get("PATH", "").split(";")
+                    )
+                )
+            )
     # Clean up
     for f in Path(MODEL_DIR).iterdir():
         if f.is_file() and f.name != model_name:
@@ -197,16 +123,6 @@ def build_models(target_dir):
             build_cmdstan_model(target_dir)
         elif backend == "PYSTAN":
             build_pystan_model(target_dir)
-
-
-class BinaryDistribution(Distribution):
-    """Distribution which always forces a binary package with platform name"""
-
-    def has_ext_modules(self):
-        return True
-
-    def is_pure(self):
-        return False
 
 
 class BuildPyCommand(build_py):
@@ -330,5 +246,4 @@ setup(
     ],
     long_description=long_description,
     long_description_content_type="text/markdown",
-    distclass=BinaryDistribution,
 )
