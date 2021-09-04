@@ -56,6 +56,30 @@ def pushd(new_dir: str) -> Iterator[None]:
     os.chdir(previous_dir)
 
 
+def clear_cmdstan(cmdstan_dir: str, verbose: bool = False) -> None:
+    with pushd(cmdstan_dir):
+        cmd = [MAKE, "clean-all"]
+        proc = subprocess.Popen(
+            cmd,
+            cwd=None,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=os.environ,
+        )
+        while proc.poll() is None:
+            if proc.stdout:
+                output = proc.stdout.readline().decode("utf-8").strip()
+                if verbose and output:
+                    print(output, flush=True)
+        _, stderr = proc.communicate()
+        if proc.returncode:
+            msgs = ['Command "make clean-all" failed']
+            if stderr:
+                msgs.append(stderr.decode("utf-8").strip())
+            raise CmdStanInstallError("\n".join(msgs))
+
+
 def build_cmdstan(cmdstan_dir: str, verbose: bool = False) -> None:
     with pushd(cmdstan_dir):
         cmd = [MAKE, "build"]
@@ -92,33 +116,27 @@ def build_cmdstan(cmdstan_dir: str, verbose: bool = False) -> None:
 
 
 def prune_cmdstan(cmdstan_dir: str) -> None:
-    with pushd(cmdstan_dir):
-        # Create temp dir
-        temp_dir = Path(".").resolve().parent / "temp_dir"
-        if temp_dir.is_dir():
-            rmtree(temp_dir)
-        else:
-            temp_dir.mkdir()
-        # Copy minimal files to temp dir
-        copytree(Path(".") / BINARIES_DIR, temp_dir / BINARIES_DIR)
-        for f in (temp_dir / BINARIES_DIR).iterdir():
-            if f.is_dir():
-                rmtree(f)
-            elif f.is_file() and f.stem not in BINARIES:
-                os.remove(f)
-        for tbb_dir in TBB_DIRS:
-            copytree(Path(".") / TBB_PARENT / tbb_dir, temp_dir / tbb_dir)
-        # Remove everything inside cmdstan_dir
-        for f in Path(".").iterdir():
-            if f.is_dir():
-                rmtree(f)
-            elif f.is_file():
-                os.remove(f)
-        # Copy the necessary files back into cmdstan_dir
-        copytree(temp_dir / BINARIES_DIR, Path(".") / BINARIES_DIR)
-        for tbb_dir in TBB_DIRS:
-            copytree(temp_dir / tbb_dir, Path(".") / TBB_PARENT / tbb_dir)
+    original_dir = Path(cmdstan_dir).resolve()
+    parent_dir = original_dir.parent
+    # Create temp dir
+    temp_dir = parent_dir / "temp"
+    if temp_dir.is_dir():
         rmtree(temp_dir)
+    else:
+        temp_dir.mkdir()
+    # Copy minimal files to temp dir
+    copytree(original_dir / BINARIES_DIR, temp_dir / BINARIES_DIR)
+    for f in (temp_dir / BINARIES_DIR).iterdir():
+        if f.is_dir():
+            rmtree(f)
+        elif f.is_file() and f.stem not in BINARIES:
+            os.remove(f)
+    for tbb_dir in TBB_DIRS:
+        copytree(original_dir / TBB_PARENT / tbb_dir, temp_dir / TBB_PARENT / tbb_dir)
+    # Remove original cmdstan_dir
+    rmtree(original_dir)
+    # Rename temp dir to original dir
+    temp_dir.rename(original_dir)
 
 
 def get_backends_from_env() -> List[str]:
@@ -140,6 +158,7 @@ def build_cmdstan_model(target_dir):
         if os.path.isdir(cmdstan_dir):
             rmtree(cmdstan_dir)
         copytree(cmdstan_cache, cmdstan_dir)
+        # clear_cmdstan(cmdstan_dir)
         build_cmdstan(cmdstan_dir)
     else:
         cmdstanpy.install_cmdstan(
