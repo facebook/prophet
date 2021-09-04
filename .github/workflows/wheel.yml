@@ -45,12 +45,12 @@ jobs:
       - name: "Get OS version (Linux)"
         if: startsWith(runner.os, 'Linux')
         run: |
-          echo "OS_VERSION=\"`lsb release -sr`\"" >> $GITHUB_ENV
+          echo "OS_VERSION=`lsb_release -sr`" >> $GITHUB_ENV
 
       - name: "Get OS version (macOS)"
         if: startsWith(runner.os, 'macOS')
         run: |
-          echo "OS_VERSION=\"`sw_vers -productVersion`\"" >> $GITHUB_ENV
+          echo "OS_VERSION=`sw_vers -productVersion`" >> $GITHUB_ENV
 
       - name: "Checkout repo"
         uses: actions/checkout@v2
@@ -88,8 +88,8 @@ jobs:
           wget https://github.com/stan-dev/cmdstan/releases/download/v${{ env.CMDSTAN_VERSION }}/cmdstan-${{ env.CMDSTAN_VERSION }}.tar.gz -O /tmp/cmdstan.tar.gz > /dev/null
           mkdir ~/.cmdstan
           tar -xvf /tmp/cmdstan.tar.gz -C ~/.cmdstan > /dev/null
-          make -C ~/.cmdstan/cmdstan-2.26.1/ clean-all > /dev/null
-          make -C ~/.cmdstan/cmdstan-2.26.1/ build > /dev/null
+          make -C ~/.cmdstan/cmdstan-${{ env.CMDSTAN_VERSION }}/ clean-all > /dev/null
+          make -C ~/.cmdstan/cmdstan-${{ env.CMDSTAN_VERSION }}/ build > /dev/null
 
       - name: "Create wheel"
         run: |

@@ -7,6 +7,7 @@ import os
 import pickle
 import platform
 import sys
+from collections import OrderedDict
 from distutils.extension import Extension
 from pathlib import Path
 from shutil import copy, copytree, rmtree
