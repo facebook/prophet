@@ -76,6 +76,7 @@ jobs:
         if: steps.cache-cmdstan.outputs.cache-hit != 'true'
         run: |
           wget https://github.com/stan-dev/cmdstan/releases/download/v${{ env.CMDSTAN_VERSION }}/cmdstan-${{ env.CMDSTAN_VERSION }}.tar.gz -O /tmp/cmdstan.tar.gz > /dev/null
+          mkdir ~/.cmdstan
           tar -xvf /tmp/cmdstan.tar.gz -C ~/.cmdstan > /dev/null
           make -C ~/.cmdstan/cmdstan-2.26.1/ build > /dev/null
 
