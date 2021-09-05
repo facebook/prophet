@@ -95,7 +95,7 @@ jobs:
             HOME="/host/${{ env.DEFAULT_HOME }}"
             PIP_CACHE_DIR="/host/${{ env.PIP_DEFAULT_CACHE }}"
           # Python versions
-          CIBW_BUILD: "cp38-*"
+          CIBW_BUILD: "cp36-* cp37-* cp38-*"
           # Architectures
           CIBW_ARCHS: "native"
           CIBW_BUILD_FRONTEND: "build"
