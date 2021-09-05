@@ -88,18 +88,16 @@ jobs:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             CMDSTAN_VERSION=${{ env.CMDSTAN_VERSION }}
-            HOME="host/${{ env.DEFAULT_HOME }}"
-            PIP_CACHE_DIR="host/${{ env.PIP_DEFAULT_CACHE }}"
+            HOME="/host/${{ env.DEFAULT_HOME }}"
+            PIP_CACHE_DIR="/host/${{ env.PIP_DEFAULT_CACHE }}"
           # Python versions
           CIBW_BUILD: "cp38-*"
           # Architectures
           CIBW_ARCHS: "native"
           CIBW_BUILD_FRONTEND: "build"
           CIBW_BEFORE_ALL: |
-            echo "using $HOME/.cmdstan library"
-            echo "using $PIP_CACHE_DIR pip cache"
-            make -C $HOME/.cmdstan/cmdstan-${{ env.CMDSTAN_VERSION }}/ clean-all &> /dev/null
-            make -C $HOME/.cmdstan/cmdstan-${{ env.CMDSTAN_VERSION }}/ build &> /dev/null
+            make -C $HOME/.cmdstan/cmdstan-${{ env.CMDSTAN_VERSION }}/ clean-all
+            make -C $HOME/.cmdstan/cmdstan-${{ env.CMDSTAN_VERSION }}/ build
 
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@v2
