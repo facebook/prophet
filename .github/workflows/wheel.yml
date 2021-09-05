@@ -34,12 +34,14 @@ jobs:
         run: |
           echo "OS_VERSION=`lsb_release -sr`" >> $GITHUB_ENV
           echo "PIP_DEFAULT_CACHE=$HOME/.cache/pip" >> $GITHUB_ENV
+          echo ${{ env.HOME }}
 
       - name: "Get OS version (macOS)"
         if: startsWith(runner.os, 'macOS')
         run: |
           echo "OS_VERSION=`sw_vers -productVersion`" >> $GITHUB_ENV
           echo "PIP_DEFAULT_CACHE=$HOME/Library/Caches/pip" >> $GITHUB_ENV
+          echo ${{ env.HOME }}
 
       - name: "Checkout repo"
         uses: actions/checkout@v2
@@ -74,10 +76,10 @@ jobs:
       - name: "Download cmdstan"
         if: steps.cache-cmdstan.outputs.cache-hit != 'true'
         run: |
-          wget https://github.com/stan-dev/cmdstan/releases/download/v${{ env.CMDSTAN_VERSION }}/cmdstan-${{ env.CMDSTAN_VERSION }}.tar.gz -O /tmp/cmdstan.tar.gz > /dev/null
+          wget https://github.com/stan-dev/cmdstan/releases/download/v${{ env.CMDSTAN_VERSION }}/cmdstan-${{ env.CMDSTAN_VERSION }}.tar.gz -O /tmp/cmdstan.tar.gz &> /dev/null
           mkdir $HOME/.cmdstan
-          tar -xvf /tmp/cmdstan.tar.gz -C $HOME/.cmdstan > /dev/null
-          cd ${{ env.GITHUB_WORKSPACE }}/prophet/python
+          tar -xf /tmp/cmdstan.tar.gz -C $HOME/.cmdstan &> /dev/null
+          cd python
 
       - name: "Build wheel"
         uses: pypa/cibuildwheel@v2.1.1
@@ -95,8 +97,8 @@ jobs:
           CIBW_BEFORE_ALL: |
             echo "using $HOME/.cmdstan library"
             echo "using $PIP_CACHE_DIR pip cache"
-            make -C $HOME/.cmdstan/cmdstan-${{ env.CMDSTAN_VERSION }}/ clean-all > /dev/null
-            make -C $HOME/.cmdstan/cmdstan-${{ env.CMDSTAN_VERSION }}/ build > /dev/null
+            make -C $HOME/.cmdstan/cmdstan-${{ env.CMDSTAN_VERSION }}/ clean-all &> /dev/null
+            make -C $HOME/.cmdstan/cmdstan-${{ env.CMDSTAN_VERSION }}/ build &> /dev/null
 
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@v2
