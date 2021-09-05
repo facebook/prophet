@@ -301,7 +301,7 @@ class PyStanBackend(IStanBackend):
     def load_model(self):
         """Load compiled Stan model"""
         model_file = pkg_resources.resource_filename(
-            'prophet',
+            "prophet",
             'stan_model/prophet_model.pkl',
         )
         with Path(model_file).open('rb') as f:
