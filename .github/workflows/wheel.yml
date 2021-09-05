@@ -88,6 +88,7 @@ jobs:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             CMDSTAN_VERSION=${{ env.CMDSTAN_VERSION }}
+          CIBW_ENVIRONMENT_LINUX: >
             HOME="/host/${{ env.DEFAULT_HOME }}"
             PIP_CACHE_DIR="/host/${{ env.PIP_DEFAULT_CACHE }}"
           # Python versions
