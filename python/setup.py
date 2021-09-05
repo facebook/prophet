@@ -112,7 +112,6 @@ def prune_cmdstan(cmdstan_dir: str) -> None:
     temp_dir.rename(original_dir)
 
 
-
 def get_backends_from_env() -> List[str]:
     return os.environ.get("STAN_BACKEND", "PYSTAN").split(",")
 
@@ -150,7 +149,6 @@ def build_cmdstan_model(target_dir):
         if f.is_file() and f.name != model_name:
             os.remove(f)
     prune_cmdstan(cmdstan_dir)
-
 
 
 def build_pystan_model(target_dir):
