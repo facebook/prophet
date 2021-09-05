@@ -81,7 +81,6 @@ jobs:
           tar -xf /tmp/cmdstan.tar.gz -C $HOME/.cmdstan &> /dev/null
 
       - name: "Build wheel"
-        # uses: pypa/cibuildwheel@v2.1.1
         run: |
           cd python && python -m cibuildwheel --output-dir wheelhouse
         env:
