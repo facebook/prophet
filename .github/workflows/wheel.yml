@@ -61,10 +61,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      # - name: "Install cibuildwheel"
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     python -m pip install cibuildwheel build
+      - name: "Install pip"
+        run: |
+          python -m pip install --upgrade pip
 
       - name: "Restore cmdstan cache"
         id: cache-cmdstan
