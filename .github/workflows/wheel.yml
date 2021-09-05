@@ -82,7 +82,8 @@ jobs:
 
       - name: "Build wheel"
         run: |
-          cd python && sudo python -m cibuildwheel --output-dir wheelhouse
+          sudo chmod -R a+rwx ${{ env.PIP_DEFAULT_CACHE }}
+          cd python && python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
