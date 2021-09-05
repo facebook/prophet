@@ -34,14 +34,14 @@ jobs:
         run: |
           echo "OS_VERSION=`lsb_release -sr`" >> $GITHUB_ENV
           echo "PIP_DEFAULT_CACHE=$HOME/.cache/pip" >> $GITHUB_ENV
-          echo ${{ env.HOME }}
+          echo "DEFAULT_HOME=$HOME" >> $GITHUB_ENV
 
       - name: "Get OS version (macOS)"
         if: startsWith(runner.os, 'macOS')
         run: |
           echo "OS_VERSION=`sw_vers -productVersion`" >> $GITHUB_ENV
           echo "PIP_DEFAULT_CACHE=$HOME/Library/Caches/pip" >> $GITHUB_ENV
-          echo ${{ env.HOME }}
+          echo "DEFAULT_HOME=$HOME" >> $GITHUB_ENV
 
       - name: "Checkout repo"
         uses: actions/checkout@v2
@@ -79,7 +79,6 @@ jobs:
           wget https://github.com/stan-dev/cmdstan/releases/download/v${{ env.CMDSTAN_VERSION }}/cmdstan-${{ env.CMDSTAN_VERSION }}.tar.gz -O /tmp/cmdstan.tar.gz &> /dev/null
           mkdir $HOME/.cmdstan
           tar -xf /tmp/cmdstan.tar.gz -C $HOME/.cmdstan &> /dev/null
-          cd python
 
       - name: "Build wheel"
         uses: pypa/cibuildwheel@v2.1.1
@@ -87,7 +86,7 @@ jobs:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             CMDSTAN_VERSION=${{ env.CMDSTAN_VERSION }}
-            HOME="host/${{ env.HOME }}"
+            HOME="host/${{ env.DEFAULT_HOME }}"
             PIP_CACHE_DIR="host/${{ env.PIP_DEFAULT_CACHE }}"
           # Python versions
           CIBW_BUILD: "cp38-*"
