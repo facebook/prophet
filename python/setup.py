@@ -6,6 +6,7 @@
 import os
 import pickle
 import platform
+import subprocess
 import sys
 from collections import OrderedDict
 from distutils.extension import Extension
@@ -28,11 +29,66 @@ MODEL_DIR = os.path.join("stan", PLATFORM)
 MODEL_TARGET_DIR = os.path.join("prophet", "stan_model")
 
 # cmdstan utils
+MAKE = os.getenv("MAKE", "make" if platform.system() != "Windows" else "mingw32-make")
+EXTENSION = ".exe" if platform.system() == "Windows" else ""
+
 CMDSTAN_VERSION = "2.26.1"
 BINARIES_DIR = "bin"
 BINARIES = ["diagnose", "print", "stanc", "stansummary"]
 TBB_PARENT = "stan/lib/stan_math/lib"
 TBB_DIRS = ["tbb", "tbb_2019_U8"]
+
+
+def clean_all_cmdstan(verbose: bool = False) -> None:
+    cmd = [MAKE, "clean-all"]
+    proc = subprocess.Popen(
+        cmd,
+        cwd=None,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=os.environ,
+    )
+    while proc.poll() is None:
+        if proc.stdout:
+            output = proc.stdout.readline().decode("utf-8").strip()
+            if verbose and output:
+                print(output, flush=True)
+    _, stderr = proc.communicate()
+    if proc.returncode:
+        msgs = ['Command "make clean-all" failed']
+        if stderr:
+            msgs.append(stderr.decode("utf-8").strip())
+        raise RuntimeError("\n".join(msgs))
+
+
+def build_cmdstan(verbose: bool = False) -> None:
+    cmd = [MAKE, "build"]
+    proc = subprocess.Popen(
+        cmd,
+        cwd=None,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=os.environ,
+    )
+    while proc.poll() is None:
+        if proc.stdout:
+            output = proc.stdout.readline().decode("utf-8").strip()
+            if verbose and output:
+                print(output, flush=True)
+    _, stderr = proc.communicate()
+    if proc.returncode:
+        msgs = ['Command "make build" failed']
+        if stderr:
+            msgs.append(stderr.decode("utf-8").strip())
+        raise RuntimeError("\n".join(msgs))
+    if platform.system() == "Windows":
+        # Add tbb to the $PATH on Windows
+        libtbb = os.path.join(os.getcwd(), "stan", "lib", "stan_math", "lib", "tbb")
+        os.environ["PATH"] = ";".join(
+            list(OrderedDict.fromkeys([libtbb] + os.environ.get("PATH", "").split(";")))
+        )
 
 
 def prune_cmdstan(cmdstan_dir: str) -> None:
@@ -73,13 +129,14 @@ def build_cmdstan_model(target_dir):
     if os.path.isdir(cmdstan_cache):
         print(f"Found existing cmdstan library at {cmdstan_cache}")
     else:
-        cmdstanpy.install_cmdstan(
-            version=CMDSTAN_VERSION, dir=cmdstan_cache, overwrite=True
-        )
+        cmdstanpy.install_cmdstan(version=CMDSTAN_VERSION, dir=cmdstan_cache)
 
     if os.path.isdir(cmdstan_dir):
         rmtree(cmdstan_dir)
     copytree(cmdstan_cache, cmdstan_dir)
+    with cmdstanpy.utils.pushd(cmdstan_dir):
+        clean_all_cmdstan()
+        build_cmdstan()
     cmdstanpy.set_cmdstan_path(cmdstan_dir)
 
     model_name = "prophet.stan"
@@ -87,17 +144,6 @@ def build_cmdstan_model(target_dir):
     sm = cmdstanpy.CmdStanModel(stan_file=os.path.join(MODEL_DIR, model_name))
     sm.compile()
     copy(sm.exe_file, os.path.join(target_dir, target_name))
-    # Add tbb to the $PATH on Windows
-    if platform.system() == "Windows":
-        libtbb = Path(cmdstan_dir).resolve() / TBB_PARENT / "tbb"
-        if libtbb not in os.environ["PATH"]:
-            os.environ["PATH"] = ";".join(
-                list(
-                    OrderedDict.fromkeys(
-                        [libtbb] + os.environ.get("PATH", "").split(";")
-                    )
-                )
-            )
     # Clean up
     for f in Path(MODEL_DIR).iterdir():
         if f.is_file() and f.name != model_name:

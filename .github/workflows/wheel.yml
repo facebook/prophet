@@ -57,7 +57,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ env.PIP_DEFAULT_CACHE }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/python/requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/python/requirements.txt') }}-v0
           restore-keys: |
             ${{ runner.os }}-pip-
 
@@ -70,8 +70,8 @@ jobs:
         id: cache-cmdstan
         uses: actions/cache@v2
         with:
-          path: $HOME/.cmdstan
-          key: ${{ runner.os }}-${{ env.OS_VERSION }}-cmdstan-${{ env.CMDSTAN_VERSION }}
+          path: ${{ env.DEFAULT_HOME }}/.cmdstan
+          key: ${{ runner.os }}-${{ env.OS_VERSION }}-cmdstan-${{ env.CMDSTAN_VERSION }}-v0
 
       - name: "Download cmdstan"
         if: steps.cache-cmdstan.outputs.cache-hit != 'true'
@@ -95,9 +95,6 @@ jobs:
           # Architectures
           CIBW_ARCHS: "native"
           CIBW_BUILD_FRONTEND: "build"
-          CIBW_BEFORE_ALL: |
-            make -C $HOME/.cmdstan/cmdstan-${{ env.CMDSTAN_VERSION }}/ clean-all
-            make -C $HOME/.cmdstan/cmdstan-${{ env.CMDSTAN_VERSION }}/ build
 
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@v2
