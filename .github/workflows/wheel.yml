@@ -57,7 +57,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ env.PIP_DEFAULT_CACHE }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/python/requirements.txt') }}-v0
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/python/requirements.txt') }}-v1
           restore-keys: |
             ${{ runner.os }}-pip-
 
@@ -71,7 +71,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ env.DEFAULT_HOME }}/.cmdstan
-          key: ${{ runner.os }}-${{ env.OS_VERSION }}-cmdstan-${{ env.CMDSTAN_VERSION }}-v0
+          key: ${{ runner.os }}-${{ env.OS_VERSION }}-cmdstan-${{ env.CMDSTAN_VERSION }}-v1
 
       - name: "Download cmdstan"
         if: steps.cache-cmdstan.outputs.cache-hit != 'true'
@@ -82,13 +82,12 @@ jobs:
 
       - name: "Build wheel"
         run: |
-          sudo chmod -R a+rwx ${{ env.DEFAULT_HOME }}
-          sudo chmod -R a+rwx ${{ env.PIP_DEFAULT_CACHE }}
-          cd python && python -m cibuildwheel --output-dir wheelhouse
+          cd python && sudo python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             CMDSTAN_VERSION=${{ env.CMDSTAN_VERSION }}
+          # Linux builds run in a Docker container, need to point the cache to the host machine.
           CIBW_ENVIRONMENT_LINUX: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             CMDSTAN_VERSION=${{ env.CMDSTAN_VERSION }}

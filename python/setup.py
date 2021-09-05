@@ -29,8 +29,8 @@ MODEL_DIR = os.path.join("stan", PLATFORM)
 MODEL_TARGET_DIR = os.path.join("prophet", "stan_model")
 
 # cmdstan utils
-MAKE = os.getenv("MAKE", "make" if platform.system() != "Windows" else "mingw32-make")
-EXTENSION = ".exe" if platform.system() == "Windows" else ""
+MAKE = os.getenv("MAKE", "make" if PLATFORM != "win" else "mingw32-make")
+EXTENSION = ".exe" if PLATFORM == "win" else ""
 
 CMDSTAN_VERSION = "2.26.1"
 BINARIES_DIR = "bin"
