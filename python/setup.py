@@ -83,8 +83,8 @@ def build_cmdstan(verbose: bool = False) -> None:
         if stderr:
             msgs.append(stderr.decode("utf-8").strip())
         raise RuntimeError("\n".join(msgs))
-    if platform.system() == "Windows":
-        # Add tbb to the $PATH on Windows
+    # Add tbb to the $PATH on Windows
+    if PLATFORM == "win":
         libtbb = os.path.join(os.getcwd(), "stan", "lib", "stan_math", "lib", "tbb")
         os.environ["PATH"] = ";".join(
             list(OrderedDict.fromkeys([libtbb] + os.environ.get("PATH", "").split(";")))
