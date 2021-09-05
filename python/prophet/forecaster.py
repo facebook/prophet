@@ -144,10 +144,10 @@ class Prophet(object):
         if stan_backend is None:
             for i in StanBackendEnum:
                 try:
-                    print("Trying to load backend: %s", i.name)
+                    logger.debug("Trying to load backend: %s", i.name)
                     return self._load_stan_backend(i.name)
                 except Exception as e:
-                    print("Unable to load backend %s (%s), trying the next one", i.name, e)
+                    logger.debug("Unable to load backend %s (%s), trying the next one", i.name, e)
         else:
             self.stan_backend = StanBackendEnum.get_backend_class(stan_backend)()
 
