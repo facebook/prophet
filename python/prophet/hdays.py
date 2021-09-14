@@ -1538,3 +1538,147 @@ class Georgia(HolidayBase):
 
 class GE(Georgia):
     pass
+
+
+# ------------ Holidays in Singapore---------------------
+class Singapore(HolidayBase):
+    """
+    Implement public holidays in Singapore
+
+    Reference:
+    https://en.wikipedia.org/wiki/Public_holidays_in_Singapore
+    """
+
+    def __init__(self, **kwargs):
+        self.country = "SG"
+        HolidayBase.__init__(self, **kwargs)
+
+    def _populate(self, year):
+        # New Year's Day
+        name = "New Year's Day"
+        self[date(year, 1, 1)] = name
+
+        # Chinese New Year
+        name = "Chinese New Year"
+        for offset in range(-1, 2, 1):
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 1, 1)).to_date()
+            if ds.year == year:
+                self[ds] = name
+
+        # Good Friday
+        name = "Good Friday"
+        for offset in range(-1, 2, 1):
+            ds = easter(year + offset) - rd(days=2)
+            if ds.year == year:
+                self[ds] = name
+                
+        # Labor Day
+        name = "Labor Day"
+        self[date(year, 5, 1)] = name
+
+        # Hari Raya Puasa (Eid al-Fitr)
+        name = "Hari Raya Puasa"
+        for offset in range(-1, 2, 1):
+            islam_year = from_gregorian(year + offset, 6, 15)[0]
+            y1, m1, d1 = to_gregorian(islam_year, 10, 1)
+            y2, m2, d2 = to_gregorian(islam_year, 10, 2)
+            if y1 == year:
+                self[date(y1, m1, d1)] = name
+            if y2 == year:
+                self[date(y2, m2, d2)] = name
+                
+        # Vesak Day (Buddha's Birthday)
+        name = "Vesak Day"
+        for offset in range(-1, 2, 1):
+            ds = Converter.Lunar2Solar(Lunar(year + offset, 4, 15)).to_date()
+            if ds.year == year:
+                self[ds] = name
+
+        # Hari Raya Haji (Eid al-Adha, i.e., Feast of the Sacrifice)
+        name = "Hari Raya Haji"
+        for offset in range(-1, 2, 1):
+            islam_year = from_gregorian(year + offset, 8, 22)[0]
+            y, m, d = to_gregorian(islam_year, 12, 10)
+            if y == year:
+                self[date(y, m, d)] = name
+                
+        # National Day
+        name = "National Day"
+        self[date(year, 8, 9)] = name
+
+        # Deepavali (Diwali)
+        # http://www.theholidayspot.com/diwali/calendar.htm
+        warning_msg = "Support only from 2010 to 2040"
+        warnings.warn(warning_msg, Warning)
+        name1 = "Deepavali"
+        if year == 2010:
+            self[date(year, 12, 5)] = name
+        elif year == 2011:
+            self[date(year, 10, 26)] = name
+        elif year == 2012:
+            self[date(year, 11, 13)] = name
+        elif year == 2013:
+            self[date(year, 11, 3)] = name
+        elif year == 2014:
+            self[date(year, 10, 23)] = name
+        elif year == 2015:
+            self[date(year, 11, 11)] = name
+        elif year == 2016:
+            self[date(year, 10, 30)] = name
+        elif year == 2017:
+            self[date(year, 10, 19)] = name
+        elif year == 2018:
+            self[date(year, 11, 7)] = name
+        elif year == 2019:
+            self[date(year, 10, 27)] = name
+        elif year == 2020:
+            self[date(year, 11, 14)] = name
+        elif year == 2021:
+            self[date(year, 11, 4)] = name
+        elif year == 2022:
+            self[date(year, 10, 24)] = name
+        elif year == 2023:
+            self[date(year, 10, 12)] = name
+        elif year == 2024:
+            self[date(year, 11, 1)] = name
+        elif year == 2025:
+            self[date(year, 10, 21)] = name
+        elif year == 2026:
+            self[date(year, 11, 8)] = name
+        elif year == 2027:
+            self[date(year, 10, 29)] = name
+        elif year == 2028:
+            self[date(year, 10, 17)] = name
+        elif year == 2029:
+            self[date(year, 11, 5)] = name
+        elif year == 2030:
+            self[date(year, 10, 26)] = name
+        elif year == 2031:
+            self[date(year, 11, 14)] = name
+        elif year == 2032:
+            self[date(year, 11, 2)] = name
+        elif year == 2033:
+            self[date(year, 10, 22)] = name
+        elif year == 2034:
+            self[date(year, 11, 10)] = name
+        elif year == 2035:
+            self[date(year, 10, 30)] = name
+        elif year == 2036:
+            self[date(year, 10, 19)] = name
+        elif year == 2037:
+            self[date(year, 11, 7)] = name
+        elif year == 2038:
+            self[date(year, 10, 27)] = name
+        elif year == 2039:
+            self[date(year, 10, 17)] = name
+        elif year == 2040:
+            self[date(year, 11, 4)] = name
+       else:
+            pass
+
+        # Christmas
+        self[date(year, 12, 25)] = "Christmas"
+
+        
+class SG(Singapore):
+    pass
