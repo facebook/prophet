@@ -1673,7 +1673,7 @@ class Singapore(HolidayBase):
             self[date(year, 10, 17)] = name
         elif year == 2040:
             self[date(year, 11, 4)] = name
-       else:
+        else:
             pass
 
         # Christmas
