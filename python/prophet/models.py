@@ -12,7 +12,6 @@ from enum import Enum
 from pathlib import Path
 import pickle
 import pkg_resources
-import os
 
 import logging
 logger = logging.getLogger('prophet.models')
@@ -53,11 +52,6 @@ class IStanBackend(ABC):
     def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
         pass
 
-    @staticmethod
-    @abstractmethod
-    def build_model(target_dir, model_dir):
-        pass
-
 
 class CmdStanPyBackend(IStanBackend):
     CMDSTAN_VERSION = "2.26.1"
@@ -71,18 +65,6 @@ class CmdStanPyBackend(IStanBackend):
     @staticmethod
     def get_type():
         return StanBackendEnum.CMDSTANPY.name
-
-    @staticmethod
-    def build_model(target_dir, model_dir):
-        from shutil import copy
-        import cmdstanpy
-        model_name = 'prophet.stan'
-        target_name = 'prophet_model.bin'
-
-        sm = cmdstanpy.CmdStanModel(
-            stan_file=os.path.join(model_dir, model_name))
-        sm.compile()
-        copy(sm.exe_file, os.path.join(target_dir, target_name))
 
     def load_model(self):
         import cmdstanpy
@@ -240,17 +222,6 @@ class PyStanBackend(IStanBackend):
     @staticmethod
     def get_type():
         return StanBackendEnum.PYSTAN.name
-
-    @staticmethod
-    def build_model(target_dir, model_dir):
-        import pystan
-        model_name = 'prophet.stan'
-        target_name = 'prophet_model.pkl'
-        with open(os.path.join(model_dir, model_name)) as f:
-            model_code = f.read()
-        sm = pystan.StanModel(model_code=model_code)
-        with open(os.path.join(target_dir, target_name), 'wb') as f:
-            pickle.dump(sm, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
 

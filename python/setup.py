@@ -28,6 +28,7 @@ if platform.platform().startswith("Win"):
 MODEL_DIR = os.path.join("stan", PLATFORM)
 MODEL_TARGET_DIR = os.path.join("prophet", "stan_model")
 
+# TODO: Remove when upgrading to cmdstanpy 1.0, use cmdstanpy internals instead
 # cmdstan utils
 MAKE = os.getenv("MAKE", "make" if PLATFORM != "win" else "mingw32-make")
 EXTENSION = ".exe" if PLATFORM == "win" else ""
@@ -39,7 +40,14 @@ TBB_PARENT = "stan/lib/stan_math/lib"
 TBB_DIRS = ["tbb", "tbb_2019_U8"]
 
 
+# TODO: Remove when upgrading to cmdstanpy 1.0, use cmdstanpy internals instead
 def clean_all_cmdstan(verbose: bool = False) -> None:
+    """Run `make clean-all` in the current directory (must be a cmdstan library).
+
+    Parameters
+    ----------
+    verbose: when ``True``, print build msgs to stdout.
+    """
     cmd = [MAKE, "clean-all"]
     proc = subprocess.Popen(
         cmd,
@@ -61,8 +69,14 @@ def clean_all_cmdstan(verbose: bool = False) -> None:
             msgs.append(stderr.decode("utf-8").strip())
         raise RuntimeError("\n".join(msgs))
 
-
+# TODO: Remove when upgrading to cmdstanpy 1.0, use cmdstanpy internals instead
 def build_cmdstan(verbose: bool = False) -> None:
+    """Run `make build` in the current directory (must be a cmdstan library).
+
+    Parameters
+    ----------
+    verbose: when ``True``, print build msgs to stdout.
+    """
     cmd = [MAKE, "build"]
     proc = subprocess.Popen(
         cmd,
@@ -90,8 +104,10 @@ def build_cmdstan(verbose: bool = False) -> None:
             list(OrderedDict.fromkeys([libtbb] + os.environ.get("PATH", "").split(";")))
         )
 
-
 def prune_cmdstan(cmdstan_dir: str) -> None:
+    """
+    Keep only the cmdstan executables and tbb files (minimum required to run a cmdstanpy commands on a pre-compiled model).
+    """
     original_dir = Path(cmdstan_dir).resolve()
     parent_dir = original_dir.parent
     temp_dir = parent_dir / "temp"
@@ -111,26 +127,35 @@ def prune_cmdstan(cmdstan_dir: str) -> None:
     rmtree(original_dir)
     temp_dir.rename(original_dir)
 
-
-def get_backends_from_env() -> List[str]:
-    return os.environ.get("STAN_BACKEND", "PYSTAN").split(",")
-
-
 def get_cmdstan_cache() -> str:
+    """Default directory for an existing cmdstan library. Prevents unnecessary re-downloads of cmdstan."""
     return Path.home().resolve() / ".cmdstan" / f"cmdstan-{CMDSTAN_VERSION}"
 
+def download_cmdstan(cache_dir: Path) -> None:
+    """Ensure the cmdstan library exists in the cache directory."""
+    import cmdstanpy
+    if os.path.isdir(cache_dir):
+        print(f"Found existing cmdstan library at {cache_dir}")
+    else:
+        with cmdstanpy.utils.pushd(cache_dir.parent):
+            cmdstanpy.utils.retrieve_version(version=CMDSTAN_VERSION, progress=False)
 
 def build_cmdstan_model(target_dir):
+    """
+    Rebuild cmdstan in the build environment, then use this installation to compile the stan model.
+    The stan model is copied to {target_dir}/prophet_model.bin
+    The cmdstan files required to run cmdstanpy commands are copied to {target_dir}/cmdstan-{version}.
+
+    Parameters
+    ----------
+    target_dir: Directory to copy the compiled model executable and core cmdstan files to.
+    """
     import cmdstanpy
 
     cmdstan_cache = get_cmdstan_cache()
+    download_cmdstan(cmdstan_cache)
+
     cmdstan_dir = os.path.join(target_dir, f"cmdstan-{CMDSTAN_VERSION}")
-
-    if os.path.isdir(cmdstan_cache):
-        print(f"Found existing cmdstan library at {cmdstan_cache}")
-    else:
-        cmdstanpy.install_cmdstan(version=CMDSTAN_VERSION, dir=cmdstan_cache)
-
     if os.path.isdir(cmdstan_dir):
         rmtree(cmdstan_dir)
     copytree(cmdstan_cache, cmdstan_dir)
@@ -142,7 +167,6 @@ def build_cmdstan_model(target_dir):
     model_name = "prophet.stan"
     target_name = "prophet_model.bin"
     sm = cmdstanpy.CmdStanModel(stan_file=os.path.join(MODEL_DIR, model_name))
-    sm.compile()
     copy(sm.exe_file, os.path.join(target_dir, target_name))
     # Clean up
     for f in Path(MODEL_DIR).iterdir():
@@ -150,8 +174,10 @@ def build_cmdstan_model(target_dir):
             os.remove(f)
     prune_cmdstan(cmdstan_dir)
 
-
 def build_pystan_model(target_dir):
+    """
+    Compile the stan model using pystan and pickle it. The pickle is copied to {target_dir}/prophet_model.pkl.
+    """
     import pystan
 
     model_name = "prophet.stan"
@@ -162,6 +188,8 @@ def build_pystan_model(target_dir):
     with open(os.path.join(target_dir, target_name), "wb") as f:
         pickle.dump(sm, f, protocol=pickle.HIGHEST_PROTOCOL)
 
+def get_backends_from_env() -> List[str]:
+    return os.environ.get("STAN_BACKEND", "PYSTAN").split(",")
 
 def build_models(target_dir):
     for backend in get_backends_from_env():
