@@ -32,7 +32,7 @@ class TestProphet(TestCase):
     @staticmethod
     def rmse(predictions, targets):
         return np.sqrt(np.mean((predictions - targets) ** 2))
- 
+
     def test_fit_predict(self):
         days = 30
         N = DATA.shape[0]
