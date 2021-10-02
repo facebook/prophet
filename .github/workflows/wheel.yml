@@ -99,6 +99,8 @@ jobs:
           # Architectures
           CIBW_ARCHS: "native"
           CIBW_BUILD_FRONTEND: "build"
+          CIBW_TEST_REQUIRES: pytest
+          CIBW_TEST_COMMAND: pytest --pyargs prophet
 
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@v2
