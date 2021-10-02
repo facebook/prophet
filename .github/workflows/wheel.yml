@@ -1,12 +1,9 @@
 name: "Create Python Wheels"
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-  # release:
-  #   types: [created]
+  release:
+    types: [ created ]
+  workflow_dispatch: {}
 
 env:
   STAN_BACKEND: "PYSTAN,CMDSTANPY"
@@ -22,6 +19,8 @@ jobs:
           - "macos-latest"
           - "ubuntu-latest"
         python-version:
+          - "3.6"
+          - "3.7"
           - "3.8"
         architecture:
           - x64
@@ -82,7 +81,6 @@ jobs:
 
       - name: "Build wheel"
         run: |
-          sudo chmod -R a+rwx ${{ env.PIP_DEFAULT_CACHE }}
           cd python && python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_ENVIRONMENT: >
@@ -94,11 +92,11 @@ jobs:
             CMDSTAN_VERSION=${{ env.CMDSTAN_VERSION }}
             HOME="/host/${{ env.DEFAULT_HOME }}"
             PIP_CACHE_DIR="/host/${{ env.PIP_DEFAULT_CACHE }}"
-          # Python versions
-          CIBW_BUILD: "cp36-* cp37-* cp38-*"
+          CIBW_BEFORE_ALL_LINUX: sudo chmod -R a+rwx ${{ env.PIP_DEFAULT_CACHE }}
           # Architectures
           CIBW_ARCHS: "native"
           CIBW_BUILD_FRONTEND: "build"
+          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux2014"
 
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@v2
