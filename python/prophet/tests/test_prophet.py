@@ -32,38 +32,6 @@ class TestProphet(TestCase):
     def rmse(predictions, targets):
         return np.sqrt(np.mean((predictions - targets) ** 2))
 
-    def test_fit_predict_cmdstan(self):
-        days = 30
-        N = DATA.shape[0]
-        train = DATA.head(N - days)
-        test = DATA.tail(days)
-        test.reset_index(inplace=True)
-
-        forecaster = Prophet(stan_backend="CMDSTANPY")
-        forecaster.fit(train, seed=1237861298)
-        np.random.seed(876543987)
-        future = forecaster.make_future_dataframe(days, include_history=False)
-        future = forecaster.predict(future)
-        # this gives ~ 10.64
-        res = self.rmse(future['yhat'], test['y'])
-        self.assertTrue(15 > res > 5, msg="backend: {}".format(forecaster.stan_backend))
-
-    def test_fit_predict_newton_cmdstan(self):
-        days = 30
-        N = DATA.shape[0]
-        train = DATA.head(N - days)
-        test = DATA.tail(days)
-        test.reset_index(inplace=True)
-
-        forecaster = Prophet(stan_backend="CMDSTANPY")
-        forecaster.fit(train, seed=1237861298, algorithm='Newton')
-        np.random.seed(876543987)
-        future = forecaster.make_future_dataframe(days, include_history=False)
-        future = forecaster.predict(future)
-        # this gives ~ 10.64
-        res = self.rmse(future['yhat'], test['y'])
-        self.assertAlmostEqual(res, 23.44, places=2, msg="backend: {}".format(forecaster.stan_backend))
-
     def test_fit_predict(self):
         days = 30
         N = DATA.shape[0]
