@@ -9,13 +9,12 @@ import platform
 import subprocess
 import sys
 from collections import OrderedDict
-from distutils.extension import Extension
 from pathlib import Path
 from shutil import copy, copytree, rmtree
 from typing import List
 
 from pkg_resources import add_activation_listener, normalize_path, require, working_set
-from setuptools import find_packages, setup
+from setuptools import find_packages, setup, Extension
 from setuptools.command.build_ext import build_ext
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
