@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 from prophet import Prophet
 
+
 DATA = pd.read_csv(
     os.path.join(os.path.dirname(__file__), 'data.csv'),
     parse_dates=['ds'],
@@ -31,8 +32,7 @@ class TestProphet(TestCase):
     @staticmethod
     def rmse(predictions, targets):
         return np.sqrt(np.mean((predictions - targets) ** 2))
-
-    
+ 
     def test_fit_predict(self):
         days = 30
         N = DATA.shape[0]
