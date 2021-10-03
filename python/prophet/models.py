@@ -12,7 +12,6 @@ from enum import Enum
 from pathlib import Path
 import pickle
 import pkg_resources
-import os
 
 import logging
 logger = logging.getLogger('prophet.models')
@@ -53,29 +52,19 @@ class IStanBackend(ABC):
     def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
         pass
 
-    @staticmethod
-    @abstractmethod
-    def build_model(target_dir, model_dir):
-        pass
-
 
 class CmdStanPyBackend(IStanBackend):
+    CMDSTAN_VERSION = "2.26.1"
+    def __init__(self):
+        super().__init__()
+        import cmdstanpy
+        cmdstanpy.set_cmdstan_path(
+            pkg_resources.resource_filename("prophet", f"stan_model/cmdstan-{self.CMDSTAN_VERSION}")
+        )
 
     @staticmethod
     def get_type():
         return StanBackendEnum.CMDSTANPY.name
-
-    @staticmethod
-    def build_model(target_dir, model_dir):
-        from shutil import copy
-        import cmdstanpy
-        model_name = 'prophet.stan'
-        target_name = 'prophet_model.bin'
-
-        sm = cmdstanpy.CmdStanModel(
-            stan_file=os.path.join(model_dir, model_name))
-        sm.compile()
-        copy(sm.exe_file, os.path.join(target_dir, target_name))
 
     def load_model(self):
         import cmdstanpy
@@ -87,7 +76,7 @@ class CmdStanPyBackend(IStanBackend):
 
     def fit(self, stan_init, stan_data, **kwargs):
         (stan_init, stan_data) = self.prepare_data(stan_init, stan_data)
-        
+
         if 'inits' not in kwargs and 'init' in kwargs:
             kwargs['inits'] = self.prepare_data(kwargs['init'], stan_data)[0]
 
@@ -120,14 +109,13 @@ class CmdStanPyBackend(IStanBackend):
 
     def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
         (stan_init, stan_data) = self.prepare_data(stan_init, stan_data)
-        
+
         if 'inits' not in kwargs and 'init' in kwargs:
             kwargs['inits'] = self.prepare_data(kwargs['init'], stan_data)[0]
 
         args = dict(
             data=stan_data,
             inits=stan_init,
-            algorithm='Newton' if stan_data['T'] < 100 else 'LBFGS',
         )
 
         if 'chains' not in kwargs:
@@ -136,7 +124,7 @@ class CmdStanPyBackend(IStanBackend):
         kwargs['iter_sampling'] = iter_half
         if 'iter_warmup' not in kwargs:
             kwargs['iter_warmup'] = iter_half
-        
+
         args.update(kwargs)
 
         self.stan_fit = self.model.sample(**args)
@@ -181,7 +169,7 @@ class CmdStanPyBackend(IStanBackend):
             'sigma_obs': init['sigma_obs']
         }
         return (cmdstanpy_init, cmdstanpy_data)
-    
+
     @staticmethod
     def stan_to_dict_numpy(column_names: Tuple[str, ...], data: 'np.array'):
         import numpy as np
@@ -234,17 +222,6 @@ class PyStanBackend(IStanBackend):
     @staticmethod
     def get_type():
         return StanBackendEnum.PYSTAN.name
-
-    @staticmethod
-    def build_model(target_dir, model_dir):
-        import pystan
-        model_name = 'prophet.stan'
-        target_name = 'prophet_model.pkl'
-        with open(os.path.join(model_dir, model_name)) as f:
-            model_code = f.read()
-        sm = pystan.StanModel(model_code=model_code)
-        with open(os.path.join(target_dir, target_name), 'wb') as f:
-            pickle.dump(sm, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
 

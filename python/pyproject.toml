@@ -1,0 +1,8 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel",
+    "pystan~=2.19.1.1",
+    "cmdstanpy==0.9.77",
+]
+build-backend = "setuptools.build_meta"
