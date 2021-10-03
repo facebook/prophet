@@ -29,6 +29,7 @@ python_shim/build/
 *.idea
 *.vscode
 *.DS_Store
+*.envrc
 
 # Development with Python
 python/prophet/bin/
@@ -36,3 +37,4 @@ python/prophet/etc/
 python/prophet/lib/
 python/prophet/pyvenv.cfg
 python/prophet/share/
+python/prophet/stan_model/
