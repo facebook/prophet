@@ -19,6 +19,12 @@ jobs:
       fail-fast: false
 
     steps:
+    - name: "Get OS version (Linux)"
+      if: startsWith(runner.os, 'Linux')
+      run: |
+        echo "OS_VERSION=`lsb_release -sr`" >> $GITHUB_ENV
+        echo "PIP_DEFAULT_CACHE=$HOME/.cache/pip" >> $GITHUB_ENV
+        echo "DEFAULT_HOME=$HOME" >> $GITHUB_ENV
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -28,7 +34,7 @@ jobs:
       id: cache-pip
       uses: actions/cache@v2
       with:
-        path: $HOME/.cache/pip
+        path: ${{ env.PIP_DEFAULT_CACHE }}
         key: ${{ runner.os }}-pip-${{ hashFiles('**/python/requirements.txt') }}-v1
         restore-keys: |
           ${{ runner.os }}-pip-
@@ -36,7 +42,7 @@ jobs:
       id: cache-cmdstan
       uses: actions/cache@v2
       with:
-        path: $HOME/.cmdstan
+        path: ${{ env.DEFAULT_HOME }}/.cmdstan
         key: ${{ runner.os }}-cmdstan-${{ env.CMDSTAN_VERSION }}-v1
     - name: "Download cmdstan"
       if: steps.cache-cmdstan.outputs.cache-hit != 'true'

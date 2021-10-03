@@ -15,15 +15,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os:
-          - "macos-latest"
-          - "ubuntu-latest"
-        python-version:
-          - "3.6"
-          - "3.7"
-          - "3.8"
-        architecture:
-          - x64
+        os: ["macos-latest", "ubuntu-latest"]
+        python-version: [3.8]
+        architecture: ["x64"]
 
       fail-fast: false
 
@@ -87,13 +81,14 @@ jobs:
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             CMDSTAN_VERSION=${{ env.CMDSTAN_VERSION }}
           # Linux builds run in a Docker container, need to point the cache to the host machine.
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_ENVIRONMENT_LINUX: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             CMDSTAN_VERSION=${{ env.CMDSTAN_VERSION }}
             HOME="/host/${{ env.DEFAULT_HOME }}"
             PIP_CACHE_DIR="/host/${{ env.PIP_DEFAULT_CACHE }}"
-          CIBW_BEFORE_ALL_LINUX: sudo chmod -R a+rwx ${{ env.PIP_DEFAULT_CACHE }}
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+          CIBW_BEFORE_ALL_LINUX: chmod -R a+rwx /host/${{ env.PIP_DEFAULT_CACHE }}
+          CIBW_BUILD: cp36-* cp37-* cp38-*
           CIBW_ARCHS: native
           CIBW_BUILD_FRONTEND: build
           CIBW_TEST_REQUIRES: pytest
