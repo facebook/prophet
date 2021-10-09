@@ -181,6 +181,30 @@ def build_cmdstan_model(target_dir):
     prune_cmdstan(cmdstan_dir)
 
 
+def build_cmdstan_model_windows(target_dir):
+    import cmdstanpy
+
+    cmdstanpy.install_cmdstan.main(
+        {
+            "dir": target_dir,
+            "progress": False,
+            "compiler": True,
+            "version": CMDSTAN_VERSION,
+        }
+    )
+    cmdstan_dir = os.path.join(target_dir, f"cmdstan-{CMDSTAN_VERSION}")
+    cmdstanpy.set_cmdstan_path(cmdstan_dir)
+    model_name = "prophet.stan"
+    target_name = "prophet_model.bin"
+    sm = cmdstanpy.CmdStanModel(stan_file=os.path.join(MODEL_DIR, model_name))
+    copy(sm.exe_file, os.path.join(target_dir, target_name))
+    # Clean up
+    for f in Path(MODEL_DIR).iterdir():
+        if f.is_file() and f.name != model_name:
+            os.remove(f)
+    prune_cmdstan(cmdstan_dir)
+
+
 def build_pystan_model(target_dir):
     """
     Compile the stan model using pystan and pickle it. The pickle is copied to {target_dir}/prophet_model.pkl.
@@ -204,8 +228,13 @@ def build_models(target_dir):
     for backend in get_backends_from_env():
         print(f"Compiling {backend} model")
         if backend == "CMDSTANPY":
-            build_cmdstan_model(target_dir)
+            if PLATFORM == "win":
+                build_cmdstan_model_windows(target_dir)
+            else:
+                build_cmdstan_model(target_dir)
         elif backend == "PYSTAN":
+            if PLATFORM == "win":
+                continue
             build_pystan_model(target_dir)
 
 
