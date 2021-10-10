@@ -137,13 +137,42 @@ def get_cmdstan_cache() -> str:
 def download_cmdstan(cache_dir: Path) -> None:
     """Ensure the cmdstan library exists in the cache directory."""
     import cmdstanpy
+    from cmdstanpy.install_cmdstan import retrieve_version
 
     if cache_dir.is_dir():
         print(f"Found existing cmdstan library at {cache_dir}")
     else:
+        print(f"Downloading cmdstan to {cache_dir}")
         cache_dir.parent.mkdir(parents=True, exist_ok=True)
         with cmdstanpy.utils.pushd(cache_dir.parent):
-            cmdstanpy.utils.retrieve_version(version=CMDSTAN_VERSION, progress=False)
+            retrieve_version(version=CMDSTAN_VERSION, progress=False)
+
+
+def install_cmdstan_toolchain():
+    """Install C++ compilers required to build stan models on Windows machines."""
+    from cmdstanpy.install_cxx_toolchain import main as _install_cxx_toolchain
+    _install_cxx_toolchain()
+
+
+def install_cmdstan_deps(cmdstan_dir: Path):
+    import cmdstanpy
+
+    cmdstan_cache = get_cmdstan_cache()
+    download_cmdstan(cmdstan_cache)
+    if cmdstan_dir.is_dir():
+        rmtree(cmdstan_dir)
+    copytree(cmdstan_cache, cmdstan_dir)
+
+    if PLATFORM == "win":
+        try:
+            cmdstanpy.utils.cxx_toolchain_path()
+        except Exception:
+            install_cmdstan_toolchain()
+
+    with cmdstanpy.utils.pushd(cmdstan_dir):
+        clean_all_cmdstan()
+        build_cmdstan()
+    cmdstanpy.set_cmdstan_path(str(cmdstan_dir))
 
 
 def build_cmdstan_model(target_dir):
@@ -157,43 +186,8 @@ def build_cmdstan_model(target_dir):
     target_dir: Directory to copy the compiled model executable and core cmdstan files to.
     """
     import cmdstanpy
-
-    cmdstan_cache = get_cmdstan_cache()
-    download_cmdstan(cmdstan_cache)
-
-    cmdstan_dir = os.path.join(target_dir, f"cmdstan-{CMDSTAN_VERSION}")
-    if os.path.isdir(cmdstan_dir):
-        rmtree(cmdstan_dir)
-    copytree(cmdstan_cache, cmdstan_dir)
-    with cmdstanpy.utils.pushd(cmdstan_dir):
-        clean_all_cmdstan()
-        build_cmdstan()
-    cmdstanpy.set_cmdstan_path(cmdstan_dir)
-
-    model_name = "prophet.stan"
-    target_name = "prophet_model.bin"
-    sm = cmdstanpy.CmdStanModel(stan_file=os.path.join(MODEL_DIR, model_name))
-    copy(sm.exe_file, os.path.join(target_dir, target_name))
-    # Clean up
-    for f in Path(MODEL_DIR).iterdir():
-        if f.is_file() and f.name != model_name:
-            os.remove(f)
-    prune_cmdstan(cmdstan_dir)
-
-
-def build_cmdstan_model_windows(target_dir):
-    import cmdstanpy
-
-    cmdstanpy.install_cmdstan.main(
-        {
-            "dir": target_dir,
-            "progress": False,
-            "compiler": True,
-            "version": CMDSTAN_VERSION,
-        }
-    )
-    cmdstan_dir = os.path.join(target_dir, f"cmdstan-{CMDSTAN_VERSION}")
-    cmdstanpy.set_cmdstan_path(cmdstan_dir)
+    cmdstan_dir = (Path(target_dir) / f"cmdstan-{CMDSTAN_VERSION}").resolve()
+    install_cmdstan_deps(cmdstan_dir)
     model_name = "prophet.stan"
     target_name = "prophet_model.bin"
     sm = cmdstanpy.CmdStanModel(stan_file=os.path.join(MODEL_DIR, model_name))
@@ -228,13 +222,8 @@ def build_models(target_dir):
     for backend in get_backends_from_env():
         print(f"Compiling {backend} model")
         if backend == "CMDSTANPY":
-            if PLATFORM == "win":
-                build_cmdstan_model_windows(target_dir)
-            else:
-                build_cmdstan_model(target_dir)
-        elif backend == "PYSTAN":
-            if PLATFORM == "win":
-                continue
+            build_cmdstan_model(target_dir)
+        elif backend == "PYSTAN" and PLATFORM != "win":
             build_pystan_model(target_dir)
 
 
