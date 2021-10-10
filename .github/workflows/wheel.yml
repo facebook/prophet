@@ -10,6 +10,13 @@ env:
   CMDSTAN_VERSION: "2.26.1"
 
 jobs:
+  # Notes for Windows wheel builds:
+  # Ensure that LongPathsEnabled is on: https://github.com/actions/virtual-environments/issues/1052#issuecomment-644212560
+  # Install and cache the RTools40 toolchain
+  # Set CMDSTAN_TOOLCHAIN environment variable
+  # Set PIP_DEFAULT_CACHE to $HOME/pip/cache and cache this using Actions
+  # pip install delvewheel
+  # delvewheel repair -w {dest_dir} {wheel} for the wheel repair
   make-wheels-macos-linux:
     name: ${{ matrix.python-version }}-${{ matrix.architecture }}-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
