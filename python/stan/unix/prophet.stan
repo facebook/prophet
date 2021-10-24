@@ -133,10 +133,10 @@ model {
   beta ~ normal(0, sigmas);
 
   // Likelihood
-  y ~ normal(
-  trend
-  .* (1 + X * (beta .* s_m))
-  + X * (beta .* s_a),
-  sigma_obs
+  y ~ normal_id_glm(
+    X,
+    trend .* (1 + X * (beta .* s_m)),
+    (beta .* s_a),
+    sigma_obs
   );
 }
