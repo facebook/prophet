@@ -99,8 +99,8 @@ data {
 
 transformed data {
   matrix[T, S] A = get_changepoint_matrix(t, t_change, T, S);
-  matrix[T, K] X_sa = X .* rep_matrix(s_a', rows(T));
-  matrix[T, K] X_sm = X .* rep_matrix(s_m', rows(T));
+  matrix[T, K] X_sa = X .* rep_matrix(s_a', T);
+  matrix[T, K] X_sm = X .* rep_matrix(s_m', T);
 }
 
 parameters {
