@@ -3,6 +3,6 @@ requires = [
     "setuptools>=42",
     "wheel",
     "pystan~=2.19.1.1",
-    "cmdstanpy==0.9.77",
+    "cmdstanpy>=1.0.0",
 ]
 build-backend = "setuptools.build_meta"

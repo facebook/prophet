@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from __future__ import absolute_import, division, print_function
+import os
 from abc import abstractmethod, ABC
 from typing import Tuple
 from collections import OrderedDict
@@ -58,9 +59,9 @@ class CmdStanPyBackend(IStanBackend):
     def __init__(self):
         super().__init__()
         import cmdstanpy
-        cmdstanpy.set_cmdstan_path(
-            pkg_resources.resource_filename("prophet", f"stan_model/cmdstan-{self.CMDSTAN_VERSION}")
-        )
+        local_cmdstan = pkg_resources.resource_filename("prophet", f"stan_model/cmdstan-{self.CMDSTAN_VERSION}")
+        if os.path.exists(local_cmdstan):
+            cmdstanpy.set_cmdstan_path(local_cmdstan)
 
     @staticmethod
     def get_type():
