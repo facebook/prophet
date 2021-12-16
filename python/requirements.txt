@@ -1,6 +1,5 @@
 Cython>=0.22
 cmdstanpy>=1.0.0
-pystan~=2.19.1.1
 numpy>=1.15.4
 pandas>=1.0.4
 matplotlib>=2.0.0

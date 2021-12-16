@@ -39,10 +39,7 @@ jobs:
       run: |
         pip install -U -r python/requirements.txt dask[dataframe] distributed
         cd python
-        STAN_BACKEND=PYSTAN python setup.py develop test
-        python setup.py clean
-        rm -rf prophet/stan_model
-        STAN_BACKEND=CMDSTANPY python setup.py develop test
+        python setup.py develop test
 
   build-and-test-r:
 

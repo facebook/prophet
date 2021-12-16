@@ -21,6 +21,7 @@ jobs:
     strategy:
       matrix:
         os: ["macos-latest", "ubuntu-latest". "windows-latest"]
+        # might need to use https://github.com/marketplace/actions/setup-msys2 on windows
         python-version: [3.8]
         architecture: ["x64"]
 
