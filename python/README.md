@@ -20,16 +20,22 @@ Full documentation and examples available at the homepage: https://facebook.gith
 
 ## Installation
 
+Prophet can be installed from PyPi:
 ```shell
 pip install prophet
 ```
-Note:  Installation requires PyStan, which has its [own installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html).
-On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html).
- The key step is installing a recent [C++ compiler](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+Alternatively, one can install a pre-built version from conda-forge:
+```shell
+conda install -c conda-forge prophet
+```
+
+The default installation requires [CmdStanPy](https://cmdstanpy.readthedocs.io/en/v1.0.0/).
+Historically, a different packaged called [PyStan](https://pystan2.readthedocs.io/en/latest/installation_beginner.html) (version 2) was required,
+and for the moment is still an option.
 
 ## Installation using Docker and docker-compose (via Makefile)
 
-Simply type `make build` and if everything is fine you should be able to `make shell` or alternative jump directly to `make py-shell`. 
+Simply type `make build` and if everything is fine you should be able to `make shell` or alternative jump directly to `make py-shell`.
 
 To run the tests, inside the container `cd python/prophet` and then `python -m unittest`
 

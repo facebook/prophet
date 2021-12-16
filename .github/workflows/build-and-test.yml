@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ master ]
 
-env:
-  CMDSTAN_VERSION: "2.26.1"
-
 jobs:
   build-and-test-python:
 
@@ -38,18 +35,6 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/python/requirements.txt') }}-v1
         restore-keys: |
           ${{ runner.os }}-pip-
-    - name: "Restore cmdstan cache"
-      id: cache-cmdstan
-      uses: actions/cache@v2
-      with:
-        path: ${{ env.DEFAULT_HOME }}/.cmdstan
-        key: ${{ runner.os }}-cmdstan-${{ env.CMDSTAN_VERSION }}-v1
-    - name: "Download cmdstan"
-      if: steps.cache-cmdstan.outputs.cache-hit != 'true'
-      run: |
-        wget https://github.com/stan-dev/cmdstan/releases/download/v${{ env.CMDSTAN_VERSION }}/cmdstan-${{ env.CMDSTAN_VERSION }}.tar.gz -O /tmp/cmdstan.tar.gz &> /dev/null
-        mkdir $HOME/.cmdstan
-        tar -xf /tmp/cmdstan.tar.gz -C $HOME/.cmdstan &> /dev/null
     - name: Install and test
       run: |
         pip install -U -r python/requirements.txt dask[dataframe] distributed

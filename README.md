@@ -61,44 +61,22 @@ If you have custom Stan compiler settings, install from source rather than the C
 Prophet is on PyPI, so you can use `pip` to install it. From v0.6 onwards, Python 2 is no longer supported. As of v1.0, the package name on PyPI is "prophet"; prior to v1.0 it was "fbprophet".
 
 ```bash
-# Install pystan with pip before using pip to install prophet
-# pystan>=3.0 is currently not supported
-pip install pystan==2.19.1.1
-
 pip install prophet
 ```
 
-The default dependency that Prophet has is `pystan`. PyStan has its own [installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html). Install pystan with pip before using pip to install prophet.
-
-#### Experimental backend - cmdstanpy
-
-You can also choose a (more experimental) alternative stan backend called `cmdstanpy`. It requires the [CmdStan](https://mc-stan.org/users/interfaces/cmdstan) command line interface and you will have to specify the environment variable `STAN_BACKEND` pointing to it, for example:
-
-```bash
-# bash
-$ CMDSTAN=/tmp/cmdstan-2.22.1 STAN_BACKEND=CMDSTANPY pip install prophet
-```
-
-Note that the `CMDSTAN` variable is directly related to `cmdstanpy` module and can be omitted if your CmdStan binaries are in your `$PATH`.
-
-It is also possible to install Prophet with two backends:
-
-```bash
-# bash
-$ CMDSTAN=/tmp/cmdstan-2.22.1 STAN_BACKEND=PYSTAN,CMDSTANPY pip install prophet
-```
+The default dependency that Prophet has is `cmdstanpy`.
+When installed using Pip, Prophet will install its own version of CmdStan.
+If this is undesired, you can set the environment variable `NO_REPACKAGE_CMDSTAN` when building from source.
 
 After installation, you can [get started!](https://facebook.github.io/prophet/docs/quick_start.html#python-api)
 
-If you upgrade the version of PyStan installed on your system, you may need to reinstall prophet ([see here](https://github.com/facebook/prophet/issues/324)).
-
 ### Anaconda
 
-Use `conda install gcc` to set up gcc. The easiest way to install Prophet is through conda-forge: `conda install -c conda-forge prophet`.
+The easiest way to install Prophet is through conda-forge: `conda install -c conda-forge prophet`.
 
 ### Windows
 
-On Windows, PyStan requires a compiler so you'll need to [follow the instructions](https://pystan2.readthedocs.io/en/latest/windows.html). The easiest way to install Prophet in Windows is in Anaconda.
+The easiest way to install Prophet in Windows is in Anaconda.
 
 ### Linux
 
