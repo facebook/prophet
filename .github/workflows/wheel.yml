@@ -28,10 +28,9 @@ jobs:
           (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
           $os_version = (Get-CimInstance Win32_OperatingSystem).version
           Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
-          Echo "PIP_DEFAULT_CACHE=$HOME/pip/cache" >> $env:GITHUB_ENV
+          Echo "PIP_DEFAULT_CACHE=$HOME\pip\cache" >> $env:GITHUB_ENV
           Echo "DEFAULT_HOME=$HOME" >> $env:GITHUB_ENV
-          Echo $env:GITHUB_ENV
-          [System.Environment]::SetEnvironmentVariable("CMDSTAN_TOOLCHAIN","$HOME/.cmdstan/rtools")
+          [System.Environment]::SetEnvironmentVariable("CMDSTAN_TOOLCHAIN","$HOME\.cmdstan\rtools")
 
       - name: "Checkout repo"
         uses: actions/checkout@v2
@@ -74,9 +73,10 @@ jobs:
       - name: "Download cmdstan"
         if: steps.cache-cmdstan.outputs.cache-hit != 'true'
         run: |
+          $ProgressPreference = "SilentlyContinue"
           Invoke-WebRequest https://github.com/stan-dev/cmdstan/releases/download/v${{ env.CMDSTAN_VERSION }}/cmdstan-${{ env.CMDSTAN_VERSION }}.tar.gz -OutFile "D:\a\_temp\cmdstan.tar.gz"
           New-Item -Path "$HOME" -Name ".cmdstan" -ItemType "directory"
-          Expand-Archive -Path "D:\a\_temp\cmdstan.tar.gz" -DestinationPath "$HOME\.cmdstan"
+          tar -xf "D:\a\_temp\cmdstan.tar.gz" -C "$HOME\.cmdstan"
 
       - name: "Build wheel"
         run: |
