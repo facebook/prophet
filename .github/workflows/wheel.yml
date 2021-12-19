@@ -23,12 +23,14 @@ jobs:
     steps:
       - name: "Setup environment variables (Windows)"
         if: startsWith(runner.os, 'Windows')
+        shell: pwsh
         run: |
           (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
           $os_version = (Get-CimInstance Win32_OperatingSystem).version
-          Echo "OS_VERSION=$os_version" >> $GITHUB_ENV
-          Echo "PIP_DEFAULT_CACHE=$HOME/pip/cache" >> $GITHUB_ENV
-          Echo "DEFAULT_HOME=$HOME" >> $GITHUB_ENV
+          Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
+          Echo "PIP_DEFAULT_CACHE=$HOME/pip/cache" >> $env:GITHUB_ENV
+          Echo "DEFAULT_HOME=$HOME" >> $env:GITHUB_ENV
+          Echo $env:GITHUB_ENV
           [System.Environment]::SetEnvironmentVariable("CMDSTAN_TOOLCHAIN","$HOME/.cmdstan/rtools")
 
       - name: "Checkout repo"
@@ -50,6 +52,7 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: "Install pip"
+        shell: pwsh
         run: |
           python -m pip install --upgrade pip
           python -m pip install cibuildwheel build delvewheel
