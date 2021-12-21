@@ -28,9 +28,8 @@ jobs:
           (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
           $os_version = (Get-CimInstance Win32_OperatingSystem).version
           Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
-          Echo "PIP_DEFAULT_CACHE=$HOME\pip\cache" >> $env:GITHUB_ENV
+          Echo "PIP_DEFAULT_CACHE=$HOME/pip/cache" >> $env:GITHUB_ENV
           Echo "DEFAULT_HOME=$HOME" >> $env:GITHUB_ENV
-          [System.Environment]::SetEnvironmentVariable("CMDSTAN_TOOLCHAIN","$HOME\.cmdstan\rtools")
 
       - name: "Checkout repo"
         uses: actions/checkout@v2
@@ -67,16 +66,16 @@ jobs:
         id: cache-rtools
         uses: actions/cache@v2
         with:
-          path: ${{ env.DEFAULT_HOME }}/.cmdstan/rtools
-          key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools
+          path: C:/rtools40
+          key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
 
       - name: "Download cmdstan"
         if: steps.cache-cmdstan.outputs.cache-hit != 'true'
         run: |
           $ProgressPreference = "SilentlyContinue"
-          Invoke-WebRequest https://github.com/stan-dev/cmdstan/releases/download/v${{ env.CMDSTAN_VERSION }}/cmdstan-${{ env.CMDSTAN_VERSION }}.tar.gz -OutFile "D:\a\_temp\cmdstan.tar.gz"
+          Invoke-WebRequest https://github.com/stan-dev/cmdstan/releases/download/v${{ env.CMDSTAN_VERSION }}/cmdstan-${{ env.CMDSTAN_VERSION }}.tar.gz -OutFile "D:/a/_temp/cmdstan.tar.gz"
           New-Item -Path "$HOME" -Name ".cmdstan" -ItemType "directory"
-          tar -xf "D:\a\_temp\cmdstan.tar.gz" -C "$HOME\.cmdstan"
+          tar -xf "D:/a/_temp/cmdstan.tar.gz" -C "$HOME/.cmdstan"
 
       - name: "Build wheel"
         run: |
@@ -85,6 +84,7 @@ jobs:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             CMDSTAN_VERSION=${{ env.CMDSTAN_VERSION }}
+            PIP_CACHE_DIR="{{ env.PIP_DEFAULT_CACHE }}"
           CIBW_BUILD: cp36-* cp37-* cp38-*
           CIBW_ARCHS: native
           CIBW_BUILD_FRONTEND: build
@@ -106,7 +106,6 @@ jobs:
   #       os: ["macos-latest", "ubuntu-latest"]
   #       python-version: [3.8]
   #       architecture: ["x64"]
-
   #     fail-fast: false
 
   #   steps:
