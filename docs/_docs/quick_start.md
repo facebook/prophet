@@ -296,7 +296,6 @@ library(prophet)
     R[write to console]: Loading required package: rlang
 
 
-
 First we read in the data and create the outcome variable. As in the Python API, this is a dataframe with columns `ds` and `y`, containing the date and numeric value respectively. The ds column should be YYYY-MM-DD for a date, or YYYY-MM-DD HH:MM:SS for a timestamp. As above, we use here the log number of views to Peyton Manning's Wikipedia page, available [here](https://github.com/facebook/prophet/blob/main/examples/example_wp_log_peyton_manning.csv).
 
 
