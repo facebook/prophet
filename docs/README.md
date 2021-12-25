@@ -8,7 +8,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for details on how to add or modify con
 
 ## Jupyter Notebooks
 
-Most of the `doc` pages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebook/prophet/tree/master/notebooks) directory at the base of the source tree.  Please make changes there and then rebuild the docs:
+Most of the `doc` pages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebook/prophet/tree/main/notebooks) directory at the base of the source tree.  Please make changes there and then rebuild the docs:
 
 ```
 $ cd docs
@@ -23,7 +23,7 @@ The requirements for running a GitHub pages site locally is described in [GitHub
 
 > If you have run the site before, you can start with step 1 and then move on to step 5.
 
-1. Ensure that you are in the same directory where this `README.md` exists (e.g., it could be in `/docs` on `master`, in the root of a `gh-pages` branch, etc). The below RubyGems commands, etc must be run from there.
+1. Ensure that you are in the same directory where this `README.md` exists (e.g., it could be in `/docs` on `main`, in the root of a `gh-pages` branch, etc). The below RubyGems commands, etc must be run from there.
 
 1. Make sure you have Ruby and [RubyGems](https://rubygems.org/) installed.
 
