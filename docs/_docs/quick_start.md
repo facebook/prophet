@@ -15,14 +15,14 @@ subsections:
 
 
 
-Prophet follows the `sklearn` model API.  We create an instance of the `Prophet` class and then call its `fit` and `predict` methods.  
+Prophet follows the `sklearn` model API.  We create an instance of the `Prophet` class and then call its `fit` and `predict` methods.
 
 
 The input to Prophet is always a dataframe with two columns: `ds` and `y`.  The `ds` (datestamp) column should be of a format expected by Pandas, ideally YYYY-MM-DD for a date or YYYY-MM-DD HH:MM:SS for a timestamp. The `y` column must be numeric, and represents the measurement we wish to forecast.
 
 
 
-As an example, let's look at a time series of the log daily page views for the Wikipedia page for [Peyton Manning](https://en.wikipedia.org/wiki/Peyton_Manning).  We scraped this data using the [Wikipediatrend](https://cran.r-project.org/package=wikipediatrend) package in R.  Peyton Manning provides a nice example because it illustrates some of Prophet's features, like multiple seasonality, changing growth rates, and the ability to model special days (such as Manning's playoff and superbowl appearances). The CSV is available [here](https://github.com/facebook/prophet/blob/master/examples/example_wp_log_peyton_manning.csv).
+As an example, let's look at a time series of the log daily page views for the Wikipedia page for [Peyton Manning](https://en.wikipedia.org/wiki/Peyton_Manning).  We scraped this data using the [Wikipediatrend](https://cran.r-project.org/package=wikipediatrend) package in R.  Peyton Manning provides a nice example because it illustrates some of Prophet's features, like multiple seasonality, changing growth rates, and the ability to model special days (such as Manning's playoff and superbowl appearances). The CSV is available [here](https://github.com/facebook/prophet/blob/main/examples/example_wp_log_peyton_manning.csv).
 
 
 
@@ -104,7 +104,7 @@ We fit the model by instantiating a new `Prophet` object.  Any settings to the f
 m = Prophet()
 m.fit(df)
 ```
-Predictions are then made on a dataframe with a column `ds` containing the dates for which a prediction is to be made. You can get a suitable dataframe that extends into the future a specified number of days using the helper method `Prophet.make_future_dataframe`. By default it will also include the dates from the history, so we will see the model fit as well. 
+Predictions are then made on a dataframe with a column `ds` containing the dates for which a prediction is to be made. You can get a suitable dataframe that extends into the future a specified number of days using the helper method `Prophet.make_future_dataframe`. By default it will also include the dates from the history, so we will see the model fit as well.
 
 
 ```python
@@ -247,8 +247,8 @@ You can plot the forecast by calling the `Prophet.plot` method and passing in yo
 # Python
 fig1 = m.plot(forecast)
 ```
- 
-![png](/prophet/static/quick_start_files/quick_start_12_0.png) 
+
+![png](/prophet/static/quick_start_files/quick_start_12_0.png)
 
 
 If you want to see the forecast components, you can use the `Prophet.plot_components` method.  By default you'll see the trend, yearly seasonality, and weekly seasonality of the time series.  If you include holidays, you'll see those here, too.
@@ -258,8 +258,8 @@ If you want to see the forecast components, you can use the `Prophet.plot_compon
 # Python
 fig2 = m.plot_components(forecast)
 ```
- 
-![png](/prophet/static/quick_start_files/quick_start_14_0.png) 
+
+![png](/prophet/static/quick_start_files/quick_start_14_0.png)
 
 
 An interactive figure of the forecast and components can be created with plotly. You will need to install plotly 4.0 or above separately, as it will not by default be installed with prophet. You will also need to install the `notebook` and `ipywidgets` packages.
@@ -292,12 +292,11 @@ In R, we use the normal model fitting API.  We provide a `prophet` function that
 library(prophet)
 ```
     R[write to console]: Loading required package: Rcpp
-    
+
     R[write to console]: Loading required package: rlang
-    
 
 
-First we read in the data and create the outcome variable. As in the Python API, this is a dataframe with columns `ds` and `y`, containing the date and numeric value respectively. The ds column should be YYYY-MM-DD for a date, or YYYY-MM-DD HH:MM:SS for a timestamp. As above, we use here the log number of views to Peyton Manning's Wikipedia page, available [here](https://github.com/facebook/prophet/blob/master/examples/example_wp_log_peyton_manning.csv).
+First we read in the data and create the outcome variable. As in the Python API, this is a dataframe with columns `ds` and `y`, containing the date and numeric value respectively. The ds column should be YYYY-MM-DD for a date, or YYYY-MM-DD HH:MM:SS for a timestamp. As above, we use here the log number of views to Peyton Manning's Wikipedia page, available [here](https://github.com/facebook/prophet/blob/main/examples/example_wp_log_peyton_manning.csv).
 
 
 ```R
@@ -352,8 +351,8 @@ You can use the generic `plot` function to plot the forecast, by passing in the 
 # R
 plot(m, forecast)
 ```
- 
-![png](/prophet/static/quick_start_files/quick_start_30_0.png) 
+
+![png](/prophet/static/quick_start_files/quick_start_30_0.png)
 
 
 You can use the `prophet_plot_components` function to see the forecast broken down into trend, weekly seasonality, and yearly seasonality.
@@ -363,8 +362,8 @@ You can use the `prophet_plot_components` function to see the forecast broken do
 # R
 prophet_plot_components(m, forecast)
 ```
- 
-![png](/prophet/static/quick_start_files/quick_start_32_0.png) 
+
+![png](/prophet/static/quick_start_files/quick_start_32_0.png)
 
 
 An interactive plot of the forecast using Dygraphs can be made with the command `dyplot.prophet(m, forecast)`.
@@ -372,4 +371,3 @@ An interactive plot of the forecast using Dygraphs can be made with the command 
 
 
 More details about the options available for each method are available in the docstrings, for example, via `?prophet` or `?fit.prophet`. This documentation is also available in the [reference manual](https://cran.r-project.org/web/packages/prophet/prophet.pdf) on CRAN.
-
