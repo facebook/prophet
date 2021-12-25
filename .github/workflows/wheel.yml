@@ -176,6 +176,7 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_BEFORE_ALL_LINUX: chmod -R a+rwx /host/${{ env.PIP_DEFAULT_CACHE }}
           CIBW_BUILD: cp36-* cp37-* cp38-*
+          CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: native
           CIBW_BUILD_FRONTEND: build
           CIBW_TEST_REQUIRES: pytest
