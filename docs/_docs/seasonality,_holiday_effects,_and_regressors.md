@@ -99,8 +99,8 @@ The holiday effect can be seen in the `forecast` dataframe:
 
 ```R
 # R
-forecast %>% 
-  select(ds, playoff, superbowl) %>% 
+forecast %>%
+  select(ds, playoff, superbowl) %>%
   filter(abs(playoff + superbowl) > 0) %>%
   tail(10)
 ```
@@ -213,8 +213,8 @@ prophet_plot_components(m, forecast)
 # Python
 fig = m.plot_components(forecast)
 ```
- 
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_14_0.png) 
+
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_14_0.png)
 
 
 Individual holidays can be plotted using the `plot_forecast_component` function (imported from `prophet.plot` in Python) like `plot_forecast_component(m, forecast, 'superbowl')` to plot just the superbowl holiday component.
@@ -248,14 +248,14 @@ You can see which holidays were included by looking at the `train_holiday_names`
 # R
 m$train.holiday.names
 ```
-     [1] "playoff"                     "superbowl"                  
-     [3] "New Year's Day"              "Martin Luther King Jr. Day" 
-     [5] "Washington's Birthday"       "Memorial Day"               
-     [7] "Independence Day"            "Labor Day"                  
-     [9] "Columbus Day"                "Veterans Day"               
-    [11] "Veterans Day (Observed)"     "Thanksgiving"               
+     [1] "playoff"                     "superbowl"
+     [3] "New Year's Day"              "Martin Luther King Jr. Day"
+     [5] "Washington's Birthday"       "Memorial Day"
+     [7] "Independence Day"            "Labor Day"
+     [9] "Columbus Day"                "Veterans Day"
+    [11] "Veterans Day (Observed)"     "Thanksgiving"
     [13] "Christmas Day"               "Independence Day (Observed)"
-    [15] "Christmas Day (Observed)"    "New Year's Day (Observed)"  
+    [15] "Christmas Day (Observed)"    "New Year's Day (Observed)"
 
 
 ```python
@@ -289,7 +289,7 @@ The holidays for each country are provided by the `holidays` package in Python. 
 
 
 
-In Python, most holidays are computed deterministically and so are available for any date range; a warning will be raised if dates fall outside the range supported by that country. In R, holiday dates are computed for 1995 through 2044 and stored in the package as `data-raw/generated_holidays.csv`. If a wider date range is needed, this script can be used to replace that file with a different date range: https://github.com/facebook/prophet/blob/master/python/scripts/generate_holidays_file.py.
+In Python, most holidays are computed deterministically and so are available for any date range; a warning will be raised if dates fall outside the range supported by that country. In R, holiday dates are computed for 1995 through 2044 and stored in the package as `data-raw/generated_holidays.csv`. If a wider date range is needed, this script can be used to replace that file with a different date range: https://github.com/facebook/prophet/blob/main/python/scripts/generate_holidays_file.py.
 
 
 
@@ -306,8 +306,8 @@ prophet_plot_components(m, forecast)
 forecast = m.predict(future)
 fig = m.plot_components(forecast)
 ```
- 
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_24_0.png) 
+
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_24_0.png)
 
 
 <a id="fourier-order-for-seasonalities"> </a>
@@ -330,8 +330,8 @@ from prophet.plot import plot_yearly
 m = Prophet().fit(df)
 a = plot_yearly(m)
 ```
- 
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_27_0.png) 
+
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_27_0.png)
 
 
 The default values are often appropriate, but they can be increased when the seasonality needs to fit higher-frequency changes, and generally be less smooth. The Fourier order can be specified for each built-in seasonality when instantiating the model, here it is increased to 20:
@@ -348,8 +348,8 @@ from prophet.plot import plot_yearly
 m = Prophet(yearly_seasonality=20).fit(df)
 a = plot_yearly(m)
 ```
- 
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_30_0.png) 
+
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_30_0.png)
 
 
 Increasing the number of Fourier terms allows the seasonality to fit faster changing cycles, but can also lead to overfitting: N Fourier terms corresponds to 2N variables used for modeling the cycle
@@ -388,8 +388,8 @@ m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
 forecast = m.fit(df).predict(future)
 fig = m.plot_components(forecast)
 ```
- 
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_33_0.png) 
+
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_33_0.png)
 
 
 <a id="seasonalities-that-depend-on-other-factors"> </a>
@@ -452,8 +452,8 @@ future['off_season'] = ~future['ds'].apply(is_nfl_season)
 forecast = m.fit(df).predict(future)
 fig = m.plot_components(forecast)
 ```
- 
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_39_0.png) 
+
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_39_0.png)
 
 
 Both of the seasonalities now show up in the components plots above. We can see that during the on-season when games are played every Sunday, there are large increases on Sunday and Monday that are completely absent during the off-season.
@@ -470,8 +470,8 @@ If you find that the holidays are overfitting, you can adjust their prior scale 
 # R
 m <- prophet(df, holidays = holidays, holidays.prior.scale = 0.05)
 forecast <- predict(m, future)
-forecast %>% 
-  select(ds, playoff, superbowl) %>% 
+forecast %>%
+  select(ds, playoff, superbowl) %>%
   filter(abs(playoff + superbowl) > 0) %>%
   tail(10)
 ```
@@ -640,8 +640,8 @@ future['nfl_sunday'] = future['ds'].apply(nfl_sunday)
 forecast = m.predict(future)
 fig = m.plot_components(forecast)
 ```
- 
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_49_0.png) 
+
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_49_0.png)
 
 
 NFL Sundays could also have been handled using the "holidays" interface described above, by creating a list of past and future NFL Sundays. The `add_regressor` function provides a more general interface for defining extra linear regressors, and in particular does not require that the regressor be a binary indicator. Another time series could be used as a regressor, although its future values would have to be known.
@@ -671,4 +671,3 @@ Extra regressors are put in the linear component of the model, so the underlying
 
 
 To extract the beta coefficients of the extra regressors, use the utility function `regressor_coefficients` (`from prophet.utilities import regressor_coefficients` in Python, `prophet::regressor_coefficients` in R) on the fitted model. The estimated beta coefficient for each regressor roughly represents the increase in prediction value for a unit increase in the regressor value (note that the coefficients returned are always on the scale of the original data). If `mcmc_samples` is specified, a credible interval for each coefficient is also returned, which can help identify whether each regressor is "statistically significant".
-
