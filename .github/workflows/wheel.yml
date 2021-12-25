@@ -10,6 +10,94 @@ env:
   CMDSTAN_VERSION: "2.26.1"
 
 jobs:
+  make-wheel-windows:
+    name: ${{ matrix.python-version }}-${{ matrix.architecture }}-${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ["windows-latest"]
+        python-version: [3.8]
+        architecture: ["x64"]
+      fail-fast: false
+
+    steps:
+      - name: "Setup environment variables (Windows)"
+        if: startsWith(runner.os, 'Windows')
+        shell: pwsh
+        run: |
+          (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
+          $os_version = (Get-CimInstance Win32_OperatingSystem).version
+          Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
+          Echo "PIP_DEFAULT_CACHE=$HOME/pip/cache" >> $env:GITHUB_ENV
+          Echo "DEFAULT_HOME=$HOME" >> $env:GITHUB_ENV
+
+      - name: "Checkout repo"
+        uses: actions/checkout@v2
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.architecture }}
+
+      - name: "Restore pip cache"
+        id: cache-pip
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.PIP_DEFAULT_CACHE }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/python/requirements.txt') }}-v1
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: "Install pip"
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install cibuildwheel build delvewheel
+
+      - name: "Restore cmdstan cache"
+        id: cache-cmdstan
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.DEFAULT_HOME }}/.cmdstan
+          key: ${{ runner.os }}-cmdstan-${{ env.CMDSTAN_VERSION }}-v1
+
+      - name: "Restore RTools40"
+        id: cache-rtools
+        uses: actions/cache@v2
+        with:
+          path: C:/rtools40
+          key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
+
+      - name: "Download cmdstan"
+        if: steps.cache-cmdstan.outputs.cache-hit != 'true'
+        run: |
+          $ProgressPreference = "SilentlyContinue"
+          Invoke-WebRequest https://github.com/stan-dev/cmdstan/releases/download/v${{ env.CMDSTAN_VERSION }}/cmdstan-${{ env.CMDSTAN_VERSION }}.tar.gz -OutFile "D:/a/_temp/cmdstan.tar.gz"
+          New-Item -Path "$HOME" -Name ".cmdstan" -ItemType "directory"
+          tar -xf "D:/a/_temp/cmdstan.tar.gz" -C "$HOME/.cmdstan"
+
+      - name: "Build wheel"
+        run: |
+          cd python && python -m cibuildwheel --output-dir wheelhouse
+        env:
+          CIBW_ENVIRONMENT: >
+            STAN_BACKEND="${{ env.STAN_BACKEND }}"
+            CMDSTAN_VERSION=${{ env.CMDSTAN_VERSION }}
+            PIP_CACHE_DIR="${{ env.PIP_DEFAULT_CACHE }}"
+          CIBW_BUILD: cp36-* cp37-* cp38-*
+          CIBW_ARCHS: native
+          CIBW_BUILD_FRONTEND: build
+          # CIBW_REPAIR_WHEEL_COMMAND: delvewheel repair -w {dest_dir} {wheel}
+          CIBW_TEST_REQUIRES: pytest
+          CIBW_TEST_COMMAND: pytest --pyargs prophet
+
+      - name: "Upload wheel as artifact"
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os }}-wheel
+          path: "./**/*.whl"
+
   make-wheels-macos-linux:
     name: ${{ matrix.python-version }}-${{ matrix.architecture }}-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -18,7 +106,6 @@ jobs:
         os: ["macos-latest", "ubuntu-latest"]
         python-version: [3.8]
         architecture: ["x64"]
-
       fail-fast: false
 
     steps:
@@ -89,6 +176,7 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_BEFORE_ALL_LINUX: chmod -R a+rwx /host/${{ env.PIP_DEFAULT_CACHE }}
           CIBW_BUILD: cp36-* cp37-* cp38-*
+          CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: native
           CIBW_BUILD_FRONTEND: build
           CIBW_TEST_REQUIRES: pytest
