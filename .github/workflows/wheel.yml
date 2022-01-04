@@ -60,13 +60,6 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install cibuildwheel build delvewheel
 
-      - name: "Restore cmdstan cache"
-        id: cache-cmdstan
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.DEFAULT_HOME }}/.cmdstan
-          key: ${{ runner.os }}-cmdstan-${{ env.CMDSTAN_VERSION }}-v1
-
       - name: "Restore RTools40"
         id: cache-rtools
         uses: actions/cache@v2
@@ -74,21 +67,12 @@ jobs:
           path: C:/rtools40
           key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
 
-      - name: "Download cmdstan"
-        if: steps.cache-cmdstan.outputs.cache-hit != 'true'
-        run: |
-          $ProgressPreference = "SilentlyContinue"
-          Invoke-WebRequest https://github.com/stan-dev/cmdstan/releases/download/v${{ env.CMDSTAN_VERSION }}/cmdstan-${{ env.CMDSTAN_VERSION }}.tar.gz -OutFile "D:/a/_temp/cmdstan.tar.gz"
-          New-Item -Path "$HOME" -Name ".cmdstan" -ItemType "directory"
-          tar -xf "D:/a/_temp/cmdstan.tar.gz" -C "$HOME/.cmdstan"
-
       - name: "Build wheel"
         run: |
           cd python && python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
-            CMDSTAN_VERSION=${{ env.CMDSTAN_VERSION }}
             PIP_CACHE_DIR="${{ env.PIP_DEFAULT_CACHE }}"
           CIBW_BUILD: cp36-* cp37-* cp38-*
           CIBW_ARCHS: native
@@ -108,7 +92,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ["macos-latest", "ubuntu-latest". "windows-latest"]
+        os: ["macos-latest", "ubuntu-latest", "windows-latest"]
         # might need to use https://github.com/marketplace/actions/setup-msys2 on windows
         python-version: [3.8]
         architecture: ["x64"]
