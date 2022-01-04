@@ -72,20 +72,8 @@ class CmdStanPyBackend(IStanBackend):
     def get_type():
         return StanBackendEnum.CMDSTANPY.name
 
-    def _add_tbb_to_path(self):
-        """Add the TBB library to $PATH on Windows only. Required for loading model binaries."""
-        if PLATFORM == "win":
-            tbb_path = pkg_resources.resource_filename(
-                "prophet",
-                f"stan_model/cmdstan-{self.CMDSTAN_VERSION}/stan/lib/stan_math/lib/tbb"
-            )
-            os.environ["PATH"] = ";".join(
-                list(OrderedDict.fromkeys([tbb_path] + os.environ.get("PATH", "").split(";")))
-            )
-
     def load_model(self):
         import cmdstanpy
-        self._add_tbb_to_path()
         model_file = pkg_resources.resource_filename(
             'prophet',
             'stan_model/prophet_model.bin',
