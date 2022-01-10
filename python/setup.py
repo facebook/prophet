@@ -28,7 +28,6 @@ TBB_PARENT = "stan/lib/stan_math/lib"
 TBB_DIRS = ["tbb", "tbb_2019_U8"]
 
 
-
 def prune_cmdstan(cmdstan_dir: str) -> None:
     """
     Keep only the cmdstan executables and tbb files (minimum required to run a cmdstanpy commands on a pre-compiled model).
@@ -40,6 +39,7 @@ def prune_cmdstan(cmdstan_dir: str) -> None:
         rmtree(temp_dir)
     temp_dir.mkdir()
 
+    print("Copying ", original_dir, " to ", temp_dir, " for pruning")
     copytree(original_dir / BINARIES_DIR, temp_dir / BINARIES_DIR)
     for f in (temp_dir / BINARIES_DIR).iterdir():
         if f.is_dir():
@@ -53,16 +53,18 @@ def prune_cmdstan(cmdstan_dir: str) -> None:
     temp_dir.rename(original_dir)
 
 
-
 def install_cmdstan_toolchain():
     """Install C++ compilers required to build stan models on Windows machines."""
     from cmdstanpy.install_cxx_toolchain import main as _install_cxx_toolchain
-    _install_cxx_toolchain({'version':None, 'install_dir': None})
+
+    _install_cxx_toolchain({"version": None, "install_dir": None})
 
 
 def install_cmdstan_deps(cmdstan_dir: Path):
     import cmdstanpy
-    if not os.environ.get('NO_REPACKAGE_CMDSTAN', False):
+    from multiprocessing import cpu_count
+
+    if not os.environ.get("NO_REPACKAGE_CMDSTAN", False):
         if platform.platform().startswith("Win") == "win":
             try:
                 cmdstanpy.utils.cxx_toolchain_path()
@@ -71,7 +73,14 @@ def install_cmdstan_deps(cmdstan_dir: Path):
         print("Installing cmdstan to", cmdstan_dir)
         if os.path.isdir(cmdstan_dir):
             rmtree(cmdstan_dir)
-        if not cmdstanpy.install_cmdstan(version=CMDSTAN_VERSION, dir=cmdstan_dir, overwrite=True, verbose=True):
+
+        if not cmdstanpy.install_cmdstan(
+            version=CMDSTAN_VERSION,
+            dir=cmdstan_dir.parent,
+            overwrite=True,
+            verbose=True,
+            cores=cpu_count(),
+        ):
             raise RuntimeError("CmdStan failed to install in repackaged directory")
 
 
@@ -86,6 +95,7 @@ def build_cmdstan_model(target_dir):
     target_dir: Directory to copy the compiled model executable and core cmdstan files to.
     """
     import cmdstanpy
+
     cmdstan_dir = (Path(target_dir) / f"cmdstan-{CMDSTAN_VERSION}").resolve()
     install_cmdstan_deps(cmdstan_dir)
     model_name = "prophet.stan"
@@ -98,7 +108,7 @@ def build_cmdstan_model(target_dir):
         if f.is_file() and f.name != model_name:
             os.remove(f)
 
-    if not os.environ.get('NO_REPACKAGE_CMDSTAN', False):
+    if not os.environ.get("NO_REPACKAGE_CMDSTAN", False):
         prune_cmdstan(cmdstan_dir)
         pass
 
