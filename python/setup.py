@@ -60,7 +60,7 @@ def install_cmdstan_toolchain():
     _install_cxx_toolchain({'version':None, 'install_dir': None})
 
 
-def install_cmdstan_deps(target_dir: Path):
+def install_cmdstan_deps(cmdstan_dir: Path):
     import cmdstanpy
     if not os.environ.get('NO_REPACKAGE_CMDSTAN', False):
         if platform.platform().startswith("Win") == "win":
@@ -68,11 +68,10 @@ def install_cmdstan_deps(target_dir: Path):
                 cmdstanpy.utils.cxx_toolchain_path()
             except Exception:
                 install_cmdstan_toolchain()
-        cmdstan_dir = os.path.join(target_dir, f"cmdstan-{CMDSTAN_VERSION}")
         print("Installing cmdstan to", cmdstan_dir)
         if os.path.isdir(cmdstan_dir):
             rmtree(cmdstan_dir)
-        if not cmdstanpy.install_cmdstan(version=CMDSTAN_VERSION, dir=target_dir, overwrite=True, verbose=True):
+        if not cmdstanpy.install_cmdstan(version=CMDSTAN_VERSION, dir=cmdstan_dir, overwrite=True, verbose=True):
             raise RuntimeError("CmdStan failed to install in repackaged directory")
 
 
