@@ -7,6 +7,7 @@
 from __future__ import absolute_import, division, print_function
 import os
 from abc import abstractmethod, ABC
+from tempfile import mkdtemp
 from typing import Tuple
 from collections import OrderedDict
 from enum import Enum
@@ -91,6 +92,7 @@ class CmdStanPyBackend(IStanBackend):
             inits=stan_init,
             algorithm='Newton' if stan_data['T'] < 100 else 'LBFGS',
             iter=int(1e4),
+            output_dir = mkdtemp(),
         )
         args.update(kwargs)
 
