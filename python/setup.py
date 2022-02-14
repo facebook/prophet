@@ -250,7 +250,7 @@ setup(
     license="MIT",
     packages=find_packages(),
     install_requires=install_requires,
-    python_requires=">=3",
+    python_requires=">=3.6",
     zip_safe=False,
     include_package_data=True,
     ext_modules=[Extension("prophet.stan_model", [])],
