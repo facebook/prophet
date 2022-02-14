@@ -52,6 +52,9 @@ def prune_cmdstan(cmdstan_dir: str) -> None:
     rmtree(original_dir)
     temp_dir.rename(original_dir)
 
+def repackage_cmdstan():
+    return os.environ.get("PROPHET_REPACKAGE_CMDSTAN", "").lower() in ["false", "0"]
+
 
 def maybe_install_cmdstan_toolchain():
     """Install C++ compilers required to build stan models on Windows machines."""
@@ -69,7 +72,7 @@ def install_cmdstan_deps(cmdstan_dir: Path):
     import cmdstanpy
     from multiprocessing import cpu_count
 
-    if os.environ.get("PROPHET_REPACKAGE_CMDSTAN", True):
+    if repackage_cmdstan():
         if platform.platform().startswith("Win"):
             maybe_install_cmdstan_toolchain()
         print("Installing cmdstan to", cmdstan_dir)
@@ -111,7 +114,7 @@ def build_cmdstan_model(target_dir):
         if f.is_file() and f.name != model_name:
             os.remove(f)
 
-    if os.environ.get("PROPHET_REPACKAGE_CMDSTAN", True):
+    if repackage_cmdstan():
         prune_cmdstan(cmdstan_dir)
 
 
