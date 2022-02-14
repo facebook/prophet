@@ -53,11 +53,16 @@ def prune_cmdstan(cmdstan_dir: str) -> None:
     temp_dir.rename(original_dir)
 
 
-def install_cmdstan_toolchain():
+def maybe_install_cmdstan_toolchain():
     """Install C++ compilers required to build stan models on Windows machines."""
+    import cmdstanpy
     from cmdstanpy.install_cxx_toolchain import main as _install_cxx_toolchain
 
-    _install_cxx_toolchain({"version": None, "install_dir": None})
+    try:
+        cmdstanpy.utils.cxx_toolchain_path()
+    except Exception:
+        _install_cxx_toolchain({"version": None, "dir": None, "verbose": True})
+        cmdstanpy.utils.cxx_toolchain_path()
 
 
 def install_cmdstan_deps(cmdstan_dir: Path):
@@ -66,10 +71,7 @@ def install_cmdstan_deps(cmdstan_dir: Path):
 
     if os.environ.get("PROPHET_REPACKAGE_CMDSTAN", True):
         if platform.platform().startswith("Win"):
-            try:
-                cmdstanpy.utils.cxx_toolchain_path()
-            except Exception:
-                install_cmdstan_toolchain()
+            maybe_install_cmdstan_toolchain()
         print("Installing cmdstan to", cmdstan_dir)
         if os.path.isdir(cmdstan_dir):
             rmtree(cmdstan_dir)
@@ -80,6 +82,7 @@ def install_cmdstan_deps(cmdstan_dir: Path):
             overwrite=True,
             verbose=True,
             cores=cpu_count(),
+            progress=True,
         ):
             raise RuntimeError("CmdStan failed to install in repackaged directory")
 
@@ -108,7 +111,7 @@ def build_cmdstan_model(target_dir):
         if f.is_file() and f.name != model_name:
             os.remove(f)
 
-    if not os.environ.get("PROPHET_REPACKAGE_CMDSTAN", True):
+    if os.environ.get("PROPHET_REPACKAGE_CMDSTAN", True):
         prune_cmdstan(cmdstan_dir)
 
 
