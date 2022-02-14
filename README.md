@@ -65,8 +65,10 @@ pip install prophet
 ```
 
 The default dependency that Prophet has is `cmdstanpy`.
-When installed using Pip, Prophet will install its own version of CmdStan.
-If this is undesired, you can set the environment variable `NO_REPACKAGE_CMDSTAN` when building from source.
+When installed using Pip, Prophet will install its own
+pre-packaged version of CmdStan.
+If this is undesired, you can set the environment variable `PROPHET_REPACKAGE_CMDSTAN` to  `False`
+when building from source.
 
 After installation, you can [get started!](https://facebook.github.io/prophet/docs/quick_start.html#python-api)
 
@@ -76,7 +78,9 @@ The easiest way to install Prophet is through conda-forge: `conda install -c con
 
 ### Windows
 
-The easiest way to install Prophet in Windows is in Anaconda.
+The easiest way to install Prophet in Windows is in Anaconda. It is possible to install via pip as well, though this requires
+a Unix-compatible C compiler such as mingw-gcc. If cmdstanpy is installed first,
+one can be installed via the `cmdstanpy.install_cxx_toolchain` command.
 
 ### Linux
 

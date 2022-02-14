@@ -64,8 +64,8 @@ def install_cmdstan_deps(cmdstan_dir: Path):
     import cmdstanpy
     from multiprocessing import cpu_count
 
-    if not os.environ.get("NO_REPACKAGE_CMDSTAN", False):
-        if platform.platform().startswith("Win") == "win":
+    if os.environ.get("PROPHET_REPACKAGE_CMDSTAN", True):
+        if platform.platform().startswith("Win"):
             try:
                 cmdstanpy.utils.cxx_toolchain_path()
             except Exception:
@@ -108,9 +108,8 @@ def build_cmdstan_model(target_dir):
         if f.is_file() and f.name != model_name:
             os.remove(f)
 
-    if not os.environ.get("NO_REPACKAGE_CMDSTAN", False):
+    if not os.environ.get("PROPHET_REPACKAGE_CMDSTAN", True):
         prune_cmdstan(cmdstan_dir)
-        pass
 
 
 def build_pystan_model(target_dir):
