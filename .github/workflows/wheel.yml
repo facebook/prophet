@@ -69,7 +69,7 @@ jobs:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             PIP_CACHE_DIR="${{ env.PIP_DEFAULT_CACHE }}"
-          CIBW_BUILD: cp36-* cp37-* cp38-* cp39-* cp310-*
+          CIBW_BUILD: cp36-* cp37-* cp38-*
           CIBW_ARCHS: native
           CIBW_BUILD_FRONTEND: build
           # CIBW_REPAIR_WHEEL_COMMAND: delvewheel repair -w {dest_dir} {wheel}
@@ -142,7 +142,7 @@ jobs:
             PIP_CACHE_DIR="/host/${{ env.PIP_DEFAULT_CACHE }}"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_BEFORE_ALL_LINUX: chmod -R a+rwx /host/${{ env.PIP_DEFAULT_CACHE }}
-          CIBW_BUILD: cp36-* cp37-* cp38-* cp39-* cp310-*
+          CIBW_BUILD: cp36-* cp37-* cp38-*
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: native
           CIBW_BUILD_FRONTEND: build
