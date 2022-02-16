@@ -92,8 +92,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ["macos-latest", "ubuntu-latest", "windows-latest"]
-        # might need to use https://github.com/marketplace/actions/setup-msys2 on windows
+        os: ["macos-latest", "ubuntu-latest"]
         python-version: [3.8]
         architecture: ["x64"]
       fail-fast: false
@@ -110,12 +109,6 @@ jobs:
         run: |
           echo "PIP_DEFAULT_CACHE=$HOME/Library/Caches/pip" >> $GITHUB_ENV
           echo "DEFAULT_HOME=$HOME" >> $GITHUB_ENV
-
-      - name: "Get OS version (Windows)"
-        if: startsWith(runner.os, 'Windows')
-        run: |
-          echo "PIP_DEFAULT_CACHE=$($env:LOCALAPPDATA)\pip\Cache" >> $GITHUB_ENV
-          echo "DEFAULT_HOME=$($env:USERPROFILE)" >> $GITHUB_ENV
 
 
       - name: "Checkout repo"
