@@ -53,7 +53,7 @@ def prune_cmdstan(cmdstan_dir: str) -> None:
     temp_dir.rename(original_dir)
 
 def repackage_cmdstan():
-    return os.environ.get("PROPHET_REPACKAGE_CMDSTAN", "").lower() in ["false", "0"]
+    return os.environ.get("PROPHET_REPACKAGE_CMDSTAN", "").lower() not in ["false", "0"]
 
 
 def maybe_install_cmdstan_toolchain():
