@@ -7,6 +7,7 @@ import os
 import pickle
 import platform
 import subprocess
+import struct
 import sys
 from collections import OrderedDict
 from pathlib import Path
@@ -209,7 +210,16 @@ def build_pystan_model(target_dir):
     target_name = "prophet_model.pkl"
     with open(os.path.join(MODEL_DIR, model_name)) as f:
         model_code = f.read()
-    sm = pystan.StanModel(model_code=model_code)
+
+    # GCC build will fail on Windows without an MS_WINnn definition.
+    # Offending line in cpython is some kind of deliberate-fail sanity check:
+    #     "__pyx_check_sizeof_voidp = 1 / (int)(SIZEOF_VOID_P == sizeof(void*))"
+    # SIZEOF_VOID_P's value is based on the presence of this symbol, otherwise
+    # defaults to 4.
+    bitness = struct.calcsize("P") * 8
+    extra_compile_args = [f"-DMS_WIN{bitness}"] if PLATFORM == "win" else []
+
+    sm = pystan.StanModel(model_code=model_code, extra_compile_args=extra_compile_args)
     with open(os.path.join(target_dir, target_name), "wb") as f:
         pickle.dump(sm, f, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -223,7 +233,7 @@ def build_models(target_dir):
         print(f"Compiling {backend} model")
         if backend == "CMDSTANPY":
             build_cmdstan_model(target_dir)
-        elif backend == "PYSTAN" and PLATFORM != "win":
+        elif backend == "PYSTAN":
             build_pystan_model(target_dir)
 
 
