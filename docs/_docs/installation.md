@@ -4,10 +4,10 @@ docid: "installation"
 title: "Installation"
 permalink: /docs/installation.html
 subsections:
-  - id: r
-    title: Using R
-  - id: python
-    title: Using Python
+    - id: r
+      title: Using R
+    - id: python
+      title: Using Python
 ---
 
 Prophet has two implementations: [R](#installation-in-r) and [Python](#installation-in-python).
@@ -46,7 +46,7 @@ Sys.setenv(R_STAN_BACKEND = "CMDSTANR")
 
 ### Windows
 
-On Windows, R requires a compiler so you'll need to [follow the instructions](https://github.com/stan-dev/rstan/wiki/Installing-RStan-on-Windows) provided by `rstan`. The key step is installing [Rtools](http://cran.r-project.org/bin/windows/Rtools/) before attempting to install the package.
+On Windows, R requires a compiler so you'll need to [follow the instructions](https://github.com/stan-dev/rstan/wiki/Configuring-C---Toolchain-for-Windows) provided by `rstan`. The key step is installing [Rtools](http://cran.r-project.org/bin/windows/Rtools/) before attempting to install the package.
 
 If you have custom Stan compiler settings, install from source rather than the CRAN binary.
 
@@ -91,7 +91,7 @@ $ CMDSTAN=/tmp/cmdstan-2.22.1 STAN_BACKEND=PYSTAN,CMDSTANPY pip install prophet
 
 ### Windows
 
-On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html).  The easiest way to install Prophet in Windows is in Anaconda.
+On Windows, PyStan requires a compiler so you'll need to [follow the instructions](https://pystan2.readthedocs.io/en/latest/windows.html). The easiest way to install Prophet in Windows is in Anaconda.
 
 ### Linux
 
