@@ -8,6 +8,7 @@ from __future__ import absolute_import, division, print_function
 
 from collections import OrderedDict
 from copy import deepcopy
+from io import StringIO
 import json
 
 import numpy as np
@@ -145,7 +146,7 @@ def model_from_dict(model_dict):
         if model_dict[attribute] is None:
             setattr(model, attribute, None)
         else:
-            s = pd.read_json(model_dict[attribute], typ='series', orient='split')
+            s = pd.read_json(StringIO(model_dict[attribute]), typ='series', orient='split')
             if s.name == 'ds':
                 if len(s) == 0:
                     s = pd.to_datetime(s)
@@ -159,7 +160,7 @@ def model_from_dict(model_dict):
         if model_dict[attribute] is None:
             setattr(model, attribute, None)
         else:
-            df = pd.read_json(model_dict[attribute], typ='frame', orient='table', convert_dates=['ds'])
+            df = pd.read_json(StringIO(model_dict[attribute]), typ='frame', orient='table', convert_dates=['ds'])
             if attribute == 'train_component_cols':
                 # Special handling because of named index column
                 df.columns.name = 'component'

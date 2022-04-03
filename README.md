@@ -38,7 +38,7 @@ follow these instructions to use `cmdstanr` instead of `rstan` as the backend:
 
 ```r
 # R
-# We recommend running this is a fresh R session or restarting your current session
+# We recommend running this in a fresh R session or restarting your current session
 install.packages(c("cmdstanr", "posterior"), repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
 
 # If you haven't installed cmdstan before, run:

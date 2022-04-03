@@ -43,7 +43,7 @@ development environment. This should contain the required dependencies.
 ```bash
 $ cd python
 
-# with Anaconda 
+# with Anaconda
 $ conda create -n prophet
 $ conda activate prophet
 $ pip install -r requirements.txt
@@ -58,7 +58,7 @@ $ pip install -r requirements.txt
 
 Dependencies can be managed through [``Packrat``](https://rstudio.github.io/packrat/) or [``renv``](https://rstudio.github.io/renv/articles/renv.html).
 
-For ``renv``, you must first initialise a new project local environment. 
+For ``renv``, you must first initialise a new project local environment.
 ```R
 > setwd("path/to/prophet/R") # set R subdirectory as working directory
 > install.packages('renv')
@@ -67,13 +67,13 @@ For ``renv``, you must first initialise a new project local environment.
 
 This should also install the dependencies listed in the DESCRIPTION automatically. Any new R packages can be installed as they are needed in the project.
 
-You can save the state of the project: 
+You can save the state of the project:
 
 ```R
 > renv::snapshot()
 ```
 
-or load the environment: 
+or load the environment:
 
 ```R
 > renv::restore()
@@ -81,7 +81,7 @@ or load the environment:
 
 ## 3. Building a development version of Prophet
 
-The next step is to build and install the development version of prophet in the environment you have just created. 
+The next step is to build and install the development version of prophet in the environment you have just created.
 
 ### Python
 
@@ -99,7 +99,7 @@ $ python  # start an interpreter
 ```
 
 This will create the new environment, and not touch any of your existing environments,
-nor any existing Python installation. 
+nor any existing Python installation.
 
 ```bash
 # to view your environments:
@@ -122,7 +122,7 @@ This will build and install the local version of the prophet package. Then from 
 
 ## 4. Creating a branch
 
-You want your master branch to reflect only production-ready code, so create a
+You want your main branch to reflect only production-ready code, so create a
 feature branch for making your changes. For example:
 
 ```bash
@@ -134,14 +134,14 @@ changes in this branch specific to one bug or feature so it is clear
 what the branch brings to *prophet*. You can have many "new-features"
 and switch in between them using the ``git checkout`` command.
 
-To update this branch, you need to retrieve the changes from the master branch:
+To update this branch, you need to retrieve the changes from the main branch:
 
 ```bash
 $ git fetch upstream
-$ git rebase upstream/master
+$ git rebase upstream/main
 ```
 
-This will replay your commits on top of the latest *prophet* git master.  If this
+This will replay your commits on top of the latest *prophet* git `main`.  If this
 leads to merge conflicts, you must resolve these before submitting your pull
 request.  If you have uncommitted changes, you will need to ``git stash`` them
 prior to updating.  This will effectively store your changes and they can be
@@ -154,11 +154,11 @@ Adding tests is one of the most common requests after code is pushed to prophet.
 
 ### Python
 
-Prophet uses the ``unittest`` package for running tests in Python and ``testthat`` package for testing in R. All tests should go into the tests subdirectory in either the Python or R folders. 
+Prophet uses the ``unittest`` package for running tests in Python and ``testthat`` package for testing in R. All tests should go into the tests subdirectory in either the Python or R folders.
 
-The entire test suite can be run by typing: 
+The entire test suite can be run by typing:
 ```bash
-$ python setup.py tests
+$ python setup.py test
 ```
 
 ### R
@@ -185,7 +185,7 @@ or for just running a single test script like ``test_diagnostics.R`` from the R 
 
 ## 6. Generating documentation
 
-Most of the `doc` pages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebook/prophet/tree/master/notebooks) directory at the base of the source tree.  Please make changes there and then rebuild the docs:
+Most of the `doc` pages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebook/prophet/tree/main/notebooks) directory at the base of the source tree.  Please make changes there and then rebuild the docs:
 
 ```bash
 $ cd docs
@@ -194,12 +194,12 @@ $ make notebooks
 
 Make sure you have installed [rpy2](https://rpy2.bitbucket.io/) so that the R code can be run as well.
 
-In R, the documentation for the source code must also generated if new parameters are added or a new function is created. This is documented with ``roxygen``. 
+In R, the documentation for the source code must also generated if new parameters are added or a new function is created. This is documented with ``roxygen``.
 
 Run the command below before submitting a PR with any changes to the R code to update the function documentation:
 
 ```R
-> devtools::document() 
+> devtools::document()
 ```
 
 ## 7. Committing your code
@@ -263,12 +263,12 @@ When you’re ready to ask for a code review, file a pull request. Before you do
 1. Navigate to your repository on GitHub – https://github.com/your-user-name/prophet
 2. Click on Branches
 3. Click on the Compare button for your feature branch
-4. Select the base and compare branches, if necessary. This will be master and new-feature, respectively.
+4. Select the base and compare branches, if necessary. This will be `main` and new-feature, respectively.
 
 
 ## 10. Making a pull request
 
-If everything looks good, you are ready to make a pull request. A pull request is how code from a local repository becomes available to the GitHub community and can be reviewed and eventually merged into the master version. This pull request and its associated changes will eventually be committed to the master branch and available in the next release. To submit a pull request:
+If everything looks good, you are ready to make a pull request. A pull request is how code from a local repository becomes available to the GitHub community and can be reviewed and eventually merged into the `main` version. This pull request and its associated changes will eventually be committed to the `main` branch and available in the next release. To submit a pull request:
 
 1. Navigate to your repository on GitHub
 2. Click on the Pull Request button
@@ -287,7 +287,7 @@ This will automatically update your pull request with the latest code and restar
 
 ## 11. Delete your merged branch
 
-Once your feature branch is merged into ``upstream master``, you can delete your remote branch via the ``Delete branch`` option in the PR and the local copy by running: 
+Once your feature branch is merged into ``upstream main``, you can delete your remote branch via the ``Delete branch`` option in the PR and the local copy by running:
 
 ```bash
 $ git branch -d new-feature
@@ -301,5 +301,5 @@ $ git branch -d new-feature
   - Write new tests if needed. See "Testing with Continuous Integration"
   - Test the code using unittest. Running all tests takes a while, so feel free to only run the tests you think are needed based on your PR. CI will catch any failing tests.
 * In R, you can also run ``devtools:check()`` for carrying out a number of automated checks all at once, for code problems, documentation, testing, package structure, vignettes etc. This will take a few minutes to run.
-* Once you push your changes and make a PR, make sure you use an informative title which summarizes the changes you have made. 
+* Once you push your changes and make a PR, make sure you use an informative title which summarizes the changes you have made.
 * If the PR addresses an issue, please reference it e.g. fixes #1234
