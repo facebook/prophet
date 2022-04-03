@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 from __future__ import absolute_import, division, print_function
-import os
 from abc import abstractmethod, ABC
 from tempfile import mkdtemp
 from typing import Tuple
@@ -64,14 +63,12 @@ class CmdStanPyBackend(IStanBackend):
     CMDSTAN_VERSION = "2.26.1"
     def __init__(self):
         import cmdstanpy
-
         # this must be set before super.__init__() for load_model to work on Windows
         local_cmdstan = pkg_resources.resource_filename(
             "prophet", f"stan_model/cmdstan-{self.CMDSTAN_VERSION}"
         )
-        if os.path.exists(local_cmdstan):
+        if Path(local_cmdstan).exists():
             cmdstanpy.set_cmdstan_path(local_cmdstan)
-
         super().__init__()
 
     @staticmethod

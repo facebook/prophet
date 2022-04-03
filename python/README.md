@@ -18,20 +18,13 @@ Full documentation and examples available at the homepage: https://facebook.gith
 - Rob Hyndman's [forecast package](http://robjhyndman.com/software/forecast/)
 - [Statsmodels](http://statsmodels.sourceforge.net/)
 
-## Installation
+## Installation - PyPI
 
-Prophet can be installed from PyPi:
-```shell
-pip install prophet
-```
-Alternatively, one can install a pre-built version from conda-forge:
-```shell
-conda install -c conda-forge prophet
-```
+See [Installation in Python - PyPI release](https://github.com/facebook/prophet#installation-in-python---pypi-release)
 
-The default installation requires [CmdStanPy](https://cmdstanpy.readthedocs.io/en/v1.0.0/).
-Historically, a different packaged called [PyStan](https://pystan2.readthedocs.io/en/latest/installation_beginner.html) (version 2) was required,
-and for the moment is still an option.
+## Installation - building from source
+
+See [Installation in Python - building from source](https://github.com/facebook/prophet#installation-in-python---building-from-source)
 
 ## Installation using Docker and docker-compose (via Makefile)
 
@@ -47,4 +40,4 @@ To run the tests, inside the container `cd python/prophet` and then `python -m u
   >>> m.fit(df)  # df is a pandas.DataFrame with 'y' and 'ds' columns
   >>> future = m.make_future_dataframe(periods=365)
   >>> m.predict(future)
-  ```
+```
