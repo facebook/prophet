@@ -18,15 +18,15 @@ Full documentation and examples available at the homepage: https://facebook.gith
 - Rob Hyndman's [forecast package](http://robjhyndman.com/software/forecast/)
 - [Statsmodels](http://statsmodels.sourceforge.net/)
 
-## Installation - PyPI
+## Installation - PyPI release
 
 See [Installation in Python - PyPI release](https://github.com/facebook/prophet#installation-in-python---pypi-release)
 
-## Installation - building from source
+## Installation - Development version
 
-See [Installation in Python - building from source](https://github.com/facebook/prophet#installation-in-python---building-from-source)
+See [Installation in Python - Development version](https://github.com/facebook/prophet#installation-in-python---development-version)
 
-## Installation using Docker and docker-compose (via Makefile)
+### Installation using Docker and docker-compose (via Makefile)
 
 Simply type `make build` and if everything is fine you should be able to `make shell` or alternative jump directly to `make py-shell`.
 

@@ -95,15 +95,13 @@ The easiest way to install Prophet is through conda-forge: `conda install -c con
 
 ### Windows
 
-The easiest way to install Prophet in Windows is in Anaconda. It is possible to install via pip as well, though this requires
-a Unix-compatible C compiler such as mingw-gcc. If cmdstanpy is installed first,
-one can be installed via the `cmdstanpy.install_cxx_toolchain` command.
+The easiest way to install Prophet in Windows is in Anaconda.
 
 ### Linux
 
 Make sure compilers (gcc, g++, build-essential) and Python development tools (python-dev, python3-dev) are installed. In Red Hat systems, install the packages gcc64 and gcc64-c++. If you are using a VM, be aware that you will need at least 4GB of memory to install prophet, and at least 2GB of memory to use prophet.
 
-## Installation in Python - building from source
+## Installation in Python - Development version
 
 Since Pystan2 is no longer being maintained, the python package will move to depend solely on `cmdstanpy` (benefits described [here](https://github.com/facebook/prophet/issues/2041)). This has been updated in the development version of the package (1.1), but this version hasn't yet been released to PyPI. If you would like to use `cmdstanpy` only for your workflow, you can clone this repo and build from source manually:
 
@@ -114,7 +112,7 @@ python -m install -r requirements.txt
 python setup.py develop
 ```
 
-By default, Prophet will use a set version of `cmdstan` (downloading and installing it if necessary) to compile the model executables. If this is undesired, you can set the environment variable `PROPHET_REPACKAGE_CMDSTAN` to `False`:
+By default, Prophet will use a fixed version of `cmdstan` (downloading and installing it if necessary) to compile the model executables. If this is undesired and you would like to use your own existing `cmdstan` installation, you can set the environment variable `PROPHET_REPACKAGE_CMDSTAN` to `False`:
 
 ```bash
 export PROPHET_REPACKAGE_CMDSTAN=False; python setup.py develop
