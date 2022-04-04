@@ -5,9 +5,9 @@ on:
     types: [ created ]
   workflow_dispatch: {}
 
+
 env:
-  STAN_BACKEND: "PYSTAN,CMDSTANPY"
-  CMDSTAN_VERSION: "2.26.1"
+  STAN_BACKEND: "CMDSTANPY"
 
 jobs:
   make-wheel-windows:
@@ -55,13 +55,6 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install cibuildwheel build delvewheel
 
-      - name: "Restore cmdstan cache"
-        id: cache-cmdstan
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.DEFAULT_HOME }}/.cmdstan
-          key: ${{ runner.os }}-cmdstan-${{ env.CMDSTAN_VERSION }}-v1
-
       - name: "Restore RTools40"
         id: cache-rtools
         uses: actions/cache@v2
@@ -69,21 +62,12 @@ jobs:
           path: C:/rtools40
           key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
 
-      - name: "Download cmdstan"
-        if: steps.cache-cmdstan.outputs.cache-hit != 'true'
-        run: |
-          $ProgressPreference = "SilentlyContinue"
-          Invoke-WebRequest https://github.com/stan-dev/cmdstan/releases/download/v${{ env.CMDSTAN_VERSION }}/cmdstan-${{ env.CMDSTAN_VERSION }}.tar.gz -OutFile "D:/a/_temp/cmdstan.tar.gz"
-          New-Item -Path "$HOME" -Name ".cmdstan" -ItemType "directory"
-          tar -xf "D:/a/_temp/cmdstan.tar.gz" -C "$HOME/.cmdstan"
-
       - name: "Build wheel"
         run: |
           cd python && python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
-            CMDSTAN_VERSION=${{ env.CMDSTAN_VERSION }}
             PIP_CACHE_DIR="${{ env.PIP_DEFAULT_CACHE }}"
           CIBW_BUILD: cp36-* cp37-* cp38-*
           CIBW_ARCHS: native
@@ -112,16 +96,15 @@ jobs:
       - name: "Get OS version (Linux)"
         if: startsWith(runner.os, 'Linux')
         run: |
-          echo "OS_VERSION=`lsb_release -sr`" >> $GITHUB_ENV
           echo "PIP_DEFAULT_CACHE=$HOME/.cache/pip" >> $GITHUB_ENV
           echo "DEFAULT_HOME=$HOME" >> $GITHUB_ENV
 
       - name: "Get OS version (macOS)"
         if: startsWith(runner.os, 'macOS')
         run: |
-          echo "OS_VERSION=`sw_vers -productVersion`" >> $GITHUB_ENV
           echo "PIP_DEFAULT_CACHE=$HOME/Library/Caches/pip" >> $GITHUB_ENV
           echo "DEFAULT_HOME=$HOME" >> $GITHUB_ENV
+
 
       - name: "Checkout repo"
         uses: actions/checkout@v2
@@ -146,31 +129,15 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install cibuildwheel build
 
-      - name: "Restore cmdstan cache"
-        id: cache-cmdstan
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.DEFAULT_HOME }}/.cmdstan
-          key: ${{ runner.os }}-cmdstan-${{ env.CMDSTAN_VERSION }}-v1
-
-      - name: "Download cmdstan"
-        if: steps.cache-cmdstan.outputs.cache-hit != 'true'
-        run: |
-          wget https://github.com/stan-dev/cmdstan/releases/download/v${{ env.CMDSTAN_VERSION }}/cmdstan-${{ env.CMDSTAN_VERSION }}.tar.gz -O /tmp/cmdstan.tar.gz &> /dev/null
-          mkdir $HOME/.cmdstan
-          tar -xf /tmp/cmdstan.tar.gz -C $HOME/.cmdstan &> /dev/null
-
       - name: "Build wheel"
         run: |
           cd python && python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
-            CMDSTAN_VERSION=${{ env.CMDSTAN_VERSION }}
           # Linux builds run in a Docker container, need to point the cache to the host machine.
           CIBW_ENVIRONMENT_LINUX: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
-            CMDSTAN_VERSION=${{ env.CMDSTAN_VERSION }}
             HOME="/host/${{ env.DEFAULT_HOME }}"
             PIP_CACHE_DIR="/host/${{ env.PIP_DEFAULT_CACHE }}"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014

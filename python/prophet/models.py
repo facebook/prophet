@@ -6,6 +6,7 @@
 
 from __future__ import absolute_import, division, print_function
 from abc import abstractmethod, ABC
+from tempfile import mkdtemp
 from typing import Tuple
 from collections import OrderedDict
 from enum import Enum
@@ -61,30 +62,21 @@ class IStanBackend(ABC):
 class CmdStanPyBackend(IStanBackend):
     CMDSTAN_VERSION = "2.26.1"
     def __init__(self):
-        super().__init__()
         import cmdstanpy
-        cmdstanpy.set_cmdstan_path(
-            pkg_resources.resource_filename("prophet", f"stan_model/cmdstan-{self.CMDSTAN_VERSION}")
+        # this must be set before super.__init__() for load_model to work on Windows
+        local_cmdstan = pkg_resources.resource_filename(
+            "prophet", f"stan_model/cmdstan-{self.CMDSTAN_VERSION}"
         )
+        if Path(local_cmdstan).exists():
+            cmdstanpy.set_cmdstan_path(local_cmdstan)
+        super().__init__()
 
     @staticmethod
     def get_type():
         return StanBackendEnum.CMDSTANPY.name
 
-    def _add_tbb_to_path(self):
-        """Add the TBB library to $PATH on Windows only. Required for loading model binaries."""
-        if PLATFORM == "win":
-            tbb_path = pkg_resources.resource_filename(
-                "prophet",
-                f"stan_model/cmdstan-{self.CMDSTAN_VERSION}/stan/lib/stan_math/lib/tbb"
-            )
-            os.environ["PATH"] = ";".join(
-                list(OrderedDict.fromkeys([tbb_path] + os.environ.get("PATH", "").split(";")))
-            )
-
     def load_model(self):
         import cmdstanpy
-        self._add_tbb_to_path()
         model_file = pkg_resources.resource_filename(
             'prophet',
             'stan_model/prophet_model.bin',
@@ -102,6 +94,7 @@ class CmdStanPyBackend(IStanBackend):
             inits=stan_init,
             algorithm='Newton' if stan_data['T'] < 100 else 'LBFGS',
             iter=int(1e4),
+            output_dir = mkdtemp(),
         )
         args.update(kwargs)
 
