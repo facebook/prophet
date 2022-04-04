@@ -160,6 +160,253 @@ class ID(Indonesia):
     pass
 
 
+# ------------ Holidays in India---------------------
+class India(HolidayBase):
+    """
+    Implement public holidays in India
+    Reference:
+    https://en.wikipedia.org/wiki/Public_holidays_in_India
+    Please note:
+    India is a culturally diverse and fervent society, celebrate various
+    holidays and festivals. We only implement the holidays that **all states
+    and territories** celebrate.
+    """
+
+    def __init__(self, **kwargs):
+        self.country = "IN"
+        HolidayBase.__init__(self, **kwargs)
+
+    def _populate(self, year):
+        # --------------------------------
+        # Three national days
+        #     Republic Day
+        #     Independence Day
+        #     Gandhi Jayanti
+        # --------------------------------
+        # Republic Day
+        name = "Republic Day"
+        self[date(year, 1, 26)] = name
+
+        # Independence Day
+        name = "Independence Day"
+        self[date(year, 8, 15)] = name
+
+        # Gandhi Jayanti
+        name = "Gandhi Jayanti"
+        self[date(year, 10, 2)] = name
+        # --------------------------------
+        # Hindu holidays
+        #     Diwali
+        #     Holi
+        # --------------------------------
+
+        # Diwali, Holi
+        # http://www.theholidayspot.com/diwali/calendar.htm
+        # https://www.timeanddate.com/holidays/india/diwali?starty=
+        # https://www.infoplease.com/calendar-holidays/major-holidays/
+        # https://www.learnreligions.com/when-is-holi-1770208
+        warning_msg = "We only support Diwali and Holi holidays from 2010 to 2030"
+        warnings.warn(warning_msg, Warning)
+        name1 = "Diwali"
+        name2 = "Holi"
+        if year == 2010:
+            self[date(year, 12, 5)] = name1
+            self[date(year, 2, 28)] = name2
+        elif year == 2011:
+            self[date(year, 10, 26)] = name1
+            self[date(year, 3, 19)] = name2
+        elif year == 2012:
+            self[date(year, 11, 13)] = name1
+            self[date(year, 3, 8)] = name2
+        elif year == 2013:
+            self[date(year, 11, 3)] = name1
+            self[date(year, 3, 26)] = name2
+        elif year == 2014:
+            self[date(year, 10, 23)] = name1
+            self[date(year, 3, 17)] = name2
+        elif year == 2015:
+            self[date(year, 11, 11)] = name1
+            self[date(year, 3, 6)] = name2
+        elif year == 2016:
+            self[date(year, 10, 30)] = name1
+            self[date(year, 3, 24)] = name2
+        elif year == 2017:
+            self[date(year, 10, 19)] = name1
+            self[date(year, 3, 13)] = name2
+        elif year == 2018:
+            self[date(year, 11, 7)] = name1
+            self[date(year, 3, 2)] = name2
+        elif year == 2019:
+            self[date(year, 10, 27)] = name1
+            self[date(year, 3, 21)] = name2
+        elif year == 2020:
+            self[date(year, 11, 14)] = name1
+            self[date(year, 3, 9)] = name2
+        elif year == 2021:
+            self[date(year, 11, 4)] = name1
+            self[date(year, 3, 28)] = name2
+        elif year == 2022:
+            self[date(year, 10, 24)] = name1
+            self[date(year, 3, 18)] = name2
+        elif year == 2023:
+            self[date(year, 10, 12)] = name1
+            self[date(year, 3, 7)] = name2
+        elif year == 2024:
+            self[date(year, 11, 1)] = name1
+            self[date(year, 3, 25)] = name2
+        elif year == 2025:
+            self[date(year, 10, 21)] = name1
+            self[date(year, 3, 14)] = name2
+        elif year == 2026:
+            self[date(year, 11, 8)] = name1
+            self[date(year, 3, 3)] = name2
+        elif year == 2027:
+            self[date(year, 10, 29)] = name1
+            self[date(year, 3, 22)] = name2
+        elif year == 2028:
+            self[date(year, 10, 17)] = name1
+            self[date(year, 3, 11)] = name2
+        elif year == 2029:
+            self[date(year, 11, 5)] = name1
+            self[date(year, 2, 28)] = name2
+        elif year == 2030:
+            self[date(year, 10, 26)] = name1
+            self[date(year, 3, 19)] = name2
+        else:
+            pass
+
+        # --------------------------------
+        # Islamic holidays
+        #     Day of Ashura
+        #     Mawlid
+        #     Eid ul-Fitr
+        #     Eid al-Adha
+        # --------------------------------
+
+        # Day of Ashura
+        # 10th day of 1st Islamic month
+        name = "Day of Ashura"
+        for offset in range(-1, 2, 1):
+            islam_year = from_gregorian(year + offset, 10, 1)[0]
+            y, m, d = to_gregorian(islam_year, 1, 10)
+            if y == year:
+                self[date(y, m, d)] = name
+
+        # Mawlid, Birth of the Prophet
+        # 12th day of 3rd Islamic month
+        name = "Mawlid"
+        for offset in range(-1, 2, 1):
+            islam_year = from_gregorian(year + offset, 11, 20)[0]
+            y, m, d = to_gregorian(islam_year, 3, 12)
+            if y == year:
+                self[date(y, m, d)] = name
+
+        # Eid ul-Fitr
+        # 1st and 2nd day of 10th Islamic month
+        name = "Eid al-Fitr"
+        for offset in range(-1, 2, 1):
+            islam_year = from_gregorian(year + offset, 6, 15)[0]
+            y1, m1, d1 = to_gregorian(islam_year, 10, 1)
+            y2, m2, d2 = to_gregorian(islam_year, 10, 2)
+            if y1 == year:
+                self[date(y1, m1, d1)] = name
+            if y2 == year:
+                self[date(y2, m2, d2)] = name
+
+        # Eid al-Adha, i.e., Feast of the Sacrifice
+        name = "Feast of the Sacrifice"
+        for offset in range(-1, 2, 1):
+            islam_year = from_gregorian(year + offset, 8, 22)[0]
+            y, m, d = to_gregorian(islam_year, 12, 10)
+            if y == year:
+                self[date(y, m, d)] = name
+
+        # --------------------------------
+        # Christian holidays
+        #    New Year, Palm Sunday,
+        #    Maundy Thursday
+        #    Good Friday
+        #    Easter Sunday
+        #    Feast of Pentecost
+        #    Fest of St. Theresa of Calcutta
+        #    Feast of the Blessed Virgin
+        #    All Saints Day
+        #    All Souls Day
+        #    Christmas Day
+        #    Boxing Day
+        #    Feast of Holy Family
+        # --------------------------------
+        # New Year's Day
+        self[date(year, 1, 1)] = "New Year's Day"
+
+        # Palm Sunday
+        name = "Palm Sunday"
+        for offset in range(-1, 2, 1):
+            ds = easter(year + offset) - rd(days=7)
+            if ds.year == year:
+                self[ds] = name
+
+        # Maundy Thursday
+        name = "Maundy Thursday"
+        for offset in range(-1, 2, 1):
+            ds = easter(year + offset) - rd(days=3)
+            if ds.year == year:
+                self[ds] = name
+
+        # Good Friday
+        name = "Good Friday"
+        for offset in range(-1, 2, 1):
+            ds = easter(year + offset) - rd(days=2)
+            if ds.year == year:
+                self[ds] = name
+
+        # Easter Sunday
+        name = "Easter Sunday"
+        for offset in range(-1, 2, 1):
+            ds = easter(year + offset)
+            if ds.year == year:
+                self[ds] = name
+
+        # Feast of Pentecost
+        name = "Feast of Pentecost"
+        for offset in range(-1, 2, 1):
+            ds = easter(year + offset) + rd(days=49)
+            if ds.year == year:
+                self[ds] = name
+
+        # Fest of St. Theresa of Calcutta
+        name = "Fest of St. Theresa of Calcutta"
+        self[date(year, 9, 5)] = name
+
+        # Feast of the Blessed Virgin
+        name = "Feast of the Blessed Virgin"
+        self[date(year, 9, 8)] = name
+
+        # All Saints Day
+        name = "All Saints Day"
+        self[date(year, 11, 1)] = name
+
+        # All Souls Day
+        name = "All Souls Day"
+        self[date(year, 11, 2)] = name
+
+        # Christmas
+        name = "Christmas Day"
+        self[date(year, 12, 25)] = name
+
+        # Boxing Day
+        name = "Boxing Day"
+        self[date(year, 12, 26)] = name
+
+        # Feast of Holy Family
+        name = "Feast of Holy Family"
+        self[date(year, 12, 30)] = name
+
+
+class IN(India):
+    pass
+
+
 # ------------ Holidays in Thailand---------------------
 class Thailand(HolidayBase):
     """
