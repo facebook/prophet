@@ -78,13 +78,6 @@ $ CMDSTAN=/tmp/cmdstan-2.22.1 STAN_BACKEND=CMDSTANPY pip install prophet
 
 Note that the `CMDSTAN` variable is directly related to `cmdstanpy` module and can be omitted if your CmdStan binaries are in your `$PATH`.
 
-It is also possible to install Prophet with two backends:
-
-```bash
-# bash
-$ CMDSTAN=/tmp/cmdstan-2.22.1 STAN_BACKEND=PYSTAN,CMDSTANPY pip install prophet
-```
-
 After installation, you can [get started!](https://facebook.github.io/prophet/docs/quick_start.html#python-api)
 
 If you upgraded the version of PyStan installed on your system, you may need to reinstall prophet ([see here](https://github.com/facebook/prophet/issues/324)).

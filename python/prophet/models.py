@@ -227,70 +227,9 @@ class CmdStanPyBackend(IStanBackend):
         return output
 
 
-class PyStanBackend(IStanBackend):
-
-    @staticmethod
-    def get_type():
-        return StanBackendEnum.PYSTAN.name
-
-    def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
-
-        args = dict(
-            data=stan_data,
-            init=lambda: stan_init,
-            iter=samples,
-        )
-        args.update(kwargs)
-        self.stan_fit = self.model.sampling(**args)
-        out = {}
-        for par in self.stan_fit.model_pars:
-            out[par] = self.stan_fit[par]
-            # Shape vector parameters
-            if par in ['delta', 'beta'] and len(out[par].shape) < 2:
-                out[par] = out[par].reshape((-1, 1))
-        return out
-
-    def fit(self, stan_init, stan_data, **kwargs) -> dict:
-
-        args = dict(
-            data=stan_data,
-            init=lambda: stan_init,
-            algorithm='Newton' if stan_data['T'] < 100 else 'LBFGS',
-            iter=1e4,
-        )
-        args.update(kwargs)
-        try:
-            self.stan_fit = self.model.optimizing(**args)
-        except RuntimeError as e:
-            # Fall back on Newton
-            if self.newton_fallback and args['algorithm'] != 'Newton':
-                logger.warning(
-                    'Optimization terminated abnormally. Falling back to Newton.'
-                )
-                args['algorithm'] = 'Newton'
-                self.stan_fit = self.model.optimizing(**args)
-            else:
-                raise e
-
-        params = {}
-
-        for par in self.stan_fit.keys():
-            params[par] = self.stan_fit[par].reshape((1, -1))
-
-        return params
-
-    def load_model(self):
-        """Load compiled Stan model"""
-        model_file = pkg_resources.resource_filename(
-            'prophet',
-            'stan_model/prophet_model.pkl',
-        )
-        with Path(model_file).open('rb') as f:
-            return pickle.load(f)
 
 
 class StanBackendEnum(Enum):
-    PYSTAN = PyStanBackend
     CMDSTANPY = CmdStanPyBackend
 
     @staticmethod
