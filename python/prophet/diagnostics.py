@@ -10,6 +10,7 @@ import logging
 from tqdm.auto import tqdm
 from copy import deepcopy
 import concurrent.futures
+import tempfile
 
 import numpy as np
 import pandas as pd
@@ -233,7 +234,14 @@ def single_cutoff_forecast(df, model, cutoff, horizon, predict_columns):
             'Less than two datapoints before cutoff. '
             'Increase initial window.'
         )
-    m.fit(history_c, **model.fit_kwargs)
+
+    # create dedicated tmp directory to make sure 
+    # cmdstanpy works correctly in parallel execution
+    tmp_dir = tempfile.TemporaryDirectory()
+    fit_kwargs = model.fit_kwargs.copy()
+    fit_kwargs["output_dir"] = tmp_dir.name
+    
+    m.fit(history_c, **fit_kwargs)
     # Calculate yhat
     index_predicted = (df['ds'] > cutoff) & (df['ds'] <= cutoff + horizon)
     # Get the columns for the future dataframe
