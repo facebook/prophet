@@ -118,34 +118,17 @@ def build_cmdstan_model(target_dir):
         prune_cmdstan(cmdstan_dir)
 
 
-def build_pystan_model(target_dir):
-    """
-    Compile the stan model using pystan and pickle it. The pickle is copied to {target_dir}/prophet_model.pkl.
-    """
-    import pystan
-    import pickle
-
-    model_name = "prophet.stan"
-    target_name = "prophet_model.pkl"
-    with open(os.path.join(MODEL_DIR, model_name)) as f:
-        model_code = f.read()
-    sm = pystan.StanModel(model_code=model_code)
-    with open(os.path.join(target_dir, target_name), "wb") as f:
-        pickle.dump(sm, f, protocol=pickle.HIGHEST_PROTOCOL)
-
 
 def get_backends_from_env() -> List[str]:
     return os.environ.get("STAN_BACKEND", "CMDSTANPY").split(",")
 
 
 def build_models(target_dir):
-    for backend in get_backends_from_env():
-        print(f"Compiling {backend} model")
-        if backend == "CMDSTANPY":
-            build_cmdstan_model(target_dir)
-        elif backend == "PYSTAN" and PLATFORM != "win":
-            build_pystan_model(target_dir)
+    print(f"Compiling cmdstanpy model")
+    build_cmdstan_model(target_dir)
 
+    if 'PYSTAN' in get_backends_from_env():
+        raise ValueError("PyStan backend is not supported for Prophet >= 1.1")
 
 class BuildPyCommand(build_py):
     """Custom build command to pre-compile Stan models."""
