@@ -52,7 +52,3 @@ src/prophet.so
 src/prophet.dll
 src/init.o
 
-# Development
-.Rprofile
-renv.lock
-renv/

@@ -14,6 +14,7 @@ from datetime import timedelta, datetime
 import numpy as np
 import pandas as pd
 
+from prophet.make_holidays import get_holiday_names, make_holidays_df
 from prophet.models import StanBackendEnum
 from prophet.plot import (plot, plot_components)
 
@@ -26,8 +27,8 @@ class Prophet(object):
 
     Parameters
     ----------
-    growth: String 'linear', 'logistic' or 'flat' to specify a linear, logistic or
-        flat trend.
+    growth: String 'linear' or 'logistic' to specify a linear or logistic
+        trend.
     changepoints: List of dates at which to include potential changepoints. If
         not specified, potential changepoints are selected automatically.
     n_changepoints: Number of potential changepoints to include. Not used
@@ -533,17 +534,17 @@ class Prophet(object):
         prior_scales = {}
         # Makes an index so we can perform `get_loc` below.
         # Strip to just dates.
-        row_index = pd.DatetimeIndex(dates.dt.date)
+        row_index = pd.DatetimeIndex(dates.apply(lambda x: x.date()))
 
-        for row in holidays.itertuples():
+        for _ix, row in holidays.iterrows():
             dt = row.ds.date()
             try:
-                lw = int(getattr(row, 'lower_window', 0))
-                uw = int(getattr(row, 'upper_window', 0))
+                lw = int(row.get('lower_window', 0))
+                uw = int(row.get('upper_window', 0))
             except ValueError:
                 lw = 0
                 uw = 0
-            ps = float(getattr(row, 'prior_scale', self.holidays_prior_scale))
+            ps = float(row.get('prior_scale', self.holidays_prior_scale))
             if np.isnan(ps):
                 ps = float(self.holidays_prior_scale)
             if row.holiday in prior_scales and prior_scales[row.holiday] != ps:
@@ -1576,7 +1577,7 @@ class Prophet(object):
         return pd.DataFrame({'ds': dates})
 
     def plot(self, fcst, ax=None, uncertainty=True, plot_cap=True,
-             xlabel='ds', ylabel='y', figsize=(10, 6), include_legend=False):
+             xlabel='ds', ylabel='y', figsize=(10, 6)):
         """Plot the Prophet forecast.
 
         Parameters
@@ -1589,7 +1590,6 @@ class Prophet(object):
         xlabel: Optional label name on X-axis
         ylabel: Optional label name on Y-axis
         figsize: Optional tuple width, height in inches.
-        include_legend: Optional boolean to add legend to the plot.
 
         Returns
         -------
@@ -1598,7 +1598,7 @@ class Prophet(object):
         return plot(
             m=self, fcst=fcst, ax=ax, uncertainty=uncertainty,
             plot_cap=plot_cap, xlabel=xlabel, ylabel=ylabel,
-            figsize=figsize, include_legend=include_legend
+            figsize=figsize
         )
 
     def plot_components(self, fcst, uncertainty=True, plot_cap=True,

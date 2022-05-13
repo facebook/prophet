@@ -125,10 +125,11 @@ test_that("logistic_floor", {
   future1 <- future
   future1$cap <- 80.
   future1$floor <- 10.
-  m <- fit.prophet(m, history)
+  m <- fit.prophet(m, history, algorithm = 'Newton')
   expect_true(m$logistic.floor)
   expect_true('floor' %in% colnames(m$history))
   expect_equal(m$history$y_scaled[1], 1., tolerance = 1e-6)
+  expect_equal(m$fit.kwargs, list(algorithm = 'Newton'))
   fcst1 <- predict(m, future1)
 
   m2 <- prophet(growth = 'logistic')
@@ -138,7 +139,7 @@ test_that("logistic_floor", {
   history2$cap <- history2$cap + 10.
   future1$cap <- future1$cap + 10.
   future1$floor <- future1$floor + 10.
-  m2 <- fit.prophet(m2, history2)
+  m2 <- fit.prophet(m2, history2, algorithm = 'Newton')
   expect_equal(m2$history$y_scaled[1], 1., tolerance = 1e-6)
 })
 

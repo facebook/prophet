@@ -6,22 +6,17 @@
 
 from __future__ import absolute_import, division, print_function
 from abc import abstractmethod, ABC
-from tempfile import mkdtemp
 from typing import Tuple
 from collections import OrderedDict
 from enum import Enum
 from pathlib import Path
-import os
 import pickle
 import pkg_resources
-import platform
+import os
 
 import logging
 logger = logging.getLogger('prophet.models')
 
-PLATFORM = "unix"
-if platform.platform().startswith("Win"):
-    PLATFORM = "win"
 
 class IStanBackend(ABC):
     def __init__(self):
@@ -58,22 +53,29 @@ class IStanBackend(ABC):
     def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
         pass
 
+    @staticmethod
+    @abstractmethod
+    def build_model(target_dir, model_dir):
+        pass
+
 
 class CmdStanPyBackend(IStanBackend):
-    CMDSTAN_VERSION = "2.26.1"
-    def __init__(self):
-        import cmdstanpy
-        # this must be set before super.__init__() for load_model to work on Windows
-        local_cmdstan = pkg_resources.resource_filename(
-            "prophet", f"stan_model/cmdstan-{self.CMDSTAN_VERSION}"
-        )
-        if Path(local_cmdstan).exists():
-            cmdstanpy.set_cmdstan_path(local_cmdstan)
-        super().__init__()
 
     @staticmethod
     def get_type():
         return StanBackendEnum.CMDSTANPY.name
+
+    @staticmethod
+    def build_model(target_dir, model_dir):
+        from shutil import copy
+        import cmdstanpy
+        model_name = 'prophet.stan'
+        target_name = 'prophet_model.bin'
+
+        sm = cmdstanpy.CmdStanModel(
+            stan_file=os.path.join(model_dir, model_name))
+        sm.compile()
+        copy(sm.exe_file, os.path.join(target_dir, target_name))
 
     def load_model(self):
         import cmdstanpy
@@ -85,29 +87,25 @@ class CmdStanPyBackend(IStanBackend):
 
     def fit(self, stan_init, stan_data, **kwargs):
         (stan_init, stan_data) = self.prepare_data(stan_init, stan_data)
-
-        if 'inits' not in kwargs and 'init' in kwargs:
-            kwargs['inits'] = self.prepare_data(kwargs['init'], stan_data)[0]
-
-        args = dict(
-            data=stan_data,
-            inits=stan_init,
-            algorithm='Newton' if stan_data['T'] < 100 else 'LBFGS',
-            iter=int(1e4),
-            output_dir = mkdtemp(),
-        )
-        args.update(kwargs)
-
+        if 'algorithm' not in kwargs:
+            kwargs['algorithm'] = 'Newton' if stan_data['T'] < 100 else 'LBFGS'
+        iterations = int(1e4)
         try:
-            self.stan_fit = self.model.optimize(**args)
+            self.stan_fit = self.model.optimize(data=stan_data,
+                                                inits=stan_init,
+                                                iter=iterations,
+                                                **kwargs)
         except RuntimeError as e:
             # Fall back on Newton
-            if self.newton_fallback and args['algorithm'] != 'Newton':
+            if self.newton_fallback and kwargs['algorithm'] != 'Newton':
                 logger.warning(
                     'Optimization terminated abnormally. Falling back to Newton.'
                 )
-                args['algorithm'] = 'Newton'
-                self.stan_fit = self.model.optimize(**args)
+                kwargs['algorithm'] = 'Newton'
+                self.stan_fit = self.model.optimize(data=stan_data,
+                                                    inits=stan_init,
+                                                    iter=iterations,
+                                                    **kwargs)
             else:
                 raise e
 
@@ -120,24 +118,16 @@ class CmdStanPyBackend(IStanBackend):
     def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
         (stan_init, stan_data) = self.prepare_data(stan_init, stan_data)
 
-        if 'inits' not in kwargs and 'init' in kwargs:
-            kwargs['inits'] = self.prepare_data(kwargs['init'], stan_data)[0]
-
-        args = dict(
-            data=stan_data,
-            inits=stan_init,
-        )
-
         if 'chains' not in kwargs:
             kwargs['chains'] = 4
         iter_half = samples // 2
-        kwargs['iter_sampling'] = iter_half
         if 'iter_warmup' not in kwargs:
             kwargs['iter_warmup'] = iter_half
 
-        args.update(kwargs)
-
-        self.stan_fit = self.model.sample(**args)
+        self.stan_fit = self.model.sample(data=stan_data,
+                                          inits=stan_init,
+                                          iter_sampling=iter_half,
+                                          **kwargs)
         res = self.stan_fit.draws()
         (samples, c, columns) = res.shape
         res = res.reshape((samples * c, columns))
@@ -176,7 +166,7 @@ class CmdStanPyBackend(IStanBackend):
             'm': init['m'],
             'delta': init['delta'].tolist(),
             'beta': init['beta'].tolist(),
-            'sigma_obs': init['sigma_obs']
+            'sigma_obs': 1
         }
         return (cmdstanpy_init, cmdstanpy_data)
 
@@ -227,9 +217,81 @@ class CmdStanPyBackend(IStanBackend):
         return output
 
 
+class PyStanBackend(IStanBackend):
+
+    @staticmethod
+    def get_type():
+        return StanBackendEnum.PYSTAN.name
+
+    @staticmethod
+    def build_model(target_dir, model_dir):
+        import pystan
+        model_name = 'prophet.stan'
+        target_name = 'prophet_model.pkl'
+        with open(os.path.join(model_dir, model_name)) as f:
+            model_code = f.read()
+        sm = pystan.StanModel(model_code=model_code)
+        with open(os.path.join(target_dir, target_name), 'wb') as f:
+            pickle.dump(sm, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
+
+        args = dict(
+            data=stan_data,
+            init=lambda: stan_init,
+            iter=samples,
+        )
+        args.update(kwargs)
+        self.stan_fit = self.model.sampling(**args)
+        out = {}
+        for par in self.stan_fit.model_pars:
+            out[par] = self.stan_fit[par]
+            # Shape vector parameters
+            if par in ['delta', 'beta'] and len(out[par].shape) < 2:
+                out[par] = out[par].reshape((-1, 1))
+        return out
+
+    def fit(self, stan_init, stan_data, **kwargs) -> dict:
+
+        args = dict(
+            data=stan_data,
+            init=lambda: stan_init,
+            algorithm='Newton' if stan_data['T'] < 100 else 'LBFGS',
+            iter=1e4,
+        )
+        args.update(kwargs)
+        try:
+            self.stan_fit = self.model.optimizing(**args)
+        except RuntimeError as e:
+            # Fall back on Newton
+            if self.newton_fallback and args['algorithm'] != 'Newton':
+                logger.warning(
+                    'Optimization terminated abnormally. Falling back to Newton.'
+                )
+                args['algorithm'] = 'Newton'
+                self.stan_fit = self.model.optimizing(**args)
+            else:
+                raise e
+
+        params = {}
+
+        for par in self.stan_fit.keys():
+            params[par] = self.stan_fit[par].reshape((1, -1))
+
+        return params
+
+    def load_model(self):
+        """Load compiled Stan model"""
+        model_file = pkg_resources.resource_filename(
+            'prophet',
+            'stan_model/prophet_model.pkl',
+        )
+        with Path(model_file).open('rb') as f:
+            return pickle.load(f)
 
 
 class StanBackendEnum(Enum):
+    PYSTAN = PyStanBackend
     CMDSTANPY = CmdStanPyBackend
 
     @staticmethod
