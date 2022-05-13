@@ -14,7 +14,6 @@ from datetime import timedelta, datetime
 import numpy as np
 import pandas as pd
 
-from prophet.make_holidays import get_holiday_names, make_holidays_df
 from prophet.models import StanBackendEnum
 from prophet.plot import (plot, plot_components)
 
