@@ -101,7 +101,7 @@ Since Pystan2 is no longer being maintained, the python package will move to dep
 ```bash
 git clone https://github.com/facebook/prophet.git
 cd prophet/python
-python -m install -r requirements.txt
+python -m pip install -r requirements.txt
 python setup.py develop
 ```
 
