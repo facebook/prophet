@@ -6,6 +6,7 @@
 
 from __future__ import absolute_import, division, print_function
 from abc import abstractmethod, ABC
+from tempfile import mkdtemp
 from typing import Tuple
 from collections import OrderedDict
 from enum import Enum
@@ -61,30 +62,21 @@ class IStanBackend(ABC):
 class CmdStanPyBackend(IStanBackend):
     CMDSTAN_VERSION = "2.26.1"
     def __init__(self):
-        super().__init__()
         import cmdstanpy
-        cmdstanpy.set_cmdstan_path(
-            pkg_resources.resource_filename("prophet", f"stan_model/cmdstan-{self.CMDSTAN_VERSION}")
+        # this must be set before super.__init__() for load_model to work on Windows
+        local_cmdstan = pkg_resources.resource_filename(
+            "prophet", f"stan_model/cmdstan-{self.CMDSTAN_VERSION}"
         )
+        if Path(local_cmdstan).exists():
+            cmdstanpy.set_cmdstan_path(local_cmdstan)
+        super().__init__()
 
     @staticmethod
     def get_type():
         return StanBackendEnum.CMDSTANPY.name
 
-    def _add_tbb_to_path(self):
-        """Add the TBB library to $PATH on Windows only. Required for loading model binaries."""
-        if PLATFORM == "win":
-            tbb_path = pkg_resources.resource_filename(
-                "prophet",
-                f"stan_model/cmdstan-{self.CMDSTAN_VERSION}/stan/lib/stan_math/lib/tbb"
-            )
-            os.environ["PATH"] = ";".join(
-                list(OrderedDict.fromkeys([tbb_path] + os.environ.get("PATH", "").split(";")))
-            )
-
     def load_model(self):
         import cmdstanpy
-        self._add_tbb_to_path()
         model_file = pkg_resources.resource_filename(
             'prophet',
             'stan_model/prophet_model.bin',
@@ -102,6 +94,7 @@ class CmdStanPyBackend(IStanBackend):
             inits=stan_init,
             algorithm='Newton' if stan_data['T'] < 100 else 'LBFGS',
             iter=int(1e4),
+            output_dir = mkdtemp(),
         )
         args.update(kwargs)
 
@@ -234,70 +227,9 @@ class CmdStanPyBackend(IStanBackend):
         return output
 
 
-class PyStanBackend(IStanBackend):
-
-    @staticmethod
-    def get_type():
-        return StanBackendEnum.PYSTAN.name
-
-    def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
-
-        args = dict(
-            data=stan_data,
-            init=lambda: stan_init,
-            iter=samples,
-        )
-        args.update(kwargs)
-        self.stan_fit = self.model.sampling(**args)
-        out = {}
-        for par in self.stan_fit.model_pars:
-            out[par] = self.stan_fit[par]
-            # Shape vector parameters
-            if par in ['delta', 'beta'] and len(out[par].shape) < 2:
-                out[par] = out[par].reshape((-1, 1))
-        return out
-
-    def fit(self, stan_init, stan_data, **kwargs) -> dict:
-
-        args = dict(
-            data=stan_data,
-            init=lambda: stan_init,
-            algorithm='Newton' if stan_data['T'] < 100 else 'LBFGS',
-            iter=1e4,
-        )
-        args.update(kwargs)
-        try:
-            self.stan_fit = self.model.optimizing(**args)
-        except RuntimeError as e:
-            # Fall back on Newton
-            if self.newton_fallback and args['algorithm'] != 'Newton':
-                logger.warning(
-                    'Optimization terminated abnormally. Falling back to Newton.'
-                )
-                args['algorithm'] = 'Newton'
-                self.stan_fit = self.model.optimizing(**args)
-            else:
-                raise e
-
-        params = {}
-
-        for par in self.stan_fit.keys():
-            params[par] = self.stan_fit[par].reshape((1, -1))
-
-        return params
-
-    def load_model(self):
-        """Load compiled Stan model"""
-        model_file = pkg_resources.resource_filename(
-            'prophet',
-            'stan_model/prophet_model.pkl',
-        )
-        with Path(model_file).open('rb') as f:
-            return pickle.load(f)
 
 
 class StanBackendEnum(Enum):
-    PYSTAN = PyStanBackend
     CMDSTANPY = CmdStanPyBackend
 
     @staticmethod

@@ -1,5 +1,4 @@
-include stan/unix/*.stan
-include stan/win/*.stan
+include stan/*.stan
 include LICENSE
 include requirements.txt
 
