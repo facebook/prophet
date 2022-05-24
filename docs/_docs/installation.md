@@ -4,10 +4,10 @@ docid: "installation"
 title: "Installation"
 permalink: /docs/installation.html
 subsections:
-    - id: r
-      title: Using R
-    - id: python
-      title: Using Python
+  - id: r
+    title: Using R
+  - id: python
+    title: Using Python
 ---
 
 Prophet has two implementations: [R](#installation-in-r) and [Python](#installation-in-python).
