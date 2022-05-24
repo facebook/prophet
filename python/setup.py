@@ -228,6 +228,9 @@ setup(
     version="1.1",
     description="Automatic Forecasting Procedure",
     url="https://facebook.github.io/prophet/",
+    project_urls={
+        "Source": "https://github.com/facebook/prophet",
+    },
     author="Sean J. Taylor <sjtz@pm.me>, Ben Letham <bletham@fb.com>",
     author_email="sjtz@pm.me",
     license="MIT",
