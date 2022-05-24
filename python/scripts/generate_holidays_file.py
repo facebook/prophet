@@ -66,6 +66,10 @@ def generate_holidays_file():
 
     # Convert to ASCII, and drop holidays that fail to convert
     generated_holidays['holiday'] = generated_holidays['holiday'].apply(utf8_to_ascii)
+    failed_countries = generated_holidays.loc[generated_holidays['holiday'] == 'FAILED_TO_PARSE', 'country'].unique()
+    if failed_countries:
+        print("Failed to convert UTF-8 holidays for:")
+        print('\n'.join(failed_countries))
     assert 'FAILED_TO_PARSE' not in generated_holidays['holiday'].unique()
     generated_holidays.to_csv("../R/data-raw/generated_holidays.csv", index=False)
 
