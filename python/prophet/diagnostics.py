@@ -114,7 +114,10 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
     -------
     A pd.DataFrame with the forecast, actual value and cutoff.
     """
-
+    
+    if model.history is None:
+        raise Exception('Model has not been fit. Fitting the model provides contextual parameters for cross validation.')
+    
     df = model.history.copy().reset_index(drop=True)
     horizon = pd.Timedelta(horizon)
 
