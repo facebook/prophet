@@ -18,18 +18,17 @@ Full documentation and examples available at the homepage: https://facebook.gith
 - Rob Hyndman's [forecast package](http://robjhyndman.com/software/forecast/)
 - [Statsmodels](http://statsmodels.sourceforge.net/)
 
-## Installation
+## Installation - PyPI release
 
-```shell
-pip install prophet
-```
-Note:  Installation requires PyStan, which has its [own installation instructions](http://pystan.readthedocs.io/en/latest/installation_beginner.html).
-On Windows, PyStan requires a compiler so you'll need to [follow the instructions](http://pystan.readthedocs.io/en/latest/windows.html).
- The key step is installing a recent [C++ compiler](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+See [Installation in Python - PyPI release](https://github.com/facebook/prophet#installation-in-python---pypi-release)
 
-## Installation using Docker and docker-compose (via Makefile)
+## Installation - Development version
 
-Simply type `make build` and if everything is fine you should be able to `make shell` or alternative jump directly to `make py-shell`. 
+See [Installation in Python - Development version](https://github.com/facebook/prophet#installation-in-python---development-version)
+
+### Installation using Docker and docker-compose (via Makefile)
+
+Simply type `make build` and if everything is fine you should be able to `make shell` or alternative jump directly to `make py-shell`.
 
 To run the tests, inside the container `cd python/prophet` and then `python -m unittest`
 
@@ -41,4 +40,4 @@ To run the tests, inside the container `cd python/prophet` and then `python -m u
   >>> m.fit(df)  # df is a pandas.DataFrame with 'y' and 'ds' columns
   >>> future = m.make_future_dataframe(periods=365)
   >>> m.predict(future)
-  ```
+```

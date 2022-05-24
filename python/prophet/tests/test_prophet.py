@@ -125,7 +125,7 @@ class TestProphet(TestCase):
         train1 = DATA.head(N // 2).copy()
         train2 = DATA.head(N // 2).copy()
         train2['y'] += 10
-        train = train1.append(train2)
+        train = pd.concat([train1, train2])
         future = pd.DataFrame({'ds': DATA['ds'].tail(N // 2)})
         forecaster = Prophet()
         forecaster.fit(train)
