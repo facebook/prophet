@@ -794,6 +794,67 @@ class PK(Pakistan):
     pass
 
 
+# ------------ Holidays in Russia---------------------
+class Russia(HolidayBase):
+    """
+    Implement public holidays in Russia
+    Reference:
+    https://en.wikipedia.org/wiki/Public_holidays_in_Russia
+    Please note:
+    Orthodox Christmas Day is official day off at Russia
+    But the Dec. 25 Christmas is also celebrated.
+    """
+
+    def __init__(self, **kwargs):
+        self.country = "RU"
+        HolidayBase.__init__(self, **kwargs)
+
+    def _populate(self, year):
+        # New Year's Day
+        name = "New Year's Day"
+        self[date(year, 1, 1)] = name
+
+        # Orthodox Christmas day
+        name = "Orthodox Christmas Day"
+        self[date(year, 1, 7)] = name
+
+        # Dec. 25 Christmas Day
+        name = "Christmas Day"
+        self[date(year, 12, 25)] = name
+
+        # Defender of the Fatherland Day
+        name = "Defender of the Fatherland Day"
+        self[date(year, 2, 23)] = name
+
+        # International Women's Day
+        name = "International Women's Day"
+        self[date(year, 3, 8)] = name
+
+        # National Flag Day
+        name = "National Flag Day"
+        self[date(year, 8, 22)] = name
+
+        # Spring and Labour Day
+        name = "Spring and Labour Day"
+        self[date(year, 5, 1)] = name
+
+        # Victory Day
+        name = "Victory Day"
+        self[date(year, 5, 9)] = name
+
+        # Russia Day
+        name = "Russia Day"
+        self[date(year, 6, 12)] = name
+
+        # Unity Day
+        name = "Unity Day"
+        self[date(year, 11, 4)] = name
+
+
+class RU(Russia):
+    pass
+
+
 # ------------ Holidays in Belarus---------------------
 class Belarus(HolidayBase):
     """
@@ -850,4 +911,90 @@ class Belarus(HolidayBase):
 
 
 class BY(Belarus):
+    pass
+
+
+# ------------ Holidays in Georgia---------------------
+class Georgia(HolidayBase):
+    """
+    Implement public holidays in Georgia
+    Reference:
+    https://en.wikipedia.org/wiki/Public_holidays_in_Georgia_(country)
+    """
+
+    def __init__(self, **kwargs):
+        self.country = "GE"
+        HolidayBase.__init__(self, **kwargs)
+
+    def _populate(self, year):
+        # New Year's Day
+        name = "New Year's Day"
+        self[date(year, 1, 1)] = name
+
+        # New Year's Day
+        name = "Second day of the New Year"
+        self[date(year, 1, 2)] = name
+
+        # Christmas Day (Orthodox)
+        name = "Orthodox Christmas"
+        self[date(year, 1, 7)] = name
+
+        # Baptism Day of our Lord Jesus Christ
+        name = "Baptism Day of our Lord Jesus Christ"
+        self[date(year, 1, 19)] = name
+
+        # Mother's Day
+        name = "Mother's Day"
+        self[date(year, 3, 3)] = name
+
+        # Women's Day
+        name = "International Women's Day"
+        self[date(year, 3, 8)] = name
+
+        # Orthodox Good Friday
+        name = "Good Friday"
+        self[easter(year, EASTER_ORTHODOX) - timedelta(days=2)] = name
+
+        # Orthodox Holy Saturday
+        name = "Great Saturday"
+        self[easter(year, EASTER_ORTHODOX) - timedelta(days=1)] = name
+
+        # 	Orthodox Easter Sunday
+        name = "Easter Sunday"
+        self[easter(year, EASTER_ORTHODOX)] = name
+
+        # Orthodox Easter Monday
+        name = "Easter Monday"
+        self[easter(year, EASTER_ORTHODOX) + timedelta(days=1)] = name
+
+        # National Unity Day
+        name = "National Unity Day"
+        self[date(year, 4, 9)] = name
+
+        # Day of Victory
+        name = "Victory Day"
+        self[date(year, 5, 9)] = name
+
+        # Saint Andrew the First-Called Day
+        name = "Saint Andrew the First-Called Day"
+        self[date(year, 5, 12)] = name
+
+        # Independence Day
+        name = "Independence Day"
+        self[date(year, 5, 26)] = name
+
+        # Saint Mary's Day
+        name = "Saint Mary's Day"
+        self[date(year, 8, 28)] = name
+
+        # Day of Svetitskhoveli Cathedral
+        name = "Day of Svetitskhoveli Cathedral"
+        self[date(year, 10, 14)] = name
+
+        # Saint George's Day
+        name = "Saint George's Day"
+        self[date(year, 12, 23)] = name
+
+
+class GE(Georgia):
     pass

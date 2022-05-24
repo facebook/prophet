@@ -4,7 +4,10 @@
 # LICENSE file in the root directory of this source tree.
 
 
-#' holidays table
+#' Generated table of holiday dates at the country level from 1995 to 2045
 #'
-#' @format A data frame with five variables: ds, holiday, country, year
+#' The data is primarily based on the Python package [holidays](https://pypi.org/project/holidays/)
+#'
+#' @format A data frame with four variables: ds, holiday, country, year
+#' @source \url{https://github.com/facebook/prophet/blob/main/python/scripts/generate_holidays_file.py}
 "generated_holidays"
