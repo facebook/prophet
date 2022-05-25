@@ -36,14 +36,13 @@ In Python, models should not be saved with pickle; the Stan backend attached to 
 
 ```python
 # Python
-import json
 from prophet.serialize import model_to_json, model_from_json
 
 with open('serialized_model.json', 'w') as fout:
-    json.dump(model_to_json(m), fout)  # Save model
+    fout.write(model_to_json(m))  # Save model
 
 with open('serialized_model.json', 'r') as fin:
-    m = model_from_json(json.load(fin))  # Load model
+    m = model_from_json(fin.read())  # Load model
 ```
 The json file will be portable across systems, and deserialization is backwards compatible with older versions of prophet.
 
