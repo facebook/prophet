@@ -1181,14 +1181,18 @@ class Prophet(object):
 
         return self
 
-    def predict(self, df=None, periods=None):
+    def predict(self, df=None, periods=None, freq=None, include_history=False):
         """Predict using the prophet model.
 
         Parameters
         ----------
         df: pd.DataFrame with dates for predictions (column ds), and capacity
             (column cap) if logistic growth. If not provided, predictions are
-            made on the history.
+            made on the history unless `periods` is passed.
+        periods: int number of periods to forecast forward.
+        freq: Any valid frequency for pd.date_range, such as 'D' or 'M'. Passing `None` will attempt to infer freq.
+        include_history: Boolean to include the historical dates in the data
+            frame for predictions.
 
         Returns
         -------
@@ -1199,7 +1203,13 @@ class Prophet(object):
 
         if df is None:
             if periods is not None:
-                df = self.make_future_dataframe(periods=int(periods))
+                df = self.setup_dataframe(
+                    self.make_future_dataframe(
+                        periods=int(periods),
+                        freq=freq,
+                        include_history=include_history,
+                    )
+                )
             else:
                 df = self.history.copy()
         else:
@@ -1208,24 +1218,40 @@ class Prophet(object):
             df = self.setup_dataframe(df.copy())
 
         df['trend'] = self.predict_trend(df)
-        seasonal_components = self.predict_seasonal_components(df)
-        if self.uncertainty_samples:
-            intervals = self.predict_uncertainty(df)
-        else:
-            intervals = None
 
-        # Drop columns except ds, cap, floor, and trend
-        cols = ['ds', 'trend']
+        # 'floor' col is required even if not using logistic, for sample_model with mcmc
+        extra_cols = ['t']
+        cols = ['ds', 'trend', 't', 'floor']
         if 'cap' in df:
             cols.append('cap')
-        if self.logistic_floor:
-            cols.append('floor')
+        if not self.logistic_floor:
+            extra_cols.append('floor')
+
         # Add in forecast components
-        df2 = pd.concat((df[cols], intervals, seasonal_components), axis=1)
-        df2['yhat'] = (
-                df2['trend'] * (1 + df2['multiplicative_terms'])
-                + df2['additive_terms']
+        df2 = pd.concat(
+            (df[cols], self.predict_seasonal_components(df)),
+            axis=1
         )
+        df2['yhat'] = (
+                df2['trend'] * (1 + df2['multiplicative_terms'])  # noqa
+                + df2['additive_terms']  # noqa
+        )
+        # some shenanigans are required to get column order same as previous versions
+        # uncertainty after yhat creation is required for vectorized version
+        if self.uncertainty_samples:
+            df2 = pd.concat(
+                [
+                    df2[['ds', 'trend']],
+                    self.predict_uncertainty(df2),
+                    df2[df2.columns.difference(['ds', 'trend'])]
+                ],
+                axis=1
+            )
+        # move yhat to end and remove extraneous columns
+        df2 = df2.drop(columns=extra_cols, errors='ignore')
+        reordered_cols = df2.columns[df2.columns != 'yhat'].union(['yhat'])
+        df2 = df2.reindex(columns=reordered_cols)
+
         return df2
 
     @staticmethod
@@ -1244,15 +1270,9 @@ class Prophet(object):
         -------
         Vector y(t).
         """
-        # Intercept changes
-        gammas = -changepoint_ts * deltas
-        # Get cumulative slope and intercept at each t
-        k_t = k * np.ones_like(t)
-        m_t = m * np.ones_like(t)
-        for s, t_s in enumerate(changepoint_ts):
-            indx = t >= t_s
-            k_t[indx] += deltas[s]
-            m_t[indx] += gammas[s]
+        indx = (changepoint_ts[None, :] <= t[..., None]) * deltas
+        k_t = indx.sum(axis=1) + k
+        m_t = (indx * -changepoint_ts).sum(axis=1) + m
         return k_t * t + m_t
 
     @staticmethod
@@ -1448,6 +1468,7 @@ class Prophet(object):
         -------
         Dataframe with uncertainty intervals.
         """
+        # use vectorization only if mcmc_sampling is not used
         if self.mcmc_samples > 0:
             sim_values = self.sample_posterior_predictive(df)
 
@@ -1466,21 +1487,24 @@ class Prophet(object):
             full_samples = sample_trends + historical_variance
             # get quantiles and scale back (prophet scales the data before fitting, so sigma and deltas are scaled)
             width_split = (1.0 - self.interval_width) / 2
-            quantiles = np.array([width_split, 1 - width_split]) * 100  # get quantiles from width
-            quantiles = np.percentile(full_samples, quantiles, axis=0)
+            qnts = np.array([width_split, 1 - width_split]) * 100  # get quantiles from width
             # Prophet scales all the data before fitting and predicting, y_scale re-scales it to original values
-            quantiles = quantiles * self.y_scale
+            quantiles = np.percentile(full_samples, qnts, axis=0) * self.y_scale
+            trend_qnts = np.percentile(sample_trends, qnts, axis=0) * self.y_scale
 
-            df["yhat_lower"] = df.yhat + quantiles[0]
-            df["yhat_upper"] = df.yhat + quantiles[1]
-            return df[["yhat_upper", "yhat_lower"]]
+            return pd.DataFrame({
+                'yhat_lower': df.yhat + quantiles[0],
+                "yhat_upper": df.yhat + quantiles[1],
+                'trend_lower': df.trend + trend_qnts[0],
+                'trend_upper': df.trend + trend_qnts[0],
+            })
 
     def _posterior_predictive(self, df):
-        k = self.uncertainty_samples
+        k = int(self.uncertainty_samples)
 
         # handle only historic data
         if df['t'].max() <= 1:
-            sample_trends = np.zeros(k, len(df))
+            sample_trends = np.zeros((k, len(df)))
         else:
             future_df = df[df['t'] > 1]
             # below calculates 't' if unavailable
@@ -1497,22 +1521,24 @@ class Prophet(object):
             elif self.growth == "logistic":
                 mat = self._make_trend_shift_matrix(mean_delta, change_likelihood, n_length, k=k)
                 cap_scaled = (future_df["cap"] / self.y_scale).values
-                sample_trends = self._logistic_uncertainty(mat, deltas, self, cap_scaled, future_df['t'])
+                sample_trends = self._logistic_uncertainty(
+                    mat, deltas, cap_scaled, future_df['t'].to_numpy(), k=k, n_length=n_length
+                )
             elif self.growth == "flat":
-                sample_trends = np.zeros(k, n_length)
+                sample_trends = np.zeros((k, n_length))
             else:
                 raise NotImplementedError
             # handle past included in dataframe
             if df['t'].min() <= 1:
-                past_trend = np.zeros(k, (np.sum(df['t'] <= 1), n_length))
-                sample_trends = np.concatenate([past_trend, sample_trends], axis=0)
+                past_trend = np.zeros((k, np.sum(df['t'] <= 1)))
+                sample_trends = np.concatenate([past_trend, sample_trends], axis=1)
 
         # add gaussian noise based on historical levels
         sigma = self.params["sigma_obs"][0]
         historical_variance = np.random.normal(scale=sigma, size=sample_trends.shape)
         return sample_trends, historical_variance
 
-    @classmethod
+    @staticmethod
     def _make_historical_mat_time(deltas, changepoints_t, t_time, n_row=1):
         """
         Creates a matrix of slope-deltas where these changes occured in training data according to the trained prophet obj
@@ -1527,13 +1553,14 @@ class Prophet(object):
         prev_deltas = np.repeat(prev_deltas.reshape(1, -1), n_row, axis=0)
         return prev_deltas, prev_time
 
-    @classmethod
     def _logistic_uncertainty(
             self,
             mat: np.ndarray,
             deltas: np.ndarray,
             cap_scaled: np.ndarray,
             t_time: np.ndarray,
+            k,
+            n_length,
     ):
         """
         Vectorizes prophet's logistic growth uncertainty by creating a matrix of future possible trends.
@@ -1545,9 +1572,7 @@ class Prophet(object):
             np.maximum.accumulate(idx, axis=1, out=idx)
             return arr[np.arange(idx.shape[0])[:, None], idx]
 
-        k = self.params["k"][0]
         m = self.params["m"][0]
-        n_length = len(t_time)
         #  for logistic growth we need to evaluate the trend all the way from the start of the train item
         historical_mat, historical_time = self._make_historical_mat_time(deltas, self.changepoints_t, t_time, len(mat))
         mat = np.concatenate([historical_mat, mat], axis=1)
@@ -1570,9 +1595,9 @@ class Prophet(object):
         sample_trends = sample_trends - sample_trends.mean(axis=0)
         return sample_trends
 
-    @classmethod
+    @staticmethod
     def _make_trend_shift_matrix(
-            self, mean_delta: float, likelihood: float, future_length: float, k: int = 10000
+            mean_delta: float, likelihood: float, future_length: float, k: int = 10000
     ) -> np.ndarray:
         """
         Creates a matrix of random trend shifts based on historical likelihood and size of shifts.
@@ -1698,6 +1723,12 @@ class Prophet(object):
         """
         if self.history_dates is None:
             raise Exception('Model has not been fit.')
+        if freq is None:
+            # taking the tail makes freq inference more reliable
+            freq = pd.infer_freq(self.history_dates.tail(5))
+            # returns None if inference failed
+            if freq is None:
+                raise Exception('Unable to infer `freq`')
         last_date = self.history_dates.max()
         dates = pd.date_range(
             start=last_date,

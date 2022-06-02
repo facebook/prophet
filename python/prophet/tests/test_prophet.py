@@ -86,12 +86,14 @@ class TestProphet(TestCase):
     def test_fit_predict_no_seasons(self):
         N = DATA.shape[0]
         train = DATA.head(N // 2)
-        future = DATA.tail(N // 2)
+        periods = 30
 
         forecaster = Prophet(weekly_seasonality=False,
                              yearly_seasonality=False)
         forecaster.fit(train)
-        forecaster.predict(future)
+        future = forecaster.make_future_dataframe(periods=periods, include_history=False)
+        result = forecaster.predict(periods=periods)
+        self.assertTrue((future.ds == result.ds).all())
 
     def test_fit_predict_no_changepoints(self):
         N = DATA.shape[0]
