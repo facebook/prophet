@@ -158,6 +158,8 @@ class Prophet(object):
         if self.growth not in ('linear', 'logistic', 'flat'):
             raise ValueError(
                 'Parameter "growth" should be "linear", "logistic" or "flat".')
+        if not isinstance(self.changepoint_range, (int, float)):
+            raise ValueError("changepoint_range must be a number in [0, 1]'")
         if ((self.changepoint_range < 0) or (self.changepoint_range > 1)):
             raise ValueError('Parameter "changepoint_range" must be in [0, 1]')
         if self.holidays is not None:
@@ -1174,8 +1176,9 @@ class Prophet(object):
         # If no changepoints were requested, replace delta with 0s
         if len(self.changepoints) == 0:
             # Fold delta into the base rate k
-            self.params['k'] = (self.params['k']
-                                + self.params['delta'].reshape(-1))
+            self.params['k'] = (
+                self.params['k'] + self.params['delta'].reshape(-1)
+            )
             self.params['delta'] = (np.zeros(self.params['delta'].shape)
                                       .reshape((-1, 1)))
 
@@ -1401,16 +1404,16 @@ class Prophet(object):
         Dictionary with posterior predictive samples for the forecast yhat and
         for the trend component.
         """
+        # Generate seasonality features once so we can re-use them.
+        seasonal_features, _, component_cols, _ = (
+            self.make_all_seasonality_features(df)
+        )
+
         if self.mcmc_samples > 0:
             n_iterations = self.params['k'].shape[0]
             samp_per_iter = max(1, int(np.ceil(
                 self.uncertainty_samples / float(n_iterations)
             )))
-
-            # Generate seasonality features once so we can re-use them.
-            seasonal_features, _, component_cols, _ = (
-                self.make_all_seasonality_features(df)
-            )
 
             sim_values = {'yhat': [], 'trend': []}
             for i in range(n_iterations):
@@ -1428,10 +1431,21 @@ class Prophet(object):
                 sim_values[k] = np.column_stack(v)
             return sim_values
         else:
-            sample_trends, historical_variance = self._posterior_predictive(df)
+            # this is not used in predict_uncertainty, only for users wanting raw samples
+            # one sample just for the yhat
+            sim = self.sample_model(
+                df=df,
+                seasonal_features=seasonal_features,
+                iteration=0,
+                s_a=component_cols['additive_terms'],
+                s_m=component_cols['multiplicative_terms'],
+            )
+            sim = pd.concat([df, sim], axis=1)
+            sample_trends, historical_variance = self._posterior_predictive(sim)
+            yhat_trends = sample_trends.T * self.y_scale + sim['yhat'].to_numpy()[..., None]
             return {
-                'trend': sample_trends * self.y_scale,
-                'yhat': historical_variance * self.y_scale
+                'yhat': historical_variance.T * self.y_scale + yhat_trends,
+                'trend': yhat_trends,
             }
 
     def predictive_samples(self, df):
@@ -1500,19 +1514,25 @@ class Prophet(object):
             })
 
     def _posterior_predictive(self, df):
+        """Vectorized version."""
         k = int(self.uncertainty_samples)
 
         # handle only historic data
         if df['t'].max() <= 1:
+            # there is no trend uncertainty in historic trends
             sample_trends = np.zeros((k, len(df)))
         else:
             future_df = df[df['t'] > 1]
             # below calculates 't' if unavailable
             # future_time_series = ((future_df["ds"] - self.start) / self.t_scale).values
-            single_diff = np.diff(future_df['t']).mean()
+            n_length = len(future_df)
+            # handle 1 length futures by using history
+            if n_length > 1:
+                single_diff = np.diff(future_df['t']).mean()
+            else:
+                single_diff = np.diff(self.history['t']).mean()
             change_likelihood = len(self.changepoints_t) * single_diff
             deltas = self.params["delta"][0]
-            n_length = len(future_df)
             mean_delta = np.mean(np.abs(deltas)) + 1e-8
             if self.growth == "linear":
                 mat = self._make_trend_shift_matrix(mean_delta, change_likelihood, n_length, k=k)
@@ -1522,9 +1542,12 @@ class Prophet(object):
                 mat = self._make_trend_shift_matrix(mean_delta, change_likelihood, n_length, k=k)
                 cap_scaled = (future_df["cap"] / self.y_scale).values
                 sample_trends = self._logistic_uncertainty(
-                    mat, deltas, cap_scaled, future_df['t'].to_numpy(), k=k, n_length=n_length
+                    mat, deltas, cap_scaled,
+                    future_df['t'].to_numpy(), k=k,
+                    n_length=n_length, single_diff=single_diff,
                 )
             elif self.growth == "flat":
+                # no trend uncertainty when there is no growth
                 sample_trends = np.zeros((k, n_length))
             else:
                 raise NotImplementedError
@@ -1539,12 +1562,13 @@ class Prophet(object):
         return sample_trends, historical_variance
 
     @staticmethod
-    def _make_historical_mat_time(deltas, changepoints_t, t_time, n_row=1):
+    def _make_historical_mat_time(deltas, changepoints_t, t_time, n_row=1, single_diff=None):
         """
         Creates a matrix of slope-deltas where these changes occured in training data according to the trained prophet obj
         """
-        diff = np.diff(t_time).mean()
-        prev_time = np.arange(0, 1 + diff, diff)
+        if single_diff is None:
+            single_diff = np.diff(t_time).mean()
+        prev_time = np.arange(0, 1 + single_diff, single_diff)
         idxs = []
         for changepoint in changepoints_t:
             idxs.append(np.where(prev_time > changepoint)[0][0])
@@ -1561,6 +1585,7 @@ class Prophet(object):
             t_time: np.ndarray,
             k,
             n_length,
+            single_diff=None,
     ):
         """
         Vectorizes prophet's logistic growth uncertainty by creating a matrix of future possible trends.
@@ -1574,7 +1599,7 @@ class Prophet(object):
 
         m = self.params["m"][0]
         #  for logistic growth we need to evaluate the trend all the way from the start of the train item
-        historical_mat, historical_time = self._make_historical_mat_time(deltas, self.changepoints_t, t_time, len(mat))
+        historical_mat, historical_time = self._make_historical_mat_time(deltas, self.changepoints_t, t_time, len(mat), single_diff)
         mat = np.concatenate([historical_mat, mat], axis=1)
         full_t_time = np.concatenate([historical_time, t_time])
 

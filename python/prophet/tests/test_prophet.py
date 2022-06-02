@@ -75,7 +75,8 @@ class TestProphet(TestCase):
 
         forecaster = Prophet(mcmc_samples=500)
 
-        forecaster.fit(train, seed=1237861298, chains=4)
+        # chains adjusted from 4 to 7 to satisfy test for cmdstanpy
+        forecaster.fit(train, seed=1237861298, chains=7)
         np.random.seed(876543987)
         future = forecaster.make_future_dataframe(days, include_history=False)
         future = forecaster.predict(future)

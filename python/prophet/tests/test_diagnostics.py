@@ -56,26 +56,27 @@ class TestDiagnostics(TestCase):
             pass
 
         for parallel in methods:
-            df_cv = diagnostics.cross_validation(
-                m, horizon='4 days', period='10 days', initial='115 days',
-                parallel=parallel)
-            self.assertEqual(len(np.unique(df_cv['cutoff'])), 3)
-            self.assertEqual(max(df_cv['ds'] - df_cv['cutoff']), horizon)
-            self.assertTrue(min(df_cv['cutoff']) >= min(self.__df['ds']) + initial)
-            dc = df_cv['cutoff'].diff()
-            dc = dc[dc > pd.Timedelta(0)].min()
-            self.assertTrue(dc >= period)
-            self.assertTrue((df_cv['cutoff'] < df_cv['ds']).all())
-            # Each y in df_cv and self.__df with same ds should be equal
-            df_merged = pd.merge(df_cv, self.__df, 'left', on='ds')
-            self.assertAlmostEqual(
-                np.sum((df_merged['y_x'] - df_merged['y_y']) ** 2), 0.0)
-            df_cv = diagnostics.cross_validation(
-                m, horizon='4 days', period='10 days', initial='135 days')
-            self.assertEqual(len(np.unique(df_cv['cutoff'])), 1)
-            with self.assertRaises(ValueError):
-                diagnostics.cross_validation(
-                    m, horizon='10 days', period='10 days', initial='140 days')
+            with self.subTest(i=parallel):
+                df_cv = diagnostics.cross_validation(
+                    m, horizon='4 days', period='10 days', initial='115 days',
+                    parallel=parallel)
+                self.assertEqual(len(np.unique(df_cv['cutoff'])), 3)
+                self.assertEqual(max(df_cv['ds'] - df_cv['cutoff']), horizon)
+                self.assertTrue(min(df_cv['cutoff']) >= min(self.__df['ds']) + initial)
+                dc = df_cv['cutoff'].diff()
+                dc = dc[dc > pd.Timedelta(0)].min()
+                self.assertTrue(dc >= period)
+                self.assertTrue((df_cv['cutoff'] < df_cv['ds']).all())
+                # Each y in df_cv and self.__df with same ds should be equal
+                df_merged = pd.merge(df_cv, self.__df, 'left', on='ds')
+                self.assertAlmostEqual(
+                    np.sum((df_merged['y_x'] - df_merged['y_y']) ** 2), 0.0)
+                df_cv = diagnostics.cross_validation(
+                    m, horizon='4 days', period='10 days', initial='135 days')
+                self.assertEqual(len(np.unique(df_cv['cutoff'])), 1)
+                with self.assertRaises(ValueError):
+                    diagnostics.cross_validation(
+                        m, horizon='10 days', period='10 days', initial='140 days')
 
         # invalid alias
         with self.assertRaisesRegex(ValueError, "'parallel' should be one"):
