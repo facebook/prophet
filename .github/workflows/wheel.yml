@@ -11,12 +11,11 @@ env:
 
 jobs:
   make-wheel-windows:
-    name: ${{ matrix.python-version }}-${{ matrix.architecture }}-${{ matrix.os }}
+    name: ${{ matrix.architecture }}-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: ["windows-latest"]
-        python-version: [3.8]
         architecture: ["x64"]
       fail-fast: false
 
@@ -37,7 +36,6 @@ jobs:
       - name: "Set up Python"
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.architecture }}
 
       - name: "Restore pip cache"
@@ -83,12 +81,11 @@ jobs:
           path: "./**/*.whl"
 
   make-wheels-macos-linux:
-    name: ${{ matrix.python-version }}-${{ matrix.architecture }}-${{ matrix.os }}
+    name: ${{ matrix.architecture }}-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: ["macos-latest", "ubuntu-latest"]
-        python-version: [3.8]
         architecture: ["x64"]
       fail-fast: false
 
@@ -112,7 +109,6 @@ jobs:
       - name: "Set up Python"
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.architecture }}
 
       - name: "Restore pip cache"
@@ -126,12 +122,12 @@ jobs:
 
       - name: "Install pip"
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install cibuildwheel build
+          python3 -m pip install --upgrade pip
+          python3 -m pip install cibuildwheel build
 
       - name: "Build wheel"
         run: |
-          cd python && python -m cibuildwheel --output-dir wheelhouse
+          cd python && python3 -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
