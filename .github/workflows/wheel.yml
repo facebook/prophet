@@ -95,6 +95,7 @@ jobs:
           CIBW_BUILD: cp37-* cp38-* cp39-* cp310-*
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: native
+          CIBW_BEFORE_ALL: cd python
           CIBW_BUILD_FRONTEND: build
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: pytest --pyargs prophet
