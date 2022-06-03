@@ -11,12 +11,11 @@ env:
 
 jobs:
   make-wheel-windows:
-    name: ${{ matrix.architecture }}-${{ matrix.os }}
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: ["windows-latest"]
-        architecture: ["x64"]
       fail-fast: false
 
     steps:
@@ -81,12 +80,11 @@ jobs:
           path: "./**/*.whl"
 
   make-wheels-macos-linux:
-    name: ${{ matrix.architecture }}-${{ matrix.os }}
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: ["macos-latest", "ubuntu-latest"]
-        architecture: ["x64"]
       fail-fast: false
 
     steps:
