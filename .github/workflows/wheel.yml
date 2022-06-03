@@ -30,12 +30,7 @@ jobs:
           Echo "DEFAULT_HOME=$HOME" >> $env:GITHUB_ENV
 
       - name: "Checkout repo"
-        uses: actions/checkout@v2
-
-      - name: "Set up Python"
-        uses: actions/setup-python@v2
-        with:
-          architecture: ${{ matrix.architecture }}
+        uses: actions/checkout@v3
 
       - name: "Restore pip cache"
         id: cache-pip
@@ -88,54 +83,15 @@ jobs:
       fail-fast: false
 
     steps:
-      - name: "Get OS version (Linux)"
-        if: startsWith(runner.os, 'Linux')
-        run: |
-          echo "PIP_DEFAULT_CACHE=$HOME/.cache/pip" >> $GITHUB_ENV
-          echo "DEFAULT_HOME=$HOME" >> $GITHUB_ENV
-
-      - name: "Get OS version (macOS)"
-        if: startsWith(runner.os, 'macOS')
-        run: |
-          echo "PIP_DEFAULT_CACHE=$HOME/Library/Caches/pip" >> $GITHUB_ENV
-          echo "DEFAULT_HOME=$HOME" >> $GITHUB_ENV
-
-
       - name: "Checkout repo"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: "Set up Python"
-        uses: actions/setup-python@v2
-        with:
-          architecture: ${{ matrix.architecture }}
-
-      - name: "Restore pip cache"
-        id: cache-pip
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.PIP_DEFAULT_CACHE }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/python/requirements.txt') }}-v1
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: "Install pip"
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install cibuildwheel build
-
-      - name: "Build wheel"
-        run: |
-          cd python && python3 -m cibuildwheel --output-dir wheelhouse
+      - name: "Build wheels"
+        uses: pypa/cibuildwheel@v2.6.0
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
-          # Linux builds run in a Docker container, need to point the cache to the host machine.
-          CIBW_ENVIRONMENT_LINUX: >
-            STAN_BACKEND="${{ env.STAN_BACKEND }}"
-            HOME="/host/${{ env.DEFAULT_HOME }}"
-            PIP_CACHE_DIR="/host/${{ env.PIP_DEFAULT_CACHE }}"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_BEFORE_ALL_LINUX: chmod -R a+rwx /host/${{ env.PIP_DEFAULT_CACHE }}
           CIBW_BUILD: cp37-* cp38-* cp39-* cp310-*
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: native
