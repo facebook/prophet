@@ -153,7 +153,7 @@ def model_from_dict(model_dict):
                 s = s.dt.tz_localize(None)
             setattr(model, attribute, s)
     for attribute in PD_TIMESTAMP:
-        setattr(model, attribute, pd.Timestamp.fromtimestamp(model_dict[attribute], 'UTC').tz_localize(None))
+        setattr(model, attribute, pd.Timestamp.utcfromtimestamp(model_dict[attribute]).tz_localize(None))
     for attribute in PD_TIMEDELTA:
         setattr(model, attribute, pd.Timedelta(seconds=model_dict[attribute]))
     for attribute in PD_DATAFRAME:
