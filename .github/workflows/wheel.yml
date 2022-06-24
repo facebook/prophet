@@ -1,4 +1,4 @@
-name: "Create Python Wheels"
+name: "Create Python Wheels and publish to PyPI"
 
 on:
   release:
@@ -41,7 +41,7 @@ jobs:
           CIBW_BUILD: cp37-* cp38-* cp39-* cp310-*
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: native
-          CIBW_BUILD_FRONTEND: build
+          CIBW_BUILD_FRONTEND: build --outdir wheelhouse
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: pytest --pyargs prophet
 
@@ -49,4 +49,22 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}-wheel
-          path: "./**/*.whl"
+          path: wheelhouse/*
+
+  upload_wheels:
+    name: Upload wheels to PyPi
+    runs-on: ubuntu-latest
+    needs: [make-wheels]
+
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: wheels
+          path: wheelhouse
+
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: ${{ secrets.PYPI_USERNAME }}
+          password: ${{ secrets.PYPI_PASSWORD }}
+          packages_dir: wheelhouse/
