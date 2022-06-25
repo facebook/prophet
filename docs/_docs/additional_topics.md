@@ -84,18 +84,18 @@ A common setting for forecasting is fitting models that need to be updated as ad
 # Python
 def stan_init(m):
     """Retrieve parameters from a trained model.
-    
+
     Retrieve parameters from a trained model in the format
     used to initialize a new Stan model.
-    
+
     Parameters
     ----------
     m: A trained model of the Prophet class.
-    
+
     Returns
     -------
     A Dictionary containing retrieved parameters of m.
-    
+
     """
     res = {}
     for pname in ['k', 'm', 'sigma_obs']:
@@ -104,7 +104,7 @@ def stan_init(m):
         res[pname] = m.params[pname][0]
     return res
 
-df = pd.read_csv('../examples/example_wp_log_peyton_manning.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
 df1 = df.loc[df['ds'] < '2016-01-19', :]  # All data except the last day
 m1 = Prophet().fit(df1) # A model fit to all data except the last day
 
@@ -132,4 +132,3 @@ These github repositories provide examples of building on top of Prophet in ways
 * [forecastr](https://github.com/garethcull/forecastr): A web app that provides a UI for Prophet.
 
 * [NeuralProphet](https://github.com/ourownstory/neural_prophet): A Prophet-style model implemented in pytorch, to be more adaptable and extensible.
-

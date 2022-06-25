@@ -24,7 +24,7 @@ Prophet can make forecasts for time series with sub-daily observations by passin
 
 ```R
 # R
-df <- read.csv('../examples/example_yosemite_temps.csv')
+df <- read.csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_yosemite_temps.csv')
 m <- prophet(df, changepoint.prior.scale=0.01)
 future <- make_future_dataframe(m, periods = 300, freq = 60 * 60)
 fcst <- predict(m, future)
@@ -32,7 +32,7 @@ plot(m, fcst)
 ```
 ```python
 # Python
-df = pd.read_csv('../examples/example_yosemite_temps.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_yosemite_temps.csv')
 m = Prophet(changepoint_prior_scale=0.01).fit(df)
 future = m.make_future_dataframe(periods=300, freq='H')
 fcst = m.predict(future)
@@ -126,7 +126,7 @@ You can use Prophet to fit monthly data. However, the underlying model is contin
 
 ```R
 # R
-df <- read.csv('../examples/example_retail_sales.csv')
+df <- read.csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_retail_sales.csv')
 m <- prophet(df, seasonality.mode = 'multiplicative')
 future <- make_future_dataframe(m, periods = 3652)
 fcst <- predict(m, future)
@@ -134,7 +134,7 @@ plot(m, fcst)
 ```
 ```python
 # Python
-df = pd.read_csv('../examples/example_retail_sales.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_retail_sales.csv')
 m = Prophet(seasonality_mode='multiplicative').fit(df)
 future = m.make_future_dataframe(periods=3652)
 fcst = m.predict(future)
@@ -155,7 +155,7 @@ prophet_plot_components(m, fcst)
 ```
 ```python
 # Python
-m = Prophet(seasonality_mode='multiplicative', mcmc_samples=300).fit(df)
+m = Prophet(seasonality_mode='multiplicative', mcmc_samples=300).fit(df, show_progress=False)
 fcst = m.predict(future)
 fig = m.plot_components(fcst)
 ```
