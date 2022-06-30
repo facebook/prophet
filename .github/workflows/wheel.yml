@@ -1,8 +1,8 @@
-name: "Create Python Wheels"
+name: "Create Python distributions and upload to PyPI"
 
 on:
   release:
-    types: [ created ]
+    types: [ published ]
   workflow_dispatch: {}
 
 
@@ -10,138 +10,34 @@ env:
   STAN_BACKEND: "CMDSTANPY"
 
 jobs:
-  make-wheel-windows:
-    name: ${{ matrix.python-version }}-${{ matrix.architecture }}-${{ matrix.os }}
+  make-wheels:
+    name: Make ${{ matrix.os }} wheels
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ["windows-latest"]
-        python-version: [3.8]
-        architecture: ["x64"]
+        os: ["macos-latest", "ubuntu-latest", "windows-latest"]
       fail-fast: false
 
     steps:
-      - name: "Setup environment variables (Windows)"
-        if: startsWith(runner.os, 'Windows')
-        shell: pwsh
-        run: |
-          (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
-          $os_version = (Get-CimInstance Win32_OperatingSystem).version
-          Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
-          Echo "PIP_DEFAULT_CACHE=$HOME/pip/cache" >> $env:GITHUB_ENV
-          Echo "DEFAULT_HOME=$HOME" >> $env:GITHUB_ENV
-
       - name: "Checkout repo"
-        uses: actions/checkout@v2
-
-      - name: "Set up Python"
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: ${{ matrix.architecture }}
-
-      - name: "Restore pip cache"
-        id: cache-pip
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.PIP_DEFAULT_CACHE }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/python/requirements.txt') }}-v1
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: "Install pip"
-        shell: pwsh
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install cibuildwheel build delvewheel
+        uses: actions/checkout@v3
 
       - name: "Restore RTools40"
+        if: startsWith(runner.os, 'Windows')
         id: cache-rtools
         uses: actions/cache@v2
         with:
           path: C:/rtools40
           key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
 
-      - name: "Build wheel"
-        run: |
-          cd python && python -m cibuildwheel --output-dir wheelhouse
+      - name: "Build wheels"
+        uses: pypa/cibuildwheel@v2.6.0
+        with:
+          package-dir: python
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
-            PIP_CACHE_DIR="${{ env.PIP_DEFAULT_CACHE }}"
-          CIBW_BUILD: cp37-* cp38-* cp39-* cp310-*
-          CIBW_ARCHS: native
-          CIBW_BUILD_FRONTEND: build
-          # CIBW_REPAIR_WHEEL_COMMAND: delvewheel repair -w {dest_dir} {wheel}
-          CIBW_TEST_REQUIRES: pytest
-          CIBW_TEST_COMMAND: pytest --pyargs prophet
-
-      - name: "Upload wheel as artifact"
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.os }}-wheel
-          path: "./**/*.whl"
-
-  make-wheels-macos-linux:
-    name: ${{ matrix.python-version }}-${{ matrix.architecture }}-${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: ["macos-latest", "ubuntu-latest"]
-        python-version: [3.8]
-        architecture: ["x64"]
-      fail-fast: false
-
-    steps:
-      - name: "Get OS version (Linux)"
-        if: startsWith(runner.os, 'Linux')
-        run: |
-          echo "PIP_DEFAULT_CACHE=$HOME/.cache/pip" >> $GITHUB_ENV
-          echo "DEFAULT_HOME=$HOME" >> $GITHUB_ENV
-
-      - name: "Get OS version (macOS)"
-        if: startsWith(runner.os, 'macOS')
-        run: |
-          echo "PIP_DEFAULT_CACHE=$HOME/Library/Caches/pip" >> $GITHUB_ENV
-          echo "DEFAULT_HOME=$HOME" >> $GITHUB_ENV
-
-
-      - name: "Checkout repo"
-        uses: actions/checkout@v2
-
-      - name: "Set up Python"
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: ${{ matrix.architecture }}
-
-      - name: "Restore pip cache"
-        id: cache-pip
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.PIP_DEFAULT_CACHE }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/python/requirements.txt') }}-v1
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: "Install pip"
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install cibuildwheel build
-
-      - name: "Build wheel"
-        run: |
-          cd python && python -m cibuildwheel --output-dir wheelhouse
-        env:
-          CIBW_ENVIRONMENT: >
-            STAN_BACKEND="${{ env.STAN_BACKEND }}"
-          # Linux builds run in a Docker container, need to point the cache to the host machine.
-          CIBW_ENVIRONMENT_LINUX: >
-            STAN_BACKEND="${{ env.STAN_BACKEND }}"
-            HOME="/host/${{ env.DEFAULT_HOME }}"
-            PIP_CACHE_DIR="/host/${{ env.PIP_DEFAULT_CACHE }}"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_BEFORE_ALL_LINUX: chmod -R a+rwx /host/${{ env.PIP_DEFAULT_CACHE }}
           CIBW_BUILD: cp37-* cp38-* cp39-* cp310-*
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: native
@@ -150,7 +46,43 @@ jobs:
           CIBW_TEST_COMMAND: pytest --pyargs prophet
 
       - name: "Upload wheel as artifact"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}-wheel
+          name: artifact-${{ matrix.os }}-wheel
           path: "./**/*.whl"
+
+  make-sdist:
+    name: Make source distribution
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - run: pipx run build --sdist
+      working-directory: python
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: artifact-source-dist
+        path: "./**/dist/*.tar.gz"
+
+  upload:
+    name: Upload to PyPI
+    needs: [make-wheels, make-sdist]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+
+    - name: Copy artifacts to dist/ folder
+      run: |
+        find . -name 'artifact-*' -exec unzip '{}' \;
+        mkdir -p dist/
+        find . -name '*.tar.gz' -exec mv '{}' dist/ \;
+        find . -name '*.whl' -exec mv '{}' dist/ \;
+
+    - name: Upload
+      uses: pypa/gh-action-pypi-publish@v1.4.2
+      with:
+        user: ${{ secrets.PYPI_USERNAME }}
+        password: ${{ secrets.PYPI_PASSWORD }}

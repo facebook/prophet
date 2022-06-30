@@ -60,7 +60,7 @@ forecast <- predict(m, future)
 ```python
 # Python
 m = Prophet(mcmc_samples=300)
-forecast = m.fit(df).predict(future)
+forecast = m.fit(df, show_progress=False).predict(future)
 ```
 This replaces the typical MAP estimation with MCMC sampling, and can take much longer depending on how many observations there are - expect several minutes instead of several seconds. If you do full sampling, then you will see the uncertainty in seasonal components when you plot them:
 

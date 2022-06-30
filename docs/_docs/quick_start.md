@@ -36,7 +36,7 @@ from prophet import Prophet
 ```
 ```python
 # Python
-df = pd.read_csv('../examples/example_wp_log_peyton_manning.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
 df.head()
 ```
 
@@ -302,7 +302,7 @@ First we read in the data and create the outcome variable. As in the Python API,
 
 ```R
 # R
-df <- read.csv('../examples/example_wp_log_peyton_manning.csv')
+df <- read.csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
 ```
 We call the `prophet` function to fit the model.  The first argument is the historical dataframe.  Additional arguments control how Prophet fits the data and are described in later pages of this documentation.
 

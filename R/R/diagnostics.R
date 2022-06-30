@@ -347,38 +347,45 @@ rolling_mean_by_h <- function(x, h, w, name) {
   df <- data.frame(x=x, h=h)
   df2 <- df %>%
     dplyr::group_by(h) %>%
-    dplyr::summarise(mean = mean(x), n = dplyr::n())
+    dplyr::summarise(sum = sum(x), n = dplyr::n())
 
-  xm <- df2$mean
+  xs <- df2$sum
   ns <- df2$n
   hs <- df2$h
-
-  res <- data.frame(horizon=c())
-  res[[name]] <- c()
+  
+  trailing_i <- length(hs)
+  x_sum <- 0
+  n_sum <- 0
+  # We don't know output size but it is bounded by length(hs)
+  res_x <- vector("double", length=length(hs))
+  
   # Start from the right and work backwards
-  i <- length(hs)
-  while (i > 0) {
-    # Construct a mean of at least w samples
-    n <- ns[i]
-    xbar <- xm[i]
-    j <- i - 1
-    while ((n < w) & (j > 0)) {
-      # Include points from the previous horizon. All of them if still less
-      # than w, otherwise just enough to get to w.
-      n2 <- min(w - n, ns[j])
-      xbar <- xbar * (n / (n + n2)) + xm[j] * (n2 / (n + n2))
-      n <- n + n2
-      j <- j - 1
+  for(i in length(hs):1) {
+    x_sum <- x_sum + xs[i]
+    n_sum <- n_sum + ns[i]
+    while (n_sum >= w) {
+      # Include points from the previous horizon. All of them if still
+      # less than w, otherwise weight the mean by the difference
+      excess_n <- n_sum - w
+      excess_x <- excess_n * xs[i]/ ns[i]
+      res_x[trailing_i] <- (x_sum - excess_x) / w
+      x_sum <- x_sum - xs[trailing_i]
+      n_sum <- n_sum - ns[trailing_i]
+      trailing_i <- trailing_i - 1
     }
-    if (n < w) {
-      # Ran out of horizons before enough points.
-      break
-    }
-    res.i <- data.frame(horizon=hs[i])
-    res.i[[name]] <- xbar
-    res <- rbind(res.i, res)
-    i <- i - 1
   }
+
+  # R handles subsetting weirdly
+  if(trailing_i == 0) {
+    res_h <- hs
+  } else {
+    res_h <- hs[-(1:trailing_i)]
+    res_x <- res_x[-(1:trailing_i)]  
+  }
+  
+  res <- data.frame(horizon=res_h)
+  res[[name]] <- res_x
+
   return(res)
 }
 

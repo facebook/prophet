@@ -892,7 +892,7 @@ class Prophet(object):
         group_cols = new_comp['col'].unique()
         if len(group_cols) > 0:
             new_comp = pd.DataFrame({'col': group_cols, 'component': name})
-            components = components.append(new_comp)
+            components = pd.concat([components, new_comp])
         return components
 
     def parse_seasonality_args(self, name, arg, auto_disable, default_order):

@@ -101,8 +101,9 @@ data {
 }
 
 transformed data {
-  matrix[T, S] A;
-  A = get_changepoint_matrix(t, t_change, T, S);
+  matrix[T, S] A = get_changepoint_matrix(t, t_change, T, S);
+  matrix[T, K] X_sa = X .* rep_matrix(s_a', T);
+  matrix[T, K] X_sm = X .* rep_matrix(s_m', T);
 }
 
 parameters {
@@ -133,10 +134,10 @@ model {
   beta ~ normal(0, sigmas);
 
   // Likelihood
-  y ~ normal(
-  trend
-  .* (1 + X * (beta .* s_m))
-  + X * (beta .* s_a),
-  sigma_obs
+  y ~ normal_id_glm(
+    X_sa,
+    trend .* (1 + X_sm * beta),
+    beta,
+    sigma_obs
   );
 }

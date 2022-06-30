@@ -114,7 +114,10 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
     -------
     A pd.DataFrame with the forecast, actual value and cutoff.
     """
-
+    
+    if model.history is None:
+        raise Exception('Model has not been fit. Fitting the model provides contextual parameters for cross validation.')
+    
     df = model.history.copy().reset_index(drop=True)
     horizon = pd.Timedelta(horizon)
 
@@ -417,37 +420,37 @@ def rolling_mean_by_h(x, h, w, name):
     # Aggregate over h
     df = pd.DataFrame({'x': x, 'h': h})
     df2 = (
-        df.groupby('h').agg(['mean', 'count']).reset_index().sort_values('h')
+        df.groupby('h').agg(['sum', 'count']).reset_index().sort_values('h')
     )
-    xm = df2['x']['mean'].values
+    xs = df2['x']['sum'].values
     ns = df2['x']['count'].values
-    hs = df2['h'].values
+    hs = df2.h.values
 
-    res_h = []
-    res_x = []
+    trailing_i = len(df2) - 1
+    x_sum = 0
+    n_sum = 0
+    # We don't know output size but it is bounded by len(df2)
+    res_x = np.empty(len(df2))
+
     # Start from the right and work backwards
-    i = len(hs) - 1
-    while i >= 0:
-        # Construct a mean of at least w samples.
-        n = int(ns[i])
-        xbar = float(xm[i])
-        j = i - 1
-        while ((n < w) and j >= 0):
+    for i in range(len(df2) - 1, -1, -1):
+        x_sum += xs[i]
+        n_sum += ns[i]
+        while n_sum >= w:
             # Include points from the previous horizon. All of them if still
-            # less than w, otherwise just enough to get to w.
-            n2 = min(w - n, ns[j])
-            xbar = xbar * (n / (n + n2)) + xm[j] * (n2 / (n + n2))
-            n += n2
-            j -= 1
-        if n < w:
-            # Ran out of horizons before enough points.
-            break
-        res_h.append(hs[i])
-        res_x.append(xbar)
-        i -= 1
-    res_h.reverse()
-    res_x.reverse()
+            # less than w, otherwise weight the mean by the difference
+            excess_n = n_sum - w
+            excess_x = excess_n * xs[i] / ns[i]
+            res_x[trailing_i] = (x_sum - excess_x)/ w
+            x_sum -= xs[trailing_i]
+            n_sum -= ns[trailing_i]
+            trailing_i -= 1
+
+    res_h = hs[(trailing_i + 1):]
+    res_x = res_x[(trailing_i + 1):]
+
     return pd.DataFrame({'horizon': res_h, name: res_x})
+    
 
 
 def rolling_median_by_h(x, h, w, name):

@@ -34,14 +34,13 @@ In Python, models should not be saved with pickle; the Stan backend attached to 
 
 ```python
 # Python
-import json
 from prophet.serialize import model_to_json, model_from_json
 
 with open('serialized_model.json', 'w') as fout:
-    json.dump(model_to_json(m), fout)  # Save model
+    fout.write(model_to_json(m))  # Save model
 
 with open('serialized_model.json', 'r') as fin:
-    m = model_from_json(json.load(fin))  # Load model
+    m = model_from_json(fin.read())  # Load model
 ```
 The json file will be portable across systems, and deserialization is backwards compatible with older versions of prophet.
 
@@ -83,18 +82,18 @@ A common setting for forecasting is fitting models that need to be updated as ad
 # Python
 def stan_init(m):
     """Retrieve parameters from a trained model.
-    
+
     Retrieve parameters from a trained model in the format
     used to initialize a new Stan model.
-    
+
     Parameters
     ----------
     m: A trained model of the Prophet class.
-    
+
     Returns
     -------
     A Dictionary containing retrieved parameters of m.
-    
+
     """
     res = {}
     for pname in ['k', 'm', 'sigma_obs']:
@@ -103,7 +102,7 @@ def stan_init(m):
         res[pname] = m.params[pname][0]
     return res
 
-df = pd.read_csv('../examples/example_wp_log_peyton_manning.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
 df1 = df.loc[df['ds'] < '2016-01-19', :]  # All data except the last day
 m1 = Prophet().fit(df1) # A model fit to all data except the last day
 
@@ -121,3 +120,13 @@ As can be seen, the parameters from the previous model are passed in to the fitt
 
 There are few caveats that should be kept in mind when considering warm-starting. First, warm-starting may work well for small updates to the data (like the addition of one day in the example above) but can be worse than fitting from scratch if there are large changes to the data (i.e., a lot of days have been added). This is because when a large amount of history is added, the location of the changepoints will be very different between the two models, and so the parameters from the previous model may actually produce a bad trend initialization. Second, as a detail, the number of changepoints need to be consistent from one model to the next or else an error will be raised because the changepoint prior parameter `delta` will be the wrong size.
 
+
+<a id="external-references"> </a>
+
+### External references
+
+These github repositories provide examples of building on top of Prophet in ways that may be of broad interest:
+
+* [forecastr](https://github.com/garethcull/forecastr): A web app that provides a UI for Prophet.
+
+* [NeuralProphet](https://github.com/ourownstory/neural_prophet): A Prophet-style model implemented in pytorch, to be more adaptable and extensible.

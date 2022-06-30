@@ -121,18 +121,21 @@ with open('requirements.txt', 'r') as f:
     install_requires = f.read().splitlines()
 
 setup(
-    name='prophet',
-    version='1.0.1',
-    description='Automatic Forecasting Procedure',
-    url='https://facebook.github.io/prophet/',
-    author='Sean J. Taylor <sjtz@pm.me>, Ben Letham <bletham@fb.com>',
-    author_email='sjtz@pm.me',
-    license='MIT',
+    name="prophet",
+    version="1.1",
+    description="Automatic Forecasting Procedure",
+    url="https://facebook.github.io/prophet/",
+    project_urls={
+        "Source": "https://github.com/facebook/prophet",
+    },
+    author="Sean J. Taylor <sjtz@pm.me>, Ben Letham <bletham@fb.com>",
+    author_email="sjtz@pm.me",
+    license="MIT",
     packages=find_packages(),
     setup_requires=[
     ],
     install_requires=install_requires,
-    python_requires='>=3',
+    python_requires=">=3.7",
     zip_safe=False,
     include_package_data=True,
     cmdclass={
@@ -142,9 +145,12 @@ setup(
     },
     test_suite='prophet.tests',
     classifiers=[
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     long_description=long_description,
     long_description_content_type='text/markdown',

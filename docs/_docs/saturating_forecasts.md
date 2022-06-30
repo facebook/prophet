@@ -24,11 +24,11 @@ Prophet allows you to make forecasts using a [logistic growth](https://en.wikipe
 
 ```R
 # R
-df <- read.csv('../examples/example_wp_log_R.csv')
+df <- read.csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_R.csv')
 ```
 ```python
 # Python
-df = pd.read_csv('../examples/example_wp_log_R.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_R.csv')
 ```
 We must specify the carrying capacity in a column `cap`. Here we will assume a particular value, but this would usually be set using data or expertise about the market size.
 
@@ -74,8 +74,8 @@ future['cap'] = 8.5
 fcst = m.predict(future)
 fig = m.plot(fcst)
 ```
- 
-![png](/prophet/static/saturating_forecasts_files/saturating_forecasts_13_0.png) 
+
+![png](/prophet/static/saturating_forecasts_files/saturating_forecasts_13_0.png)
 
 
 The logistic function has an implicit minimum of 0, and will saturate at 0 the same way that it saturates at the capacity. It is possible to also specify a different saturating minimum.
@@ -114,9 +114,8 @@ m.fit(df)
 fcst = m.predict(future)
 fig = m.plot(fcst)
 ```
- 
-![png](/prophet/static/saturating_forecasts_files/saturating_forecasts_16_0.png) 
+
+![png](/prophet/static/saturating_forecasts_files/saturating_forecasts_16_0.png)
 
 
 To use a logistic growth trend with a saturating minimum, a maximum capacity must also be specified.
-
