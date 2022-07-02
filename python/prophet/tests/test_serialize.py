@@ -142,6 +142,7 @@ class TestSerialize(TestCase):
         old_versions = {
             '0.6.1.dev0': (29.3669923968994, 'fb'),
             '0.7.1': (29.282810844704414, 'fb'),
+            '1.0.1': (29.282810844704414, ''),
         }
         for v, (pred_val, v_str) in old_versions.items():
             fname = os.path.join(
