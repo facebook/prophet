@@ -58,45 +58,25 @@ If you have custom Stan compiler settings, install from source rather than the C
 
 ## Installation in Python - PyPI release
 
-Prophet is on PyPI, so you can use `pip` to install it. From v0.6 onwards, Python 2 is no longer supported. As of v1.0, the package name on PyPI is "prophet"; prior to v1.0 it was "fbprophet".
+Prophet is on PyPI, so you can use `pip` to install it.
 
 ```bash
-# Install pystan with pip before using pip to install prophet
-# pystan>=3.0 is currently not supported
-pip install pystan==2.19.1.1
-pip install prophet
+python -m pip install prophet
 ```
 
-#### Experimental backend - cmdstanpy
-
-You can also choose a (more experimental) alternative stan backend called `cmdstanpy`. It requires the [CmdStan](https://mc-stan.org/users/interfaces/cmdstan) command line interface and you will have to specify the environment variable `STAN_BACKEND` pointing to it, for example:
-
-```bash
-# bash
-$ CMDSTAN=/tmp/cmdstan-2.22.1 STAN_BACKEND=CMDSTANPY pip install prophet
-```
-
-Note that the `CMDSTAN` variable is directly related to `cmdstanpy` module and can be omitted if your CmdStan binaries are in your `$PATH`.
+* From v0.6 onwards, Python 2 is no longer supported.
+* As of v1.0, the package name on PyPI is "prophet"; prior to v1.0 it was "fbprophet".
+* As of v1.1, the minimum supported Python version is 3.7.
 
 After installation, you can [get started!](https://facebook.github.io/prophet/docs/quick_start.html#python-api)
 
-If you upgraded the version of PyStan installed on your system, you may need to reinstall prophet ([see here](https://github.com/facebook/prophet/issues/324)).
-
 ### Anaconda
 
-The easiest way to install Prophet is through conda-forge: `conda install -c conda-forge prophet`.
-
-### Windows
-
-The easiest way to install Prophet in Windows is in Anaconda.
-
-### Linux
-
-Make sure compilers (gcc, g++, build-essential) and Python development tools (python-dev, python3-dev) are installed. In Red Hat systems, install the packages gcc64 and gcc64-c++. If you are using a VM, be aware that you will need at least 4GB of memory to install prophet, and at least 2GB of memory to use prophet.
+Prophet can also be installed through conda-forge: `conda install -c conda-forge prophet`.
 
 ## Installation in Python - Development version
 
-Since Pystan2 is no longer being maintained, the python package will move to depend solely on `cmdstanpy` (benefits described [here](https://github.com/facebook/prophet/issues/2041)). This has been updated in the development version of the package (1.1), but this version hasn't yet been released to PyPI. If you would like to use `cmdstanpy` only for your workflow, you can clone this repo and build from source manually:
+To get the latest code changes as they are merged, you can clone this repo and build from source manually. This is **not** guaranteed to be stable.
 
 ```bash
 git clone https://github.com/facebook/prophet.git
@@ -111,11 +91,21 @@ By default, Prophet will use a fixed version of `cmdstan` (downloading and insta
 export PROPHET_REPACKAGE_CMDSTAN=False; python setup.py develop
 ```
 
+### Linux
+
+Make sure compilers (gcc, g++, build-essential) and Python development tools (python-dev, python3-dev) are installed. In Red Hat systems, install the packages gcc64 and gcc64-c++. If you are using a VM, be aware that you will need at least 4GB of memory to install prophet, and at least 2GB of memory to use prophet.
+
 ### Windows
 
 Using `cmdstanpy` with Windows requires a Unix-compatible C compiler such as mingw-gcc. If cmdstanpy is installed first, one can be installed via the `cmdstanpy.install_cxx_toolchain` command.
 
 ## Changelog
+
+### Version 1.1 (2022.06.25)
+
+- Replaced `pystan2` dependency with `cmdstan` + `cmdstanpy`.
+- Pre-packaged model binaries for Python package, uploaded binary distributions to PyPI.
+- Improvements in the `stan` model code, cross-validation metric calculations, holidays.
 
 ### Version 1.0 (2021.03.28)
 
