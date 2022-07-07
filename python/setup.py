@@ -59,12 +59,16 @@ def repackage_cmdstan():
 def maybe_install_cmdstan_toolchain():
     """Install C++ compilers required to build stan models on Windows machines."""
     import cmdstanpy
-    from cmdstanpy.install_cxx_toolchain import main as _install_cxx_toolchain
-
     try:
         cmdstanpy.utils.cxx_toolchain_path()
     except Exception:
-        _install_cxx_toolchain({"version": None, "dir": None, "verbose": True})
+        try:
+            from cmdstanpy.install_cxx_toolchain import run_rtools_install
+        except ImportError:
+            # older versions
+            from cmdstanpy.install_cxx_toolchain import main as run_rtools_install
+
+        run_rtools_install({"version": None, "dir": None, "verbose": True})
         cmdstanpy.utils.cxx_toolchain_path()
 
 
