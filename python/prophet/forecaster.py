@@ -1184,7 +1184,7 @@ class Prophet(object):
 
         return self
 
-    def predict(self, df=None, periods=None, freq=None, include_history=False):
+    def predict(self, df=None):
         """Predict using the prophet model.
 
         Parameters
@@ -1205,16 +1205,7 @@ class Prophet(object):
             raise Exception('Model has not been fit.')
 
         if df is None:
-            if periods is not None:
-                df = self.setup_dataframe(
-                    self.make_future_dataframe(
-                        periods=int(periods),
-                        freq=freq,
-                        include_history=include_history,
-                    )
-                )
-            else:
-                df = self.history.copy()
+            df = self.history.copy()
         else:
             if df.shape[0] == 0:
                 raise ValueError('Dataframe has no rows.')
@@ -1236,24 +1227,27 @@ class Prophet(object):
             axis=1
         )
         df2['yhat'] = (
-                df2['trend'] * (1 + df2['multiplicative_terms'])  # noqa
-                + df2['additive_terms']  # noqa
+                df2['trend'] * (1 + df2['multiplicative_terms'])
+                + df2['additive_terms']  # noqa W503
         )
         # some shenanigans are required to get column order same as previous versions
         # uncertainty after yhat creation is required for vectorized version
         if self.uncertainty_samples:
-            df2 = pd.concat(
-                [
-                    df2[['ds', 'trend']],
-                    self.predict_uncertainty(df2),
-                    df2[df2.columns.difference(['ds', 'trend'])]
-                ],
-                axis=1
-            )
-        # move yhat to end and remove extraneous columns
-        df2 = df2.drop(columns=extra_cols, errors='ignore')
-        reordered_cols = df2.columns[df2.columns != 'yhat'].union(['yhat'])
-        df2 = df2.reindex(columns=reordered_cols)
+            uncertainty = self.predict_uncertainty(df2)
+            uncertainty_cols = uncertainty.columns.tolist()
+            df2 = pd.concat([df2, uncertainty], axis=1)
+        else:
+            uncertainty_cols = []
+
+        reordered_cols = (
+            ["ds", "trend"]
+            + [c for c in uncertainty_cols]  # noqa W503
+            + [c for c in df2.columns if c not in (uncertainty_cols + ["ds", "trend", "yhat"])]  # noqa W503
+            + ["yhat"]  # noqa W503
+        )
+        cols_to_remove = [c for c in extra_cols if c in df2.columns]
+
+        df2 = df2[reordered_cols].drop(columns=cols_to_remove)
 
         return df2
 
@@ -1273,9 +1267,9 @@ class Prophet(object):
         -------
         Vector y(t).
         """
-        indx = (changepoint_ts[None, :] <= t[..., None]) * deltas
-        k_t = indx.sum(axis=1) + k
-        m_t = (indx * -changepoint_ts).sum(axis=1) + m
+        cumulative_change = (changepoint_ts[None, :] <= t[..., None]) * deltas
+        k_t = cumulative_change.sum(axis=1) + k
+        m_t = (cumulative_change * -changepoint_ts).sum(axis=1) + m
         return k_t * t + m_t
 
     @staticmethod
@@ -1515,16 +1509,14 @@ class Prophet(object):
 
     def _posterior_predictive(self, df):
         """Vectorized version."""
-        k = int(self.uncertainty_samples)
+        n_samples = int(self.uncertainty_samples)
 
         # handle only historic data
         if df['t'].max() <= 1:
             # there is no trend uncertainty in historic trends
-            sample_trends = np.zeros((k, len(df)))
+            sample_trends = np.zeros((n_samples, len(df)))
         else:
             future_df = df[df['t'] > 1]
-            # below calculates 't' if unavailable
-            # future_time_series = ((future_df["ds"] - self.start) / self.t_scale).values
             n_length = len(future_df)
             # handle 1 length futures by using history
             if n_length > 1:
@@ -1535,25 +1527,25 @@ class Prophet(object):
             deltas = self.params["delta"][0]
             mean_delta = np.mean(np.abs(deltas)) + 1e-8
             if self.growth == "linear":
-                mat = self._make_trend_shift_matrix(mean_delta, change_likelihood, n_length, k=k)
+                mat = self._make_trend_shift_matrix(mean_delta, change_likelihood, n_length, n_samples=n_samples)
                 sample_trends = mat.cumsum(axis=1).cumsum(axis=1)  # from slope changes to actual values
                 sample_trends = sample_trends * single_diff  # scaled by the actual meaning of the slope
             elif self.growth == "logistic":
-                mat = self._make_trend_shift_matrix(mean_delta, change_likelihood, n_length, k=k)
+                mat = self._make_trend_shift_matrix(mean_delta, change_likelihood, n_length, n_samples=n_samples)
                 cap_scaled = (future_df["cap"] / self.y_scale).values
                 sample_trends = self._logistic_uncertainty(
                     mat, deltas, cap_scaled,
-                    future_df['t'].to_numpy(), k=k,
+                    future_df['t'].to_numpy(), k=n_samples,
                     n_length=n_length, single_diff=single_diff,
                 )
             elif self.growth == "flat":
                 # no trend uncertainty when there is no growth
-                sample_trends = np.zeros((k, n_length))
+                sample_trends = np.zeros((n_samples, n_length))
             else:
                 raise NotImplementedError
             # handle past included in dataframe
             if df['t'].min() <= 1:
-                past_trend = np.zeros((k, np.sum(df['t'] <= 1)))
+                past_trend = np.zeros((n_samples, np.sum(df['t'] <= 1)))
                 sample_trends = np.concatenate([past_trend, sample_trends], axis=1)
 
         # add gaussian noise based on historical levels
@@ -1622,7 +1614,7 @@ class Prophet(object):
 
     @staticmethod
     def _make_trend_shift_matrix(
-            mean_delta: float, likelihood: float, future_length: float, k: int = 10000
+            mean_delta: float, likelihood: float, future_length: float, n_samples: int = 10000
     ) -> np.ndarray:
         """
         Creates a matrix of random trend shifts based on historical likelihood and size of shifts.
@@ -1630,7 +1622,7 @@ class Prophet(object):
         Each row represents a different sample of a possible future, and each column is a time step into the future.
         """
         # create a bool matrix of where these trend shifts should go
-        bool_slope_change = np.random.uniform(size=(k, future_length)) < likelihood
+        bool_slope_change = np.random.uniform(size=(n_samples, future_length)) < likelihood
         shift_values = np.random.laplace(0, mean_delta, size=bool_slope_change.shape)
         mat = shift_values * bool_slope_change
         n_mat = np.hstack([np.zeros((len(mat), 1)), mat])[:, :-1]
@@ -1728,7 +1720,7 @@ class Prophet(object):
         we only fall back to it if the array contains NaNs. See
         https://github.com/facebook/prophet/issues/1310 for more details.
         """
-        fn =  np.nanpercentile if np.isnan(a).any() else np.percentile
+        fn = np.nanpercentile if np.isnan(a).any() else np.percentile
         return fn(a, *args, **kwargs)
 
     def make_future_dataframe(self, periods, freq='D', include_history=True):

@@ -93,7 +93,7 @@ class TestProphet(TestCase):
                              yearly_seasonality=False)
         forecaster.fit(train)
         future = forecaster.make_future_dataframe(periods=periods, include_history=False)
-        result = forecaster.predict(periods=periods)
+        result = forecaster.predict(future)
         self.assertTrue((future.ds == result.ds).all())
 
     def test_fit_predict_no_changepoints(self):
