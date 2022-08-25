@@ -549,7 +549,7 @@ construct_holiday_dataframe <- function(m, dates) {
     )
     all.holidays <- ifelse(
       nrow(holidays.to.add) > 0,
-      suppressWarnings(dplyr::bind_rows(all.holidays, holidays.to.add),
+      suppressWarnings(dplyr::bind_rows(all.holidays, holidays.to.add)),
       all.holidays)
   }
   return(all.holidays)
