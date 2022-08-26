@@ -16,6 +16,10 @@ jobs:
     strategy:
       matrix:
         os: ["macos-latest", "ubuntu-latest", "windows-latest"]
+        cibw_archs: ["native"]
+        include:
+          - os: ubuntu-latest
+            cibw_archs: "aarch64"
       fail-fast: false
 
     steps:
@@ -31,10 +35,10 @@ jobs:
           key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
 
       - name: Set up QEMU
-        if: runner.os == 'Linux'
+        if: matrix.cibw_archs == 'aarch64'
         uses: docker/setup-qemu-action@v2
         with:
-          platforms: all
+          platforms: arm64
 
       - name: "Build wheels"
         uses: pypa/cibuildwheel@v2.6.0
@@ -46,8 +50,7 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_BUILD: cp37-* cp38-* cp39-* cp310-*
           CIBW_SKIP: "*musllinux*"
-          CIBW_ARCHS: native
-          CIBW_ARCHS_LINUX: auto aarch64
+          CIBW_ARCHS: ${{ matrix.cibw_archs }}
           CIBW_BUILD_FRONTEND: build
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: pytest --pyargs prophet
@@ -55,7 +58,7 @@ jobs:
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@v3
         with:
-          name: artifact-${{ matrix.os }}-wheel
+          name: artifact-${{ matrix.os }}-${{ matric.cibw_archs }}-wheel
           path: "./**/*.whl"
 
   make-sdist:
