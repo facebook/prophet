@@ -128,7 +128,7 @@ def get_backends_from_env() -> List[str]:
 
 
 def build_models(target_dir):
-    print(f"Compiling cmdstanpy model")
+    print("Compiling cmdstanpy model")
     build_cmdstan_model(target_dir)
 
     if 'PYSTAN' in get_backends_from_env():

@@ -35,8 +35,8 @@ def get_holiday_names(country):
         try:
             holiday_names = getattr(hdays_part1, country)(years=years).values()
         except AttributeError as e:
-            raise AttributeError(
-                "Holidays in {} are not currently supported!".format(country)) from e
+            raise AttributeError(f"Holidays in {country} are not currently supported!") from e
+
     return set(holiday_names)
 
 
@@ -59,8 +59,8 @@ def make_holidays_df(year_list, country, province=None, state=None):
         try:
             holidays = getattr(hdays_part1, country)(prov=province, state=state, years=year_list, expand=False)
         except AttributeError as e:
-            raise AttributeError(
-                "Holidays in {} are not currently supported!".format(country)) from e
+            raise AttributeError(f"Holidays in {country} are not currently supported!") from e
+
     holidays_df = pd.DataFrame([(date, holidays.get_list(date)) for date in holidays], columns=['ds', 'holiday'])
     holidays_df = holidays_df.explode('holiday')
     holidays_df.reset_index(inplace=True, drop=True)
