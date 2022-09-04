@@ -10,6 +10,7 @@ import logging
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from datetime import timedelta, datetime
+from typing import Dict
 
 import numpy as np
 import pandas as pd
@@ -1184,7 +1185,7 @@ class Prophet(object):
 
         return self
 
-    def predict(self, df=None):
+    def predict(self, df: pd.DataFrame = None, vectorized: bool = True) -> pd.DataFrame:
         """Predict using the prophet model.
 
         Parameters
@@ -1192,6 +1193,9 @@ class Prophet(object):
         df: pd.DataFrame with dates for predictions (column ds), and capacity
             (column cap) if logistic growth. If not provided, predictions are
             made on the history.
+        vectorized: Whether to use a vectorized method to compute uncertainty intervals. Suggest using
+            True (the default) for much faster runtimes in most cases,
+            except when (growth = 'logistic' and mcmc_samples > 0).
 
         Returns
         -------
@@ -1210,7 +1214,7 @@ class Prophet(object):
         df['trend'] = self.predict_trend(df)
         seasonal_components = self.predict_seasonal_components(df)
         if self.uncertainty_samples:
-            intervals = self.predict_uncertainty(df)
+            intervals = self.predict_uncertainty(df, vectorized)
         else:
             intervals = None
 
@@ -1363,12 +1367,13 @@ class Prophet(object):
                 )
         return pd.DataFrame(data)
 
-    def sample_posterior_predictive(self, df):
+    def sample_posterior_predictive(self, df: pd.DataFrame, vectorized: bool) -> Dict[str, np.ndarray]:
         """Prophet posterior predictive samples.
 
         Parameters
         ----------
         df: Prediction dataframe.
+        vectorized: Whether to use a vectorized method to generate future draws.
 
         Returns
         -------
@@ -1385,14 +1390,25 @@ class Prophet(object):
         )))
         sim_values = {'yhat': [], 'trend': []}
         for i in range(n_iterations):
-            sims = self._sample_model(
-                df=df,
-                seasonal_features=seasonal_features,
-                iteration=i,
-                s_a=component_cols['additive_terms'],
-                s_m=component_cols['multiplicative_terms'],
-                n_samples=samp_per_iter
-            )
+            if vectorized:
+                sims = self._sample_model(
+                    df=df,
+                    seasonal_features=seasonal_features,
+                    iteration=i,
+                    s_a=component_cols['additive_terms'],
+                    s_m=component_cols['multiplicative_terms'],
+                    n_samples=samp_per_iter
+                )
+            else:
+                sims = [
+                    self.sample_model(
+                        df=df,
+                        seasonal_features=seasonal_features,
+                        iteration=i,
+                        s_a=component_cols['additive_terms'],
+                        s_m=component_cols['multiplicative_terms'],
+                    )
+                ]
             for key in sim_values:
                 for sim in sims:
                     sim_values[key].append(sim[key])
@@ -1423,18 +1439,19 @@ class Prophet(object):
         sim_values = self.sample_posterior_predictive(df)
         return sim_values
 
-    def predict_uncertainty(self, df):
+    def predict_uncertainty(self, df: pd.DataFrame, vectorized: bool) -> pd.DataFrame:
         """Prediction intervals for yhat and trend.
 
         Parameters
         ----------
         df: Prediction dataframe.
+        vectorized: Whether to use a vectorized method for generating future draws.
 
         Returns
         -------
         Dataframe with uncertainty intervals.
         """
-        sim_values = self.sample_posterior_predictive(df)
+        sim_values = self.sample_posterior_predictive(df, vectorized)
 
         lower_p = 100 * (1.0 - self.interval_width) / 2
         upper_p = 100 * (1.0 + self.interval_width) / 2
