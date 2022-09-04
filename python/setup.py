@@ -229,7 +229,7 @@ with open("requirements.txt", "r") as f:
 
 about = {}
 here = Path(__file__).resolve()
-with open(here / "prophet" /  "__version__.py", "r", "utf-8") as f:
+with open(here / "prophet" /  "__version__.py", "r") as f:
     exec(f.read(), about)
 
 setup(

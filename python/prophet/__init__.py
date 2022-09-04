@@ -9,6 +9,6 @@ from prophet.forecaster import Prophet
 from pathlib import Path
 about = {}
 here = Path(__file__).resolve()
-with open(here / "__version__.py", "r", "utf-8") as f:
+with open(here / "__version__.py", "r") as f:
     exec(f.read(), about)
 __version__ = about["__version__"]
