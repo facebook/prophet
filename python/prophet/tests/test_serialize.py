@@ -40,9 +40,6 @@ class TestSerialize(TestCase):
         model_str = model_to_json(m)
         # Make sure json doesn't get too large in the future
         self.assertTrue(len(model_str) < 200000)
-        z = json.loads(model_str)
-        self.assertEqual(z['__prophet_version'], '1.1')
-
         m2 = model_from_json(model_str)
 
         # Check that m and m2 are equal
