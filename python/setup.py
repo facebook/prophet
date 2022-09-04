@@ -228,7 +228,7 @@ with open("requirements.txt", "r") as f:
     install_requires = f.read().splitlines()
 
 about = {}
-here = Path(__file__).resolve()
+here = Path(__file__).parent.resolve()
 with open(here / "prophet" /  "__version__.py", "r") as f:
     exec(f.read(), about)
 
