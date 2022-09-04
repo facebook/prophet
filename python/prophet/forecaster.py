@@ -1406,14 +1406,14 @@ class Prophet(object):
         Dictionary with posterior predictive samples for the forecast yhat and
         for the trend component.
         """
-        # Generate seasonality features once so we can re-use them.
-        seasonal_features, _, component_cols, _ = (
-            self.make_all_seasonality_features(df)
-        )
         n_iterations = self.params['k'].shape[0]
         samp_per_iter = max(1, int(np.ceil(
             self.uncertainty_samples / float(n_iterations)
         )))
+        # Generate seasonality features once so we can re-use them.
+        seasonal_features, _, component_cols, _ = (
+            self.make_all_seasonality_features(df)
+        )
         sim_values = {'yhat': [], 'trend': []}
         for i in range(n_iterations):
             if vectorized:
@@ -1433,7 +1433,7 @@ class Prophet(object):
                         iteration=i,
                         s_a=component_cols['additive_terms'],
                         s_m=component_cols['multiplicative_terms'],
-                    )
+                    ) for _ in range(samp_per_iter)
                 ]
             for key in sim_values:
                 for sim in sims:
@@ -1471,8 +1471,6 @@ class Prophet(object):
             'yhat': trend * (1 + Xb_m) + Xb_a + noise,
             'trend': trend
         })
-
-
 
     def _sample_model(
         self,
@@ -1585,7 +1583,6 @@ class Prophet(object):
             (np.tile(expected, (n_samples, 1)) + uncertainty) * self.y_scale +
             np.tile(df["floor"].values, (n_samples, 1))
         )
-
 
     def _sample_uncertainty(self, df: pd.DataFrame, n_samples: int, iteration: int = 0) -> np.ndarray:
         """Sample draws of future trend changes, vectorizing as much as possible.
