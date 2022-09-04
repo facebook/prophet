@@ -1191,11 +1191,7 @@ class Prophet(object):
         ----------
         df: pd.DataFrame with dates for predictions (column ds), and capacity
             (column cap) if logistic growth. If not provided, predictions are
-            made on the history unless `periods` is passed.
-        periods: int number of periods to forecast forward.
-        freq: Any valid frequency for pd.date_range, such as 'D' or 'M'. Passing `None` will attempt to infer freq.
-        include_history: Boolean to include the historical dates in the data
-            frame for predictions.
+            made on the history.
 
         Returns
         -------
@@ -1212,43 +1208,24 @@ class Prophet(object):
             df = self.setup_dataframe(df.copy())
 
         df['trend'] = self.predict_trend(df)
+        seasonal_components = self.predict_seasonal_components(df)
+        if self.uncertainty_samples:
+            intervals = self.predict_uncertainty(df)
+        else:
+            intervals = None
 
-        # 'floor' col is required even if not using logistic, for sample_model with mcmc
-        extra_cols = ['t']
-        cols = ['ds', 'trend', 't', 'floor']
+        # Drop columns except ds, cap, floor, and trend
+        cols = ['ds', 'trend']
         if 'cap' in df:
             cols.append('cap')
-        if not self.logistic_floor:
-            extra_cols.append('floor')
-
+        if self.logistic_floor:
+            cols.append('floor')
         # Add in forecast components
-        df2 = pd.concat(
-            (df[cols], self.predict_seasonal_components(df)),
-            axis=1
-        )
+        df2 = pd.concat((df[cols], intervals, seasonal_components), axis=1)
         df2['yhat'] = (
                 df2['trend'] * (1 + df2['multiplicative_terms'])
-                + df2['additive_terms']  # noqa W503
+                + df2['additive_terms']
         )
-        # some shenanigans are required to get column order same as previous versions
-        # uncertainty after yhat creation is required for vectorized version
-        if self.uncertainty_samples:
-            uncertainty = self.predict_uncertainty(df2)
-            uncertainty_cols = uncertainty.columns.tolist()
-            df2 = pd.concat([df2, uncertainty], axis=1)
-        else:
-            uncertainty_cols = []
-
-        reordered_cols = (
-            ["ds", "trend"]
-            + [c for c in uncertainty_cols]  # noqa W503
-            + [c for c in df2.columns if c not in (uncertainty_cols + ["ds", "trend", "yhat"])]  # noqa W503
-            + ["yhat"]  # noqa W503
-        )
-        cols_to_remove = [c for c in extra_cols if c in df2.columns]
-
-        df2 = df2[reordered_cols].drop(columns=cols_to_remove)
-
         return df2
 
     @staticmethod
@@ -1267,9 +1244,9 @@ class Prophet(object):
         -------
         Vector y(t).
         """
-        cumulative_change = (changepoint_ts[None, :] <= t[..., None]) * deltas
-        k_t = cumulative_change.sum(axis=1) + k
-        m_t = (cumulative_change * -changepoint_ts).sum(axis=1) + m
+        deltas_t = (changepoint_ts[None, :] <= t[..., None]) * deltas
+        k_t = deltas_t.sum(axis=1) + k
+        m_t = (deltas_t * -changepoint_ts).sum(axis=1) + m
         return k_t * t + m_t
 
     @staticmethod
@@ -1402,45 +1379,26 @@ class Prophet(object):
         seasonal_features, _, component_cols, _ = (
             self.make_all_seasonality_features(df)
         )
-
-        if self.mcmc_samples > 0:
-            n_iterations = self.params['k'].shape[0]
-            samp_per_iter = max(1, int(np.ceil(
-                self.uncertainty_samples / float(n_iterations)
-            )))
-
-            sim_values = {'yhat': [], 'trend': []}
-            for i in range(n_iterations):
-                for _j in range(samp_per_iter):
-                    sim = self.sample_model(
-                        df=df,
-                        seasonal_features=seasonal_features,
-                        iteration=i,
-                        s_a=component_cols['additive_terms'],
-                        s_m=component_cols['multiplicative_terms'],
-                    )
-                    for key in sim_values:
-                        sim_values[key].append(sim[key])
-            for k, v in sim_values.items():
-                sim_values[k] = np.column_stack(v)
-            return sim_values
-        else:
-            # this is not used in predict_uncertainty, only for users wanting raw samples
-            # one sample just for the yhat
-            sim = self.sample_model(
+        n_iterations = self.params['k'].shape[0]
+        samp_per_iter = max(1, int(np.ceil(
+            self.uncertainty_samples / float(n_iterations)
+        )))
+        sim_values = {'yhat': [], 'trend': []}
+        for i in range(n_iterations):
+            sims = self._sample_model(
                 df=df,
                 seasonal_features=seasonal_features,
-                iteration=0,
+                iteration=i,
                 s_a=component_cols['additive_terms'],
                 s_m=component_cols['multiplicative_terms'],
+                n_samples=samp_per_iter
             )
-            sim = pd.concat([df, sim], axis=1)
-            sample_trends, historical_variance = self._posterior_predictive(sim)
-            yhat_trends = sample_trends.T * self.y_scale + sim['yhat'].to_numpy()[..., None]
-            return {
-                'yhat': historical_variance.T * self.y_scale + yhat_trends,
-                'trend': yhat_trends,
-            }
+            for key in sim_values:
+                for sim in sims:
+                    sim_values[key].append(sim[key])
+        for k, v in sim_values.items():
+            sim_values[k] = np.column_stack(v)
+        return sim_values
 
     def predictive_samples(self, df):
         """Sample from the posterior predictive distribution. Returns samples
@@ -1476,82 +1434,103 @@ class Prophet(object):
         -------
         Dataframe with uncertainty intervals.
         """
-        # use vectorization only if mcmc_sampling is not used
-        if self.mcmc_samples > 0:
-            sim_values = self.sample_posterior_predictive(df)
+        sim_values = self.sample_posterior_predictive(df)
 
-            lower_p = 100 * (1.0 - self.interval_width) / 2
-            upper_p = 100 * (1.0 + self.interval_width) / 2
+        lower_p = 100 * (1.0 - self.interval_width) / 2
+        upper_p = 100 * (1.0 + self.interval_width) / 2
 
-            series = {}
-            for key in ['yhat', 'trend']:
-                series['{}_lower'.format(key)] = self.percentile(
-                    sim_values[key], lower_p, axis=1)
-                series['{}_upper'.format(key)] = self.percentile(
-                    sim_values[key], upper_p, axis=1)
-            return pd.DataFrame(series)
+        series = {}
+        for key in ['yhat', 'trend']:
+            series['{}_lower'.format(key)] = self.percentile(
+                sim_values[key], lower_p, axis=1)
+            series['{}_upper'.format(key)] = self.percentile(
+                sim_values[key], upper_p, axis=1)
+
+        return pd.DataFrame(series)
+
+    def _sample_predictive_trend(self, df: pd.DataFrame, n_samples: int, iteration: int = 0) -> np.ndarray:
+        """Sample draws of the future trend values. Vectorized version of sample_predictive_trend().
+
+        Returns
+        -------
+        Draws of the trend values with shape (n_samples, len(df)). Values are on the scale of the original data.
+        """
+        deltas = self.params["delta"][iteration]
+        m = self.params["m"][iteration]
+        k = self.params["k"][iteration]
+        if self.growth == "linear":
+            expected = self.piecewise_linear(df["t"].values, deltas, k, m, self.changepoints_t)
+        elif self.growth == "logistic":
+            expected = self.piecewise_logistic(
+                df["t"].values, df["cap_scaled"].values, deltas, k, m, self.changepoints_t
+            )
+        elif self.growth == "flat":
+            expected = self.flat_trend(df["t"].values, m)
         else:
-            sample_trends, historical_variance = self._posterior_predictive(df)
-            full_samples = sample_trends + historical_variance
-            # get quantiles and scale back (prophet scales the data before fitting, so sigma and deltas are scaled)
-            width_split = (1.0 - self.interval_width) / 2
-            qnts = np.array([width_split, 1 - width_split]) * 100  # get quantiles from width
-            # Prophet scales all the data before fitting and predicting, y_scale re-scales it to original values
-            quantiles = np.percentile(full_samples, qnts, axis=0) * self.y_scale
-            trend_qnts = np.percentile(sample_trends, qnts, axis=0) * self.y_scale
+            raise NotImplementedError
+        uncertainty = self._sample_uncertainty(df, n_samples, iteration)
+        return (
+            (np.tile(expected, (n_samples, 1)) + uncertainty) * self.y_scale +
+            np.tile(df["floor"].values, (n_samples, 1))
+        )
 
-            return pd.DataFrame({
-                'yhat_lower': df.yhat + quantiles[0],
-                "yhat_upper": df.yhat + quantiles[1],
-                'trend_lower': df.trend + trend_qnts[0],
-                'trend_upper': df.trend + trend_qnts[0],
-            })
 
-    def _posterior_predictive(self, df):
-        """Vectorized version."""
-        n_samples = int(self.uncertainty_samples)
+    def _sample_uncertainty(self, df: pd.DataFrame, n_samples: int, iteration: int = 0) -> np.ndarray:
+        """Sample draws of future trend changes, vectorizing as much as possible.
 
+        Parameters
+        ----------
+        df: DataFrame with columns `t` (time scaled to the model context), trend, and cap.
+        n_samples: Number of future paths of the trend to simulate
+        iteration: The iteration of the parameter set to use. Default 0, the first iteration.
+
+        Returns
+        -------
+        Draws of the trend changes with shape (n_samples, len(df)). Values are standardized.
+        """
         # handle only historic data
-        if df['t'].max() <= 1:
+        if df["t"].max() <= 1:
             # there is no trend uncertainty in historic trends
-            sample_trends = np.zeros((n_samples, len(df)))
+            uncertainties = np.zeros((n_samples, len(df)))
         else:
-            future_df = df[df['t'] > 1]
+            future_df = df.loc[df["t"] > 1]
             n_length = len(future_df)
             # handle 1 length futures by using history
             if n_length > 1:
-                single_diff = np.diff(future_df['t']).mean()
+                single_diff = np.diff(future_df["t"]).mean()
             else:
-                single_diff = np.diff(self.history['t']).mean()
+                single_diff = np.diff(self.history["t"]).mean()
             change_likelihood = len(self.changepoints_t) * single_diff
-            deltas = self.params["delta"][0]
+            deltas = self.params["delta"][iteration]
+            m = self.params["m"][iteration]
+            k = self.params["k"][iteration]
             mean_delta = np.mean(np.abs(deltas)) + 1e-8
             if self.growth == "linear":
                 mat = self._make_trend_shift_matrix(mean_delta, change_likelihood, n_length, n_samples=n_samples)
-                sample_trends = mat.cumsum(axis=1).cumsum(axis=1)  # from slope changes to actual values
-                sample_trends = sample_trends * single_diff  # scaled by the actual meaning of the slope
+                uncertainties = mat.cumsum(axis=1).cumsum(axis=1)  # from slope changes to actual values
+                uncertainties *= single_diff  # scaled by the actual meaning of the slope
             elif self.growth == "logistic":
                 mat = self._make_trend_shift_matrix(mean_delta, change_likelihood, n_length, n_samples=n_samples)
-                cap_scaled = (future_df["cap"] / self.y_scale).values
-                sample_trends = self._logistic_uncertainty(
-                    mat, deltas, cap_scaled,
-                    future_df['t'].to_numpy(), k=n_samples,
-                    n_length=n_length, single_diff=single_diff,
+                uncertainties = self._logistic_uncertainty(
+                    mat=mat,
+                    deltas=deltas,
+                    k=k,
+                    m=m,
+                    cap=future_df["cap_scaled"].values,
+                    t_time=future_df["t"].values,
+                    n_length=n_length,
+                    single_diff=single_diff,
                 )
             elif self.growth == "flat":
                 # no trend uncertainty when there is no growth
-                sample_trends = np.zeros((n_samples, n_length))
+                uncertainties = np.zeros((n_samples, n_length))
             else:
                 raise NotImplementedError
             # handle past included in dataframe
-            if df['t'].min() <= 1:
-                past_trend = np.zeros((n_samples, np.sum(df['t'] <= 1)))
-                sample_trends = np.concatenate([past_trend, sample_trends], axis=1)
-
-        # add gaussian noise based on historical levels
-        sigma = self.params["sigma_obs"][0]
-        historical_variance = np.random.normal(scale=sigma, size=sample_trends.shape)
-        return sample_trends, historical_variance
+            if df["t"].min() <= 1:
+                past_uncertainty = np.zeros((n_samples, np.sum(df["t"] <= 1)))
+                uncertainties = np.concatenate([past_uncertainty, uncertainties], axis=1)
+        return uncertainties
 
     @staticmethod
     def _make_historical_mat_time(deltas, changepoints_t, t_time, n_row=1, single_diff=None):
@@ -1570,17 +1549,35 @@ class Prophet(object):
         return prev_deltas, prev_time
 
     def _logistic_uncertainty(
-            self,
-            mat: np.ndarray,
-            deltas: np.ndarray,
-            cap_scaled: np.ndarray,
-            t_time: np.ndarray,
-            k,
-            n_length,
-            single_diff=None,
-    ):
+        self,
+        mat: np.ndarray,
+        deltas: np.ndarray,
+        k: float,
+        m: float,
+        cap: np.ndarray,
+        t_time: np.ndarray,
+        n_length: int,
+        single_diff: float = None,
+    ) -> np.ndarray:
         """
-        Vectorizes prophet's logistic growth uncertainty by creating a matrix of future possible trends.
+        Vectorizes prophet's logistic uncertainty by creating a matrix of future possible trends.
+
+        Parameters
+        ----------
+        mat: A trend shift matrix returned by _make_trend_shift_matrix()
+        deltas: The size of the trend changes at each changepoint, estimated by the model
+        k: Float initial rate.
+        m: Float initial offset.
+        cap: np.array of capacities at each t.
+        t_time: The values of t in the model context (i.e. scaled so that anything > 1 represents the future)
+        n_length: For each path, the number of future steps to simulate
+        single_diff: The difference between each t step in the model context. Default None, inferred
+            from t_time.
+
+        Returns
+        -------
+        A numpy array with shape (n_samples, n_length), representing the width of the uncertainty interval
+        (standardized, not on the same scale as the actual data values) around 0.
         """
 
         def ffill(arr):
@@ -1589,13 +1586,12 @@ class Prophet(object):
             np.maximum.accumulate(idx, axis=1, out=idx)
             return arr[np.arange(idx.shape[0])[:, None], idx]
 
-        m = self.params["m"][0]
-        #  for logistic growth we need to evaluate the trend all the way from the start of the train item
+        # for logistic growth we need to evaluate the trend all the way from the start of the train item
         historical_mat, historical_time = self._make_historical_mat_time(deltas, self.changepoints_t, t_time, len(mat), single_diff)
         mat = np.concatenate([historical_mat, mat], axis=1)
         full_t_time = np.concatenate([historical_time, t_time])
 
-        #  apply logistic growth logic on the slope changes
+        # apply logistic growth logic on the slope changes
         k_cum = np.concatenate((np.ones((mat.shape[0], 1)) * k, np.where(mat, np.cumsum(mat, axis=1) + k, 0)), axis=1)
         k_cum_b = ffill(k_cum)
         gammas = np.zeros_like(mat)
@@ -1606,15 +1602,14 @@ class Prophet(object):
         # the data before the -n_length is the historical values, which are not needed, so cut the last n_length
         k_t = (mat.cumsum(axis=1) + k)[:, -n_length:]
         m_t = (gammas.cumsum(axis=1) + m)[:, -n_length:]
-        sample_trends = cap_scaled / (1 + np.exp(-k_t * (t_time - m_t)))
+        sample_trends = cap / (1 + np.exp(-k_t * (t_time - m_t)))
         # remove the mean because we only need width of the uncertainty centered around 0
         # we will add the width to the main forecast - yhat (which is the mean) - later
-        sample_trends = sample_trends - sample_trends.mean(axis=0)
-        return sample_trends
+        return sample_trends - sample_trends.mean(axis=0)
 
     @staticmethod
     def _make_trend_shift_matrix(
-            mean_delta: float, likelihood: float, future_length: float, n_samples: int = 10000
+        mean_delta: float, likelihood: float, future_length: float, n_samples: int
     ) -> np.ndarray:
         """
         Creates a matrix of random trend shifts based on historical likelihood and size of shifts.
@@ -1628,6 +1623,39 @@ class Prophet(object):
         n_mat = np.hstack([np.zeros((len(mat), 1)), mat])[:, :-1]
         mat = (n_mat + mat) / 2
         return mat
+
+    def _sample_model(
+        self,
+        df: pd.DataFrame,
+        seasonal_features: pd.DataFrame,
+        iteration: int,
+        s_a: np.ndarray,
+        s_m: np.ndarray,
+        n_samples: int,
+    ) -> pd.DataFrame:
+        """Simulate observations from the extrapolated generative model. Vectorized version of sample_model().
+
+        Returns
+        -------
+        List (length n_samples) of DataFrames with np.arrays for trend and yhat, each ordered like df['t'].
+        """
+        # Get the seasonality and regressor components, which are deterministic per iteration
+        beta = self.params['beta'][iteration]
+        Xb_a = np.matmul(seasonal_features.values,
+                        beta * s_a.values) * self.y_scale
+        Xb_m = np.matmul(seasonal_features.values, beta * s_m.values)
+        # Get the future trend, which is stochastic per iteration
+        trends = self._sample_predictive_trend(df, n_samples, iteration)  # already on the same scale as the actual data
+        sigma = self.params['sigma_obs'][iteration]
+        noise_terms = np.random.normal(0, sigma, trends.shape) * self.y_scale
+
+        simulations = []
+        for trend, noise in zip(trends, noise_terms):
+            simulations.append(pd.DataFrame({
+                'yhat': trend * (1 + Xb_m) + Xb_a + noise,
+                'trend': trend
+            }))
+        return simulations
 
     def sample_model(self, df, seasonal_features, iteration, s_a, s_m):
         """Simulate observations from the extrapolated generative model.
