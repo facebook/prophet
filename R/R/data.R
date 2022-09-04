@@ -10,4 +10,5 @@
 #'
 #' @format A data frame with four variables: ds, holiday, country, year
 #' @source \url{https://github.com/facebook/prophet/blob/main/python/scripts/generate_holidays_file.py}
+#' @export
 "generated_holidays"

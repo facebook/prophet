@@ -10,7 +10,7 @@ There are two main ways that outliers can affect Prophet forecasts. Here we make
 
 ```R
 # R
-df <- read.csv('../examples/example_wp_log_R_outliers1.csv')
+df <- read.csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_R_outliers1.csv')
 m <- prophet(df)
 future <- make_future_dataframe(m, periods = 1096)
 forecast <- predict(m, future)
@@ -18,15 +18,15 @@ plot(m, forecast)
 ```
 ```python
 # Python
-df = pd.read_csv('../examples/example_wp_log_R_outliers1.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_R_outliers1.csv')
 m = Prophet()
 m.fit(df)
 future = m.make_future_dataframe(periods=1096)
 forecast = m.predict(future)
 fig = m.plot(forecast)
 ```
- 
-![png](/prophet/static/outliers_files/outliers_4_0.png) 
+
+![png](/prophet/static/outliers_files/outliers_4_0.png)
 
 
 The trend forecast seems reasonable, but the uncertainty intervals seem way too wide. Prophet is able to handle the outliers in the history, but only by fitting them with trend changes. The uncertainty model then expects future trend changes of similar magnitude.
@@ -51,8 +51,8 @@ df.loc[(df['ds'] > '2010-01-01') & (df['ds'] < '2011-01-01'), 'y'] = None
 model = Prophet().fit(df)
 fig = model.plot(model.predict(future))
 ```
- 
-![png](/prophet/static/outliers_files/outliers_7_0.png) 
+
+![png](/prophet/static/outliers_files/outliers_7_0.png)
 
 
 In the above example the outliers messed up the uncertainty estimation but did not impact the main forecast `yhat`. This isn't always the case, as in this example with added outliers:
@@ -60,7 +60,7 @@ In the above example the outliers messed up the uncertainty estimation but did n
 
 ```R
 # R
-df <- read.csv('../examples/example_wp_log_R_outliers2.csv')
+df <- read.csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_R_outliers2.csv')
 m <- prophet(df)
 future <- make_future_dataframe(m, periods = 1096)
 forecast <- predict(m, future)
@@ -68,15 +68,15 @@ plot(m, forecast)
 ```
 ```python
 # Python
-df = pd.read_csv('../examples/example_wp_log_R_outliers2.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_R_outliers2.csv')
 m = Prophet()
 m.fit(df)
 future = m.make_future_dataframe(periods=1096)
 forecast = m.predict(future)
 fig = m.plot(forecast)
 ```
- 
-![png](/prophet/static/outliers_files/outliers_10_0.png) 
+
+![png](/prophet/static/outliers_files/outliers_10_0.png)
 
 
 Here a group of extreme outliers in June 2015 mess up the seasonality estimate, so their effect reverberates into the future forever. Again the right approach is to remove them:
@@ -97,6 +97,5 @@ df.loc[(df['ds'] > '2015-06-01') & (df['ds'] < '2015-06-30'), 'y'] = None
 m = Prophet().fit(df)
 fig = m.plot(m.predict(future))
 ```
- 
-![png](/prophet/static/outliers_files/outliers_13_0.png) 
 
+![png](/prophet/static/outliers_files/outliers_13_0.png)

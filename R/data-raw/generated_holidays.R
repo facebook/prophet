@@ -7,4 +7,4 @@
 
 
 generated_holidays <- read.csv("data-raw/generated_holidays.csv")
-usethis::use_data(generated_holidays, overwrite = TRUE)
+usethis::use_data(generated_holidays, overwrite = TRUE, internal = TRUE)

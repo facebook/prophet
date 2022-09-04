@@ -10,13 +10,17 @@ from collections import OrderedDict
 from copy import deepcopy
 from io import StringIO
 import json
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 from prophet.forecaster import Prophet
-from prophet import __version__
 
+about = {}
+here = Path(__file__).parent.resolve()
+with open(here / "__version__.py", "r") as f:
+    exec(f.read(), about)
 
 SIMPLE_ATTRIBUTES = [
     'growth', 'n_changepoints', 'specified_changepoints', 'changepoint_range',
@@ -102,7 +106,7 @@ def model_to_dict(model):
     # Params (Dict[str, np.ndarray])
     model_dict['params'] = {k: v.tolist() for k, v in model.params.items()}
     # Attributes that are skipped: stan_fit, stan_backend
-    model_dict['__prophet_version'] = __version__
+    model_dict['__prophet_version'] = about["__version__"]
     return model_dict
 
 

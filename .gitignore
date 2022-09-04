@@ -38,3 +38,4 @@ python/prophet/lib/
 python/prophet/pyvenv.cfg
 python/prophet/share/
 python/prophet/stan_model/
+.Rproj.user
