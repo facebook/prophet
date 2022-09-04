@@ -1367,6 +1367,32 @@ class Prophet(object):
                 )
         return pd.DataFrame(data)
 
+    def predict_uncertainty(self, df: pd.DataFrame, vectorized: bool) -> pd.DataFrame:
+        """Prediction intervals for yhat and trend.
+
+        Parameters
+        ----------
+        df: Prediction dataframe.
+        vectorized: Whether to use a vectorized method for generating future draws.
+
+        Returns
+        -------
+        Dataframe with uncertainty intervals.
+        """
+        sim_values = self.sample_posterior_predictive(df, vectorized)
+
+        lower_p = 100 * (1.0 - self.interval_width) / 2
+        upper_p = 100 * (1.0 + self.interval_width) / 2
+
+        series = {}
+        for key in ['yhat', 'trend']:
+            series['{}_lower'.format(key)] = self.percentile(
+                sim_values[key], lower_p, axis=1)
+            series['{}_upper'.format(key)] = self.percentile(
+                sim_values[key], upper_p, axis=1)
+
+        return pd.DataFrame(series)
+
     def sample_posterior_predictive(self, df: pd.DataFrame, vectorized: bool) -> Dict[str, np.ndarray]:
         """Prophet posterior predictive samples.
 
@@ -1416,54 +1442,123 @@ class Prophet(object):
             sim_values[k] = np.column_stack(v)
         return sim_values
 
-    def predictive_samples(self, df):
-        """Sample from the posterior predictive distribution. Returns samples
-        for the main estimate yhat, and for the trend component. The shape of
-        each output will be (nforecast x nsamples), where nforecast is the
-        number of points being forecasted (the number of rows in the input
-        dataframe) and nsamples is the number of posterior samples drawn.
-        This is the argument `uncertainty_samples` in the Prophet constructor,
-        which defaults to 1000.
-
-        Parameters
-        ----------
-        df: Dataframe with dates for predictions (column ds), and capacity
-            (column cap) if logistic growth.
-
-        Returns
-        -------
-        Dictionary with keys "trend" and "yhat" containing
-        posterior predictive samples for that component.
-        """
-        df = self.setup_dataframe(df.copy())
-        sim_values = self.sample_posterior_predictive(df)
-        return sim_values
-
-    def predict_uncertainty(self, df: pd.DataFrame, vectorized: bool) -> pd.DataFrame:
-        """Prediction intervals for yhat and trend.
+    def sample_model(self, df, seasonal_features, iteration, s_a, s_m):
+        """Simulate observations from the extrapolated generative model.
 
         Parameters
         ----------
         df: Prediction dataframe.
-        vectorized: Whether to use a vectorized method for generating future draws.
+        seasonal_features: pd.DataFrame of seasonal features.
+        iteration: Int sampling iteration to use parameters from.
+        s_a: Indicator vector for additive components
+        s_m: Indicator vector for multiplicative components
 
         Returns
         -------
-        Dataframe with uncertainty intervals.
+        Dataframe with trend and yhat, each like df['t'].
         """
-        sim_values = self.sample_posterior_predictive(df, vectorized)
+        trend = self.sample_predictive_trend(df, iteration)
 
-        lower_p = 100 * (1.0 - self.interval_width) / 2
-        upper_p = 100 * (1.0 + self.interval_width) / 2
+        beta = self.params['beta'][iteration]
+        Xb_a = np.matmul(seasonal_features.values,
+                         beta * s_a.values) * self.y_scale
+        Xb_m = np.matmul(seasonal_features.values, beta * s_m.values)
 
-        series = {}
-        for key in ['yhat', 'trend']:
-            series['{}_lower'.format(key)] = self.percentile(
-                sim_values[key], lower_p, axis=1)
-            series['{}_upper'.format(key)] = self.percentile(
-                sim_values[key], upper_p, axis=1)
+        sigma = self.params['sigma_obs'][iteration]
+        noise = np.random.normal(0, sigma, df.shape[0]) * self.y_scale
 
-        return pd.DataFrame(series)
+        return pd.DataFrame({
+            'yhat': trend * (1 + Xb_m) + Xb_a + noise,
+            'trend': trend
+        })
+
+
+
+    def _sample_model(
+        self,
+        df: pd.DataFrame,
+        seasonal_features: pd.DataFrame,
+        iteration: int,
+        s_a: np.ndarray,
+        s_m: np.ndarray,
+        n_samples: int,
+    ) -> pd.DataFrame:
+        """Simulate observations from the extrapolated generative model. Vectorized version of sample_model().
+
+        Returns
+        -------
+        List (length n_samples) of DataFrames with np.arrays for trend and yhat, each ordered like df['t'].
+        """
+        # Get the seasonality and regressor components, which are deterministic per iteration
+        beta = self.params['beta'][iteration]
+        Xb_a = np.matmul(seasonal_features.values,
+                        beta * s_a.values) * self.y_scale
+        Xb_m = np.matmul(seasonal_features.values, beta * s_m.values)
+        # Get the future trend, which is stochastic per iteration
+        trends = self._sample_predictive_trend(df, n_samples, iteration)  # already on the same scale as the actual data
+        sigma = self.params['sigma_obs'][iteration]
+        noise_terms = np.random.normal(0, sigma, trends.shape) * self.y_scale
+
+        simulations = []
+        for trend, noise in zip(trends, noise_terms):
+            simulations.append(pd.DataFrame({
+                'yhat': trend * (1 + Xb_m) + Xb_a + noise,
+                'trend': trend
+            }))
+        return simulations
+
+    def sample_predictive_trend(self, df, iteration):
+        """Simulate the trend using the extrapolated generative model.
+
+        Parameters
+        ----------
+        df: Prediction dataframe.
+        iteration: Int sampling iteration to use parameters from.
+
+        Returns
+        -------
+        np.array of simulated trend over df['t'].
+        """
+        k = self.params['k'][iteration]
+        m = self.params['m'][iteration]
+        deltas = self.params['delta'][iteration]
+
+        t = np.array(df['t'])
+        T = t.max()
+
+        # New changepoints from a Poisson process with rate S on [1, T]
+        if T > 1:
+            S = len(self.changepoints_t)
+            n_changes = np.random.poisson(S * (T - 1))
+        else:
+            n_changes = 0
+        if n_changes > 0:
+            changepoint_ts_new = 1 + np.random.rand(n_changes) * (T - 1)
+            changepoint_ts_new.sort()
+        else:
+            changepoint_ts_new = []
+
+        # Get the empirical scale of the deltas, plus epsilon to avoid NaNs.
+        lambda_ = np.mean(np.abs(deltas)) + 1e-8
+
+        # Sample deltas
+        deltas_new = np.random.laplace(0, lambda_, n_changes)
+
+        # Prepend the times and deltas from the history
+        changepoint_ts = np.concatenate((self.changepoints_t,
+                                         changepoint_ts_new))
+        deltas = np.concatenate((deltas, deltas_new))
+
+        if self.growth == 'linear':
+            trend = self.piecewise_linear(t, deltas, k, m, changepoint_ts)
+        elif self.growth == 'logistic':
+            cap = df['cap_scaled']
+            trend = self.piecewise_logistic(t, cap, deltas, k, m,
+                                            changepoint_ts)
+        elif self.growth == 'flat':
+            trend = self.flat_trend(t, m)
+
+        return trend * self.y_scale + df['floor']
 
     def _sample_predictive_trend(self, df: pd.DataFrame, n_samples: int, iteration: int = 0) -> np.ndarray:
         """Sample draws of the future trend values. Vectorized version of sample_predictive_trend().
@@ -1550,6 +1645,23 @@ class Prophet(object):
         return uncertainties
 
     @staticmethod
+    def _make_trend_shift_matrix(
+        mean_delta: float, likelihood: float, future_length: float, n_samples: int
+    ) -> np.ndarray:
+        """
+        Creates a matrix of random trend shifts based on historical likelihood and size of shifts.
+        Can be used for either linear or logistic trend shifts.
+        Each row represents a different sample of a possible future, and each column is a time step into the future.
+        """
+        # create a bool matrix of where these trend shifts should go
+        bool_slope_change = np.random.uniform(size=(n_samples, future_length)) < likelihood
+        shift_values = np.random.laplace(0, mean_delta, size=bool_slope_change.shape)
+        mat = shift_values * bool_slope_change
+        n_mat = np.hstack([np.zeros((len(mat), 1)), mat])[:, :-1]
+        mat = (n_mat + mat) / 2
+        return mat
+
+    @staticmethod
     def _make_historical_mat_time(deltas, changepoints_t, t_time, n_row=1, single_diff=None):
         """
         Creates a matrix of slope-deltas where these changes occured in training data according to the trained prophet obj
@@ -1624,138 +1736,28 @@ class Prophet(object):
         # we will add the width to the main forecast - yhat (which is the mean) - later
         return sample_trends - sample_trends.mean(axis=0)
 
-    @staticmethod
-    def _make_trend_shift_matrix(
-        mean_delta: float, likelihood: float, future_length: float, n_samples: int
-    ) -> np.ndarray:
-        """
-        Creates a matrix of random trend shifts based on historical likelihood and size of shifts.
-        Can be used for either linear or logistic trend shifts.
-        Each row represents a different sample of a possible future, and each column is a time step into the future.
-        """
-        # create a bool matrix of where these trend shifts should go
-        bool_slope_change = np.random.uniform(size=(n_samples, future_length)) < likelihood
-        shift_values = np.random.laplace(0, mean_delta, size=bool_slope_change.shape)
-        mat = shift_values * bool_slope_change
-        n_mat = np.hstack([np.zeros((len(mat), 1)), mat])[:, :-1]
-        mat = (n_mat + mat) / 2
-        return mat
-
-    def _sample_model(
-        self,
-        df: pd.DataFrame,
-        seasonal_features: pd.DataFrame,
-        iteration: int,
-        s_a: np.ndarray,
-        s_m: np.ndarray,
-        n_samples: int,
-    ) -> pd.DataFrame:
-        """Simulate observations from the extrapolated generative model. Vectorized version of sample_model().
-
-        Returns
-        -------
-        List (length n_samples) of DataFrames with np.arrays for trend and yhat, each ordered like df['t'].
-        """
-        # Get the seasonality and regressor components, which are deterministic per iteration
-        beta = self.params['beta'][iteration]
-        Xb_a = np.matmul(seasonal_features.values,
-                        beta * s_a.values) * self.y_scale
-        Xb_m = np.matmul(seasonal_features.values, beta * s_m.values)
-        # Get the future trend, which is stochastic per iteration
-        trends = self._sample_predictive_trend(df, n_samples, iteration)  # already on the same scale as the actual data
-        sigma = self.params['sigma_obs'][iteration]
-        noise_terms = np.random.normal(0, sigma, trends.shape) * self.y_scale
-
-        simulations = []
-        for trend, noise in zip(trends, noise_terms):
-            simulations.append(pd.DataFrame({
-                'yhat': trend * (1 + Xb_m) + Xb_a + noise,
-                'trend': trend
-            }))
-        return simulations
-
-    def sample_model(self, df, seasonal_features, iteration, s_a, s_m):
-        """Simulate observations from the extrapolated generative model.
+    def predictive_samples(self, df):
+        """Sample from the posterior predictive distribution. Returns samples
+        for the main estimate yhat, and for the trend component. The shape of
+        each output will be (nforecast x nsamples), where nforecast is the
+        number of points being forecasted (the number of rows in the input
+        dataframe) and nsamples is the number of posterior samples drawn.
+        This is the argument `uncertainty_samples` in the Prophet constructor,
+        which defaults to 1000.
 
         Parameters
         ----------
-        df: Prediction dataframe.
-        seasonal_features: pd.DataFrame of seasonal features.
-        iteration: Int sampling iteration to use parameters from.
-        s_a: Indicator vector for additive components
-        s_m: Indicator vector for multiplicative components
+        df: Dataframe with dates for predictions (column ds), and capacity
+            (column cap) if logistic growth.
 
         Returns
         -------
-        Dataframe with trend and yhat, each like df['t'].
+        Dictionary with keys "trend" and "yhat" containing
+        posterior predictive samples for that component.
         """
-        trend = self.sample_predictive_trend(df, iteration)
-
-        beta = self.params['beta'][iteration]
-        Xb_a = np.matmul(seasonal_features.values,
-                         beta * s_a.values) * self.y_scale
-        Xb_m = np.matmul(seasonal_features.values, beta * s_m.values)
-
-        sigma = self.params['sigma_obs'][iteration]
-        noise = np.random.normal(0, sigma, df.shape[0]) * self.y_scale
-
-        return pd.DataFrame({
-            'yhat': trend * (1 + Xb_m) + Xb_a + noise,
-            'trend': trend
-        })
-
-    def sample_predictive_trend(self, df, iteration):
-        """Simulate the trend using the extrapolated generative model.
-
-        Parameters
-        ----------
-        df: Prediction dataframe.
-        iteration: Int sampling iteration to use parameters from.
-
-        Returns
-        -------
-        np.array of simulated trend over df['t'].
-        """
-        k = self.params['k'][iteration]
-        m = self.params['m'][iteration]
-        deltas = self.params['delta'][iteration]
-
-        t = np.array(df['t'])
-        T = t.max()
-
-        # New changepoints from a Poisson process with rate S on [1, T]
-        if T > 1:
-            S = len(self.changepoints_t)
-            n_changes = np.random.poisson(S * (T - 1))
-        else:
-            n_changes = 0
-        if n_changes > 0:
-            changepoint_ts_new = 1 + np.random.rand(n_changes) * (T - 1)
-            changepoint_ts_new.sort()
-        else:
-            changepoint_ts_new = []
-
-        # Get the empirical scale of the deltas, plus epsilon to avoid NaNs.
-        lambda_ = np.mean(np.abs(deltas)) + 1e-8
-
-        # Sample deltas
-        deltas_new = np.random.laplace(0, lambda_, n_changes)
-
-        # Prepend the times and deltas from the history
-        changepoint_ts = np.concatenate((self.changepoints_t,
-                                         changepoint_ts_new))
-        deltas = np.concatenate((deltas, deltas_new))
-
-        if self.growth == 'linear':
-            trend = self.piecewise_linear(t, deltas, k, m, changepoint_ts)
-        elif self.growth == 'logistic':
-            cap = df['cap_scaled']
-            trend = self.piecewise_logistic(t, cap, deltas, k, m,
-                                            changepoint_ts)
-        elif self.growth == 'flat':
-            trend = self.flat_trend(t, m)
-
-        return trend * self.y_scale + df['floor']
+        df = self.setup_dataframe(df.copy())
+        sim_values = self.sample_posterior_predictive(df)
+        return sim_values
 
     def percentile(self, a, *args, **kwargs):
         """
