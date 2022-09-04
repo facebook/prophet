@@ -227,17 +227,22 @@ with open("README.md", "r", encoding="utf-8") as f:
 with open("requirements.txt", "r") as f:
     install_requires = f.read().splitlines()
 
+about = {}
+here = Path(__file__).parent.resolve()
+with open(here / "prophet" /  "__version__.py", "r") as f:
+    exec(f.read(), about)
+
 setup(
-    name="prophet",
-    version="1.1",
-    description="Automatic Forecasting Procedure",
-    url="https://facebook.github.io/prophet/",
+    name=about["__title__"],
+    version=about["__version__"],
+    description=about["__description__"],
+    url=about["__url__"],
     project_urls={
         "Source": "https://github.com/facebook/prophet",
     },
-    author="Sean J. Taylor <sjtz@pm.me>, Ben Letham <bletham@fb.com>",
-    author_email="sjtz@pm.me",
-    license="MIT",
+    author=about["__author__"],
+    author_email=about["__author_email__"],
+    license=about["__license__"],
     packages=find_packages(),
     install_requires=install_requires,
     python_requires=">=3.7",
