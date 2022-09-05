@@ -1,9 +1,16 @@
 # Prophet: Automatic Forecasting Procedure
 
 ![Build](https://github.com/facebook/prophet/workflows/Build/badge.svg)
-[![Pypi_Version](https://img.shields.io/pypi/v/prophet.svg)](https://pypi.python.org/pypi/prophet)
+
+[![PyPI Version](https://img.shields.io/pypi/v/prophet.svg)](https://pypi.python.org/pypi/prophet)
+[![PyPI Downloads Monthly](https://pepy.tech/badge/prophet/month)](https://pepy.tech/project/prophet)
+[![PyPI Downloads All](https://pepy.tech/badge/prophet)](https://pepy.tech/project/prophet)
+
+[![CRAN Version](https://www.r-pkg.org/badges/version/prophet)](https://CRAN.R-project.org/package=prophet)
+[![CRAN Downloads Monthly](https://cranlogs.r-pkg.org/badges/prophet?color=brightgreen)](https://cran.r-project.org/package=prophet)
+[![CRAN Downloads All](https://cranlogs.r-pkg.org/badges/grand-total/prophet?color=brightgreen)](https://cranlogs.r-pkg.org/badges/grand-total/prophet)
+
 [![Conda_Version](https://anaconda.org/conda-forge/prophet/badges/version.svg)](https://anaconda.org/conda-forge/prophet/)
-[![CRAN status](https://www.r-pkg.org/badges/version/prophet)](https://CRAN.R-project.org/package=prophet)
 
 Prophet is a procedure for forecasting time series data based on an additive model where non-linear trends are fit with yearly, weekly, and daily seasonality, plus holiday effects. It works best with time series that have strong seasonal effects and several seasons of historical data. Prophet is robust to missing data and shifts in the trend, and typically handles outliers well.
 
