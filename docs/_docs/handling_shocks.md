@@ -48,7 +48,7 @@ The aggregated dataset can be found in the examples folder [here](https://github
 
 ```python
 # Python
-df = pd.read_csv('../examples/example_pedestrians_covid.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_pedestrians_covid.csv')
 ```
 ```python
 # Python
