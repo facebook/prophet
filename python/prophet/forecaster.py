@@ -10,7 +10,7 @@ import logging
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from datetime import timedelta, datetime
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -1480,7 +1480,7 @@ class Prophet(object):
         s_a: np.ndarray,
         s_m: np.ndarray,
         n_samples: int,
-    ) -> pd.DataFrame:
+    ) -> List[pd.DataFrame]:
         """Simulate observations from the extrapolated generative model. Vectorized version of sample_model().
 
         Returns
