@@ -4,18 +4,12 @@ docid: "handling_shocks"
 title: "Handling Shocks"
 permalink: /docs/handling_shocks.html
 subsections:
-  - title: Case Study - Pedestrian Activity
-    id: case-study---pedestrian-activity
-  - title: Default model without any adjustments
-    id: default-model-without-any-adjustments
   - title: Treating COVID-19 lockdowns as a one-off holidays
     id: treating-covid-19-lockdowns-as-a-one-off-holidays
   - title: Sense checking the trend
     id: sense-checking-the-trend
   - title: Changes in seasonality between pre- and post-COVID
     id: changes-in-seasonality-between-pre--and-post-covid
-  - title: Further reading
-    id: further-reading
 ---
 
 As a result of the lockdowns caused by the COVID-19 pandemic, many time series experienced "shocks" during 2020, e.g. spikes in media consumption (Netflix, YouTube), e-commerce transactions (Amazon, eBay), whilst attendance to in-person events declined dramatically.
@@ -41,7 +35,7 @@ In this page we'll explore some strategies for capturing these effects using Pro
 
 <a id="case-study---pedestrian-activity"> </a>
 
-### Case Study - Pedestrian Activity
+#### Case Study - Pedestrian Activity
 
 
 
@@ -54,7 +48,7 @@ The aggregated dataset can be found in the examples folder [here](https://github
 
 ```python
 # Python
-df = pd.read_csv('../examples/example_pedestrians_covid.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_pedestrians_covid.csv')
 ```
 ```python
 # Python
@@ -79,7 +73,7 @@ There are also shorter periods of strict lockdown that lead to sudden tips in th
 
 <a id="default-model-without-any-adjustments"> </a>
 
-### Default model without any adjustments
+#### Default model without any adjustments
 
 
 
@@ -93,9 +87,6 @@ m = m.fit(df)
 future = m.make_future_dataframe(periods=366)
 forecast = m.predict(future)
 ```
-    02:53:41 - cmdstanpy - INFO - Chain [1] start processing
-    02:53:41 - cmdstanpy - INFO - Chain [1] done processing
-
 
 ```python
 # Python
@@ -227,9 +218,6 @@ m2 = m2.fit(df)
 future2 = m2.make_future_dataframe(periods=366)
 forecast2 = m2.predict(future2)
 ```
-    02:53:44 - cmdstanpy - INFO - Chain [1] start processing
-    02:53:45 - cmdstanpy - INFO - Chain [1] done processing
-
 
 ```python
 # Python
@@ -311,9 +299,6 @@ m3 = Prophet(holidays=lockdowns, changepoints=m3_changepoints, changepoint_prior
 m3 = m3.fit(df)
 forecast3 = m3.predict(future2)
 ```
-    02:53:49 - cmdstanpy - INFO - Chain [1] start processing
-    02:53:52 - cmdstanpy - INFO - Chain [1] done processing
-
 
 ```python
 # Python
@@ -380,9 +365,6 @@ m4.add_seasonality(
 # Python
 m4 = m4.fit(df2)
 ```
-    02:53:55 - cmdstanpy - INFO - Chain [1] start processing
-    02:53:56 - cmdstanpy - INFO - Chain [1] done processing
-
 
 We also need to create the `pre_covid` and `post_covid` flags in the future dataframe. This is so that Prophet can apply the correct weekly seasonality parameters to each future date.
 
@@ -420,7 +402,7 @@ Interestingly, the model with conditional seasonalities suggests that, post-COVI
 
 <a id="further-reading"> </a>
 
-### Further reading
+#### Further reading
 
 
 

@@ -10,6 +10,7 @@
   - id: outliers
   - id: non-daily_data
   - id: diagnostics
+  - id: handling_shocks
   - id: additional_topics
   - id: contributing
 
