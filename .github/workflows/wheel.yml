@@ -11,11 +11,18 @@ env:
 
 jobs:
   make-wheels:
-    name: Make ${{ matrix.os }} wheels
+    name: Make ${{ matrix.os }} ${{ matrix.cibw_arch }} ${{ matrix.py_version }} wheels
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: ["macos-latest", "ubuntu-latest", "windows-latest"]
+        cibw_arch: ["native", "aarch64"]
+        py_version: ["cp37-*", "cp38-*", "cp39-*", "cp310-*"]
+        exclude:
+          - os: macos-latest
+            cibw_arch: "aarch64"
+          - os: windows-latest
+            cibw_arch: "aarch64"
       fail-fast: false
 
     steps:
@@ -30,6 +37,12 @@ jobs:
           path: C:/rtools40
           key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
 
+      - name: Set up QEMU
+        if: matrix.cibw_arch == 'aarch64'
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: arm64
+
       - name: "Build wheels"
         uses: pypa/cibuildwheel@v2.6.0
         with:
@@ -38,9 +51,9 @@ jobs:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_BUILD: cp37-* cp38-* cp39-* cp310-*
+          CIBW_BUILD: ${{ matrix.py_version }}
           CIBW_SKIP: "*musllinux*"
-          CIBW_ARCHS: native
+          CIBW_ARCHS: ${{ matrix.cibw_arch }}
           CIBW_BUILD_FRONTEND: build
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: pytest --pyargs prophet
@@ -48,7 +61,7 @@ jobs:
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@v3
         with:
-          name: artifact-${{ matrix.os }}-wheel
+          name: artifact-${{ matrix.os }}-${{ matrix.cibw_arch }}-wheel
           path: "./**/*.whl"
 
   make-sdist:
