@@ -11,15 +11,18 @@ env:
 
 jobs:
   make-wheels:
-    name: Make ${{ matrix.os }} ${{ matrix.cibw_archs }} wheels
+    name: Make ${{ matrix.os }} ${{ matrix.cibw_arch }} ${{ matrix.py_version }} wheels
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: ["macos-latest", "ubuntu-latest", "windows-latest"]
-        cibw_archs: ["native"]
-        include:
-          - os: ubuntu-latest
-            cibw_archs: "aarch64"
+        cibw_arch: ["native", "aarch64"]
+        py_version: ["cp37-*", "cp38-*", "cp39-*", "cp310-*"]
+        exclude:
+          - os: macos-latest
+            cibw_arch: "aarch64"
+          - os: windows-latest
+            cibw_arch: "aarch64"
       fail-fast: false
 
     steps:
@@ -35,7 +38,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
 
       - name: Set up QEMU
-        if: matrix.cibw_archs == 'aarch64'
+        if: matrix.cibw_arch == 'aarch64'
         uses: docker/setup-qemu-action@v2
         with:
           platforms: arm64
@@ -48,9 +51,9 @@ jobs:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_BUILD: cp37-* cp38-* cp39-* cp310-*
+          CIBW_BUILD: ${{ matrix.py_version }}
           CIBW_SKIP: "*musllinux*"
-          CIBW_ARCHS: ${{ matrix.cibw_archs }}
+          CIBW_ARCHS: ${{ matrix.cibw_arch }}
           CIBW_BUILD_FRONTEND: build
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: pytest --pyargs prophet
@@ -58,7 +61,7 @@ jobs:
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@v3
         with:
-          name: artifact-${{ matrix.os }}-${{ matrix.cibw_archs }}-wheel
+          name: artifact-${{ matrix.os }}-${{ matrix.cibw_arch }}-wheel
           path: "./**/*.whl"
 
   make-sdist:
@@ -91,8 +94,8 @@ jobs:
         find . -name '*.tar.gz' -exec mv '{}' dist/ \;
         find . -name '*.whl' -exec mv '{}' dist/ \;
 
-    - name: Upload
-      uses: pypa/gh-action-pypi-publish@v1.4.2
-      with:
-        user: ${{ secrets.PYPI_USERNAME }}
-        password: ${{ secrets.PYPI_PASSWORD }}
+    # - name: Upload
+    #   uses: pypa/gh-action-pypi-publish@v1.4.2
+    #   with:
+    #     user: ${{ secrets.PYPI_USERNAME }}
+    #     password: ${{ secrets.PYPI_PASSWORD }}
