@@ -94,8 +94,8 @@ jobs:
         find . -name '*.tar.gz' -exec mv '{}' dist/ \;
         find . -name '*.whl' -exec mv '{}' dist/ \;
 
-    # - name: Upload
-    #   uses: pypa/gh-action-pypi-publish@v1.4.2
-    #   with:
-    #     user: ${{ secrets.PYPI_USERNAME }}
-    #     password: ${{ secrets.PYPI_PASSWORD }}
+    - name: Upload
+      uses: pypa/gh-action-pypi-publish@v1.4.2
+      with:
+        user: ${{ secrets.PYPI_USERNAME }}
+        password: ${{ secrets.PYPI_PASSWORD }}
