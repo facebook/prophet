@@ -1417,7 +1417,7 @@ class Prophet(object):
         sim_values = {'yhat': [], 'trend': []}
         for i in range(n_iterations):
             if vectorized:
-                sims = self._sample_model(
+                sims = self.sample_model_vectorized(
                     df=df,
                     seasonal_features=seasonal_features,
                     iteration=i,
@@ -1472,7 +1472,7 @@ class Prophet(object):
             'trend': trend
         })
 
-    def _sample_model(
+    def sample_model_vectorized(
         self,
         df: pd.DataFrame,
         seasonal_features: pd.DataFrame,
@@ -1493,7 +1493,7 @@ class Prophet(object):
                         beta * s_a.values) * self.y_scale
         Xb_m = np.matmul(seasonal_features.values, beta * s_m.values)
         # Get the future trend, which is stochastic per iteration
-        trends = self._sample_predictive_trend(df, n_samples, iteration)  # already on the same scale as the actual data
+        trends = self.sample_predictive_trend_vectorized(df, n_samples, iteration)  # already on the same scale as the actual data
         sigma = self.params['sigma_obs'][iteration]
         noise_terms = np.random.normal(0, sigma, trends.shape) * self.y_scale
 
@@ -1558,7 +1558,7 @@ class Prophet(object):
 
         return trend * self.y_scale + df['floor']
 
-    def _sample_predictive_trend(self, df: pd.DataFrame, n_samples: int, iteration: int = 0) -> np.ndarray:
+    def sample_predictive_trend_vectorized(self, df: pd.DataFrame, n_samples: int, iteration: int = 0) -> np.ndarray:
         """Sample draws of the future trend values. Vectorized version of sample_predictive_trend().
 
         Returns
@@ -1733,7 +1733,7 @@ class Prophet(object):
         # we will add the width to the main forecast - yhat (which is the mean) - later
         return sample_trends - sample_trends.mean(axis=0)
 
-    def predictive_samples(self, df):
+    def predictive_samples(self, df: pd.DataFrame, vectorized: bool = True):
         """Sample from the posterior predictive distribution. Returns samples
         for the main estimate yhat, and for the trend component. The shape of
         each output will be (nforecast x nsamples), where nforecast is the
@@ -1746,6 +1746,9 @@ class Prophet(object):
         ----------
         df: Dataframe with dates for predictions (column ds), and capacity
             (column cap) if logistic growth.
+        vectorized: Whether to use a vectorized method to compute possible draws. Suggest using
+            True (the default) for much faster runtimes in most cases,
+            except when (growth = 'logistic' and mcmc_samples > 0).
 
         Returns
         -------
@@ -1753,8 +1756,7 @@ class Prophet(object):
         posterior predictive samples for that component.
         """
         df = self.setup_dataframe(df.copy())
-        sim_values = self.sample_posterior_predictive(df)
-        return sim_values
+        return self.sample_posterior_predictive(df, vectorized)
 
     def percentile(self, a, *args, **kwargs):
         """
