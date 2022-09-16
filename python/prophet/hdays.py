@@ -406,6 +406,84 @@ class India(HolidayBase):
 class IN(India):
     pass
 
+# ------------ Holidays in Kyrgyzstan---------------------
+class Kyrgyzstan(HolidayBase):
+    """
+    Implement public holidays in Kyrgyzstan
+    Reference:
+    https://en.wikipedia.org/wiki/Public_holidays_in_Kyrgyzstan
+    Please note:
+    June 1st is a childrens day which iscelebrated but is not a day off, the are day off.
+    """
+
+    def __init__(self, **kwargs):
+        self.country = "KG"
+        HolidayBase.__init__(self, **kwargs)
+
+    def _populate(self, year):
+        # New Year's Day
+        name = "New Year's Day"
+        self[date(year, 1, 1)] = name
+
+        # Orthodox Christmas day
+        name = "Orthodox Christmas Day"
+        self[date(year, 1, 7)] = name
+
+        # Feb. 23 Fatherland Defender's Day
+        name = "Fatherland Defender's Day"
+        self[date(year, 2, 23)] = name
+
+        # International Women's Day
+        name = "International Women's Day"
+        self[date(year, 3, 8)] = name
+
+        # Nooruz Mairamy
+        name = "Nooruz Mairamy"
+        self[date(year, 3, 21)] = name
+        
+        # Day of the People's April Revolution
+        name = "Day of the People's April Revolution"
+        self[date(year, 4, 7)] = name
+        
+        # Spring and Labour Day
+        name = "Spring and Labour Day"
+        self[date(year, 5, 1)] = name
+        
+        # Spring and Labour Day
+        name = "Spring and Labour Day"
+        self[date(year, 5, 1)] = name
+        
+        # Constitution Day
+        name = "Constitution Day"
+        self[date(year, 5, 5)] = name
+
+        # Victory Day
+        name = "Victory Day"
+        self[date(year, 5, 9)] = name
+
+        # Children's Day
+        name = "Russia Day"
+        self[date(year, 6, 1)] = name
+        
+        # Independence Day
+        name = "Independence Day"
+        self[date(year, 8, 31)] = name
+        
+        # Day 1 of History and Commemoration of Ancestors
+        name = "Day 1 of History and Commemoration of Ancestors"
+        self[date(year, 11, 7)] = name
+        
+        # Day 2 of History and Commemoration of Ancestors
+        name = "Day 2 of History and Commemoration of Ancestors"
+        self[date(year, 11, 8)] = name
+
+        # New Year's Eve
+        name = "New Year's Eve"
+        self[date(year, 12, 31)] = name
+
+
+class KG(Kyrgyzstan):
+    pass
 
 # ------------ Holidays in Thailand---------------------
 class Thailand(HolidayBase):
