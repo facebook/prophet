@@ -449,10 +449,6 @@ class Kyrgyzstan(HolidayBase):
         name = "Spring and Labour Day"
         self[date(year, 5, 1)] = name
         
-        # Spring and Labour Day
-        name = "Spring and Labour Day"
-        self[date(year, 5, 1)] = name
-        
         # Constitution Day
         name = "Constitution Day"
         self[date(year, 5, 5)] = name
@@ -480,10 +476,32 @@ class Kyrgyzstan(HolidayBase):
         # New Year's Eve
         name = "New Year's Eve"
         self[date(year, 12, 31)] = name
+        
+        # Islamic Holidays
+        
+        # Eid ul-Fitr
+        # 1st and 2nd day of 10th Islamic month
+        name = "Eid al-Fitr"
+        for offset in range(-1, 2, 1):
+            islam_year = from_gregorian(year + offset, 6, 15)[0]
+            y1, m1, d1 = to_gregorian(islam_year, 10, 1)
+            y2, m2, d2 = to_gregorian(islam_year, 10, 2)
+            if y1 == year:
+                self[date(y1, m1, d1)] = name
+            if y2 == year:
+                self[date(y2, m2, d2)] = name
 
+        # Eid al-Adha, i.e., Feast of the Sacrifice
+        name = "Feast of the Sacrifice"
+        for offset in range(-1, 2, 1):
+            islam_year = from_gregorian(year + offset, 8, 22)[0]
+            y, m, d = to_gregorian(islam_year, 12, 10)
+            if y == year:
+                self[date(y, m, d)] = name
 
 class KG(Kyrgyzstan):
     pass
+
 
 # ------------ Holidays in Thailand---------------------
 class Thailand(HolidayBase):
