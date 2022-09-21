@@ -108,6 +108,11 @@ Using `cmdstanpy` with Windows requires a Unix-compatible C compiler such as min
 
 ## Changelog
 
+### Version 1.1.1 (2022.09.08)
+
+- (Python) Improved runtime (3-7x) of uncertainty predictions via vectorization.
+- Bugfixes relating to Python package versions and R holiday objects.
+
 ### Version 1.1 (2022.06.25)
 
 - Replaced `pystan2` dependency with `cmdstan` + `cmdstanpy`.
