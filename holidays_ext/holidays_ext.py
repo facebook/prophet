@@ -12,6 +12,7 @@ from lunarcalendar import Lunar, Converter
 from lunarcalendar.converter import DateNotExist
 
 from holidays import WEEKEND, HolidayBase
+from holidays import UnitedStates as OldUnitedStates
 from dateutil.easter import easter, EASTER_ORTHODOX
 from dateutil.relativedelta import relativedelta as rd, TU
 
@@ -202,8 +203,8 @@ class India(HolidayBase):
             2019: date(2019, 10, 27),
             2020: date(2020, 11, 14),
             2021: date(2021, 11, 4),
-            2022: date(2020, 10, 24),
-            2023: date(2023, 10, 12),
+            2022: date(2022, 10, 24),
+            2023: date(2023, 11, 12),
             2024: date(2024, 11, 1),
             2025: date(2025, 10, 21),
             2026: date(2026, 11, 8),
@@ -273,6 +274,9 @@ class India(HolidayBase):
             y, m, d = to_gregorian(islam_year, 12, 10)
             if y == year:
                 self[date(y, m, d)] = "Feast of the Sacrifice"
+        # Year 2020 is missing from the above logic.
+        if year == 2020:
+            self[date(2020, 7, 31)] = "Feast of the Sacrifice"
 
         self[date(year, 1, 1)] = "New Year's Day"
 
@@ -1062,4 +1066,19 @@ class Georgia(HolidayBase):
 
 
 class GE(Georgia):
+    pass
+
+
+class UnitedStates(OldUnitedStates):
+    """Overrides United States by adding Halloween."""
+    def __init__(self, **kwargs):
+        self.country = "US"
+        HolidayBase.__init__(self, **kwargs)
+
+    def _populate(self, year):
+        super()._populate(year)
+        self[date(year, 10, 31)] = "Halloween"
+
+
+class US(UnitedStates):
     pass
