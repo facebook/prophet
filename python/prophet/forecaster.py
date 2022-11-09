@@ -1467,10 +1467,10 @@ class Prophet(object):
         sigma = self.params['sigma_obs'][iteration]
         noise = np.random.normal(0, sigma, df.shape[0]) * self.y_scale
 
-        return pd.DataFrame({
+        return {
             'yhat': trend * (1 + Xb_m) + Xb_a + noise,
             'trend': trend
-        })
+        }
 
     def sample_model_vectorized(
         self,
@@ -1480,7 +1480,7 @@ class Prophet(object):
         s_a: np.ndarray,
         s_m: np.ndarray,
         n_samples: int,
-    ) -> List[pd.DataFrame]:
+    ) -> List[dict]:
         """Simulate observations from the extrapolated generative model. Vectorized version of sample_model().
 
         Returns
@@ -1499,10 +1499,10 @@ class Prophet(object):
 
         simulations = []
         for trend, noise in zip(trends, noise_terms):
-            simulations.append(pd.DataFrame({
+            simulations.append({
                 'yhat': trend * (1 + Xb_m) + Xb_a + noise,
                 'trend': trend
-            }))
+            })
         return simulations
 
     def sample_predictive_trend(self, df, iteration):
