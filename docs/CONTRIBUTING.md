@@ -65,7 +65,7 @@ or with a combination of changing `./_data/features.yml` and adding some Liquid 
 
 ## Blog
 
-To modify a blog post, edit the appopriate markdown file in `./_posts/`.
+To modify a blog post, edit the appropriate markdown file in `./_posts/`.
 
 Adding a new blog post is a four-step process.
 
