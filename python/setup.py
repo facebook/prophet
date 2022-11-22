@@ -20,6 +20,8 @@ from setuptools.command.test import test as test_command
 import pandas as pd
 import numpy as np
 
+import sklearn
+
 
 MODEL_DIR = "stan"
 MODEL_TARGET_DIR = os.path.join("prophet", "stan_model")
