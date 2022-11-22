@@ -22,6 +22,12 @@ import numpy as np
 
 import sklearn
 
+asd
+fa
+
+
+
+asdfasdfasdfsadfas
 
 MODEL_DIR = "stan"
 MODEL_TARGET_DIR = os.path.join("prophet", "stan_model")
