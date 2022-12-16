@@ -78,24 +78,3 @@ jobs:
         name: artifact-source-dist
         path: "./**/dist/*.tar.gz"
 
-  upload:
-    name: Upload to PyPI
-    needs: [make-wheels, make-sdist]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release' && github.event.action == 'published'
-    steps:
-    - name: Download all artifacts
-      uses: actions/download-artifact@v3
-
-    - name: Copy artifacts to dist/ folder
-      run: |
-        find . -name 'artifact-*' -exec unzip '{}' \;
-        mkdir -p dist/
-        find . -name '*.tar.gz' -exec mv '{}' dist/ \;
-        find . -name '*.whl' -exec mv '{}' dist/ \;
-
-    - name: Upload
-      uses: pypa/gh-action-pypi-publish@v1.4.2
-      with:
-        user: ${{ secrets.PYPI_USERNAME }}
-        password: ${{ secrets.PYPI_PASSWORD }}
