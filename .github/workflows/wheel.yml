@@ -44,7 +44,7 @@ jobs:
           platforms: arm64
 
       - name: "Build wheels"
-        uses: pypa/cibuildwheel@v2.6.0
+        uses: pypa/cibuildwheel@v2.11.3
         with:
           package-dir: python
         env:
@@ -78,3 +78,4 @@ jobs:
         name: artifact-source-dist
         path: "./**/dist/*.tar.gz"
 
+ 
