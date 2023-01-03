@@ -83,6 +83,7 @@ class CmdStanPyBackend(IStanBackend):
 
         if 'inits' not in kwargs and 'init' in kwargs:
             kwargs['inits'] = self.prepare_data(kwargs['init'], stan_data)[0]
+            del kwargs['init']
 
         args = dict(
             data=stan_data,
@@ -151,13 +152,13 @@ class CmdStanPyBackend(IStanBackend):
             'K': data['K'],
             'tau': data['tau'],
             'trend_indicator': data['trend_indicator'],
-            'y': data['y'].tolist(),
-            't': data['t'].tolist(),
-            'cap': data['cap'].tolist(),
-            't_change': data['t_change'].tolist(),
-            's_a': data['s_a'].tolist(),
-            's_m': data['s_m'].tolist(),
-            'X': data['X'].to_numpy().tolist(),
+            'y': list(data['y']),
+            't': list(data['t']),
+            'cap': list(data['cap']),
+            't_change': list(data['t_change']),
+            's_a': list(data['s_a']),
+            's_m': list(data['s_m']),
+            'X': data['X'] if isinstance(data['X'], list) else list(data['X'].to_numpy()),
             'sigmas': data['sigmas']
         }
 
