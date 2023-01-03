@@ -165,11 +165,11 @@ class CmdStanPyBackend(IStanBackend):
         cmdstanpy_init = {
             'k': init['k'],
             'm': init['m'],
-            'delta': init['delta'].tolist(),
-            'beta': init['beta'].tolist(),
+            'delta': list(init['delta']),
+            'beta': list(init['beta']),
             'sigma_obs': init['sigma_obs']
         }
-        return (cmdstanpy_init, cmdstanpy_data)
+        return cmdstanpy_init, cmdstanpy_data
 
     @staticmethod
     def stan_to_dict_numpy(column_names: Tuple[str, ...], data: 'np.array'):
