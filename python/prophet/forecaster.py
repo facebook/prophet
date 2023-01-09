@@ -1442,7 +1442,7 @@ class Prophet(object):
             sim_values[k] = np.column_stack(v)
         return sim_values
 
-    def sample_model(self, df, seasonal_features, iteration, s_a, s_m):
+    def sample_model(self, df, seasonal_features, iteration, s_a, s_m) -> Dict[str, np.ndarray]:
         """Simulate observations from the extrapolated generative model.
 
         Parameters
@@ -1455,7 +1455,7 @@ class Prophet(object):
 
         Returns
         -------
-        Dataframe with trend and yhat, each like df['t'].
+        Dictionary with `yhat` and `trend`, each like df['t'].
         """
         trend = self.sample_predictive_trend(df, iteration)
 
@@ -1480,12 +1480,12 @@ class Prophet(object):
         s_a: np.ndarray,
         s_m: np.ndarray,
         n_samples: int,
-    ) -> List[dict]:
+    ) -> List[Dict[str, np.ndarray]]:
         """Simulate observations from the extrapolated generative model. Vectorized version of sample_model().
 
         Returns
         -------
-        List (length n_samples) of DataFrames with np.arrays for trend and yhat, each ordered like df['t'].
+        List (length n_samples) of dictionaries with arrays for trend and yhat, each ordered like df['t'].
         """
         # Get the seasonality and regressor components, which are deterministic per iteration
         beta = self.params['beta'][iteration]
