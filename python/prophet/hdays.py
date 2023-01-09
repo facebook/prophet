@@ -406,6 +406,102 @@ class India(HolidayBase):
 class IN(India):
     pass
 
+# ------------ Holidays in Kyrgyzstan---------------------
+class Kyrgyzstan(HolidayBase):
+    """
+    Implement public holidays in Kyrgyzstan
+    Reference:
+    https://en.wikipedia.org/wiki/Public_holidays_in_Kyrgyzstan
+    Please note:
+    June 1st is a childrens day which iscelebrated but is not a day off, the are day off.
+    """
+
+    def __init__(self, **kwargs):
+        self.country = "KG"
+        HolidayBase.__init__(self, **kwargs)
+
+    def _populate(self, year):
+        # New Year's Day
+        name = "New Year's Day"
+        self[date(year, 1, 1)] = name
+
+        # Orthodox Christmas day
+        name = "Orthodox Christmas Day"
+        self[date(year, 1, 7)] = name
+
+        # Feb. 23 Fatherland Defender's Day
+        name = "Fatherland Defender's Day"
+        self[date(year, 2, 23)] = name
+
+        # International Women's Day
+        name = "International Women's Day"
+        self[date(year, 3, 8)] = name
+
+        # Nooruz Mairamy
+        name = "Nooruz Mairamy"
+        self[date(year, 3, 21)] = name
+        
+        # Day of the People's April Revolution
+        name = "Day of the People's April Revolution"
+        self[date(year, 4, 7)] = name
+        
+        # Spring and Labour Day
+        name = "Spring and Labour Day"
+        self[date(year, 5, 1)] = name
+        
+        # Constitution Day
+        name = "Constitution Day"
+        self[date(year, 5, 5)] = name
+
+        # Victory Day
+        name = "Victory Day"
+        self[date(year, 5, 9)] = name
+
+        # Children's Day
+        name = "Russia Day"
+        self[date(year, 6, 1)] = name
+        
+        # Independence Day
+        name = "Independence Day"
+        self[date(year, 8, 31)] = name
+        
+        # Day 1 of History and Commemoration of Ancestors
+        name = "Day 1 of History and Commemoration of Ancestors"
+        self[date(year, 11, 7)] = name
+        
+        # Day 2 of History and Commemoration of Ancestors
+        name = "Day 2 of History and Commemoration of Ancestors"
+        self[date(year, 11, 8)] = name
+
+        # New Year's Eve
+        name = "New Year's Eve"
+        self[date(year, 12, 31)] = name
+        
+        # Islamic Holidays
+        
+        # Eid ul-Fitr
+        # 1st and 2nd day of 10th Islamic month
+        name = "Eid al-Fitr"
+        for offset in range(-1, 2, 1):
+            islam_year = from_gregorian(year + offset, 6, 15)[0]
+            y1, m1, d1 = to_gregorian(islam_year, 10, 1)
+            y2, m2, d2 = to_gregorian(islam_year, 10, 2)
+            if y1 == year:
+                self[date(y1, m1, d1)] = name
+            if y2 == year:
+                self[date(y2, m2, d2)] = name
+
+        # Eid al-Adha, i.e., Feast of the Sacrifice
+        name = "Feast of the Sacrifice"
+        for offset in range(-1, 2, 1):
+            islam_year = from_gregorian(year + offset, 8, 22)[0]
+            y, m, d = to_gregorian(islam_year, 12, 10)
+            if y == year:
+                self[date(y, m, d)] = name
+
+class KG(Kyrgyzstan):
+    pass
+
 
 # ------------ Holidays in Thailand---------------------
 class Thailand(HolidayBase):
