@@ -435,6 +435,9 @@ class Prophet(object):
         -------
         Matrix with seasonality features.
         """
+        if not (series_order >= 1):
+            raise ValueError("series_order must be >= 1")
+
         # convert to days since epoch
         t = dates.to_numpy(dtype=int) // NANOSECONDS_TO_SECONDS / (3600 * 24.)
 
