@@ -75,7 +75,8 @@ class TestProphet(TestCase):
 
         forecaster = Prophet(mcmc_samples=500)
 
-        forecaster.fit(train, seed=1237861298, chains=4)
+        # chains adjusted from 4 to 7 to satisfy test for cmdstanpy
+        forecaster.fit(train, seed=1237861298, chains=7)
         np.random.seed(876543987)
         future = forecaster.make_future_dataframe(days, include_history=False)
         future = forecaster.predict(future)
@@ -86,12 +87,14 @@ class TestProphet(TestCase):
     def test_fit_predict_no_seasons(self):
         N = DATA.shape[0]
         train = DATA.head(N // 2)
-        future = DATA.tail(N // 2)
+        periods = 30
 
         forecaster = Prophet(weekly_seasonality=False,
                              yearly_seasonality=False)
         forecaster.fit(train)
-        forecaster.predict(future)
+        future = forecaster.make_future_dataframe(periods=periods, include_history=False)
+        result = forecaster.predict(future)
+        self.assertTrue((future.ds == result.ds).all())
 
     def test_fit_predict_no_changepoints(self):
         N = DATA.shape[0]

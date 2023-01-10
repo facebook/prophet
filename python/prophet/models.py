@@ -6,22 +6,17 @@
 
 from __future__ import absolute_import, division, print_function
 from abc import abstractmethod, ABC
-from tempfile import mkdtemp
 from typing import Tuple
 from collections import OrderedDict
 from enum import Enum
 from pathlib import Path
-import os
-import pickle
 import pkg_resources
 import platform
 
 import logging
 logger = logging.getLogger('prophet.models')
 
-PLATFORM = "unix"
-if platform.platform().startswith("Win"):
-    PLATFORM = "win"
+PLATFORM = "win" if platform.platform().startswith("Win") else "unix"
 
 class IStanBackend(ABC):
     def __init__(self):
@@ -94,7 +89,6 @@ class CmdStanPyBackend(IStanBackend):
             inits=stan_init,
             algorithm='Newton' if stan_data['T'] < 100 else 'LBFGS',
             iter=int(1e4),
-            output_dir = mkdtemp(),
         )
         args.update(kwargs)
 
@@ -102,15 +96,11 @@ class CmdStanPyBackend(IStanBackend):
             self.stan_fit = self.model.optimize(**args)
         except RuntimeError as e:
             # Fall back on Newton
-            if self.newton_fallback and args['algorithm'] != 'Newton':
-                logger.warning(
-                    'Optimization terminated abnormally. Falling back to Newton.'
-                )
-                args['algorithm'] = 'Newton'
-                self.stan_fit = self.model.optimize(**args)
-            else:
+            if not self.newton_fallback or args['algorithm'] == 'Newton':
                 raise e
-
+            logger.warning('Optimization terminated abnormally. Falling back to Newton.')
+            args['algorithm'] = 'Newton'
+            self.stan_fit = self.model.optimize(**args)
         params = self.stan_to_dict_numpy(
             self.stan_fit.column_names, self.stan_fit.optimized_params_np)
         for par in params:
@@ -192,11 +182,7 @@ class CmdStanPyBackend(IStanBackend):
         end = 0
         two_dims = len(data.shape) > 1
         for cname in column_names:
-            if "." in cname:
-                parsed = cname.split(".")
-            else:
-                parsed = cname.split("[")
-
+            parsed = cname.split(".") if "." in cname else cname.split("[")
             curr = parsed[0]
             if prev is None:
                 prev = curr
@@ -212,10 +198,7 @@ class CmdStanPyBackend(IStanBackend):
                     output[prev] = np.array(data[start:end])
                 prev = curr
                 start = end
-                end += 1
-            else:
-                end += 1
-
+            end += 1
         if prev in output:
             raise RuntimeError(
                 "Found repeated column name"
@@ -237,4 +220,4 @@ class StanBackendEnum(Enum):
         try:
             return StanBackendEnum[name].value
         except KeyError as e:
-            raise ValueError("Unknown stan backend: {}".format(name)) from e
+            raise ValueError(f"Unknown stan backend: {name}") from e
