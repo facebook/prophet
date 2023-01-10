@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
-from datetime import timedelta, datetime
+from datetime import timedelta
 from typing import Dict, List
 
 import numpy as np
@@ -21,7 +21,7 @@ from prophet.plot import (plot, plot_components)
 
 logger = logging.getLogger('prophet')
 logger.setLevel(logging.INFO)
-
+NANOSECONDS_TO_SECONDS = 1000 * 1000 * 1000
 
 class Prophet(object):
     """Prophet forecaster.
@@ -436,11 +436,8 @@ class Prophet(object):
         Matrix with seasonality features.
         """
         # convert to days since epoch
-        t = np.array(
-            (dates - datetime(1970, 1, 1))
-                .dt.total_seconds()
-                .astype(float)
-        ) / (3600 * 24.)
+        t = dates.to_numpy(dtype=int) // NANOSECONDS_TO_SECONDS / (3600 * 24.)
+
         return np.column_stack([
             fun((2.0 * (i + 1) * np.pi * t / period))
             for i in range(series_order)
