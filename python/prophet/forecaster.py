@@ -10,10 +10,11 @@ import logging
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from datetime import timedelta
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd
+from numpy.typing import NDArray
 
 from prophet.make_holidays import get_holiday_names, make_holidays_df
 from prophet.models import StanBackendEnum
@@ -421,7 +422,11 @@ class Prophet(object):
             self.changepoints_t = np.array([0])  # dummy changepoint
 
     @staticmethod
-    def fourier_series(dates, period, series_order):
+    def fourier_series(
+        dates: pd.Series,
+        period: Union[int, float],
+        series_order: int,
+    ) -> NDArray[np.float_]:
         """Provides Fourier series components with the specified frequency
         and order.
 
