@@ -547,7 +547,9 @@ construct_holiday_dataframe <- function(m, dates) {
     holidays.to.add <- data.frame(
       holiday=setdiff(m$train.holiday.names, all.holidays$holiday)
     )
-    all.holidays <- suppressWarnings(dplyr::bind_rows(all.holidays, holidays.to.add))
+    if (nrow(holidays.to.add) > 0) {
+      all.holidays <- suppressWarnings(dplyr::bind_rows(all.holidays, holidays.to.add))
+    }
   }
   return(all.holidays)
 }
