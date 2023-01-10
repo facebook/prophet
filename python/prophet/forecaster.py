@@ -438,11 +438,13 @@ class Prophet(object):
         # convert to days since epoch
         t = dates.to_numpy(dtype=int) // NANOSECONDS_TO_SECONDS / (3600 * 24.)
 
-        return np.column_stack([
-            fun((2.0 * (i + 1) * np.pi * t / period))
-            for i in range(series_order)
-            for fun in (np.sin, np.cos)
-        ])
+        x_T = t * np.pi * 2
+        O = np.empty((dates.shape[0], 2 * series_order))
+        for i in range(series_order):
+            cycle = x_T * (i + 1) / period
+            O[:, 2 * i] = np.sin(cycle)
+            O[:, (2 * i) + 1] = np.cos(cycle)
+        return O
 
     @classmethod
     def make_seasonality_features(cls, dates, period, series_order, prefix):
