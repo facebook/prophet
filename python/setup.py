@@ -21,11 +21,11 @@ from setuptools.command.test import test as test_command
 MODEL_DIR = "stan"
 MODEL_TARGET_DIR = os.path.join("prophet", "stan_model")
 
-CMDSTAN_VERSION = "2.31.0"
+CMDSTAN_VERSION = "2.26.1"
 BINARIES_DIR = "bin"
 BINARIES = ["diagnose", "print", "stanc", "stansummary"]
 TBB_PARENT = "stan/lib/stan_math/lib"
-TBB_DIRS = ["tbb", "tbb_2020.3"]
+TBB_DIRS = ["tbb", "tbb_2019_U8"]
 
 
 def prune_cmdstan(cmdstan_dir: str) -> None:
