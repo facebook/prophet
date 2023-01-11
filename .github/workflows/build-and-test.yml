@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: [3.7, 3.8, 3.9, 3.10, 3.11]
       fail-fast: false
 
     steps:
@@ -37,7 +37,8 @@ jobs:
           ${{ runner.os }}-pip-
     - name: Install and test
       run: |
-        pip install -U -r python/requirements.txt dask[dataframe] distributed
+        python -m pip install -U -r python/requirements.txt dask[dataframe] distributed
+        python -m pip install -U --upgrade setuptools wheel
         cd python
         python setup.py develop test
 

@@ -47,11 +47,13 @@ $ cd python
 $ conda create -n prophet
 $ conda activate prophet
 $ pip install -r requirements.txt
+$ pip install --upgrade setuptools wheel
 
 # with venv
 $ python3 -m venv prophet
 $ source prophet/bin/activate
 $ pip install -r requirements.txt
+$ pip install --upgrade setuptools wheel
 ```
 
 ### R

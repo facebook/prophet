@@ -89,6 +89,7 @@ To get the latest code changes as they are merged, you can clone this repo and b
 git clone https://github.com/facebook/prophet.git
 cd prophet/python
 python -m pip install -r requirements.txt
+python -m pip install --upgrade setuptools wheel
 python setup.py develop
 ```
 
