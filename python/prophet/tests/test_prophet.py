@@ -76,7 +76,7 @@ class TestProphet(TestCase):
         forecaster = Prophet(mcmc_samples=500)
 
         # chains adjusted from 4 to 7 to satisfy test for cmdstanpy
-        forecaster.fit(train, seed=1237861298, chains=7)
+        forecaster.fit(train, seed=1237861298, chains=7, show_progress=False)
         np.random.seed(876543987)
         future = forecaster.make_future_dataframe(days, include_history=False)
         future = forecaster.predict(future)
@@ -112,7 +112,7 @@ class TestProphet(TestCase):
         future = DATA.tail(N // 2)
 
         forecaster = Prophet(n_changepoints=0, mcmc_samples=100)
-        forecaster.fit(train)
+        forecaster.fit(train, show_progress=False)
         forecaster.predict(future)
 
     def test_fit_changepoint_not_in_history(self):
@@ -934,8 +934,8 @@ class TestProphet(TestCase):
         previous_df = DATA.iloc[:500]
         df = DATA.iloc[:510]
         m = Prophet(mcmc_samples=100)
-        m = m.fit(previous_df)
+        m = m.fit(previous_df, show_progress=False)
         m_params = self.get_stan_init(m)
         m2 = Prophet(mcmc_samples=100)
-        m2 = m2.fit(df, init=m_params)
+        m2 = m2.fit(df, init=m_params, show_progress=False)
         self.assertEqual(m2.params['delta'].shape, (200, 25))
