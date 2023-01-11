@@ -447,12 +447,12 @@ class Prophet(object):
         t = dates.to_numpy(dtype=int) // NANOSECONDS_TO_SECONDS / (3600 * 24.)
 
         x_T = t * np.pi * 2
-        O = np.empty((dates.shape[0], 2 * series_order))
+        fourier_components = np.empty((dates.shape[0], 2 * series_order))
         for i in range(series_order):
-            cycle = x_T * (i + 1) / period
-            O[:, 2 * i] = np.sin(cycle)
-            O[:, (2 * i) + 1] = np.cos(cycle)
-        return O
+            c = x_T * (i + 1) / period
+            fourier_components[:, 2 * i] = np.sin(c)
+            fourier_components[:, (2 * i) + 1] = np.cos(c)
+        return fourier_components
 
     @classmethod
     def make_seasonality_features(cls, dates, period, series_order, prefix):
