@@ -79,11 +79,11 @@ class CmdStanPyBackend(IStanBackend):
         return cmdstanpy.CmdStanModel(exe_file=model_file)
 
     def fit(self, stan_init, stan_data, **kwargs):
-        (stan_init, stan_data) = self.prepare_data(stan_init, stan_data)
-
         if 'inits' not in kwargs and 'init' in kwargs:
-            kwargs['inits'] = self.prepare_data(kwargs['init'], stan_data)[0]
+            kwargs['inits'], _ = self.prepare_data(kwargs['init'], stan_data)
+            del kwargs['init']
 
+        stan_init, stan_data = self.prepare_data(stan_init, stan_data)
         args = dict(
             data=stan_data,
             inits=stan_init,
@@ -108,11 +108,11 @@ class CmdStanPyBackend(IStanBackend):
         return params
 
     def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
-        (stan_init, stan_data) = self.prepare_data(stan_init, stan_data)
-
         if 'inits' not in kwargs and 'init' in kwargs:
-            kwargs['inits'] = self.prepare_data(kwargs['init'], stan_data)[0]
+            kwargs['inits'], _ = self.prepare_data(kwargs['init'], stan_data)
+            del kwargs['init']
 
+        stan_init, stan_data = self.prepare_data(stan_init, stan_data)
         args = dict(
             data=stan_data,
             inits=stan_init,
