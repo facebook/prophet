@@ -110,7 +110,7 @@ class TestProphet(TestCase):
         N = DATA.shape[0]
         train = DATA.head(N // 2)
         future = DATA.tail(N // 2)
-        
+
         forecaster = Prophet(n_changepoints=0, mcmc_samples=100)
         forecaster.fit(train)
         forecaster.predict(future)
@@ -891,3 +891,51 @@ class TestProphet(TestCase):
              'holidays',
              },
         )
+
+    @staticmethod
+    def get_stan_init(m):
+        """Retrieve parameters from a trained model.
+
+        Retrieve parameters from a trained model in the format
+        used to initialize a new Stan model.
+
+        Parameters
+        ----------
+        m: A trained model of the Prophet class.
+
+        Returns
+        -------
+        A Dictionary containing retrieved parameters of m.
+        """
+        res = {}
+        for pname in ['k', 'm', 'sigma_obs']:
+            if m.mcmc_samples == 0:
+                res[pname] = m.params[pname][0][0]
+            else:
+                res[pname] = np.mean(m.params[pname])
+        for pname in ['delta', 'beta']:
+            if m.mcmc_samples == 0:
+                res[pname] = m.params[pname][0]
+            else:
+                res[pname] = np.mean(m.params[pname], axis=0)
+        return res
+
+    def test_fit_warm_start(self):
+        previous_df = DATA.iloc[:500]
+        df = DATA.iloc[:510]
+        m = Prophet()
+        m = m.fit(previous_df)
+        m_params = self.get_stan_init(m)
+        m2 = Prophet()
+        m2 = m2.fit(df, init=m_params)
+        self.assertEqual(len(m2.params['delta'][0]), 25)
+
+    def test_sampling_warm_start(self):
+        previous_df = DATA.iloc[:500]
+        df = DATA.iloc[:510]
+        m = Prophet(mcmc_samples=100)
+        m = m.fit(previous_df)
+        m_params = self.get_stan_init(m)
+        m2 = Prophet(mcmc_samples=100)
+        m2 = m2.fit(df, init=m_params)
+        self.assertEqual(m2.params['delta'].shape, (200, 25))
