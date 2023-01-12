@@ -785,7 +785,9 @@ class Prophet(object):
             )
             if props['condition_name'] is not None:
                 features[~df[props['condition_name']]] = 0
-            seasonal_features.append(features)
+
+            seasonal_features = pd.concat([seasonal_features, features], axis=0)
+            
             prior_scales.extend(
                 [props['prior_scale']] * features.shape[1])
             modes[props['mode']].append(name)
@@ -796,20 +798,22 @@ class Prophet(object):
             features, holiday_priors, holiday_names = (
                 self.make_holiday_features(df['ds'], holidays)
             )
-            seasonal_features.append(features)
+
+            seasonal_features = pd.concat([seasonal_features, features], axis=0)
+
             prior_scales.extend(holiday_priors)
             modes[self.seasonality_mode].extend(holiday_names)
 
         # Additional regressors
         for name, props in self.extra_regressors.items():
-            seasonal_features.append(pd.DataFrame(df[name]))
+            seasonal_features = pd.concat([seasonal_features, pd.DataFrame(df[name])], axis=0)
+
             prior_scales.append(props['prior_scale'])
             modes[props['mode']].append(name)
 
         # Dummy to prevent empty X
         if len(seasonal_features) == 0:
-            seasonal_features.append(
-                pd.DataFrame({'zeros': np.zeros(df.shape[0])}))
+            seasonal_features = pd.concat([seasonal_features, pd.DataFrame({'zeros': np.zeros(df.shape[0])})], axis=0)
             prior_scales.append(1.)
 
         seasonal_features = pd.concat(seasonal_features, axis=1)
