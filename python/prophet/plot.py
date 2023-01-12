@@ -521,7 +521,12 @@ def plot_cross_validation_metric(
 
     # Some work because matplotlib does not handle timedelta
     # Target ~10 ticks.
-    tick_w = max(df_none['horizon'].astype('timedelta64[ns]')) / 10.
+    
+    df_none['horizon_delta'] = pd.to_timedelta(df_none['horizon'])
+    df_h['horizon_delta'] = pd.to_timedelta(df_h['horizon'])
+
+    tick_w = max(df_none['horizon_delta']) / 10.
+
     # Find the largest time resolution that has <1 unit per bin.
     dts = ['D', 'h', 'm', 's', 'ms', 'us', 'ns']
     dt_names = [
@@ -541,8 +546,8 @@ def plot_cross_validation_metric(
         if np.timedelta64(1, dt) < np.timedelta64(tick_w, 'ns'):
             break
 
-    x_plt = df_none['horizon'].astype('timedelta64[ns]').view(np.int64) / float(dt_conversions[i])
-    x_plt_h = df_h['horizon'].astype('timedelta64[ns]').view(np.int64) / float(dt_conversions[i])
+    x_plt = df_none['horizon_delta'].total_seconds().view(np.int64) / float(dt_conversions[i])
+    x_plt_h = df_h['horizon_delta'].total_seconds().view(np.int64) / float(dt_conversions[i])
 
     ax.plot(x_plt, df_none[metric], '.', alpha=0.1, c=point_color)
     ax.plot(x_plt_h, df_h[metric], '-', c=color)
