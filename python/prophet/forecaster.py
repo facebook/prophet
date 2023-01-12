@@ -786,7 +786,10 @@ class Prophet(object):
             if props['condition_name'] is not None:
                 features[~df[props['condition_name']]] = 0
 
-            seasonal_features = pd.concat([seasonal_features, features], axis=0)
+            seasonal_features = pd.concat(
+                [seasonal_features, features], 
+                axis=0
+            )
             
             prior_scales.extend(
                 [props['prior_scale']] * features.shape[1])
@@ -799,24 +802,37 @@ class Prophet(object):
                 self.make_holiday_features(df['ds'], holidays)
             )
 
-            seasonal_features = pd.concat([seasonal_features, features], axis=0)
+            seasonal_features = pd.concat(
+                [seasonal_features, features], 
+                axis=0
+            )
 
             prior_scales.extend(holiday_priors)
             modes[self.seasonality_mode].extend(holiday_names)
 
         # Additional regressors
         for name, props in self.extra_regressors.items():
-            seasonal_features = pd.concat([seasonal_features, pd.DataFrame(df[name])], axis=0)
+
+            seasonal_features = pd.concat(
+                [seasonal_features, pd.DataFrame(df[name])], 
+                axis=0
+            )
 
             prior_scales.append(props['prior_scale'])
             modes[props['mode']].append(name)
 
         # Dummy to prevent empty X
         if len(seasonal_features) == 0:
-            seasonal_features = pd.concat([seasonal_features, pd.DataFrame({'zeros': np.zeros(df.shape[0])})], axis=0)
+
+            seasonal_features = pd.concat(
+                [seasonal_features, pd.DataFrame({'zeros': np.zeros(df.shape[0])})], 
+                axis=0
+            )
+
             prior_scales.append(1.)
 
         seasonal_features = pd.concat(seasonal_features, axis=1)
+        
         component_cols, modes = self.regressor_column_matrix(
             seasonal_features, modes
         )
@@ -1236,7 +1252,12 @@ class Prophet(object):
         if self.logistic_floor:
             cols.append('floor')
         # Add in forecast components
-        df2 = pd.concat((df[cols], intervals, seasonal_components), axis=1)
+
+        df2 = pd.concat(
+            (df[cols], intervals, seasonal_components), 
+            axis=1
+        )
+
         df2['yhat'] = (
                 df2['trend'] * (1 + df2['multiplicative_terms'])
                 + df2['additive_terms']
