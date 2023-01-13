@@ -444,7 +444,7 @@ class Prophet(object):
             raise ValueError("series_order must be >= 1")
 
         # convert to days since epoch
-        t = dates.to_numpy(dtype=int) // NANOSECONDS_TO_SECONDS / (3600 * 24.)
+        t = dates.to_numpy(dtype=np.int64) // NANOSECONDS_TO_SECONDS / (3600 * 24.)
 
         x_T = t * np.pi * 2
         fourier_components = np.empty((dates.shape[0], 2 * series_order))
