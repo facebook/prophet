@@ -9,12 +9,12 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import sys
-from unittest import TestCase, skipUnless
+from unittest import TestCase
 
 import numpy as np
 import pandas as pd
 from prophet import Prophet
+import pytest
 
 
 DATA = pd.read_csv(
@@ -65,7 +65,7 @@ class TestProphet(TestCase):
         res = self.rmse(future['yhat'], test['y'])
         self.assertAlmostEqual(res, 23.44, places=2, msg="backend: {}".format(forecaster.stan_backend))
 
-    @skipUnless("--test-slow" in sys.argv, "Skipped due to the lack of '--test-slow' argument")
+    @pytest.mark.slow
     def test_fit_sampling_predict(self):
         days = 30
         N = DATA.shape[0]
@@ -105,7 +105,7 @@ class TestProphet(TestCase):
         forecaster.fit(train)
         forecaster.predict(future)
 
-    @skipUnless("--test-slow" in sys.argv, "Skipped due to the lack of '--test-slow' argument")
+    @pytest.mark.slow
     def test_fit_predict_no_changepoints_mcmc(self):
         N = DATA.shape[0]
         train = DATA.head(N // 2)

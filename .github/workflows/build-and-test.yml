@@ -12,7 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8"]
+        os: ["macos-latest", "ubuntu-latest", "window-latest"]
       fail-fast: false
 
     steps:
@@ -32,15 +33,14 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ env.PIP_DEFAULT_CACHE }}
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/python/requirements.txt') }}-v1
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/python/pyproject.toml') }}-v1
         restore-keys: |
           ${{ runner.os }}-pip-
     - name: Install and test
       run: |
-        python -m pip install -U -r python/requirements.txt dask[dataframe] distributed
-        python -m pip install -U --upgrade setuptools wheel
         cd python
-        python setup.py develop test
+        python -m pip install -U --editable ".[dev,parallel]"
+        python -m pytest prophet/tests/
 
   build-and-test-r:
 
