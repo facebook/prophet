@@ -46,14 +46,10 @@ $ cd python
 # with Anaconda
 $ conda create -n prophet
 $ conda activate prophet
-$ pip install -r requirements.txt
-$ pip install --upgrade setuptools wheel
 
 # with venv
 $ python3 -m venv prophet
 $ source prophet/bin/activate
-$ pip install -r requirements.txt
-$ pip install --upgrade setuptools wheel
 ```
 
 ### R
@@ -88,7 +84,7 @@ The next step is to build and install the development version of prophet in the 
 ### Python
 
 ```bash
-$ python setup.py develop
+$ python -m pip install -e ".[dev,parallel]"
 ```
 
 You should be able to import *prophet* from your locally built version:
@@ -97,7 +93,7 @@ You should be able to import *prophet* from your locally built version:
 $ python  # start an interpreter
 >>> import prophet
 >>> prophet.__version__
-'1.0'  # whatever the current github version is
+'1.1.2'  # whatever the current github version is
 ```
 
 This will create the new environment, and not touch any of your existing environments,
@@ -156,11 +152,11 @@ Adding tests is one of the most common requests after code is pushed to prophet.
 
 ### Python
 
-Prophet uses the ``unittest`` package for running tests in Python and ``testthat`` package for testing in R. All tests should go into the tests subdirectory in either the Python or R folders.
+Prophet uses the ``pytest`` package for running tests in Python and ``testthat`` package for testing in R. All tests should go into the tests subdirectory in either the Python or R folders.
 
 The entire test suite can be run by typing:
 ```bash
-$ python setup.py test
+$ python -m pytest prophet/tests/
 ```
 
 ### R

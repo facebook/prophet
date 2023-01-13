@@ -30,7 +30,7 @@ See [Installation in Python - Development version](https://github.com/facebook/p
 
 Simply type `make build` and if everything is fine you should be able to `make shell` or alternative jump directly to `make py-shell`.
 
-To run the tests, inside the container `cd python/prophet` and then `python -m unittest`
+To run the tests, inside the container `cd python/prophet` and then `python -m pytest prophet/tests/`
 
 ### Example usage
 
