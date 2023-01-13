@@ -1,6 +1,6 @@
 include stan/*.stan
 include LICENSE
-include requirements.txt
+include pyproject.toml
 
 # Ensure in-place built models do not get included in the source dist.
 prune prophet/stan_model
