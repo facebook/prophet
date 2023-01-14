@@ -13,9 +13,9 @@ from unittest import TestCase
 
 import numpy as np
 import pandas as pd
+import pytest
 from prophet import Prophet
 from prophet.utilities import warm_start_params
-import pytest
 
 
 DATA = pd.read_csv(
