@@ -9,7 +9,7 @@ on:
 jobs:
   build-and-test-python:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         python-version: ["3.8"]
@@ -22,12 +22,32 @@ jobs:
       run: |
         echo "OS_VERSION=`lsb_release -sr`" >> $GITHUB_ENV
         echo "PIP_DEFAULT_CACHE=$HOME/.cache/pip" >> $GITHUB_ENV
-        echo "DEFAULT_HOME=$HOME" >> $GITHUB_ENV
+    - name: "Get OS version (macOS)"
+      if: startsWith(runner.os, 'macOS')
+      run: |
+        echo "OS_VERSION=`sw_vers -productVersion`" >> $GITHUB_ENV
+        echo "PIP_DEFAULT_CACHE=$HOME/Library/Caches/pip" >> $GITHUB_ENV
+    - name: "Get OS version (Windows)"
+      if: startsWith(runner.os, 'Windows')
+      shell: pwsh
+      run: |
+        (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
+        $os_version = (Get-CimInstance Win32_OperatingSystem).version
+        Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
+        Echo "PIP_DEFAULT_CACHE=$HOME/pip/cache" >> $env:GITHUB_ENV
+
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+    - name: "Restore RTools40"
+      if: startsWith(runner.os, 'Windows')
+      id: cache-rtools
+      uses: actions/cache@v2
+      with:
+        path: C:/rtools40
+        key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
     - name: "Restore pip cache"
       id: cache-pip
       uses: actions/cache@v2
