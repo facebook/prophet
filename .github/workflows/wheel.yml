@@ -17,7 +17,7 @@ jobs:
       matrix:
         os: ["macos-latest", "ubuntu-latest", "windows-latest"]
         cibw_arch: ["native", "aarch64"]
-        py_version: ["cp37-*", "cp38-*", "cp39-*", "cp310-*", "cp311-*"]
+        py_version: ["cp37-*", "cp38-*", "cp39-*", "cp310-*"]
         exclude:
           - os: macos-latest
             cibw_arch: "aarch64"
@@ -44,7 +44,7 @@ jobs:
           platforms: arm64
 
       - name: "Build wheels"
-        uses: pypa/cibuildwheel@v2.11.4
+        uses: pypa/cibuildwheel@v2.6.0
         with:
           package-dir: python
         env:
@@ -95,7 +95,7 @@ jobs:
         find . -name '*.whl' -exec mv '{}' dist/ \;
 
     - name: Upload
-      uses: pypa/gh-action-pypi-publish@v1.6.4
+      uses: pypa/gh-action-pypi-publish@v1.4.2
       with:
         user: ${{ secrets.PYPI_USERNAME }}
         password: ${{ secrets.PYPI_PASSWORD }}
