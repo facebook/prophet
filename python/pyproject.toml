@@ -30,7 +30,7 @@ authors = [
 maintainers = [
   {name = "Cuong Duong", email = "cuong.duong242@gmail.com"},
 ]
-license = {file = "LICENSE"}
+license = {text = "MIT"}
 classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
@@ -43,7 +43,7 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = [
-  "setuptools",
+  "setuptools>=64",
   "wheel",
   "pytest",
   "jupyterlab",
