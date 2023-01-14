@@ -1,12 +1,12 @@
 cmdstanpy>=1.0.4
-numpy>=1.15.4
-pandas>=1.0.4
-matplotlib>=2.0.0
-LunarCalendar>=0.0.9
 convertdate>=2.1.2
 holidays>=0.14.2
+LunarCalendar>=0.0.9
+matplotlib>=2.0.0
+numpy>=1.15.4
+pandas>=1.0.4
+python-dateutil>=2.8.0
 setuptools>=42
 setuptools-git>=1.2
-python-dateutil>=2.8.0
 tqdm>=4.36.1
 wheel>=0.37.0

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates.
 
 # This source code is licensed under the MIT license found in the
@@ -6,10 +5,10 @@
 
 from __future__ import absolute_import, division, print_function
 
+import json
 from collections import OrderedDict
 from copy import deepcopy
 from io import StringIO
-import json
 from pathlib import Path
 
 import numpy as np
@@ -23,24 +22,37 @@ with open(here / "__version__.py", "r") as f:
     exec(f.read(), about)
 
 SIMPLE_ATTRIBUTES = [
-    'growth', 'n_changepoints', 'specified_changepoints', 'changepoint_range',
-    'yearly_seasonality', 'weekly_seasonality', 'daily_seasonality',
-    'seasonality_mode', 'seasonality_prior_scale', 'changepoint_prior_scale',
-    'holidays_prior_scale', 'mcmc_samples', 'interval_width', 'uncertainty_samples',
-    'y_scale', 'logistic_floor', 'country_holidays', 'component_modes'
+    "growth",
+    "n_changepoints",
+    "specified_changepoints",
+    "changepoint_range",
+    "yearly_seasonality",
+    "weekly_seasonality",
+    "daily_seasonality",
+    "seasonality_mode",
+    "seasonality_prior_scale",
+    "changepoint_prior_scale",
+    "holidays_prior_scale",
+    "mcmc_samples",
+    "interval_width",
+    "uncertainty_samples",
+    "y_scale",
+    "logistic_floor",
+    "country_holidays",
+    "component_modes",
 ]
 
-PD_SERIES = ['changepoints', 'history_dates', 'train_holiday_names']
+PD_SERIES = ["changepoints", "history_dates", "train_holiday_names"]
 
-PD_TIMESTAMP = ['start']
+PD_TIMESTAMP = ["start"]
 
-PD_TIMEDELTA = ['t_scale']
+PD_TIMEDELTA = ["t_scale"]
 
-PD_DATAFRAME = ['holidays', 'history', 'train_component_cols']
+PD_DATAFRAME = ["holidays", "history", "train_component_cols"]
 
-NP_ARRAY = ['changepoints_t']
+NP_ARRAY = ["changepoints_t"]
 
-ORDEREDDICT = ['seasonalities', 'extra_regressors']
+ORDEREDDICT = ["seasonalities", "extra_regressors"]
 
 
 def model_to_dict(model):
@@ -73,7 +85,7 @@ def model_to_dict(model):
             model_dict[attribute] = None
         else:
             model_dict[attribute] = getattr(model, attribute).to_json(
-                orient='split', date_format='iso'
+                orient="split", date_format="iso"
             )
     for attribute in PD_TIMESTAMP:
         model_dict[attribute] = getattr(model, attribute).timestamp()
@@ -83,7 +95,9 @@ def model_to_dict(model):
         if getattr(model, attribute) is None:
             model_dict[attribute] = None
         else:
-            model_dict[attribute] = getattr(model, attribute).to_json(orient='table', index=False)
+            model_dict[attribute] = getattr(model, attribute).to_json(
+                orient="table", index=False
+            )
     for attribute in NP_ARRAY:
         model_dict[attribute] = getattr(model, attribute).tolist()
     for attribute in ORDEREDDICT:
@@ -95,18 +109,18 @@ def model_to_dict(model):
     # fit_kwargs -> Transform any numpy types before serializing.
     # They do not need to be transformed back on deserializing.
     fit_kwargs = deepcopy(model.fit_kwargs)
-    if 'init' in fit_kwargs:
-        for k, v in fit_kwargs['init'].items():
+    if "init" in fit_kwargs:
+        for k, v in fit_kwargs["init"].items():
             if isinstance(v, np.ndarray):
-                fit_kwargs['init'][k] = v.tolist()
+                fit_kwargs["init"][k] = v.tolist()
             elif isinstance(v, np.floating):
-                fit_kwargs['init'][k] = float(v)
-    model_dict['fit_kwargs'] = fit_kwargs
+                fit_kwargs["init"][k] = float(v)
+    model_dict["fit_kwargs"] = fit_kwargs
 
     # Params (Dict[str, np.ndarray])
-    model_dict['params'] = {k: v.tolist() for k, v in model.params.items()}
+    model_dict["params"] = {k: v.tolist() for k, v in model.params.items()}
     # Attributes that are skipped: stan_fit, stan_backend
-    model_dict['__prophet_version'] = about["__version__"]
+    model_dict["__prophet_version"] = about["__version__"]
     return model_dict
 
 
@@ -150,25 +164,36 @@ def model_from_dict(model_dict):
         if model_dict[attribute] is None:
             setattr(model, attribute, None)
         else:
-            s = pd.read_json(StringIO(model_dict[attribute]), typ='series', orient='split')
-            if s.name == 'ds':
+            s = pd.read_json(
+                StringIO(model_dict[attribute]), typ="series", orient="split"
+            )
+            if s.name == "ds":
                 if len(s) == 0:
                     s = pd.to_datetime(s)
                 s = s.dt.tz_localize(None)
             setattr(model, attribute, s)
     for attribute in PD_TIMESTAMP:
-        setattr(model, attribute, pd.Timestamp.utcfromtimestamp(model_dict[attribute]).tz_localize(None))
+        setattr(
+            model,
+            attribute,
+            pd.Timestamp.utcfromtimestamp(model_dict[attribute]).tz_localize(None),
+        )
     for attribute in PD_TIMEDELTA:
         setattr(model, attribute, pd.Timedelta(seconds=model_dict[attribute]))
     for attribute in PD_DATAFRAME:
         if model_dict[attribute] is None:
             setattr(model, attribute, None)
         else:
-            df = pd.read_json(StringIO(model_dict[attribute]), typ='frame', orient='table', convert_dates=['ds'])
-            if attribute == 'train_component_cols':
+            df = pd.read_json(
+                StringIO(model_dict[attribute]),
+                typ="frame",
+                orient="table",
+                convert_dates=["ds"],
+            )
+            if attribute == "train_component_cols":
                 # Special handling because of named index column
-                df.columns.name = 'component'
-                df.index.name = 'col'
+                df.columns.name = "component"
+                df.index.name = "col"
             setattr(model, attribute, df)
     for attribute in NP_ARRAY:
         setattr(model, attribute, np.array(model_dict[attribute]))
@@ -180,9 +205,9 @@ def model_from_dict(model_dict):
         setattr(model, attribute, od)
     # Other attributes with special handling
     # fit_kwargs
-    model.fit_kwargs = model_dict['fit_kwargs']
+    model.fit_kwargs = model_dict["fit_kwargs"]
     # Params (Dict[str, np.ndarray])
-    model.params = {k: np.array(v) for k, v in model_dict['params'].items()}
+    model.params = {k: np.array(v) for k, v in model_dict["params"].items()}
     # Skipped attributes
     model.stan_backend = None
     model.stan_fit = None

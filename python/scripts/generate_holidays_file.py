@@ -3,19 +3,16 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import inspect
 import unicodedata
-import warnings
-
-import pandas as pd
-import numpy as np
 
 import holidays as hdays_part1
+import numpy as np
+import pandas as pd
+
 import prophet.hdays as hdays_part2
 from prophet.make_holidays import make_holidays_df
 
@@ -26,27 +23,27 @@ def utf8_to_ascii(text):
     TODO: revisit whether we want to do this lossy conversion.
     """
     ascii_text = (
-        unicodedata.normalize('NFD', text)
-        .encode('ascii', 'ignore')
-        .decode('ascii')
+        unicodedata.normalize("NFD", text)
+        .encode("ascii", "ignore")
+        .decode("ascii")
         .strip()
     )
     # Check if anything converted
-    if sum(1 for x in ascii_text if x not in [' ', '(', ')', ',']) == 0:
-        return 'FAILED_TO_PARSE'
+    if sum(1 for x in ascii_text if x not in [" ", "(", ")", ","]) == 0:
+        return "FAILED_TO_PARSE"
     else:
         return ascii_text
 
 
 def generate_holidays_file():
     """Generate csv file of all possible holiday names, ds,
-     and countries, year combination
+    and countries, year combination
     """
     year_list = np.arange(1995, 2045, 1).tolist()
     all_holidays = []
     # class names in holiday packages which are not countries
     # Also cut out countries with utf-8 holidays that don't parse to ascii
-    class_to_exclude = {'rd', 'BY', 'BG', 'JP', 'RS', 'UA', 'KR'}
+    class_to_exclude = {"rd", "BY", "BG", "JP", "RS", "UA", "KR"}
 
     class_list2 = inspect.getmembers(hdays_part2, inspect.isclass)
     country_set = {name for name in list(zip(*class_list2))[0] if len(name) == 2}
@@ -57,20 +54,22 @@ def generate_holidays_file():
 
     for country in country_set:
         df = make_holidays_df(year_list=year_list, country=country)
-        df['country'] = country
+        df["country"] = country
         all_holidays.append(df)
 
     generated_holidays = pd.concat(all_holidays, axis=0, ignore_index=True)
-    generated_holidays['year'] = generated_holidays.ds.dt.year
-    generated_holidays.sort_values(['country', 'ds', 'holiday'], inplace=True)
+    generated_holidays["year"] = generated_holidays.ds.dt.year
+    generated_holidays.sort_values(["country", "ds", "holiday"], inplace=True)
 
     # Convert to ASCII, and drop holidays that fail to convert
-    generated_holidays['holiday'] = generated_holidays['holiday'].apply(utf8_to_ascii)
-    failed_countries = generated_holidays.loc[generated_holidays['holiday'] == 'FAILED_TO_PARSE', 'country'].unique()
+    generated_holidays["holiday"] = generated_holidays["holiday"].apply(utf8_to_ascii)
+    failed_countries = generated_holidays.loc[
+        generated_holidays["holiday"] == "FAILED_TO_PARSE", "country"
+    ].unique()
     if failed_countries:
         print("Failed to convert UTF-8 holidays for:")
-        print('\n'.join(failed_countries))
-    assert 'FAILED_TO_PARSE' not in generated_holidays['holiday'].unique()
+        print("\n".join(failed_countries))
+    assert "FAILED_TO_PARSE" not in generated_holidays["holiday"].unique()
     generated_holidays.to_csv("../R/data-raw/generated_holidays.csv", index=False)
 
 

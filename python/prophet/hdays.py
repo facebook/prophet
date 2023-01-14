@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates.
 
 # This source code is licensed under the MIT license found in the
@@ -10,11 +9,10 @@ import warnings
 from datetime import date, timedelta
 
 from convertdate.islamic import from_gregorian, to_gregorian
-from lunarcalendar import Lunar, Converter
-
-from holidays import WEEKEND, HolidayBase, Turkey
-from dateutil.easter import easter, EASTER_ORTHODOX
+from dateutil.easter import EASTER_ORTHODOX, easter
 from dateutil.relativedelta import relativedelta as rd
+from holidays import WEEKEND, HolidayBase, Turkey
+from lunarcalendar import Converter, Lunar
 
 
 # Official public holidays at a country level
@@ -406,6 +404,7 @@ class India(HolidayBase):
 class IN(India):
     pass
 
+
 # ------------ Holidays in Kyrgyzstan---------------------
 class Kyrgyzstan(HolidayBase):
     """
@@ -440,15 +439,15 @@ class Kyrgyzstan(HolidayBase):
         # Nooruz Mairamy
         name = "Nooruz Mairamy"
         self[date(year, 3, 21)] = name
-        
+
         # Day of the People's April Revolution
         name = "Day of the People's April Revolution"
         self[date(year, 4, 7)] = name
-        
+
         # Spring and Labour Day
         name = "Spring and Labour Day"
         self[date(year, 5, 1)] = name
-        
+
         # Constitution Day
         name = "Constitution Day"
         self[date(year, 5, 5)] = name
@@ -460,15 +459,15 @@ class Kyrgyzstan(HolidayBase):
         # Children's Day
         name = "Russia Day"
         self[date(year, 6, 1)] = name
-        
+
         # Independence Day
         name = "Independence Day"
         self[date(year, 8, 31)] = name
-        
+
         # Day 1 of History and Commemoration of Ancestors
         name = "Day 1 of History and Commemoration of Ancestors"
         self[date(year, 11, 7)] = name
-        
+
         # Day 2 of History and Commemoration of Ancestors
         name = "Day 2 of History and Commemoration of Ancestors"
         self[date(year, 11, 8)] = name
@@ -476,9 +475,9 @@ class Kyrgyzstan(HolidayBase):
         # New Year's Eve
         name = "New Year's Eve"
         self[date(year, 12, 31)] = name
-        
+
         # Islamic Holidays
-        
+
         # Eid ul-Fitr
         # 1st and 2nd day of 10th Islamic month
         name = "Eid al-Fitr"
@@ -498,6 +497,7 @@ class Kyrgyzstan(HolidayBase):
             y, m, d = to_gregorian(islam_year, 12, 10)
             if y == year:
                 self[date(y, m, d)] = name
+
 
 class KG(Kyrgyzstan):
     pass

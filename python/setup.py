@@ -4,19 +4,19 @@
 # LICENSE file in the root directory of this source tree.
 
 import os
-import sys
 import platform
+import sys
 from pathlib import Path
 from shutil import copy, copytree, rmtree
 from typing import List
 
-from pkg_resources import add_activation_listener, normalize_path, require, working_set
-from setuptools import find_packages, setup, Extension
+from pkg_resources import (add_activation_listener, normalize_path, require,
+                           working_set)
+from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext
 from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
 from setuptools.command.test import test as test_command
-
 
 MODEL_DIR = "stan"
 MODEL_TARGET_DIR = os.path.join("prophet", "stan_model")
@@ -52,6 +52,7 @@ def prune_cmdstan(cmdstan_dir: str) -> None:
     rmtree(original_dir)
     temp_dir.rename(original_dir)
 
+
 def repackage_cmdstan():
     return os.environ.get("PROPHET_REPACKAGE_CMDSTAN", "").lower() not in ["false", "0"]
 
@@ -59,6 +60,7 @@ def repackage_cmdstan():
 def maybe_install_cmdstan_toolchain():
     """Install C++ compilers required to build stan models on Windows machines."""
     import cmdstanpy
+
     try:
         cmdstanpy.utils.cxx_toolchain_path()
     except Exception:
@@ -66,15 +68,17 @@ def maybe_install_cmdstan_toolchain():
             from cmdstanpy.install_cxx_toolchain import run_rtools_install
         except ImportError:
             # older versions
-            from cmdstanpy.install_cxx_toolchain import main as run_rtools_install
+            from cmdstanpy.install_cxx_toolchain import \
+                main as run_rtools_install
 
         run_rtools_install({"version": None, "dir": None, "verbose": True})
         cmdstanpy.utils.cxx_toolchain_path()
 
 
 def install_cmdstan_deps(cmdstan_dir: Path):
-    import cmdstanpy
     from multiprocessing import cpu_count
+
+    import cmdstanpy
 
     if repackage_cmdstan():
         if platform.platform().startswith("Win"):
@@ -122,7 +126,6 @@ def build_cmdstan_model(target_dir):
         prune_cmdstan(cmdstan_dir)
 
 
-
 def get_backends_from_env() -> List[str]:
     return os.environ.get("STAN_BACKEND", "CMDSTANPY").split(",")
 
@@ -131,8 +134,9 @@ def build_models(target_dir):
     print("Compiling cmdstanpy model")
     build_cmdstan_model(target_dir)
 
-    if 'PYSTAN' in get_backends_from_env():
+    if "PYSTAN" in get_backends_from_env():
         raise ValueError("PyStan backend is not supported for Prophet >= 1.1")
+
 
 class BuildPyCommand(build_py):
     """Custom build command to pre-compile Stan models."""
@@ -229,7 +233,7 @@ with open("requirements.txt", "r") as f:
 
 about = {}
 here = Path(__file__).parent.resolve()
-with open(here / "prophet" /  "__version__.py", "r") as f:
+with open(here / "prophet" / "__version__.py", "r") as f:
     exec(f.read(), about)
 
 setup(

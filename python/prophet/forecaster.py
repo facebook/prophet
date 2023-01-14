@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates.
 
 # This source code is licensed under the MIT license found in the
@@ -18,11 +17,12 @@ from numpy.typing import NDArray
 
 from prophet.make_holidays import get_holiday_names, make_holidays_df
 from prophet.models import StanBackendEnum
-from prophet.plot import (plot, plot_components)
+from prophet.plot import plot, plot_components
 
-logger = logging.getLogger('prophet')
+logger = logging.getLogger("prophet")
 logger.setLevel(logging.INFO)
 NANOSECONDS_TO_SECONDS = 1000 * 1000 * 1000
+
 
 class Prophet(object):
     """Prophet forecaster.
@@ -78,29 +78,29 @@ class Prophet(object):
     """
 
     def __init__(
-            self,
-            growth='linear',
-            changepoints=None,
-            n_changepoints=25,
-            changepoint_range=0.8,
-            yearly_seasonality='auto',
-            weekly_seasonality='auto',
-            daily_seasonality='auto',
-            holidays=None,
-            seasonality_mode='additive',
-            seasonality_prior_scale=10.0,
-            holidays_prior_scale=10.0,
-            changepoint_prior_scale=0.05,
-            mcmc_samples=0,
-            interval_width=0.80,
-            uncertainty_samples=1000,
-            stan_backend=None
+        self,
+        growth="linear",
+        changepoints=None,
+        n_changepoints=25,
+        changepoint_range=0.8,
+        yearly_seasonality="auto",
+        weekly_seasonality="auto",
+        daily_seasonality="auto",
+        holidays=None,
+        seasonality_mode="additive",
+        seasonality_prior_scale=10.0,
+        holidays_prior_scale=10.0,
+        changepoint_prior_scale=0.05,
+        mcmc_samples=0,
+        interval_width=0.80,
+        uncertainty_samples=1000,
+        stan_backend=None,
     ):
         self.growth = growth
 
         self.changepoints = changepoints
         if self.changepoints is not None:
-            self.changepoints = pd.Series(pd.to_datetime(self.changepoints), name='ds')
+            self.changepoints = pd.Series(pd.to_datetime(self.changepoints), name="ds")
             self.n_changepoints = len(self.changepoints)
             self.specified_changepoints = True
         else:
@@ -149,7 +149,9 @@ class Prophet(object):
                     logger.debug("Trying to load backend: %s", i.name)
                     return self._load_stan_backend(i.name)
                 except Exception as e:
-                    logger.debug("Unable to load backend %s (%s), trying the next one", i.name, e)
+                    logger.debug(
+                        "Unable to load backend %s (%s), trying the next one", i.name, e
+                    )
         else:
             self.stan_backend = StanBackendEnum.get_backend_class(stan_backend)()
 
@@ -157,46 +159,49 @@ class Prophet(object):
 
     def validate_inputs(self):
         """Validates the inputs to Prophet."""
-        if self.growth not in ('linear', 'logistic', 'flat'):
+        if self.growth not in ("linear", "logistic", "flat"):
             raise ValueError(
-                'Parameter "growth" should be "linear", "logistic" or "flat".')
+                'Parameter "growth" should be "linear", "logistic" or "flat".'
+            )
         if not isinstance(self.changepoint_range, (int, float)):
             raise ValueError("changepoint_range must be a number in [0, 1]'")
-        if ((self.changepoint_range < 0) or (self.changepoint_range > 1)):
+        if (self.changepoint_range < 0) or (self.changepoint_range > 1):
             raise ValueError('Parameter "changepoint_range" must be in [0, 1]')
         if self.holidays is not None:
             if not (
                 isinstance(self.holidays, pd.DataFrame)
-                and 'ds' in self.holidays  # noqa W503
-                and 'holiday' in self.holidays  # noqa W503
+                and "ds" in self.holidays  # noqa W503
+                and "holiday" in self.holidays  # noqa W503
             ):
-                raise ValueError('holidays must be a DataFrame with "ds" and '
-                                 '"holiday" columns.')
-            self.holidays['ds'] = pd.to_datetime(self.holidays['ds'])
+                raise ValueError(
+                    'holidays must be a DataFrame with "ds" and ' '"holiday" columns.'
+                )
+            self.holidays["ds"] = pd.to_datetime(self.holidays["ds"])
             if (
-                self.holidays['ds'].isnull().any()
-                or self.holidays['holiday'].isnull().any()
+                self.holidays["ds"].isnull().any()
+                or self.holidays["holiday"].isnull().any()
             ):
-                raise ValueError('Found a NaN in holidays dataframe.')
-            has_lower = 'lower_window' in self.holidays
-            has_upper = 'upper_window' in self.holidays
+                raise ValueError("Found a NaN in holidays dataframe.")
+            has_lower = "lower_window" in self.holidays
+            has_upper = "upper_window" in self.holidays
             if has_lower + has_upper == 1:
-                raise ValueError('Holidays must have both lower_window and ' +
-                                 'upper_window, or neither')
+                raise ValueError(
+                    "Holidays must have both lower_window and "
+                    + "upper_window, or neither"
+                )
             if has_lower:
-                if self.holidays['lower_window'].max() > 0:
-                    raise ValueError('Holiday lower_window should be <= 0')
-                if self.holidays['upper_window'].min() < 0:
-                    raise ValueError('Holiday upper_window should be >= 0')
-            for h in self.holidays['holiday'].unique():
+                if self.holidays["lower_window"].max() > 0:
+                    raise ValueError("Holiday lower_window should be <= 0")
+                if self.holidays["upper_window"].min() < 0:
+                    raise ValueError("Holiday upper_window should be >= 0")
+            for h in self.holidays["holiday"].unique():
                 self.validate_column_name(h, check_holidays=False)
-        if self.seasonality_mode not in ['additive', 'multiplicative']:
-            raise ValueError(
-                'seasonality_mode must be "additive" or "multiplicative"'
-            )
+        if self.seasonality_mode not in ["additive", "multiplicative"]:
+            raise ValueError('seasonality_mode must be "additive" or "multiplicative"')
 
-    def validate_column_name(self, name, check_holidays=True,
-                             check_seasonalities=True, check_regressors=True):
+    def validate_column_name(
+        self, name, check_holidays=True, check_seasonalities=True, check_regressors=True
+    ):
         """Validates the name of a seasonality, holiday, or regressor.
 
         Parameters
@@ -206,43 +211,53 @@ class Prophet(object):
         check_seasonalities: bool check if name already used for seasonality
         check_regressors: bool check if name already used for regressor
         """
-        if '_delim_' in name:
+        if "_delim_" in name:
             raise ValueError('Name cannot contain "_delim_"')
         reserved_names = [
-            'trend', 'additive_terms', 'daily', 'weekly', 'yearly',
-            'holidays', 'zeros', 'extra_regressors_additive', 'yhat',
-            'extra_regressors_multiplicative', 'multiplicative_terms',
+            "trend",
+            "additive_terms",
+            "daily",
+            "weekly",
+            "yearly",
+            "holidays",
+            "zeros",
+            "extra_regressors_additive",
+            "yhat",
+            "extra_regressors_multiplicative",
+            "multiplicative_terms",
         ]
-        rn_l = [n + '_lower' for n in reserved_names]
-        rn_u = [n + '_upper' for n in reserved_names]
+        rn_l = [n + "_lower" for n in reserved_names]
+        rn_u = [n + "_upper" for n in reserved_names]
         reserved_names.extend(rn_l)
         reserved_names.extend(rn_u)
-        reserved_names.extend([
-            'ds', 'y', 'cap', 'floor', 'y_scaled', 'cap_scaled'])
+        reserved_names.extend(["ds", "y", "cap", "floor", "y_scaled", "cap_scaled"])
         if name in reserved_names:
+            raise ValueError("Name {name!r} is reserved.".format(name=name))
+        if (
+            check_holidays
+            and self.holidays is not None
+            and name in self.holidays["holiday"].unique()
+        ):
             raise ValueError(
-                'Name {name!r} is reserved.'.format(name=name)
+                "Name {name!r} already used for a holiday.".format(name=name)
             )
-        if (check_holidays and self.holidays is not None and
-                name in self.holidays['holiday'].unique()):
+        if (
+            check_holidays
+            and self.country_holidays is not None
+            and name in get_holiday_names(self.country_holidays)
+        ):
             raise ValueError(
-                'Name {name!r} already used for a holiday.'.format(name=name)
-            )
-        if (check_holidays and self.country_holidays is not None and
-                name in get_holiday_names(self.country_holidays)):
-            raise ValueError(
-                'Name {name!r} is a holiday name in {country_holidays}.'
-                .format(name=name, country_holidays=self.country_holidays)
+                "Name {name!r} is a holiday name in {country_holidays}.".format(
+                    name=name, country_holidays=self.country_holidays
+                )
             )
         if check_seasonalities and name in self.seasonalities:
             raise ValueError(
-                'Name {name!r} already used for a seasonality.'
-                .format(name=name)
+                "Name {name!r} already used for a seasonality.".format(name=name)
             )
         if check_regressors and name in self.extra_regressors:
             raise ValueError(
-                'Name {name!r} already used for an added regressor.'
-                .format(name=name)
+                "Name {name!r} already used for an added regressor.".format(name=name)
             )
 
     def setup_dataframe(self, df, initialize_scales=False):
@@ -262,76 +277,74 @@ class Prophet(object):
         -------
         pd.DataFrame prepared for fitting or predicting.
         """
-        if 'y' in df:  # 'y' will be in training data
-            df['y'] = pd.to_numeric(df['y'])
-            if np.isinf(df['y'].values).any():
-                raise ValueError('Found infinity in column y.')
-        if df['ds'].dtype == np.int64:
-            df['ds'] = df['ds'].astype(str)
-        df['ds'] = pd.to_datetime(df['ds'])
-        if df['ds'].dt.tz is not None:
+        if "y" in df:  # 'y' will be in training data
+            df["y"] = pd.to_numeric(df["y"])
+            if np.isinf(df["y"].values).any():
+                raise ValueError("Found infinity in column y.")
+        if df["ds"].dtype == np.int64:
+            df["ds"] = df["ds"].astype(str)
+        df["ds"] = pd.to_datetime(df["ds"])
+        if df["ds"].dt.tz is not None:
             raise ValueError(
-                'Column ds has timezone specified, which is not supported. '
-                'Remove timezone.'
+                "Column ds has timezone specified, which is not supported. "
+                "Remove timezone."
             )
-        if df['ds'].isnull().any():
-            raise ValueError('Found NaN in column ds.')
+        if df["ds"].isnull().any():
+            raise ValueError("Found NaN in column ds.")
         for name in self.extra_regressors:
             if name not in df:
                 raise ValueError(
-                    'Regressor {name!r} missing from dataframe'
-                    .format(name=name)
+                    "Regressor {name!r} missing from dataframe".format(name=name)
                 )
             df[name] = pd.to_numeric(df[name])
             if df[name].isnull().any():
-                raise ValueError(
-                    'Found NaN in column {name!r}'.format(name=name)
-                )
+                raise ValueError("Found NaN in column {name!r}".format(name=name))
         for props in self.seasonalities.values():
-            condition_name = props['condition_name']
+            condition_name = props["condition_name"]
             if condition_name is not None:
                 if condition_name not in df:
                     raise ValueError(
-                        'Condition {condition_name!r} missing from dataframe'
-                        .format(condition_name=condition_name)
+                        "Condition {condition_name!r} missing from dataframe".format(
+                            condition_name=condition_name
+                        )
                     )
                 if not df[condition_name].isin([True, False]).all():
                     raise ValueError(
-                        'Found non-boolean in column {condition_name!r}'
-                        .format(condition_name=condition_name)
+                        "Found non-boolean in column {condition_name!r}".format(
+                            condition_name=condition_name
+                        )
                     )
-                df[condition_name] = df[condition_name].astype('bool')
+                df[condition_name] = df[condition_name].astype("bool")
 
-        if df.index.name == 'ds':
+        if df.index.name == "ds":
             df.index.name = None
-        df = df.sort_values('ds')
+        df = df.sort_values("ds")
         df = df.reset_index(drop=True)
 
         self.initialize_scales(initialize_scales, df)
 
         if self.logistic_floor:
-            if 'floor' not in df:
+            if "floor" not in df:
                 raise ValueError('Expected column "floor".')
         else:
-            df['floor'] = 0
-        if self.growth == 'logistic':
-            if 'cap' not in df:
+            df["floor"] = 0
+        if self.growth == "logistic":
+            if "cap" not in df:
                 raise ValueError(
-                    'Capacities must be supplied for logistic growth in '
-                    'column "cap"'
+                    "Capacities must be supplied for logistic growth in " 'column "cap"'
                 )
-            if (df['cap'] <= df['floor']).any():
+            if (df["cap"] <= df["floor"]).any():
                 raise ValueError(
-                    'cap must be greater than floor (which defaults to 0).'
+                    "cap must be greater than floor (which defaults to 0)."
                 )
-            df['cap_scaled'] = (df['cap'] - df['floor']) / self.y_scale
+            df["cap_scaled"] = (df["cap"] - df["floor"]) / self.y_scale
 
-        df['t'] = (df['ds'] - self.start) / self.t_scale
-        if 'y' in df:
-            df['y_scaled'] = (df['y'] - df['floor']) / self.y_scale
+        df["t"] = (df["ds"] - self.start) / self.t_scale
+        if "y" in df:
+            df["y_scaled"] = (df["y"] - df["floor"]) / self.y_scale
 
         for name, props in self.extra_regressors.items():
-            df[name] = ((df[name] - props['mu']) / props['std'])
+            df[name] = (df[name] - props["mu"]) / props["std"]
         return df
 
     def initialize_scales(self, initialize_scales, df):
@@ -346,31 +359,31 @@ class Prophet(object):
         """
         if not initialize_scales:
             return
-        if self.growth == 'logistic' and 'floor' in df:
+        if self.growth == "logistic" and "floor" in df:
             self.logistic_floor = True
-            floor = df['floor']
+            floor = df["floor"]
         else:
-            floor = 0.
-        self.y_scale = float((df['y'] - floor).abs().max())
+            floor = 0.0
+        self.y_scale = float((df["y"] - floor).abs().max())
         if self.y_scale == 0:
             self.y_scale = 1.0
-        self.start = df['ds'].min()
-        self.t_scale = df['ds'].max() - self.start
+        self.start = df["ds"].min()
+        self.t_scale = df["ds"].max() - self.start
         for name, props in self.extra_regressors.items():
-            standardize = props['standardize']
+            standardize = props["standardize"]
             n_vals = len(df[name].unique())
             if n_vals < 2:
                 standardize = False
-            if standardize == 'auto':
+            if standardize == "auto":
                 if set(df[name].unique()) == {1, 0}:
-                    standardize = False #  Don't standardize binary variables.
+                    standardize = False  # Don't standardize binary variables.
                 else:
                     standardize = True
             if standardize:
                 mu = df[name].mean()
                 std = df[name].std()
-                self.extra_regressors[name]['mu'] = mu
-                self.extra_regressors[name]['std'] = std
+                self.extra_regressors[name]["mu"] = mu
+                self.extra_regressors[name]["std"] = std
 
     def set_changepoints(self):
         """Set changepoints
@@ -386,38 +399,34 @@ class Prophet(object):
             if len(self.changepoints) == 0:
                 pass
             else:
-                too_low = min(self.changepoints) < self.history['ds'].min()
-                too_high = max(self.changepoints) > self.history['ds'].max()
+                too_low = min(self.changepoints) < self.history["ds"].min()
+                too_high = max(self.changepoints) > self.history["ds"].max()
                 if too_low or too_high:
-                    raise ValueError(
-                        'Changepoints must fall within training data.')
+                    raise ValueError("Changepoints must fall within training data.")
         else:
             # Place potential changepoints evenly through first
             # `changepoint_range` proportion of the history
-            hist_size = int(np.floor(self.history.shape[0]
-                                     * self.changepoint_range))
+            hist_size = int(np.floor(self.history.shape[0] * self.changepoint_range))
             if self.n_changepoints + 1 > hist_size:
                 self.n_changepoints = hist_size - 1
                 logger.info(
-                    'n_changepoints greater than number of observations. '
-                    'Using {n_changepoints}.'
-                    .format(n_changepoints=self.n_changepoints)
+                    "n_changepoints greater than number of observations. "
+                    "Using {n_changepoints}.".format(n_changepoints=self.n_changepoints)
                 )
             if self.n_changepoints > 0:
                 cp_indexes = (
                     np.linspace(0, hist_size - 1, self.n_changepoints + 1)
-                        .round()
-                        .astype(int)
+                    .round()
+                    .astype(int)
                 )
-                self.changepoints = (
-                    self.history.iloc[cp_indexes]['ds'].tail(-1)
-                )
+                self.changepoints = self.history.iloc[cp_indexes]["ds"].tail(-1)
             else:
                 # set empty changepoints
-                self.changepoints = pd.Series(pd.to_datetime([]), name='ds')
+                self.changepoints = pd.Series(pd.to_datetime([]), name="ds")
         if len(self.changepoints) > 0:
-            self.changepoints_t = np.sort(np.array(
-                (self.changepoints - self.start) / self.t_scale))
+            self.changepoints_t = np.sort(
+                np.array((self.changepoints - self.start) / self.t_scale)
+            )
         else:
             self.changepoints_t = np.array([0])  # dummy changepoint
 
@@ -444,7 +453,7 @@ class Prophet(object):
             raise ValueError("series_order must be >= 1")
 
         # convert to days since epoch
-        t = dates.to_numpy(dtype=np.int64) // NANOSECONDS_TO_SECONDS / (3600 * 24.)
+        t = dates.to_numpy(dtype=np.int64) // NANOSECONDS_TO_SECONDS / (3600 * 24.0)
 
         x_T = t * np.pi * 2
         fourier_components = np.empty((dates.shape[0], 2 * series_order))
@@ -472,8 +481,7 @@ class Prophet(object):
         """
         features = cls.fourier_series(dates, period, series_order)
         columns = [
-            '{}_delim_{}'.format(prefix, i + 1)
-            for i in range(features.shape[1])
+            "{}_delim_{}".format(prefix, i + 1) for i in range(features.shape[1])
         ]
         return pd.DataFrame(features, columns=columns)
 
@@ -500,27 +508,26 @@ class Prophet(object):
             country_holidays_df = make_holidays_df(
                 year_list=year_list, country=self.country_holidays
             )
-            all_holidays = pd.concat((all_holidays, country_holidays_df),
-                                     sort=False)
+            all_holidays = pd.concat((all_holidays, country_holidays_df), sort=False)
             all_holidays.reset_index(drop=True, inplace=True)
         # Drop future holidays not previously seen in training data
         if self.train_holiday_names is not None:
             # Remove holiday names didn't show up in fit
             index_to_drop = all_holidays.index[
-                np.logical_not(
-                    all_holidays.holiday.isin(self.train_holiday_names)
-                )
+                np.logical_not(all_holidays.holiday.isin(self.train_holiday_names))
             ]
             all_holidays = all_holidays.drop(index_to_drop)
             # Add holiday names in fit but not in predict with ds as NA
-            holidays_to_add = pd.DataFrame({
-                'holiday': self.train_holiday_names[
-                    np.logical_not(self.train_holiday_names
-                                       .isin(all_holidays.holiday))
-                ]
-            })
-            all_holidays = pd.concat((all_holidays, holidays_to_add),
-                                     sort=False)
+            holidays_to_add = pd.DataFrame(
+                {
+                    "holiday": self.train_holiday_names[
+                        np.logical_not(
+                            self.train_holiday_names.isin(all_holidays.holiday)
+                        )
+                    ]
+                }
+            )
+            all_holidays = pd.concat((all_holidays, holidays_to_add), sort=False)
             all_holidays.reset_index(drop=True, inplace=True)
         return all_holidays
 
@@ -549,21 +556,21 @@ class Prophet(object):
         for row in holidays.itertuples():
             dt = row.ds.date()
             try:
-                lw = int(getattr(row, 'lower_window', 0))
-                uw = int(getattr(row, 'upper_window', 0))
+                lw = int(getattr(row, "lower_window", 0))
+                uw = int(getattr(row, "upper_window", 0))
             except ValueError:
                 lw = 0
                 uw = 0
-            ps = float(getattr(row, 'prior_scale', self.holidays_prior_scale))
+            ps = float(getattr(row, "prior_scale", self.holidays_prior_scale))
             if np.isnan(ps):
                 ps = float(self.holidays_prior_scale)
             if row.holiday in prior_scales and prior_scales[row.holiday] != ps:
                 raise ValueError(
-                    'Holiday {holiday!r} does not have consistent prior '
-                    'scale specification.'.format(holiday=row.holiday)
+                    "Holiday {holiday!r} does not have consistent prior "
+                    "scale specification.".format(holiday=row.holiday)
                 )
             if ps <= 0:
-                raise ValueError('Prior scale must be > 0')
+                raise ValueError("Prior scale must be > 0")
             prior_scales[row.holiday] = ps
 
             for offset in range(lw, uw + 1):
@@ -572,22 +579,18 @@ class Prophet(object):
                     loc = row_index.get_loc(occurrence)
                 except KeyError:
                     loc = None
-                key = '{}_delim_{}{}'.format(
-                    row.holiday,
-                    '+' if offset >= 0 else '-',
-                    abs(offset)
+                key = "{}_delim_{}{}".format(
+                    row.holiday, "+" if offset >= 0 else "-", abs(offset)
                 )
                 if loc is not None:
-                    expanded_holidays[key][loc] = 1.
+                    expanded_holidays[key][loc] = 1.0
                 else:
                     expanded_holidays[key]  # Access key to generate value
         holiday_features = pd.DataFrame(expanded_holidays)
         # Make sure column order is consistent
-        holiday_features = holiday_features[sorted(holiday_features.columns
-                                                                   .tolist())]
+        holiday_features = holiday_features[sorted(holiday_features.columns.tolist())]
         prior_scale_list = [
-            prior_scales[h.split('_delim_')[0]]
-            for h in holiday_features.columns
+            prior_scales[h.split("_delim_")[0]] for h in holiday_features.columns
         ]
         holiday_names = list(prior_scales.keys())
         # Store holiday names used in fit
@@ -595,8 +598,7 @@ class Prophet(object):
             self.train_holiday_names = pd.Series(holiday_names)
         return holiday_features, prior_scale_list, holiday_names
 
-    def add_regressor(self, name, prior_scale=None, standardize='auto',
-                      mode=None):
+    def add_regressor(self, name, prior_scale=None, standardize="auto", mode=None):
         """Add an additional regressor to be used for fitting and predicting.
 
         The dataframe passed to `fit` and `predict` will have a column with the
@@ -626,28 +628,34 @@ class Prophet(object):
         The prophet object.
         """
         if self.history is not None:
-            raise Exception(
-                "Regressors must be added prior to model fitting.")
+            raise Exception("Regressors must be added prior to model fitting.")
         self.validate_column_name(name, check_regressors=False)
         if prior_scale is None:
             prior_scale = float(self.holidays_prior_scale)
         if mode is None:
             mode = self.seasonality_mode
         if prior_scale <= 0:
-            raise ValueError('Prior scale must be > 0')
-        if mode not in ['additive', 'multiplicative']:
+            raise ValueError("Prior scale must be > 0")
+        if mode not in ["additive", "multiplicative"]:
             raise ValueError("mode must be 'additive' or 'multiplicative'")
         self.extra_regressors[name] = {
-            'prior_scale': prior_scale,
-            'standardize': standardize,
-            'mu': 0.,
-            'std': 1.,
-            'mode': mode,
+            "prior_scale": prior_scale,
+            "standardize": standardize,
+            "mu": 0.0,
+            "std": 1.0,
+            "mode": mode,
         }
         return self
 
-    def add_seasonality(self, name, period, fourier_order, prior_scale=None,
-                        mode=None, condition_name=None):
+    def add_seasonality(
+        self,
+        name,
+        period,
+        fourier_order,
+        prior_scale=None,
+        mode=None,
+        condition_name=None,
+    ):
         """Add a seasonal component with specified period, number of Fourier
         components, and prior scale.
 
@@ -683,9 +691,8 @@ class Prophet(object):
         The prophet object.
         """
         if self.history is not None:
-            raise Exception(
-                'Seasonality must be added prior to model fitting.')
-        if name not in ['daily', 'weekly', 'yearly']:
+            raise Exception("Seasonality must be added prior to model fitting.")
+        if name not in ["daily", "weekly", "yearly"]:
             # Allow overwriting built-in seasonalities
             self.validate_column_name(name, check_seasonalities=False)
         if prior_scale is None:
@@ -693,21 +700,21 @@ class Prophet(object):
         else:
             ps = float(prior_scale)
         if ps <= 0:
-            raise ValueError('Prior scale must be > 0')
+            raise ValueError("Prior scale must be > 0")
         if fourier_order <= 0:
-            raise ValueError('Fourier Order must be > 0')
+            raise ValueError("Fourier Order must be > 0")
         if mode is None:
             mode = self.seasonality_mode
-        if mode not in ['additive', 'multiplicative']:
+        if mode not in ["additive", "multiplicative"]:
             raise ValueError('mode must be "additive" or "multiplicative"')
         if condition_name is not None:
             self.validate_column_name(condition_name)
         self.seasonalities[name] = {
-            'period': period,
-            'fourier_order': fourier_order,
-            'prior_scale': ps,
-            'mode': mode,
-            'condition_name': condition_name,
+            "period": period,
+            "fourier_order": fourier_order,
+            "prior_scale": ps,
+            "mode": mode,
+            "condition_name": condition_name,
         }
         return self
 
@@ -732,9 +739,7 @@ class Prophet(object):
         The prophet object.
         """
         if self.history is not None:
-            raise Exception(
-                "Country holidays must be added prior to model fitting."
-            )
+            raise Exception("Country holidays must be added prior to model fitting.")
         # Validate names.
         for name in get_holiday_names(country_name):
             # Allow merging with existing holidays
@@ -742,9 +747,8 @@ class Prophet(object):
         # Set the holidays.
         if self.country_holidays is not None:
             logger.warning(
-                'Changing country holidays from {country_holidays!r} to '
-                '{country_name!r}.'
-                .format(
+                "Changing country holidays from {country_holidays!r} to "
+                "{country_name!r}.".format(
                     country_holidays=self.country_holidays,
                     country_name=country_name,
                 )
@@ -773,28 +777,27 @@ class Prophet(object):
         """
         seasonal_features = []
         prior_scales = []
-        modes = {'additive': [], 'multiplicative': []}
+        modes = {"additive": [], "multiplicative": []}
 
         # Seasonality features
         for name, props in self.seasonalities.items():
             features = self.make_seasonality_features(
-                df['ds'],
-                props['period'],
-                props['fourier_order'],
+                df["ds"],
+                props["period"],
+                props["fourier_order"],
                 name,
             )
-            if props['condition_name'] is not None:
-                features[~df[props['condition_name']]] = 0
+            if props["condition_name"] is not None:
+                features[~df[props["condition_name"]]] = 0
             seasonal_features.append(features)
-            prior_scales.extend(
-                [props['prior_scale']] * features.shape[1])
-            modes[props['mode']].append(name)
+            prior_scales.extend([props["prior_scale"]] * features.shape[1])
+            modes[props["mode"]].append(name)
 
         # Holiday features
-        holidays = self.construct_holiday_dataframe(df['ds'])
+        holidays = self.construct_holiday_dataframe(df["ds"])
         if len(holidays) > 0:
-            features, holiday_priors, holiday_names = (
-                self.make_holiday_features(df['ds'], holidays)
+            features, holiday_priors, holiday_names = self.make_holiday_features(
+                df["ds"], holidays
             )
             seasonal_features.append(features)
             prior_scales.extend(holiday_priors)
@@ -803,19 +806,16 @@ class Prophet(object):
         # Additional regressors
         for name, props in self.extra_regressors.items():
             seasonal_features.append(pd.DataFrame(df[name]))
-            prior_scales.append(props['prior_scale'])
-            modes[props['mode']].append(name)
+            prior_scales.append(props["prior_scale"])
+            modes[props["mode"]].append(name)
 
         # Dummy to prevent empty X
         if len(seasonal_features) == 0:
-            seasonal_features.append(
-                pd.DataFrame({'zeros': np.zeros(df.shape[0])}))
-            prior_scales.append(1.)
+            seasonal_features.append(pd.DataFrame({"zeros": np.zeros(df.shape[0])}))
+            prior_scales.append(1.0)
 
         seasonal_features = pd.concat(seasonal_features, axis=1)
-        component_cols, modes = self.regressor_column_matrix(
-            seasonal_features, modes
-        )
+        component_cols, modes = self.regressor_column_matrix(seasonal_features, modes)
         return seasonal_features, prior_scales, component_cols, modes
 
     def regressor_column_matrix(self, seasonal_features, modes):
@@ -838,51 +838,58 @@ class Prophet(object):
             that columns is used in that component.
         modes: Updated input with combination components.
         """
-        components = pd.DataFrame({
-            'col': np.arange(seasonal_features.shape[1]),
-            'component': [
-                x.split('_delim_')[0] for x in seasonal_features.columns
-            ],
-        })
+        components = pd.DataFrame(
+            {
+                "col": np.arange(seasonal_features.shape[1]),
+                "component": [x.split("_delim_")[0] for x in seasonal_features.columns],
+            }
+        )
         # Add total for holidays
         if self.train_holiday_names is not None:
             components = self.add_group_component(
-                components, 'holidays', self.train_holiday_names.unique())
+                components, "holidays", self.train_holiday_names.unique()
+            )
         # Add totals additive and multiplicative components, and regressors
-        for mode in ['additive', 'multiplicative']:
+        for mode in ["additive", "multiplicative"]:
             components = self.add_group_component(
-                components, mode + '_terms', modes[mode]
+                components, mode + "_terms", modes[mode]
             )
             regressors_by_mode = [
-                r for r, props in self.extra_regressors.items()
-                if props['mode'] == mode
+                r for r, props in self.extra_regressors.items() if props["mode"] == mode
             ]
             components = self.add_group_component(
-                components, 'extra_regressors_' + mode, regressors_by_mode)
+                components, "extra_regressors_" + mode, regressors_by_mode
+            )
             # Add combination components to modes
-            modes[mode].append(mode + '_terms')
-            modes[mode].append('extra_regressors_' + mode)
+            modes[mode].append(mode + "_terms")
+            modes[mode].append("extra_regressors_" + mode)
         # After all of the additive/multiplicative groups have been added,
-        modes[self.seasonality_mode].append('holidays')
+        modes[self.seasonality_mode].append("holidays")
         # Convert to a binary matrix
         component_cols = pd.crosstab(
-            components['col'], components['component'],
-        ).sort_index(level='col')
+            components["col"],
+            components["component"],
+        ).sort_index(level="col")
         # Add columns for additive and multiplicative terms, if missing
-        for name in ['additive_terms', 'multiplicative_terms']:
+        for name in ["additive_terms", "multiplicative_terms"]:
             if name not in component_cols:
                 component_cols[name] = 0
         # Remove the placeholder
-        component_cols.drop('zeros', axis=1, inplace=True, errors='ignore')
+        component_cols.drop("zeros", axis=1, inplace=True, errors="ignore")
         # Validation
-        if (max(component_cols['additive_terms']
-            + component_cols['multiplicative_terms']) > 1):
-            raise Exception('A bug occurred in seasonal components.')
+        if (
+            max(
+                component_cols["additive_terms"]
+                + component_cols["multiplicative_terms"]
+            )
+            > 1
+        ):
+            raise Exception("A bug occurred in seasonal components.")
         # Compare to the training, if set.
         if self.train_component_cols is not None:
             component_cols = component_cols[self.train_component_cols.columns]
             if not component_cols.equals(self.train_component_cols):
-                raise Exception('A bug occurred in constructing regressors.')
+                raise Exception("A bug occurred in constructing regressors.")
         return component_cols, modes
 
     def add_group_component(self, components, name, group):
@@ -899,10 +906,10 @@ class Prophet(object):
         -------
         Dataframe with components.
         """
-        new_comp = components[components['component'].isin(set(group))].copy()
-        group_cols = new_comp['col'].unique()
+        new_comp = components[components["component"].isin(set(group))].copy()
+        group_cols = new_comp["col"].unique()
         if len(group_cols) > 0:
-            new_comp = pd.DataFrame({'col': group_cols, 'component': name})
+            new_comp = pd.DataFrame({"col": group_cols, "component": name})
             components = pd.concat([components, new_comp])
         return components
 
@@ -920,18 +927,17 @@ class Prophet(object):
         -------
         Number of fourier components, or 0 for disabled.
         """
-        if arg == 'auto':
+        if arg == "auto":
             fourier_order = 0
             if name in self.seasonalities:
                 logger.info(
-                    'Found custom seasonality named {name!r}, disabling '
-                    'built-in {name!r} seasonality.'.format(name=name)
+                    "Found custom seasonality named {name!r}, disabling "
+                    "built-in {name!r} seasonality.".format(name=name)
                 )
             elif auto_disable:
                 logger.info(
-                    'Disabling {name} seasonality. Run prophet with '
-                    '{name}_seasonality=True to override this.'
-                    .format(name=name)
+                    "Disabling {name} seasonality. Run prophet with "
+                    "{name}_seasonality=True to override this.".format(name=name)
                 )
             else:
                 fourier_order = default_order
@@ -952,50 +958,55 @@ class Prophet(object):
         Turns on daily seasonality if there is >=2 days of history, and the
         spacing between dates in the history is <1 day.
         """
-        first = self.history['ds'].min()
-        last = self.history['ds'].max()
-        dt = self.history['ds'].diff()
+        first = self.history["ds"].min()
+        last = self.history["ds"].max()
+        dt = self.history["ds"].diff()
         min_dt = dt.iloc[dt.values.nonzero()[0]].min()
 
         # Yearly seasonality
         yearly_disable = last - first < pd.Timedelta(days=730)
         fourier_order = self.parse_seasonality_args(
-            'yearly', self.yearly_seasonality, yearly_disable, 10)
+            "yearly", self.yearly_seasonality, yearly_disable, 10
+        )
         if fourier_order > 0:
-            self.seasonalities['yearly'] = {
-                'period': 365.25,
-                'fourier_order': fourier_order,
-                'prior_scale': self.seasonality_prior_scale,
-                'mode': self.seasonality_mode,
-                'condition_name': None
+            self.seasonalities["yearly"] = {
+                "period": 365.25,
+                "fourier_order": fourier_order,
+                "prior_scale": self.seasonality_prior_scale,
+                "mode": self.seasonality_mode,
+                "condition_name": None,
             }
 
         # Weekly seasonality
-        weekly_disable = ((last - first < pd.Timedelta(weeks=2)) or
-                          (min_dt >= pd.Timedelta(weeks=1)))
+        weekly_disable = (last - first < pd.Timedelta(weeks=2)) or (
+            min_dt >= pd.Timedelta(weeks=1)
+        )
         fourier_order = self.parse_seasonality_args(
-            'weekly', self.weekly_seasonality, weekly_disable, 3)
+            "weekly", self.weekly_seasonality, weekly_disable, 3
+        )
         if fourier_order > 0:
-            self.seasonalities['weekly'] = {
-                'period': 7,
-                'fourier_order': fourier_order,
-                'prior_scale': self.seasonality_prior_scale,
-                'mode': self.seasonality_mode,
-                'condition_name': None
+            self.seasonalities["weekly"] = {
+                "period": 7,
+                "fourier_order": fourier_order,
+                "prior_scale": self.seasonality_prior_scale,
+                "mode": self.seasonality_mode,
+                "condition_name": None,
             }
 
         # Daily seasonality
-        daily_disable = ((last - first < pd.Timedelta(days=2)) or
-                         (min_dt >= pd.Timedelta(days=1)))
+        daily_disable = (last - first < pd.Timedelta(days=2)) or (
+            min_dt >= pd.Timedelta(days=1)
+        )
         fourier_order = self.parse_seasonality_args(
-            'daily', self.daily_seasonality, daily_disable, 4)
+            "daily", self.daily_seasonality, daily_disable, 4
+        )
         if fourier_order > 0:
-            self.seasonalities['daily'] = {
-                'period': 1,
-                'fourier_order': fourier_order,
-                'prior_scale': self.seasonality_prior_scale,
-                'mode': self.seasonality_mode,
-                'condition_name': None
+            self.seasonalities["daily"] = {
+                "period": 1,
+                "fourier_order": fourier_order,
+                "prior_scale": self.seasonality_prior_scale,
+                "mode": self.seasonality_mode,
+                "condition_name": None,
             }
 
     @staticmethod
@@ -1016,10 +1027,10 @@ class Prophet(object):
         A tuple (k, m) with the rate (k) and offset (m) of the linear growth
         function.
         """
-        i0, i1 = df['ds'].idxmin(), df['ds'].idxmax()
-        T = df['t'].iloc[i1] - df['t'].iloc[i0]
-        k = (df['y_scaled'].iloc[i1] - df['y_scaled'].iloc[i0]) / T
-        m = df['y_scaled'].iloc[i0] - k * df['t'].iloc[i0]
+        i0, i1 = df["ds"].idxmin(), df["ds"].idxmax()
+        T = df["t"].iloc[i1] - df["t"].iloc[i0]
+        k = (df["y_scaled"].iloc[i1] - df["y_scaled"].iloc[i0]) / T
+        m = df["y_scaled"].iloc[i0] - k * df["t"].iloc[i0]
         return (k, m)
 
     @staticmethod
@@ -1040,14 +1051,14 @@ class Prophet(object):
         A tuple (k, m) with the rate (k) and offset (m) of the logistic growth
         function.
         """
-        i0, i1 = df['ds'].idxmin(), df['ds'].idxmax()
-        T = df['t'].iloc[i1] - df['t'].iloc[i0]
+        i0, i1 = df["ds"].idxmin(), df["ds"].idxmax()
+        T = df["t"].iloc[i1] - df["t"].iloc[i0]
 
         # Force valid values, in case y > cap or y < 0
-        C0 = df['cap_scaled'].iloc[i0]
-        C1 = df['cap_scaled'].iloc[i1]
-        y0 = max(0.01 * C0, min(0.99 * C0, df['y_scaled'].iloc[i0]))
-        y1 = max(0.01 * C1, min(0.99 * C1, df['y_scaled'].iloc[i1]))
+        C0 = df["cap_scaled"].iloc[i0]
+        C1 = df["cap_scaled"].iloc[i1]
+        y0 = max(0.01 * C0, min(0.99 * C0, df["y_scaled"].iloc[i0]))
+        y1 = max(0.01 * C1, min(0.99 * C1, df["y_scaled"].iloc[i1]))
 
         r0 = C0 / y0
         r1 = C1 / y1
@@ -1082,7 +1093,7 @@ class Prophet(object):
         function.
         """
         k = 0
-        m = df['y_scaled'].mean()
+        m = df["y_scaled"].mean()
         return k, m
 
     def fit(self, df, **kwargs):
@@ -1111,72 +1122,82 @@ class Prophet(object):
         The fitted Prophet object.
         """
         if self.history is not None:
-            raise Exception('Prophet object can only be fit once. '
-                            'Instantiate a new object.')
-        if ('ds' not in df) or ('y' not in df):
+            raise Exception(
+                "Prophet object can only be fit once. " "Instantiate a new object."
+            )
+        if ("ds" not in df) or ("y" not in df):
             raise ValueError(
                 'Dataframe must have columns "ds" and "y" with the dates and '
-                'values respectively.'
+                "values respectively."
             )
-        history = df[df['y'].notnull()].copy()
+        history = df[df["y"].notnull()].copy()
         if history.shape[0] < 2:
-            raise ValueError('Dataframe has less than 2 non-NaN rows.')
-        self.history_dates = pd.to_datetime(pd.Series(df['ds'].unique(), name='ds')).sort_values()
+            raise ValueError("Dataframe has less than 2 non-NaN rows.")
+        self.history_dates = pd.to_datetime(
+            pd.Series(df["ds"].unique(), name="ds")
+        ).sort_values()
 
         history = self.setup_dataframe(history, initialize_scales=True)
         self.history = history
         self.set_auto_seasonalities()
-        seasonal_features, prior_scales, component_cols, modes = (
-            self.make_all_seasonality_features(history))
+        (
+            seasonal_features,
+            prior_scales,
+            component_cols,
+            modes,
+        ) = self.make_all_seasonality_features(history)
         self.train_component_cols = component_cols
         self.component_modes = modes
         self.fit_kwargs = deepcopy(kwargs)
 
         self.set_changepoints()
 
-        trend_indicator = {'linear': 0, 'logistic': 1, 'flat': 2}
+        trend_indicator = {"linear": 0, "logistic": 1, "flat": 2}
 
         dat = {
-            'T': history.shape[0],
-            'K': seasonal_features.shape[1],
-            'S': len(self.changepoints_t),
-            'y': history['y_scaled'],
-            't': history['t'],
-            't_change': self.changepoints_t,
-            'X': seasonal_features,
-            'sigmas': prior_scales,
-            'tau': self.changepoint_prior_scale,
-            'trend_indicator': trend_indicator[self.growth],
-            's_a': component_cols['additive_terms'],
-            's_m': component_cols['multiplicative_terms'],
+            "T": history.shape[0],
+            "K": seasonal_features.shape[1],
+            "S": len(self.changepoints_t),
+            "y": history["y_scaled"],
+            "t": history["t"],
+            "t_change": self.changepoints_t,
+            "X": seasonal_features,
+            "sigmas": prior_scales,
+            "tau": self.changepoint_prior_scale,
+            "trend_indicator": trend_indicator[self.growth],
+            "s_a": component_cols["additive_terms"],
+            "s_m": component_cols["multiplicative_terms"],
         }
 
-        if self.growth == 'linear':
-            dat['cap'] = np.zeros(self.history.shape[0])
+        if self.growth == "linear":
+            dat["cap"] = np.zeros(self.history.shape[0])
             kinit = self.linear_growth_init(history)
-        elif self.growth == 'flat':
-            dat['cap'] = np.zeros(self.history.shape[0])
+        elif self.growth == "flat":
+            dat["cap"] = np.zeros(self.history.shape[0])
             kinit = self.flat_growth_init(history)
         else:
-            dat['cap'] = history['cap_scaled']
+            dat["cap"] = history["cap_scaled"]
             kinit = self.logistic_growth_init(history)
 
         stan_init = {
-            'k': kinit[0],
-            'm': kinit[1],
-            'delta': np.zeros(len(self.changepoints_t)),
-            'beta': np.zeros(seasonal_features.shape[1]),
-            'sigma_obs': 1,
+            "k": kinit[0],
+            "m": kinit[1],
+            "delta": np.zeros(len(self.changepoints_t)),
+            "beta": np.zeros(seasonal_features.shape[1]),
+            "sigma_obs": 1,
         }
 
-        if history['y'].min() == history['y'].max() and \
-                (self.growth == 'linear' or self.growth == 'flat'):
+        if history["y"].min() == history["y"].max() and (
+            self.growth == "linear" or self.growth == "flat"
+        ):
             self.params = stan_init
-            self.params['sigma_obs'] = 1e-9
+            self.params["sigma_obs"] = 1e-9
             for par in self.params:
                 self.params[par] = np.array([self.params[par]])
         elif self.mcmc_samples > 0:
-            self.params = self.stan_backend.sampling(stan_init, dat, self.mcmc_samples, **kwargs)
+            self.params = self.stan_backend.sampling(
+                stan_init, dat, self.mcmc_samples, **kwargs
+            )
         else:
             self.params = self.stan_backend.fit(stan_init, dat, **kwargs)
 
@@ -1184,11 +1205,8 @@ class Prophet(object):
         # If no changepoints were requested, replace delta with 0s
         if len(self.changepoints) == 0:
             # Fold delta into the base rate k
-            self.params['k'] = (
-                self.params['k'] + self.params['delta'].reshape(-1)
-            )
-            self.params['delta'] = (np.zeros(self.params['delta'].shape)
-                                      .reshape((-1, 1)))
+            self.params["k"] = self.params["k"] + self.params["delta"].reshape(-1)
+            self.params["delta"] = np.zeros(self.params["delta"].shape).reshape((-1, 1))
 
         return self
 
@@ -1209,16 +1227,16 @@ class Prophet(object):
         A pd.DataFrame with the forecast components.
         """
         if self.history is None:
-            raise Exception('Model has not been fit.')
+            raise Exception("Model has not been fit.")
 
         if df is None:
             df = self.history.copy()
         else:
             if df.shape[0] == 0:
-                raise ValueError('Dataframe has no rows.')
+                raise ValueError("Dataframe has no rows.")
             df = self.setup_dataframe(df.copy())
 
-        df['trend'] = self.predict_trend(df)
+        df["trend"] = self.predict_trend(df)
         seasonal_components = self.predict_seasonal_components(df)
         if self.uncertainty_samples:
             intervals = self.predict_uncertainty(df, vectorized)
@@ -1226,16 +1244,15 @@ class Prophet(object):
             intervals = None
 
         # Drop columns except ds, cap, floor, and trend
-        cols = ['ds', 'trend']
-        if 'cap' in df:
-            cols.append('cap')
+        cols = ["ds", "trend"]
+        if "cap" in df:
+            cols.append("cap")
         if self.logistic_floor:
-            cols.append('floor')
+            cols.append("floor")
         # Add in forecast components
         df2 = pd.concat((df[cols], intervals, seasonal_components), axis=1)
-        df2['yhat'] = (
-                df2['trend'] * (1 + df2['multiplicative_terms'])
-                + df2['additive_terms']
+        df2["yhat"] = (
+            df2["trend"] * (1 + df2["multiplicative_terms"]) + df2["additive_terms"]
         )
         return df2
 
@@ -1281,10 +1298,9 @@ class Prophet(object):
         k_cum = np.concatenate((np.atleast_1d(k), np.cumsum(deltas) + k))
         gammas = np.zeros(len(changepoint_ts))
         for i, t_s in enumerate(changepoint_ts):
-            gammas[i] = (
-                    (t_s - m - np.sum(gammas))
-                    * (1 - k_cum[i] / k_cum[i + 1])  # noqa W503
-            )
+            gammas[i] = (t_s - m - np.sum(gammas)) * (
+                1 - k_cum[i] / k_cum[i + 1]
+            )  # noqa W503
         # Get cumulative rate and offset at each t
         k_t = k * np.ones_like(t)
         m_t = m * np.ones_like(t)
@@ -1321,22 +1337,21 @@ class Prophet(object):
         -------
         Vector with trend on prediction dates.
         """
-        k = np.nanmean(self.params['k'])
-        m = np.nanmean(self.params['m'])
-        deltas = np.nanmean(self.params['delta'], axis=0)
+        k = np.nanmean(self.params["k"])
+        m = np.nanmean(self.params["m"])
+        deltas = np.nanmean(self.params["delta"], axis=0)
 
-        t = np.array(df['t'])
-        if self.growth == 'linear':
+        t = np.array(df["t"])
+        if self.growth == "linear":
             trend = self.piecewise_linear(t, deltas, k, m, self.changepoints_t)
-        elif self.growth == 'logistic':
-            cap = df['cap_scaled']
-            trend = self.piecewise_logistic(
-                t, cap, deltas, k, m, self.changepoints_t)
-        elif self.growth == 'flat':
+        elif self.growth == "logistic":
+            cap = df["cap_scaled"]
+            trend = self.piecewise_logistic(t, cap, deltas, k, m, self.changepoints_t)
+        elif self.growth == "flat":
             # constant trend
             trend = self.flat_trend(t, m)
 
-        return trend * self.y_scale + df['floor']
+        return trend * self.y_scale + df["floor"]
 
     def predict_seasonal_components(self, df):
         """Predict seasonality components, holidays, and added regressors.
@@ -1349,9 +1364,7 @@ class Prophet(object):
         -------
         Dataframe with seasonal components.
         """
-        seasonal_features, _, component_cols, _ = (
-            self.make_all_seasonality_features(df)
-        )
+        seasonal_features, _, component_cols, _ = self.make_all_seasonality_features(df)
         if self.uncertainty_samples:
             lower_p = 100 * (1.0 - self.interval_width) / 2
             upper_p = 100 * (1.0 + self.interval_width) / 2
@@ -1359,18 +1372,22 @@ class Prophet(object):
         X = seasonal_features.values
         data = {}
         for component in component_cols.columns:
-            beta_c = self.params['beta'] * component_cols[component].values
+            beta_c = self.params["beta"] * component_cols[component].values
 
             comp = np.matmul(X, beta_c.transpose())
-            if component in self.component_modes['additive']:
+            if component in self.component_modes["additive"]:
                 comp *= self.y_scale
             data[component] = np.nanmean(comp, axis=1)
             if self.uncertainty_samples:
-                data[component + '_lower'] = self.percentile(
-                    comp, lower_p, axis=1,
+                data[component + "_lower"] = self.percentile(
+                    comp,
+                    lower_p,
+                    axis=1,
                 )
-                data[component + '_upper'] = self.percentile(
-                    comp, upper_p, axis=1,
+                data[component + "_upper"] = self.percentile(
+                    comp,
+                    upper_p,
+                    axis=1,
                 )
         return pd.DataFrame(data)
 
@@ -1392,15 +1409,19 @@ class Prophet(object):
         upper_p = 100 * (1.0 + self.interval_width) / 2
 
         series = {}
-        for key in ['yhat', 'trend']:
-            series['{}_lower'.format(key)] = self.percentile(
-                sim_values[key], lower_p, axis=1)
-            series['{}_upper'.format(key)] = self.percentile(
-                sim_values[key], upper_p, axis=1)
+        for key in ["yhat", "trend"]:
+            series["{}_lower".format(key)] = self.percentile(
+                sim_values[key], lower_p, axis=1
+            )
+            series["{}_upper".format(key)] = self.percentile(
+                sim_values[key], upper_p, axis=1
+            )
 
         return pd.DataFrame(series)
 
-    def sample_posterior_predictive(self, df: pd.DataFrame, vectorized: bool) -> Dict[str, np.ndarray]:
+    def sample_posterior_predictive(
+        self, df: pd.DataFrame, vectorized: bool
+    ) -> Dict[str, np.ndarray]:
         """Prophet posterior predictive samples.
 
         Parameters
@@ -1413,24 +1434,22 @@ class Prophet(object):
         Dictionary with posterior predictive samples for the forecast yhat and
         for the trend component.
         """
-        n_iterations = self.params['k'].shape[0]
-        samp_per_iter = max(1, int(np.ceil(
-            self.uncertainty_samples / float(n_iterations)
-        )))
-        # Generate seasonality features once so we can re-use them.
-        seasonal_features, _, component_cols, _ = (
-            self.make_all_seasonality_features(df)
+        n_iterations = self.params["k"].shape[0]
+        samp_per_iter = max(
+            1, int(np.ceil(self.uncertainty_samples / float(n_iterations)))
         )
-        sim_values = {'yhat': [], 'trend': []}
+        # Generate seasonality features once so we can re-use them.
+        seasonal_features, _, component_cols, _ = self.make_all_seasonality_features(df)
+        sim_values = {"yhat": [], "trend": []}
         for i in range(n_iterations):
             if vectorized:
                 sims = self.sample_model_vectorized(
                     df=df,
                     seasonal_features=seasonal_features,
                     iteration=i,
-                    s_a=component_cols['additive_terms'],
-                    s_m=component_cols['multiplicative_terms'],
-                    n_samples=samp_per_iter
+                    s_a=component_cols["additive_terms"],
+                    s_m=component_cols["multiplicative_terms"],
+                    n_samples=samp_per_iter,
                 )
             else:
                 sims = [
@@ -1438,9 +1457,10 @@ class Prophet(object):
                         df=df,
                         seasonal_features=seasonal_features,
                         iteration=i,
-                        s_a=component_cols['additive_terms'],
-                        s_m=component_cols['multiplicative_terms'],
-                    ) for _ in range(samp_per_iter)
+                        s_a=component_cols["additive_terms"],
+                        s_m=component_cols["multiplicative_terms"],
+                    )
+                    for _ in range(samp_per_iter)
                 ]
             for key in sim_values:
                 for sim in sims:
@@ -1449,7 +1469,9 @@ class Prophet(object):
             sim_values[k] = np.column_stack(v)
         return sim_values
 
-    def sample_model(self, df, seasonal_features, iteration, s_a, s_m) -> Dict[str, np.ndarray]:
+    def sample_model(
+        self, df, seasonal_features, iteration, s_a, s_m
+    ) -> Dict[str, np.ndarray]:
         """Simulate observations from the extrapolated generative model.
 
         Parameters
@@ -1466,18 +1488,14 @@ class Prophet(object):
         """
         trend = self.sample_predictive_trend(df, iteration)
 
-        beta = self.params['beta'][iteration]
-        Xb_a = np.matmul(seasonal_features.values,
-                         beta * s_a.values) * self.y_scale
+        beta = self.params["beta"][iteration]
+        Xb_a = np.matmul(seasonal_features.values, beta * s_a.values) * self.y_scale
         Xb_m = np.matmul(seasonal_features.values, beta * s_m.values)
 
-        sigma = self.params['sigma_obs'][iteration]
+        sigma = self.params["sigma_obs"][iteration]
         noise = np.random.normal(0, sigma, df.shape[0]) * self.y_scale
 
-        return {
-            'yhat': trend * (1 + Xb_m) + Xb_a + noise,
-            'trend': trend
-        }
+        return {"yhat": trend * (1 + Xb_m) + Xb_a + noise, "trend": trend}
 
     def sample_model_vectorized(
         self,
@@ -1495,21 +1513,21 @@ class Prophet(object):
         List (length n_samples) of dictionaries with arrays for trend and yhat, each ordered like df['t'].
         """
         # Get the seasonality and regressor components, which are deterministic per iteration
-        beta = self.params['beta'][iteration]
-        Xb_a = np.matmul(seasonal_features.values,
-                        beta * s_a.values) * self.y_scale
+        beta = self.params["beta"][iteration]
+        Xb_a = np.matmul(seasonal_features.values, beta * s_a.values) * self.y_scale
         Xb_m = np.matmul(seasonal_features.values, beta * s_m.values)
         # Get the future trend, which is stochastic per iteration
-        trends = self.sample_predictive_trend_vectorized(df, n_samples, iteration)  # already on the same scale as the actual data
-        sigma = self.params['sigma_obs'][iteration]
+        trends = self.sample_predictive_trend_vectorized(
+            df, n_samples, iteration
+        )  # already on the same scale as the actual data
+        sigma = self.params["sigma_obs"][iteration]
         noise_terms = np.random.normal(0, sigma, trends.shape) * self.y_scale
 
         simulations = []
         for trend, noise in zip(trends, noise_terms):
-            simulations.append({
-                'yhat': trend * (1 + Xb_m) + Xb_a + noise,
-                'trend': trend
-            })
+            simulations.append(
+                {"yhat": trend * (1 + Xb_m) + Xb_a + noise, "trend": trend}
+            )
         return simulations
 
     def sample_predictive_trend(self, df, iteration):
@@ -1524,11 +1542,11 @@ class Prophet(object):
         -------
         np.array of simulated trend over df['t'].
         """
-        k = self.params['k'][iteration]
-        m = self.params['m'][iteration]
-        deltas = self.params['delta'][iteration]
+        k = self.params["k"][iteration]
+        m = self.params["m"][iteration]
+        deltas = self.params["delta"][iteration]
 
-        t = np.array(df['t'])
+        t = np.array(df["t"])
         T = t.max()
 
         # New changepoints from a Poisson process with rate S on [1, T]
@@ -1550,22 +1568,22 @@ class Prophet(object):
         deltas_new = np.random.laplace(0, lambda_, n_changes)
 
         # Prepend the times and deltas from the history
-        changepoint_ts = np.concatenate((self.changepoints_t,
-                                         changepoint_ts_new))
+        changepoint_ts = np.concatenate((self.changepoints_t, changepoint_ts_new))
         deltas = np.concatenate((deltas, deltas_new))
 
-        if self.growth == 'linear':
+        if self.growth == "linear":
             trend = self.piecewise_linear(t, deltas, k, m, changepoint_ts)
-        elif self.growth == 'logistic':
-            cap = df['cap_scaled']
-            trend = self.piecewise_logistic(t, cap, deltas, k, m,
-                                            changepoint_ts)
-        elif self.growth == 'flat':
+        elif self.growth == "logistic":
+            cap = df["cap_scaled"]
+            trend = self.piecewise_logistic(t, cap, deltas, k, m, changepoint_ts)
+        elif self.growth == "flat":
             trend = self.flat_trend(t, m)
 
-        return trend * self.y_scale + df['floor']
+        return trend * self.y_scale + df["floor"]
 
-    def sample_predictive_trend_vectorized(self, df: pd.DataFrame, n_samples: int, iteration: int = 0) -> np.ndarray:
+    def sample_predictive_trend_vectorized(
+        self, df: pd.DataFrame, n_samples: int, iteration: int = 0
+    ) -> np.ndarray:
         """Sample draws of the future trend values. Vectorized version of sample_predictive_trend().
 
         Returns
@@ -1576,10 +1594,17 @@ class Prophet(object):
         m = self.params["m"][iteration]
         k = self.params["k"][iteration]
         if self.growth == "linear":
-            expected = self.piecewise_linear(df["t"].values, deltas, k, m, self.changepoints_t)
+            expected = self.piecewise_linear(
+                df["t"].values, deltas, k, m, self.changepoints_t
+            )
         elif self.growth == "logistic":
             expected = self.piecewise_logistic(
-                df["t"].values, df["cap_scaled"].values, deltas, k, m, self.changepoints_t
+                df["t"].values,
+                df["cap_scaled"].values,
+                deltas,
+                k,
+                m,
+                self.changepoints_t,
             )
         elif self.growth == "flat":
             expected = self.flat_trend(df["t"].values, m)
@@ -1587,11 +1612,12 @@ class Prophet(object):
             raise NotImplementedError
         uncertainty = self._sample_uncertainty(df, n_samples, iteration)
         return (
-            (np.tile(expected, (n_samples, 1)) + uncertainty) * self.y_scale +
-            np.tile(df["floor"].values, (n_samples, 1))
-        )
+            np.tile(expected, (n_samples, 1)) + uncertainty
+        ) * self.y_scale + np.tile(df["floor"].values, (n_samples, 1))
 
-    def _sample_uncertainty(self, df: pd.DataFrame, n_samples: int, iteration: int = 0) -> np.ndarray:
+    def _sample_uncertainty(
+        self, df: pd.DataFrame, n_samples: int, iteration: int = 0
+    ) -> np.ndarray:
         """Sample draws of future trend changes, vectorizing as much as possible.
 
         Parameters
@@ -1622,11 +1648,19 @@ class Prophet(object):
             k = self.params["k"][iteration]
             mean_delta = np.mean(np.abs(deltas)) + 1e-8
             if self.growth == "linear":
-                mat = self._make_trend_shift_matrix(mean_delta, change_likelihood, n_length, n_samples=n_samples)
-                uncertainties = mat.cumsum(axis=1).cumsum(axis=1)  # from slope changes to actual values
-                uncertainties *= single_diff  # scaled by the actual meaning of the slope
+                mat = self._make_trend_shift_matrix(
+                    mean_delta, change_likelihood, n_length, n_samples=n_samples
+                )
+                uncertainties = mat.cumsum(axis=1).cumsum(
+                    axis=1
+                )  # from slope changes to actual values
+                uncertainties *= (
+                    single_diff  # scaled by the actual meaning of the slope
+                )
             elif self.growth == "logistic":
-                mat = self._make_trend_shift_matrix(mean_delta, change_likelihood, n_length, n_samples=n_samples)
+                mat = self._make_trend_shift_matrix(
+                    mean_delta, change_likelihood, n_length, n_samples=n_samples
+                )
                 uncertainties = self._logistic_uncertainty(
                     mat=mat,
                     deltas=deltas,
@@ -1645,7 +1679,9 @@ class Prophet(object):
             # handle past included in dataframe
             if df["t"].min() <= 1:
                 past_uncertainty = np.zeros((n_samples, np.sum(df["t"] <= 1)))
-                uncertainties = np.concatenate([past_uncertainty, uncertainties], axis=1)
+                uncertainties = np.concatenate(
+                    [past_uncertainty, uncertainties], axis=1
+                )
         return uncertainties
 
     @staticmethod
@@ -1658,7 +1694,9 @@ class Prophet(object):
         Each row represents a different sample of a possible future, and each column is a time step into the future.
         """
         # create a bool matrix of where these trend shifts should go
-        bool_slope_change = np.random.uniform(size=(n_samples, future_length)) < likelihood
+        bool_slope_change = (
+            np.random.uniform(size=(n_samples, future_length)) < likelihood
+        )
         shift_values = np.random.laplace(0, mean_delta, size=bool_slope_change.shape)
         mat = shift_values * bool_slope_change
         n_mat = np.hstack([np.zeros((len(mat), 1)), mat])[:, :-1]
@@ -1666,7 +1704,9 @@ class Prophet(object):
         return mat
 
     @staticmethod
-    def _make_historical_mat_time(deltas, changepoints_t, t_time, n_row=1, single_diff=None):
+    def _make_historical_mat_time(
+        deltas, changepoints_t, t_time, n_row=1, single_diff=None
+    ):
         """
         Creates a matrix of slope-deltas where these changes occured in training data according to the trained prophet obj
         """
@@ -1720,12 +1760,20 @@ class Prophet(object):
             return arr[np.arange(idx.shape[0])[:, None], idx]
 
         # for logistic growth we need to evaluate the trend all the way from the start of the train item
-        historical_mat, historical_time = self._make_historical_mat_time(deltas, self.changepoints_t, t_time, len(mat), single_diff)
+        historical_mat, historical_time = self._make_historical_mat_time(
+            deltas, self.changepoints_t, t_time, len(mat), single_diff
+        )
         mat = np.concatenate([historical_mat, mat], axis=1)
         full_t_time = np.concatenate([historical_time, t_time])
 
         # apply logistic growth logic on the slope changes
-        k_cum = np.concatenate((np.ones((mat.shape[0], 1)) * k, np.where(mat, np.cumsum(mat, axis=1) + k, 0)), axis=1)
+        k_cum = np.concatenate(
+            (
+                np.ones((mat.shape[0], 1)) * k,
+                np.where(mat, np.cumsum(mat, axis=1) + k, 0),
+            ),
+            axis=1,
+        )
         k_cum_b = ffill(k_cum)
         gammas = np.zeros_like(mat)
         for i in range(mat.shape[1]):
@@ -1776,7 +1824,7 @@ class Prophet(object):
         fn = np.nanpercentile if np.isnan(a).any() else np.percentile
         return fn(a, *args, **kwargs)
 
-    def make_future_dataframe(self, periods, freq='D', include_history=True):
+    def make_future_dataframe(self, periods, freq="D", include_history=True):
         """Simulate the trend using the extrapolated generative model.
 
         Parameters
@@ -1792,28 +1840,38 @@ class Prophet(object):
         requested number of periods.
         """
         if self.history_dates is None:
-            raise Exception('Model has not been fit.')
+            raise Exception("Model has not been fit.")
         if freq is None:
             # taking the tail makes freq inference more reliable
             freq = pd.infer_freq(self.history_dates.tail(5))
             # returns None if inference failed
             if freq is None:
-                raise Exception('Unable to infer `freq`')
+                raise Exception("Unable to infer `freq`")
         last_date = self.history_dates.max()
         dates = pd.date_range(
             start=last_date,
             periods=periods + 1,  # An extra in case we include start
-            freq=freq)
+            freq=freq,
+        )
         dates = dates[dates > last_date]  # Drop start if equals last_date
         dates = dates[:periods]  # Return correct number of periods
 
         if include_history:
             dates = np.concatenate((np.array(self.history_dates), dates))
 
-        return pd.DataFrame({'ds': dates})
+        return pd.DataFrame({"ds": dates})
 
-    def plot(self, fcst, ax=None, uncertainty=True, plot_cap=True,
-             xlabel='ds', ylabel='y', figsize=(10, 6), include_legend=False):
+    def plot(
+        self,
+        fcst,
+        ax=None,
+        uncertainty=True,
+        plot_cap=True,
+        xlabel="ds",
+        ylabel="y",
+        figsize=(10, 6),
+        include_legend=False,
+    ):
         """Plot the Prophet forecast.
 
         Parameters
@@ -1833,13 +1891,26 @@ class Prophet(object):
         A matplotlib figure.
         """
         return plot(
-            m=self, fcst=fcst, ax=ax, uncertainty=uncertainty,
-            plot_cap=plot_cap, xlabel=xlabel, ylabel=ylabel,
-            figsize=figsize, include_legend=include_legend
+            m=self,
+            fcst=fcst,
+            ax=ax,
+            uncertainty=uncertainty,
+            plot_cap=plot_cap,
+            xlabel=xlabel,
+            ylabel=ylabel,
+            figsize=figsize,
+            include_legend=include_legend,
         )
 
-    def plot_components(self, fcst, uncertainty=True, plot_cap=True,
-                        weekly_start=0, yearly_start=0, figsize=None):
+    def plot_components(
+        self,
+        fcst,
+        uncertainty=True,
+        plot_cap=True,
+        weekly_start=0,
+        yearly_start=0,
+        figsize=None,
+    ):
         """Plot the Prophet forecast components.
 
         Will plot whichever are available of: trend, holidays, weekly
@@ -1864,7 +1935,11 @@ class Prophet(object):
         A matplotlib figure.
         """
         return plot_components(
-            m=self, fcst=fcst, uncertainty=uncertainty, plot_cap=plot_cap,
-            weekly_start=weekly_start, yearly_start=yearly_start,
-            figsize=figsize
+            m=self,
+            fcst=fcst,
+            uncertainty=uncertainty,
+            plot_cap=plot_cap,
+            weekly_start=weekly_start,
+            yearly_start=yearly_start,
+            figsize=figsize,
         )

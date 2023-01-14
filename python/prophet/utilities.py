@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates.
 
 # This source code is licensed under the MIT license found in the
@@ -8,6 +7,7 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 import pandas as pd
+
 
 def regressor_index(m, name):
     """Given the name of a regressor, return its (column) index in the `beta` matrix.
@@ -21,9 +21,10 @@ def regressor_index(m, name):
     -------
     The column index of the regressor in the `beta` matrix.
     """
-    return np.extract(
-        m.train_component_cols[name] == 1, m.train_component_cols.index
-    )[0]
+    return np.extract(m.train_component_cols[name] == 1, m.train_component_cols.index)[
+        0
+    ]
+
 
 def regressor_coefficients(m):
     """Summarise the coefficients of the extra regressors used in the model.
@@ -51,26 +52,26 @@ def regressor_coefficients(m):
     - `coef_upper`: Upper bound for the coefficient, estimated from MCMC samples.
         Only to different to `coef` if `mcmc_samples > 0`.
     """
-    assert len(m.extra_regressors) > 0, 'No extra regressors found.'
+    assert len(m.extra_regressors) > 0, "No extra regressors found."
     coefs = []
     for regressor, params in m.extra_regressors.items():
-        beta = m.params['beta'][:, regressor_index(m, regressor)]
-        if params['mode'] == 'additive':
-            coef = beta * m.y_scale / params['std']
+        beta = m.params["beta"][:, regressor_index(m, regressor)]
+        if params["mode"] == "additive":
+            coef = beta * m.y_scale / params["std"]
         else:
-            coef = beta / params['std']
+            coef = beta / params["std"]
         percentiles = [
             (1 - m.interval_width) / 2,
             1 - (1 - m.interval_width) / 2,
         ]
         coef_bounds = np.quantile(coef, q=percentiles)
         record = {
-            'regressor': regressor,
-            'regressor_mode': params['mode'],
-            'center': params['mu'],
-            'coef_lower': coef_bounds[0],
-            'coef': np.mean(coef),
-            'coef_upper': coef_bounds[1],
+            "regressor": regressor,
+            "regressor_mode": params["mode"],
+            "center": params["mu"],
+            "coef_lower": coef_bounds[0],
+            "coef": np.mean(coef),
+            "coef_upper": coef_bounds[1],
         }
         coefs.append(record)
 
