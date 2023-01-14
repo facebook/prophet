@@ -75,3 +75,31 @@ def regressor_coefficients(m):
         coefs.append(record)
 
     return pd.DataFrame(coefs)
+
+def warm_start_params(m):
+    """
+    Retrieve parameters from a trained model in the format used to initialize a new Stan model.
+    Note that the new Stan model must have these same settings:
+        n_changepoints, seasonality features, mcmc sampling
+    for the retrieved parameters to be valid for the new model.
+
+    Parameters
+    ----------
+    m: A trained model of the Prophet class.
+
+    Returns
+    -------
+    A Dictionary containing retrieved parameters of m.
+    """
+    res = {}
+    for pname in ['k', 'm', 'sigma_obs']:
+        if m.mcmc_samples == 0:
+            res[pname] = m.params[pname][0][0]
+        else:
+            res[pname] = np.mean(m.params[pname])
+    for pname in ['delta', 'beta']:
+        if m.mcmc_samples == 0:
+            res[pname] = m.params[pname][0]
+        else:
+            res[pname] = np.mean(m.params[pname], axis=0)
+    return res
