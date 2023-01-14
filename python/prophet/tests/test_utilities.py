@@ -16,8 +16,8 @@ from prophet import Prophet
 from prophet.utilities import regressor_coefficients
 
 DATA = pd.read_csv(
-    os.path.join(os.path.dirname(__file__), "data.csv"),
-    parse_dates=["ds"],
+    os.path.join(os.path.dirname(__file__), 'data.csv'),
+    parse_dates=['ds'],
 )
 
 
@@ -27,18 +27,18 @@ class TestUtilities(TestCase):
         N = DATA.shape[0]
         df = DATA.copy()
         np.random.seed(123)
-        df["regr1"] = np.random.normal(size=N)
-        df["regr2"] = np.random.normal(size=N)
-        m.add_regressor("regr1", mode="additive")
-        m.add_regressor("regr2", mode="multiplicative")
+        df['regr1'] = np.random.normal(size=N)
+        df['regr2'] = np.random.normal(size=N)
+        m.add_regressor('regr1', mode='additive')
+        m.add_regressor('regr2', mode='multiplicative')
         m.fit(df)
 
         coefs = regressor_coefficients(m)
         self.assertTrue(coefs.shape == (2, 6))
         # No MCMC sampling, so lower and upper should be the same as mean
         self.assertTrue(
-            np.array_equal(coefs["coef_lower"].values, coefs["coef"].values)
+            np.array_equal(coefs['coef_lower'].values, coefs['coef'].values)
         )
         self.assertTrue(
-            np.array_equal(coefs["coef_upper"].values, coefs["coef"].values)
+            np.array_equal(coefs['coef_upper'].values, coefs['coef'].values)
         )

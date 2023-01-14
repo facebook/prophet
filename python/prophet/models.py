@@ -15,9 +15,9 @@ from typing import Tuple
 
 import pkg_resources
 
-logger = logging.getLogger("prophet.models")
+logger = logging.getLogger('prophet.models')
 
-PLATFORM = "win" if platform.platform().startswith("Win") else "unix"
+PLATFORM = 'win' if platform.platform().startswith('Win') else 'unix'
 
 
 class IStanBackend(ABC):
@@ -32,10 +32,10 @@ class IStanBackend(ABC):
          * newton_fallback [bool]: whether to fallback to Newton if L-BFGS fails
         """
         for k, v in kwargs.items():
-            if k == "newton_fallback":
+            if k == 'newton_fallback':
                 self.newton_fallback = v
             else:
-                raise ValueError(f"Unknown option {k}")
+                raise ValueError(f'Unknown option {k}')
 
     @staticmethod
     @abstractmethod
@@ -56,14 +56,14 @@ class IStanBackend(ABC):
 
 
 class CmdStanPyBackend(IStanBackend):
-    CMDSTAN_VERSION = "2.26.1"
+    CMDSTAN_VERSION = '2.26.1'
 
     def __init__(self):
         import cmdstanpy
 
         # this must be set before super.__init__() for load_model to work on Windows
         local_cmdstan = pkg_resources.resource_filename(
-            "prophet", f"stan_model/cmdstan-{self.CMDSTAN_VERSION}"
+            'prophet', f'stan_model/cmdstan-{self.CMDSTAN_VERSION}'
         )
         if Path(local_cmdstan).exists():
             cmdstanpy.set_cmdstan_path(local_cmdstan)
@@ -77,21 +77,21 @@ class CmdStanPyBackend(IStanBackend):
         import cmdstanpy
 
         model_file = pkg_resources.resource_filename(
-            "prophet",
-            "stan_model/prophet_model.bin",
+            'prophet',
+            'stan_model/prophet_model.bin',
         )
         return cmdstanpy.CmdStanModel(exe_file=model_file)
 
     def fit(self, stan_init, stan_data, **kwargs):
-        if "inits" not in kwargs and "init" in kwargs:
-            kwargs["inits"], _ = self.prepare_data(kwargs["init"], stan_data)
-            del kwargs["init"]
+        if 'inits' not in kwargs and 'init' in kwargs:
+            kwargs['inits'], _ = self.prepare_data(kwargs['init'], stan_data)
+            del kwargs['init']
 
         stan_init, stan_data = self.prepare_data(stan_init, stan_data)
         args = dict(
             data=stan_data,
             inits=stan_init,
-            algorithm="Newton" if stan_data["T"] < 100 else "LBFGS",
+            algorithm='Newton' if stan_data['T'] < 100 else 'LBFGS',
             iter=int(1e4),
         )
         args.update(kwargs)
@@ -100,12 +100,12 @@ class CmdStanPyBackend(IStanBackend):
             self.stan_fit = self.model.optimize(**args)
         except RuntimeError as e:
             # Fall back on Newton
-            if not self.newton_fallback or args["algorithm"] == "Newton":
+            if not self.newton_fallback or args['algorithm'] == 'Newton':
                 raise e
             logger.warning(
-                "Optimization terminated abnormally. Falling back to Newton."
+                'Optimization terminated abnormally. Falling back to Newton.'
             )
-            args["algorithm"] = "Newton"
+            args['algorithm'] = 'Newton'
             self.stan_fit = self.model.optimize(**args)
         params = self.stan_to_dict_numpy(
             self.stan_fit.column_names, self.stan_fit.optimized_params_np
@@ -115,9 +115,9 @@ class CmdStanPyBackend(IStanBackend):
         return params
 
     def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
-        if "inits" not in kwargs and "init" in kwargs:
-            kwargs["inits"], _ = self.prepare_data(kwargs["init"], stan_data)
-            del kwargs["init"]
+        if 'inits' not in kwargs and 'init' in kwargs:
+            kwargs['inits'], _ = self.prepare_data(kwargs['init'], stan_data)
+            del kwargs['init']
 
         stan_init, stan_data = self.prepare_data(stan_init, stan_data)
         args = dict(
@@ -125,12 +125,12 @@ class CmdStanPyBackend(IStanBackend):
             inits=stan_init,
         )
 
-        if "chains" not in kwargs:
-            kwargs["chains"] = 4
+        if 'chains' not in kwargs:
+            kwargs['chains'] = 4
         iter_half = samples // 2
-        kwargs["iter_sampling"] = iter_half
-        if "iter_warmup" not in kwargs:
-            kwargs["iter_warmup"] = iter_half
+        kwargs['iter_sampling'] = iter_half
+        if 'iter_warmup' not in kwargs:
+            kwargs['iter_warmup'] = iter_half
 
         args.update(kwargs)
 
@@ -145,7 +145,7 @@ class CmdStanPyBackend(IStanBackend):
             if s[1] == 1:
                 params[par] = params[par].reshape((s[0],))
 
-            if par in ["delta", "beta"] and len(s) < 2:
+            if par in ['delta', 'beta'] and len(s) < 2:
                 params[par] = params[par].reshape((-1, 1))
 
         return params
@@ -153,32 +153,32 @@ class CmdStanPyBackend(IStanBackend):
     @staticmethod
     def prepare_data(init, data) -> Tuple[dict, dict]:
         cmdstanpy_data = {
-            "T": data["T"],
-            "S": data["S"],
-            "K": data["K"],
-            "tau": data["tau"],
-            "trend_indicator": data["trend_indicator"],
-            "y": data["y"].tolist(),
-            "t": data["t"].tolist(),
-            "cap": data["cap"].tolist(),
-            "t_change": data["t_change"].tolist(),
-            "s_a": data["s_a"].tolist(),
-            "s_m": data["s_m"].tolist(),
-            "X": data["X"].to_numpy().tolist(),
-            "sigmas": data["sigmas"],
+            'T': data['T'],
+            'S': data['S'],
+            'K': data['K'],
+            'tau': data['tau'],
+            'trend_indicator': data['trend_indicator'],
+            'y': data['y'].tolist(),
+            't': data['t'].tolist(),
+            'cap': data['cap'].tolist(),
+            't_change': data['t_change'].tolist(),
+            's_a': data['s_a'].tolist(),
+            's_m': data['s_m'].tolist(),
+            'X': data['X'].to_numpy().tolist(),
+            'sigmas': data['sigmas'],
         }
 
         cmdstanpy_init = {
-            "k": init["k"],
-            "m": init["m"],
-            "delta": init["delta"].tolist(),
-            "beta": init["beta"].tolist(),
-            "sigma_obs": init["sigma_obs"],
+            'k': init['k'],
+            'm': init['m'],
+            'delta': init['delta'].tolist(),
+            'beta': init['beta'].tolist(),
+            'sigma_obs': init['sigma_obs'],
         }
         return (cmdstanpy_init, cmdstanpy_data)
 
     @staticmethod
-    def stan_to_dict_numpy(column_names: Tuple[str, ...], data: "np.array"):
+    def stan_to_dict_numpy(column_names: Tuple[str, ...], data: 'np.array'):
         import numpy as np
 
         output = OrderedDict()
@@ -189,14 +189,14 @@ class CmdStanPyBackend(IStanBackend):
         end = 0
         two_dims = len(data.shape) > 1
         for cname in column_names:
-            parsed = cname.split(".") if "." in cname else cname.split("[")
+            parsed = cname.split('.') if '.' in cname else cname.split('[')
             curr = parsed[0]
             if prev is None:
                 prev = curr
 
             if curr != prev:
                 if prev in output:
-                    raise RuntimeError("Found repeated column name")
+                    raise RuntimeError('Found repeated column name')
                 if two_dims:
                     output[prev] = np.array(data[:, start:end])
                 else:
@@ -205,7 +205,7 @@ class CmdStanPyBackend(IStanBackend):
                 start = end
             end += 1
         if prev in output:
-            raise RuntimeError("Found repeated column name")
+            raise RuntimeError('Found repeated column name')
         if two_dims:
             output[prev] = np.array(data[:, start:end])
         else:
@@ -221,4 +221,4 @@ class StanBackendEnum(Enum):
         try:
             return StanBackendEnum[name].value
         except KeyError as e:
-            raise ValueError(f"Unknown stan backend: {name}") from e
+            raise ValueError(f'Unknown stan backend: {name}') from e

@@ -52,26 +52,26 @@ def regressor_coefficients(m):
     - `coef_upper`: Upper bound for the coefficient, estimated from MCMC samples.
         Only to different to `coef` if `mcmc_samples > 0`.
     """
-    assert len(m.extra_regressors) > 0, "No extra regressors found."
+    assert len(m.extra_regressors) > 0, 'No extra regressors found.'
     coefs = []
     for regressor, params in m.extra_regressors.items():
-        beta = m.params["beta"][:, regressor_index(m, regressor)]
-        if params["mode"] == "additive":
-            coef = beta * m.y_scale / params["std"]
+        beta = m.params['beta'][:, regressor_index(m, regressor)]
+        if params['mode'] == 'additive':
+            coef = beta * m.y_scale / params['std']
         else:
-            coef = beta / params["std"]
+            coef = beta / params['std']
         percentiles = [
             (1 - m.interval_width) / 2,
             1 - (1 - m.interval_width) / 2,
         ]
         coef_bounds = np.quantile(coef, q=percentiles)
         record = {
-            "regressor": regressor,
-            "regressor_mode": params["mode"],
-            "center": params["mu"],
-            "coef_lower": coef_bounds[0],
-            "coef": np.mean(coef),
-            "coef_upper": coef_bounds[1],
+            'regressor': regressor,
+            'regressor_mode': params['mode'],
+            'center': params['mu'],
+            'coef_lower': coef_bounds[0],
+            'coef': np.mean(coef),
+            'coef_upper': coef_bounds[1],
         }
         coefs.append(record)
 

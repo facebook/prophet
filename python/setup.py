@@ -18,14 +18,14 @@ from setuptools.command.build_py import build_py
 from setuptools.command.develop import develop
 from setuptools.command.test import test as test_command
 
-MODEL_DIR = "stan"
-MODEL_TARGET_DIR = os.path.join("prophet", "stan_model")
+MODEL_DIR = 'stan'
+MODEL_TARGET_DIR = os.path.join('prophet', 'stan_model')
 
-CMDSTAN_VERSION = "2.26.1"
-BINARIES_DIR = "bin"
-BINARIES = ["diagnose", "print", "stanc", "stansummary"]
-TBB_PARENT = "stan/lib/stan_math/lib"
-TBB_DIRS = ["tbb", "tbb_2019_U8"]
+CMDSTAN_VERSION = '2.26.1'
+BINARIES_DIR = 'bin'
+BINARIES = ['diagnose', 'print', 'stanc', 'stansummary']
+TBB_PARENT = 'stan/lib/stan_math/lib'
+TBB_DIRS = ['tbb', 'tbb_2019_U8']
 
 
 def prune_cmdstan(cmdstan_dir: str) -> None:
@@ -34,12 +34,12 @@ def prune_cmdstan(cmdstan_dir: str) -> None:
     """
     original_dir = Path(cmdstan_dir).resolve()
     parent_dir = original_dir.parent
-    temp_dir = parent_dir / "temp"
+    temp_dir = parent_dir / 'temp'
     if temp_dir.is_dir():
         rmtree(temp_dir)
     temp_dir.mkdir()
 
-    print("Copying ", original_dir, " to ", temp_dir, " for pruning")
+    print('Copying ', original_dir, ' to ', temp_dir, ' for pruning')
     copytree(original_dir / BINARIES_DIR, temp_dir / BINARIES_DIR)
     for f in (temp_dir / BINARIES_DIR).iterdir():
         if f.is_dir():
@@ -54,7 +54,7 @@ def prune_cmdstan(cmdstan_dir: str) -> None:
 
 
 def repackage_cmdstan():
-    return os.environ.get("PROPHET_REPACKAGE_CMDSTAN", "").lower() not in ["false", "0"]
+    return os.environ.get('PROPHET_REPACKAGE_CMDSTAN', '').lower() not in ['false', '0']
 
 
 def maybe_install_cmdstan_toolchain():
@@ -71,7 +71,7 @@ def maybe_install_cmdstan_toolchain():
             from cmdstanpy.install_cxx_toolchain import \
                 main as run_rtools_install
 
-        run_rtools_install({"version": None, "dir": None, "verbose": True})
+        run_rtools_install({'version': None, 'dir': None, 'verbose': True})
         cmdstanpy.utils.cxx_toolchain_path()
 
 
@@ -81,9 +81,9 @@ def install_cmdstan_deps(cmdstan_dir: Path):
     import cmdstanpy
 
     if repackage_cmdstan():
-        if platform.platform().startswith("Win"):
+        if platform.platform().startswith('Win'):
             maybe_install_cmdstan_toolchain()
-        print("Installing cmdstan to", cmdstan_dir)
+        print('Installing cmdstan to', cmdstan_dir)
         if os.path.isdir(cmdstan_dir):
             rmtree(cmdstan_dir)
 
@@ -95,7 +95,7 @@ def install_cmdstan_deps(cmdstan_dir: Path):
             cores=cpu_count(),
             progress=True,
         ):
-            raise RuntimeError("CmdStan failed to install in repackaged directory")
+            raise RuntimeError('CmdStan failed to install in repackaged directory')
 
 
 def build_cmdstan_model(target_dir):
@@ -110,10 +110,10 @@ def build_cmdstan_model(target_dir):
     """
     import cmdstanpy
 
-    cmdstan_dir = (Path(target_dir) / f"cmdstan-{CMDSTAN_VERSION}").resolve()
+    cmdstan_dir = (Path(target_dir) / f'cmdstan-{CMDSTAN_VERSION}').resolve()
     install_cmdstan_deps(cmdstan_dir)
-    model_name = "prophet.stan"
-    target_name = "prophet_model.bin"
+    model_name = 'prophet.stan'
+    target_name = 'prophet_model.bin'
     sm = cmdstanpy.CmdStanModel(stan_file=os.path.join(MODEL_DIR, model_name))
     copy(sm.exe_file, os.path.join(target_dir, target_name))
 
@@ -127,15 +127,15 @@ def build_cmdstan_model(target_dir):
 
 
 def get_backends_from_env() -> List[str]:
-    return os.environ.get("STAN_BACKEND", "CMDSTANPY").split(",")
+    return os.environ.get('STAN_BACKEND', 'CMDSTANPY').split(',')
 
 
 def build_models(target_dir):
-    print("Compiling cmdstanpy model")
+    print('Compiling cmdstanpy model')
     build_cmdstan_model(target_dir)
 
-    if "PYSTAN" in get_backends_from_env():
-        raise ValueError("PyStan backend is not supported for Prophet >= 1.1")
+    if 'PYSTAN' in get_backends_from_env():
+        raise ValueError('PyStan backend is not supported for Prophet >= 1.1')
 
 
 class BuildPyCommand(build_py):
@@ -171,14 +171,14 @@ class DevelopCommand(develop):
 
 class TestCommand(test_command):
     user_options = [
-        ("test-module=", "m", "Run 'test_suite' in specified module"),
+        ('test-module=', 'm', "Run 'test_suite' in specified module"),
         (
-            "test-suite=",
-            "s",
+            'test-suite=',
+            's',
             "Run single test, case or suite (e.g. 'module.test_suite')",
         ),
-        ("test-runner=", "r", "Test runner to use"),
-        ("test-slow", "w", "Test slow suites (default off)"),
+        ('test-runner=', 'r', 'Test runner to use'),
+        ('test-slow', 'w', 'Test slow suites (default off)'),
     ]
     test_slow = None
 
@@ -189,25 +189,25 @@ class TestCommand(test_command):
     def finalize_options(self):
         super(TestCommand, self).finalize_options()
         if self.test_slow is None:
-            self.test_slow = getattr(self.distribution, "test_slow", False)
+            self.test_slow = getattr(self.distribution, 'test_slow', False)
 
     """We must run tests on the build directory, not source."""
 
     def with_project_on_sys_path(self, func):
         # Ensure metadata is up-to-date
-        self.reinitialize_command("build_py", inplace=0)
-        self.run_command("build_py")
-        bpy_cmd = self.get_finalized_command("build_py")
+        self.reinitialize_command('build_py', inplace=0)
+        self.run_command('build_py')
+        bpy_cmd = self.get_finalized_command('build_py')
         build_path = normalize_path(bpy_cmd.build_lib)
 
         # Build extensions
-        self.reinitialize_command("egg_info", egg_base=build_path)
-        self.run_command("egg_info")
+        self.reinitialize_command('egg_info', egg_base=build_path)
+        self.run_command('egg_info')
 
-        self.reinitialize_command("build_ext", inplace=0)
-        self.run_command("build_ext")
+        self.reinitialize_command('build_ext', inplace=0)
+        self.run_command('build_ext')
 
-        ei_cmd = self.get_finalized_command("egg_info")
+        ei_cmd = self.get_finalized_command('egg_info')
 
         old_path = sys.path[:]
         old_modules = sys.modules.copy()
@@ -216,7 +216,7 @@ class TestCommand(test_command):
             sys.path.insert(0, normalize_path(ei_cmd.egg_base))
             working_set.__init__()
             add_activation_listener(lambda dist: dist.activate())
-            require("%s==%s" % (ei_cmd.egg_name, ei_cmd.egg_version))
+            require('%s==%s' % (ei_cmd.egg_name, ei_cmd.egg_version))
             func()
         finally:
             sys.path[:] = old_path
@@ -225,49 +225,49 @@ class TestCommand(test_command):
             working_set.__init__()
 
 
-with open("README.md", "r", encoding="utf-8") as f:
+with open('README.md', 'r', encoding='utf-8') as f:
     long_description = f.read()
 
-with open("requirements.txt", "r") as f:
+with open('requirements.txt', 'r') as f:
     install_requires = f.read().splitlines()
 
 about = {}
 here = Path(__file__).parent.resolve()
-with open(here / "prophet" / "__version__.py", "r") as f:
+with open(here / 'prophet' / '__version__.py', 'r') as f:
     exec(f.read(), about)
 
 setup(
-    name=about["__title__"],
-    version=about["__version__"],
-    description=about["__description__"],
-    url=about["__url__"],
+    name=about['__title__'],
+    version=about['__version__'],
+    description=about['__description__'],
+    url=about['__url__'],
     project_urls={
-        "Source": "https://github.com/facebook/prophet",
+        'Source': 'https://github.com/facebook/prophet',
     },
-    author=about["__author__"],
-    author_email=about["__author_email__"],
-    license=about["__license__"],
+    author=about['__author__'],
+    author_email=about['__author_email__'],
+    license=about['__license__'],
     packages=find_packages(),
     install_requires=install_requires,
-    python_requires=">=3.7",
+    python_requires='>=3.7',
     zip_safe=False,
     include_package_data=True,
-    ext_modules=[Extension("prophet.stan_model", [])],
+    ext_modules=[Extension('prophet.stan_model', [])],
     cmdclass={
-        "build_ext": BuildExtCommand,
-        "build_py": BuildPyCommand,
-        "develop": DevelopCommand,
-        "test": TestCommand,
+        'build_ext': BuildExtCommand,
+        'build_py': BuildPyCommand,
+        'develop': DevelopCommand,
+        'test': TestCommand,
     },
-    test_suite="prophet.tests",
+    test_suite='prophet.tests',
     classifiers=[
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
     long_description=long_description,
-    long_description_content_type="text/markdown",
+    long_description_content_type='text/markdown',
 )

@@ -23,6 +23,7 @@ repos:
       - id: check-added-large-files
         args: [--maxkb=1024]
       - id: end-of-file-fixer
+      - id: double-quote-string-fixer
 
   - repo: https://github.com/pycqa/flake8
     rev: 6.0.0
