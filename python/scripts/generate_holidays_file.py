@@ -3,19 +3,16 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import inspect
 import unicodedata
-import warnings
-
-import pandas as pd
-import numpy as np
 
 import holidays as hdays_part1
+import numpy as np
+import pandas as pd
+
 import prophet.hdays as hdays_part2
 from prophet.make_holidays import make_holidays_df
 
@@ -40,7 +37,7 @@ def utf8_to_ascii(text):
 
 def generate_holidays_file():
     """Generate csv file of all possible holiday names, ds,
-     and countries, year combination
+    and countries, year combination
     """
     year_list = np.arange(1995, 2045, 1).tolist()
     all_holidays = []
@@ -66,14 +63,16 @@ def generate_holidays_file():
 
     # Convert to ASCII, and drop holidays that fail to convert
     generated_holidays['holiday'] = generated_holidays['holiday'].apply(utf8_to_ascii)
-    failed_countries = generated_holidays.loc[generated_holidays['holiday'] == 'FAILED_TO_PARSE', 'country'].unique()
+    failed_countries = generated_holidays.loc[
+        generated_holidays['holiday'] == 'FAILED_TO_PARSE', 'country'
+    ].unique()
     if failed_countries:
-        print("Failed to convert UTF-8 holidays for:")
+        print('Failed to convert UTF-8 holidays for:')
         print('\n'.join(failed_countries))
     assert 'FAILED_TO_PARSE' not in generated_holidays['holiday'].unique()
-    generated_holidays.to_csv("../R/data-raw/generated_holidays.csv", index=False)
+    generated_holidays.to_csv('../R/data-raw/generated_holidays.csv', index=False)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # execute only if run as a script
     generate_holidays_file()

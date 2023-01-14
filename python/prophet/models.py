@@ -1,22 +1,24 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates.
 
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
 from __future__ import absolute_import, division, print_function
-from abc import abstractmethod, ABC
-from typing import Tuple
+
+import logging
+import platform
+from abc import ABC, abstractmethod
 from collections import OrderedDict
 from enum import Enum
 from pathlib import Path
-import pkg_resources
-import platform
+from typing import Tuple
 
-import logging
+import pkg_resources
+
 logger = logging.getLogger('prophet.models')
 
-PLATFORM = "win" if platform.platform().startswith("Win") else "unix"
+PLATFORM = 'win' if platform.platform().startswith('Win') else 'unix'
+
 
 class IStanBackend(ABC):
     def __init__(self):
@@ -34,7 +36,6 @@ class IStanBackend(ABC):
                 self.newton_fallback = v
             else:
                 raise ValueError(f'Unknown option {k}')
-
 
     @staticmethod
     @abstractmethod
@@ -55,12 +56,14 @@ class IStanBackend(ABC):
 
 
 class CmdStanPyBackend(IStanBackend):
-    CMDSTAN_VERSION = "2.26.1"
+    CMDSTAN_VERSION = '2.26.1'
+
     def __init__(self):
         import cmdstanpy
+
         # this must be set before super.__init__() for load_model to work on Windows
         local_cmdstan = pkg_resources.resource_filename(
-            "prophet", f"stan_model/cmdstan-{self.CMDSTAN_VERSION}"
+            'prophet', f'stan_model/cmdstan-{self.CMDSTAN_VERSION}'
         )
         if Path(local_cmdstan).exists():
             cmdstanpy.set_cmdstan_path(local_cmdstan)
@@ -72,6 +75,7 @@ class CmdStanPyBackend(IStanBackend):
 
     def load_model(self):
         import cmdstanpy
+
         model_file = pkg_resources.resource_filename(
             'prophet',
             'stan_model/prophet_model.bin',
@@ -98,11 +102,14 @@ class CmdStanPyBackend(IStanBackend):
             # Fall back on Newton
             if not self.newton_fallback or args['algorithm'] == 'Newton':
                 raise e
-            logger.warning('Optimization terminated abnormally. Falling back to Newton.')
+            logger.warning(
+                'Optimization terminated abnormally. Falling back to Newton.'
+            )
             args['algorithm'] = 'Newton'
             self.stan_fit = self.model.optimize(**args)
         params = self.stan_to_dict_numpy(
-            self.stan_fit.column_names, self.stan_fit.optimized_params_np)
+            self.stan_fit.column_names, self.stan_fit.optimized_params_np
+        )
         for par in params:
             params[par] = params[par].reshape((1, -1))
         return params
@@ -158,7 +165,7 @@ class CmdStanPyBackend(IStanBackend):
             's_a': data['s_a'].tolist(),
             's_m': data['s_m'].tolist(),
             'X': data['X'].to_numpy().tolist(),
-            'sigmas': data['sigmas']
+            'sigmas': data['sigmas'],
         }
 
         cmdstanpy_init = {
@@ -166,7 +173,7 @@ class CmdStanPyBackend(IStanBackend):
             'm': init['m'],
             'delta': init['delta'].tolist(),
             'beta': init['beta'].tolist(),
-            'sigma_obs': init['sigma_obs']
+            'sigma_obs': init['sigma_obs'],
         }
         return (cmdstanpy_init, cmdstanpy_data)
 
@@ -182,16 +189,14 @@ class CmdStanPyBackend(IStanBackend):
         end = 0
         two_dims = len(data.shape) > 1
         for cname in column_names:
-            parsed = cname.split(".") if "." in cname else cname.split("[")
+            parsed = cname.split('.') if '.' in cname else cname.split('[')
             curr = parsed[0]
             if prev is None:
                 prev = curr
 
             if curr != prev:
                 if prev in output:
-                    raise RuntimeError(
-                        "Found repeated column name"
-                    )
+                    raise RuntimeError('Found repeated column name')
                 if two_dims:
                     output[prev] = np.array(data[:, start:end])
                 else:
@@ -200,16 +205,12 @@ class CmdStanPyBackend(IStanBackend):
                 start = end
             end += 1
         if prev in output:
-            raise RuntimeError(
-                "Found repeated column name"
-            )
+            raise RuntimeError('Found repeated column name')
         if two_dims:
             output[prev] = np.array(data[:, start:end])
         else:
             output[prev] = np.array(data[start:end])
         return output
-
-
 
 
 class StanBackendEnum(Enum):
@@ -220,4 +221,4 @@ class StanBackendEnum(Enum):
         try:
             return StanBackendEnum[name].value
         except KeyError as e:
-            raise ValueError(f"Unknown stan backend: {name}") from e
+            raise ValueError(f'Unknown stan backend: {name}') from e

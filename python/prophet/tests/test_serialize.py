@@ -3,21 +3,19 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import json
 import os
-import sys
-from unittest import TestCase, skipUnless
+from unittest import TestCase
 
 import numpy as np
 import pandas as pd
-from prophet import Prophet
-from prophet.serialize import model_to_json, model_from_json, PD_SERIES, PD_DATAFRAME
 
+from prophet import Prophet
+from prophet.serialize import (PD_DATAFRAME, PD_SERIES, model_from_json,
+                               model_to_json)
 
 DATA = pd.read_csv(
     os.path.join(os.path.dirname(__file__), 'data.csv'),
@@ -26,7 +24,6 @@ DATA = pd.read_csv(
 
 
 class TestSerialize(TestCase):
-
     def test_simple_serialize(self):
         m = Prophet()
         days = 30
@@ -70,12 +67,14 @@ class TestSerialize(TestCase):
 
     def test_full_serialize(self):
         # Construct a model with all attributes
-        holidays = pd.DataFrame({
-            'ds': pd.to_datetime(['2012-06-06', '2013-06-06']),
-            'holiday': ['seans-bday'] * 2,
-            'lower_window': [0] * 2,
-            'upper_window': [1] * 2,
-        })
+        holidays = pd.DataFrame(
+            {
+                'ds': pd.to_datetime(['2012-06-06', '2013-06-06']),
+                'holiday': ['seans-bday'] * 2,
+                'lower_window': [0] * 2,
+                'upper_window': [1] * 2,
+            }
+        )
         # Test with holidays and country_holidays
         m = Prophet(
             holidays=holidays,
@@ -83,17 +82,21 @@ class TestSerialize(TestCase):
             changepoints=['2012-07-01', '2012-10-01', '2013-01-01'],
         )
         m.add_country_holidays(country_name='US')
-        m.add_seasonality(name='conditional_weekly', period=7, fourier_order=3,
-                          prior_scale=2., condition_name='is_conditional_week')
-        m.add_seasonality(name='normal_monthly', period=30.5, fourier_order=5,
-                          prior_scale=2.)
+        m.add_seasonality(
+            name='conditional_weekly',
+            period=7,
+            fourier_order=3,
+            prior_scale=2.0,
+            condition_name='is_conditional_week',
+        )
+        m.add_seasonality(
+            name='normal_monthly', period=30.5, fourier_order=5, prior_scale=2.0
+        )
         df = DATA.copy()
         df['is_conditional_week'] = [0] * 255 + [1] * 255
         m.add_regressor('binary_feature', prior_scale=0.2)
         m.add_regressor('numeric_feature', prior_scale=0.5)
-        m.add_regressor(
-            'numeric_feature2', prior_scale=0.5, mode='multiplicative'
-        )
+        m.add_regressor('numeric_feature2', prior_scale=0.5, mode='multiplicative')
         m.add_regressor('binary_feature2', standardize=True)
         df['binary_feature'] = ['0'] * 255 + ['1'] * 255
         df['numeric_feature'] = range(510)
@@ -143,8 +146,7 @@ class TestSerialize(TestCase):
         }
         for v, (pred_val, v_str) in old_versions.items():
             fname = os.path.join(
-                os.path.dirname(__file__),
-                'serialized_model_v{}.json'.format(v)
+                os.path.dirname(__file__), 'serialized_model_v{}.json'.format(v)
             )
             with open(fname, 'r') as fin:
                 model_str = json.load(fin)

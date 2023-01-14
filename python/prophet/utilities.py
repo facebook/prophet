@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates.
 
 # This source code is licensed under the MIT license found in the
@@ -8,6 +7,7 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 import pandas as pd
+
 
 def regressor_index(m, name):
     """Given the name of a regressor, return its (column) index in the `beta` matrix.
@@ -21,9 +21,10 @@ def regressor_index(m, name):
     -------
     The column index of the regressor in the `beta` matrix.
     """
-    return np.extract(
-        m.train_component_cols[name] == 1, m.train_component_cols.index
-    )[0]
+    return np.extract(m.train_component_cols[name] == 1, m.train_component_cols.index)[
+        0
+    ]
+
 
 def regressor_coefficients(m):
     """Summarise the coefficients of the extra regressors used in the model.
