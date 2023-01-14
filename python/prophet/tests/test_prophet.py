@@ -15,6 +15,7 @@ from unittest import TestCase, skipUnless
 import numpy as np
 import pandas as pd
 from prophet import Prophet
+from prophet.utilities import warm_start_params
 
 
 DATA = pd.read_csv(
@@ -892,50 +893,12 @@ class TestProphet(TestCase):
              },
         )
 
-    @staticmethod
-    def get_stan_init(m):
-        """Retrieve parameters from a trained model.
-
-        Retrieve parameters from a trained model in the format
-        used to initialize a new Stan model.
-
-        Parameters
-        ----------
-        m: A trained model of the Prophet class.
-
-        Returns
-        -------
-        A Dictionary containing retrieved parameters of m.
-        """
-        res = {}
-        for pname in ['k', 'm', 'sigma_obs']:
-            if m.mcmc_samples == 0:
-                res[pname] = m.params[pname][0][0]
-            else:
-                res[pname] = np.mean(m.params[pname])
-        for pname in ['delta', 'beta']:
-            if m.mcmc_samples == 0:
-                res[pname] = m.params[pname][0]
-            else:
-                res[pname] = np.mean(m.params[pname], axis=0)
-        return res
-
     def test_fit_warm_start(self):
-        previous_df = DATA.iloc[:500]
-        df = DATA.iloc[:510]
-        m = Prophet()
-        m = m.fit(previous_df)
-        m_params = self.get_stan_init(m)
-        m2 = Prophet()
-        m2 = m2.fit(df, init=m_params)
+        m = Prophet().fit(DATA.iloc[:500])
+        m2 = Prophet().fit(DATA.iloc[:510], init=warm_start_params(m))
         self.assertEqual(len(m2.params['delta'][0]), 25)
 
     def test_sampling_warm_start(self):
-        previous_df = DATA.iloc[:500]
-        df = DATA.iloc[:510]
-        m = Prophet(mcmc_samples=100)
-        m = m.fit(previous_df, show_progress=False)
-        m_params = self.get_stan_init(m)
-        m2 = Prophet(mcmc_samples=100)
-        m2 = m2.fit(df, init=m_params, show_progress=False)
+        m = Prophet(mcmc_samples=100).fit(DATA.iloc[:500], show_progress=False)
+        m2 = Prophet(mcmc_samples=100).fit(DATA.iloc[:510], init=warm_start_params(m), show_progress=False)
         self.assertEqual(m2.params['delta'].shape, (200, 25))

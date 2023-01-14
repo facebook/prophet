@@ -80,14 +80,14 @@ class CmdStanPyBackend(IStanBackend):
 
     def fit(self, stan_init, stan_data, **kwargs):
         if 'inits' not in kwargs and 'init' in kwargs:
-            kwargs['inits'], _ = self.prepare_data(kwargs['init'], stan_data)
+            stan_init = self.sanitize_custom_inits(stan_init, kwargs['init'])
             del kwargs['init']
 
-        stan_init, stan_data = self.prepare_data(stan_init, stan_data)
+        inits_list, data_list = self.prepare_data(stan_init, stan_data)
         args = dict(
-            data=stan_data,
-            inits=stan_init,
-            algorithm='Newton' if stan_data['T'] < 100 else 'LBFGS',
+            data=data_list,
+            inits=inits_list,
+            algorithm='Newton' if data_list['T'] < 100 else 'LBFGS',
             iter=int(1e4),
         )
         args.update(kwargs)
@@ -109,22 +109,20 @@ class CmdStanPyBackend(IStanBackend):
 
     def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
         if 'inits' not in kwargs and 'init' in kwargs:
-            kwargs['inits'], _ = self.prepare_data(kwargs['init'], stan_data)
+            stan_init = self.sanitize_custom_inits(stan_init, kwargs['init'])
             del kwargs['init']
 
-        stan_init, stan_data = self.prepare_data(stan_init, stan_data)
+        inits_list, data_list = self.prepare_data(stan_init, stan_data)
         args = dict(
-            data=stan_data,
-            inits=stan_init,
+            data=data_list,
+            inits=inits_list,
         )
-
         if 'chains' not in kwargs:
             kwargs['chains'] = 4
         iter_half = samples // 2
         kwargs['iter_sampling'] = iter_half
         if 'iter_warmup' not in kwargs:
             kwargs['iter_warmup'] = iter_half
-
         args.update(kwargs)
 
         self.stan_fit = self.model.sample(**args)
@@ -144,7 +142,24 @@ class CmdStanPyBackend(IStanBackend):
         return params
 
     @staticmethod
+    def sanitize_custom_inits(default_inits, custom_inits):
+        """Validate that custom inits have the correct type and shape, otherwise use defaults."""
+        sanitized = {}
+        for param in ['k', 'm', 'sigma_obs']:
+            try:
+                sanitized[param] = float(custom_inits.get(param))
+            except Exception:
+                sanitized[param] = default_inits[param]
+        for param in ['delta', 'beta']:
+            if default_inits[param].shape == custom_inits[param].shape:
+                sanitized[param] = custom_inits[param]
+            else:
+                sanitized[param] = default_inits[param]
+        return sanitized
+
+    @staticmethod
     def prepare_data(init, data) -> Tuple[dict, dict]:
+        """Converts np.ndarrays to lists that can be read by cmdstanpy."""
         cmdstanpy_data = {
             'T': data['T'],
             'S': data['S'],

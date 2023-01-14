@@ -82,11 +82,12 @@ A common setting for forecasting is fitting models that need to be updated as ad
 
 ```python
 # Python
-def get_stan_init(m):
-    """Retrieve parameters from a trained model.
-
-    Retrieve parameters from a trained model in the format
-    used to initialize a new Stan model.
+def warm_start_params(m):
+    """
+    Retrieve parameters from a trained model in the format used to initialize a new Stan model.
+    Note that the new Stan model must have these same settings:
+        n_changepoints, seasonality features, mcmc sampling
+    for the retrieved parameters to be valid for the new model.
 
     Parameters
     ----------
@@ -115,7 +116,7 @@ m1 = Prophet().fit(df1) # A model fit to all data except the last day
 
 
 %timeit m2 = Prophet().fit(df)  # Adding the last day, fitting from scratch
-%timeit m2 = Prophet().fit(df, init=get_stan_init(m1))  # Adding the last day, warm-starting from m1
+%timeit m2 = Prophet().fit(df, init=warm_start_params(m1))  # Adding the last day, warm-starting from m1
 ```
     1.33 s ± 55.9 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
     185 ms ± 4.46 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
