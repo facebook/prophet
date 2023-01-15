@@ -17,7 +17,7 @@ jobs:
       matrix:
         os: ["macos-latest", "ubuntu-latest", "windows-latest"]
         cibw_arch: ["native"]
-        # Builds one wheel using first build spec, then tests on all versions
+        # Build one wheel (ABI = none) using first build spec, then test on all python versions.
         cibw_build: ["cp37-* cp38-* cp39-* cp310-* cp311-*"]
         include:
           - os: ubuntu-latest
