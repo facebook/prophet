@@ -17,11 +17,16 @@ jobs:
       matrix:
         os: ["macos-latest", "ubuntu-latest", "windows-latest"]
         cibw_arch: ["native"]
+        # Builds one wheel using first build spec, then tests on all versions
+        cibw_build: ["cp37-* cp38-* cp39-* cp310-* cp311-*"]
         include:
           - os: ubuntu-latest
             cibw_arch: aarch64
+            # Each test takes 30 mins, which is too long to run sequentially, so we test once only.
+            cibw_build: "cp37-*"
           - os: macos-latest
             cibw_arch: arm64
+            cibw_build: ["cp38-* cp39-* cp310-* cp311-*"]
       fail-fast: false
 
     steps:
@@ -58,7 +63,7 @@ jobs:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_BUILD: "cp37-* cp38-* cp39-* cp310-* cp311-*"
+          CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
           CIBW_BUILD_FRONTEND: build
