@@ -64,6 +64,7 @@ jobs:
           CIBW_BUILD_FRONTEND: build
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: pytest --pyargs prophet
+          CIBW_TEST_SKIP: "*_arm64"
 
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@v3
