@@ -11,18 +11,21 @@ env:
 
 jobs:
   make-wheels:
-    name: Make ${{ matrix.os }} ${{ matrix.cibw_arch }} ${{ matrix.py_version }} wheels
+    name: Make ${{ matrix.os }} ${{ matrix.cibw_arch }} wheels
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: ["macos-latest", "ubuntu-latest", "windows-latest"]
-        cibw_arch: ["native", "aarch64"]
-        py_version: ["cp37-*", "cp38-*", "cp39-*", "cp310-*"]
+        cibw_arch: ["native", "aarch64", "universal2"]
         exclude:
           - os: macos-latest
             cibw_arch: "aarch64"
           - os: windows-latest
             cibw_arch: "aarch64"
+          - os: ubuntu-latest
+            cibw_arch: "universal2"
+          - os: windows-latest
+            cibw_arch: "universal2"
       fail-fast: false
 
     steps:
@@ -32,7 +35,7 @@ jobs:
       - name: "Restore RTools40"
         if: startsWith(runner.os, 'Windows')
         id: cache-rtools
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: C:/rtools40
           key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
@@ -44,14 +47,14 @@ jobs:
           platforms: arm64
 
       - name: "Build wheels"
-        uses: pypa/cibuildwheel@v2.6.0
+        uses: pypa/cibuildwheel@v2.11.4
         with:
           package-dir: python
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_BUILD: ${{ matrix.py_version }}
+          CIBW_BUILD: "cp37-* cp38-* cp39-* cp310-* cp311-*"
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
           CIBW_BUILD_FRONTEND: build
