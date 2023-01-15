@@ -17,45 +17,27 @@ jobs:
       fail-fast: false
 
     steps:
-    - name: "Get OS version (Linux)"
-      if: startsWith(runner.os, 'Linux')
-      run: |
-        echo "OS_VERSION=`lsb_release -sr`" >> $GITHUB_ENV
-        echo "PIP_DEFAULT_CACHE=$HOME/.cache/pip" >> $GITHUB_ENV
-    - name: "Get OS version (macOS)"
-      if: startsWith(runner.os, 'macOS')
-      run: |
-        echo "OS_VERSION=`sw_vers -productVersion`" >> $GITHUB_ENV
-        echo "PIP_DEFAULT_CACHE=$HOME/Library/Caches/pip" >> $GITHUB_ENV
-    - name: "Get OS version (Windows)"
+    - name: "Set environment variables (Windows)"
       if: startsWith(runner.os, 'Windows')
       shell: pwsh
       run: |
         (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
         $os_version = (Get-CimInstance Win32_OperatingSystem).version
         Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
-        Echo "PIP_DEFAULT_CACHE=%LocalAppData%\pip\Cache" >> $env:GITHUB_ENV
-
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+        cache: pip
+        cache-dependency-path: "**/python/pyproject.toml"
     - name: "Restore RTools40"
       if: startsWith(runner.os, 'Windows')
       id: cache-rtools
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: C:/rtools40
         key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
-    - name: "Restore pip cache"
-      id: cache-pip
-      uses: actions/cache@v2
-      with:
-        path: ${{ env.PIP_DEFAULT_CACHE }}
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/python/pyproject.toml') }}-v1
-        restore-keys: |
-          ${{ runner.os }}-pip-
     - name: Install and test
       run: |
         cd python
@@ -76,7 +58,7 @@ jobs:
       RSPM: ${{ matrix.config.rspm }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up R
       uses: r-lib/actions/setup-r@v2
       with:
@@ -92,7 +74,7 @@ jobs:
       shell: Rscript {0}
     - name: Restore R package cache
       if: runner.os != 'Windows'
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ${{ env.R_LIBS_USER }}
         key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
