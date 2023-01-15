@@ -16,19 +16,23 @@ jobs:
     strategy:
       matrix:
         os: ["macos-latest", "ubuntu-latest", "windows-latest"]
-        cibw_arch: ["native", "aarch64", "universal2"]
-        exclude:
-          - os: macos-latest
-            cibw_arch: "aarch64"
-          - os: windows-latest
-            cibw_arch: "aarch64"
+        cibw_arch: ["native"]
+        include:
           - os: ubuntu-latest
-            cibw_arch: "universal2"
-          - os: windows-latest
-            cibw_arch: "universal2"
+            cibw_arch: aarch64
+          - os: macos-latest
+            cibw_arch: arm64
       fail-fast: false
 
     steps:
+      - name: "Set environment variables (Windows)"
+        if: startsWith(runner.os, 'Windows')
+        shell: pwsh
+        run: |
+          (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
+          $os_version = (Get-CimInstance Win32_OperatingSystem).version
+          Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
+
       - name: "Checkout repo"
         uses: actions/checkout@v3
 
