@@ -24,9 +24,6 @@ jobs:
             cibw_arch: aarch64
             # Each test takes 30 mins, which is too long to run sequentially, so we test once only.
             cibw_build: "cp37-*"
-          - os: macos-latest
-            cibw_arch: arm64
-            cibw_build: ["cp38-* cp39-* cp310-* cp311-*"]
       fail-fast: false
 
     steps:
@@ -69,7 +66,6 @@ jobs:
           CIBW_BUILD_FRONTEND: build
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: pytest --pyargs prophet
-          CIBW_TEST_SKIP: "*_arm64"
 
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@v3
