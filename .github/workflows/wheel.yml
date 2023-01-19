@@ -11,28 +11,37 @@ env:
 
 jobs:
   make-wheels:
-    name: Make ${{ matrix.os }} ${{ matrix.cibw_arch }} ${{ matrix.py_version }} wheels
+    name: Make ${{ matrix.os }} ${{ matrix.cibw_arch }} wheels
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: ["macos-latest", "ubuntu-latest", "windows-latest"]
-        cibw_arch: ["native", "aarch64"]
-        py_version: ["cp37-*", "cp38-*", "cp39-*", "cp310-*"]
-        exclude:
-          - os: macos-latest
-            cibw_arch: "aarch64"
-          - os: windows-latest
-            cibw_arch: "aarch64"
+        cibw_arch: ["native"]
+        # Build one wheel (ABI = none) using first build spec, then test on all python versions.
+        cibw_build: ["cp37-* cp38-* cp39-* cp310-* cp311-*"]
+        include:
+          - os: ubuntu-latest
+            cibw_arch: aarch64
+            # Each test takes 30 mins, which is too long to run sequentially, so we test once only.
+            cibw_build: "cp37-*"
       fail-fast: false
 
     steps:
+      - name: "Set environment variables (Windows)"
+        if: startsWith(runner.os, 'Windows')
+        shell: pwsh
+        run: |
+          (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
+          $os_version = (Get-CimInstance Win32_OperatingSystem).version
+          Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
+
       - name: "Checkout repo"
         uses: actions/checkout@v3
 
       - name: "Restore RTools40"
         if: startsWith(runner.os, 'Windows')
         id: cache-rtools
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: C:/rtools40
           key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
@@ -44,14 +53,14 @@ jobs:
           platforms: arm64
 
       - name: "Build wheels"
-        uses: pypa/cibuildwheel@v2.6.0
+        uses: pypa/cibuildwheel@v2.11.4
         with:
           package-dir: python
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_BUILD: ${{ matrix.py_version }}
+          CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
           CIBW_BUILD_FRONTEND: build

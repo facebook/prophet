@@ -13,6 +13,7 @@ from setuptools import find_packages, setup, Extension
 from setuptools.command.build_ext import build_ext
 from setuptools.command.build_py import build_py
 from setuptools.command.editable_wheel import editable_wheel
+from wheel.bdist_wheel import bdist_wheel
 
 
 MODEL_DIR = "stan"
@@ -164,6 +165,16 @@ class EditableWheel(editable_wheel):
         editable_wheel.run(self)
 
 
+class BDistWheelABINone(bdist_wheel):
+    def finalize_options(self):
+        bdist_wheel.finalize_options(self)
+        self.root_is_pure = False
+
+    def get_tag(self):
+        _, _, plat = bdist_wheel.get_tag(self)
+        return "py3", "none", plat
+
+
 about = {}
 here = Path(__file__).parent.resolve()
 with open(here / "prophet" / "__version__.py", "r") as f:
@@ -179,6 +190,7 @@ setup(
         "build_ext": BuildExtCommand,
         "build_py": BuildPyCommand,
         "editable_wheel": EditableWheel,
+        "bdist_wheel": BDistWheelABINone,
     },
     test_suite="prophet.tests",
 )
