@@ -9,37 +9,40 @@ on:
 jobs:
   build-and-test-python:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: ["3.8"]
+        os: ["macos-latest", "ubuntu-latest", "windows-latest"]
       fail-fast: false
 
     steps:
-    - name: "Get OS version (Linux)"
-      if: startsWith(runner.os, 'Linux')
+    - name: "Set environment variables (Windows)"
+      if: startsWith(runner.os, 'Windows')
+      shell: pwsh
       run: |
-        echo "OS_VERSION=`lsb_release -sr`" >> $GITHUB_ENV
-        echo "PIP_DEFAULT_CACHE=$HOME/.cache/pip" >> $GITHUB_ENV
-        echo "DEFAULT_HOME=$HOME" >> $GITHUB_ENV
-    - uses: actions/checkout@v2
+        (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
+        $os_version = (Get-CimInstance Win32_OperatingSystem).version
+        Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
+    - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: "Restore pip cache"
-      id: cache-pip
-      uses: actions/cache@v2
+        cache: pip
+        cache-dependency-path: "**/python/pyproject.toml"
+    - name: "Restore RTools40"
+      if: startsWith(runner.os, 'Windows')
+      id: cache-rtools
+      uses: actions/cache@v3
       with:
-        path: ${{ env.PIP_DEFAULT_CACHE }}
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/python/requirements.txt') }}-v1
-        restore-keys: |
-          ${{ runner.os }}-pip-
+        path: C:/rtools40
+        key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
     - name: Install and test
       run: |
-        pip install -U -r python/requirements.txt dask[dataframe] distributed
         cd python
-        python setup.py develop test
+        python -m pip install -U --editable ".[dev,parallel]"
+        python -m pytest prophet/tests/
 
   build-and-test-r:
 
@@ -55,7 +58,7 @@ jobs:
       RSPM: ${{ matrix.config.rspm }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up R
       uses: r-lib/actions/setup-r@v2
       with:
@@ -71,7 +74,7 @@ jobs:
       shell: Rscript {0}
     - name: Restore R package cache
       if: runner.os != 'Windows'
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ${{ env.R_LIBS_USER }}
         key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}

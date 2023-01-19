@@ -88,14 +88,13 @@ To get the latest code changes as they are merged, you can clone this repo and b
 ```bash
 git clone https://github.com/facebook/prophet.git
 cd prophet/python
-python -m pip install -r requirements.txt
-python setup.py develop
+python -m pip install -e .
 ```
 
 By default, Prophet will use a fixed version of `cmdstan` (downloading and installing it if necessary) to compile the model executables. If this is undesired and you would like to use your own existing `cmdstan` installation, you can set the environment variable `PROPHET_REPACKAGE_CMDSTAN` to `False`:
 
 ```bash
-export PROPHET_REPACKAGE_CMDSTAN=False; python setup.py develop
+export PROPHET_REPACKAGE_CMDSTAN=False; python -m pip install -e .
 ```
 
 ### Linux
