@@ -22,6 +22,7 @@ dependencies = [
   "holidays>=0.14.2",
   "python-dateutil>=2.8.0",
   "tqdm>=4.36.1",
+  "setuptools>=64",
 ]
 authors = [
   {name = "Sean J. Taylor", email = "sjtz@pm.me"},
@@ -43,7 +44,6 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = [
-  "setuptools>=64",
   "wheel",
   "pytest",
   "jupyterlab",
