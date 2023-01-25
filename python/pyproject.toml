@@ -22,6 +22,7 @@ dependencies = [
   "holidays>=0.14.2",
   "python-dateutil>=2.8.0",
   "tqdm>=4.36.1",
+  "importlib_resources",
 ]
 authors = [
   {name = "Sean J. Taylor", email = "sjtz@pm.me"},
@@ -56,6 +57,6 @@ parallel = [
 ]
 
 [project.urls]
-homepage = "https://facebook.github.io/prophet/"
-documentation = "https://facebook.github.io/prophet/"
-repository = "https://github.com/facebook/prophet"
+Homepage = "https://facebook.github.io/prophet/"
+Documentation = "https://facebook.github.io/prophet/"
+Repository = "https://github.com/facebook/prophet"

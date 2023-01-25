@@ -58,7 +58,7 @@ class CmdStanPyBackend(IStanBackend):
     def __init__(self):
         import cmdstanpy
         # this must be set before super.__init__() for load_model to work on Windows
-        local_cmdstan = importlib_resources.files("prophet").joinpath(f"stan_model/cmdstan-{self.CMDSTAN_VERSION}")
+        local_cmdstan = importlib_resources.files("prophet") / "stan_model" / f"cmdstan-{self.CMDSTAN_VERSION}"
         if local_cmdstan.exists():
             cmdstanpy.set_cmdstan_path(str(local_cmdstan))
         super().__init__()
@@ -69,7 +69,7 @@ class CmdStanPyBackend(IStanBackend):
 
     def load_model(self):
         import cmdstanpy
-        model_file = importlib_resources.files("prophet").joinpath("stan_model/prophet_model.bin")
+        model_file = importlib_resources.files("prophet") / "stan_model" / "prophet_model.bin"
         return cmdstanpy.CmdStanModel(exe_file=str(model_file))
 
     def fit(self, stan_init, stan_data, **kwargs):
