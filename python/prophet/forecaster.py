@@ -157,7 +157,7 @@ class Prophet(object):
 
     def validate_inputs(self):
         """Validates the inputs to Prophet."""
-        if self.growth not in ('linear', 'logistic', 'flat'):
+        if self.growth not in {'linear', 'logistic', 'flat'}:
             raise ValueError(
                 'Parameter "growth" should be "linear", "logistic" or "flat".')
         if not isinstance(self.changepoint_range, (int, float)):
@@ -635,7 +635,7 @@ class Prophet(object):
             mode = self.seasonality_mode
         if prior_scale <= 0:
             raise ValueError('Prior scale must be > 0')
-        if mode not in ['additive', 'multiplicative']:
+        if mode not in {'additive', 'multiplicative'}:
             raise ValueError("mode must be 'additive' or 'multiplicative'")
         self.extra_regressors[name] = {
             'prior_scale': prior_scale,
@@ -685,7 +685,7 @@ class Prophet(object):
         if self.history is not None:
             raise Exception(
                 'Seasonality must be added prior to model fitting.')
-        if name not in ['daily', 'weekly', 'yearly']:
+        if name not in {'daily', 'weekly', 'yearly'}:
             # Allow overwriting built-in seasonalities
             self.validate_column_name(name, check_seasonalities=False)
         if prior_scale is None:
@@ -698,7 +698,7 @@ class Prophet(object):
             raise ValueError('Fourier Order must be > 0')
         if mode is None:
             mode = self.seasonality_mode
-        if mode not in ['additive', 'multiplicative']:
+        if mode not in {'additive', 'multiplicative'}:
             raise ValueError('mode must be "additive" or "multiplicative"')
         if condition_name is not None:
             self.validate_column_name(condition_name)
@@ -849,7 +849,7 @@ class Prophet(object):
             components = self.add_group_component(
                 components, 'holidays', self.train_holiday_names.unique())
         # Add totals additive and multiplicative components, and regressors
-        for mode in ['additive', 'multiplicative']:
+        for mode in {'additive', 'multiplicative'}:
             components = self.add_group_component(
                 components, mode + '_terms', modes[mode]
             )
@@ -869,7 +869,7 @@ class Prophet(object):
             components['col'], components['component'],
         ).sort_index(level='col')
         # Add columns for additive and multiplicative terms, if missing
-        for name in ['additive_terms', 'multiplicative_terms']:
+        for name in {'additive_terms', 'multiplicative_terms'}:
             if name not in component_cols:
                 component_cols[name] = 0
         # Remove the placeholder
@@ -1392,7 +1392,7 @@ class Prophet(object):
         upper_p = 100 * (1.0 + self.interval_width) / 2
 
         series = {}
-        for key in ['yhat', 'trend']:
+        for key in {'yhat', 'trend'}:
             series['{}_lower'.format(key)] = self.percentile(
                 sim_values[key], lower_p, axis=1)
             series['{}_upper'.format(key)] = self.percentile(

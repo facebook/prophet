@@ -92,12 +92,12 @@ def warm_start_params(m):
     A Dictionary containing retrieved parameters of m.
     """
     res = {}
-    for pname in ['k', 'm', 'sigma_obs']:
+    for pname in {'k', 'm', 'sigma_obs'}:
         if m.mcmc_samples == 0:
             res[pname] = m.params[pname][0][0]
         else:
             res[pname] = np.mean(m.params[pname])
-    for pname in ['delta', 'beta']:
+    for pname in {'delta', 'beta'}:
         if m.mcmc_samples == 0:
             res[pname] = m.params[pname][0]
         else:

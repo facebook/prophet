@@ -130,7 +130,7 @@ class CmdStanPyBackend(IStanBackend):
             if s[1] == 1:
                 params[par] = params[par].reshape((s[0],))
 
-            if par in ['delta', 'beta'] and len(s) < 2:
+            if par in {'delta', 'beta'} and len(s) < 2:
                 params[par] = params[par].reshape((-1, 1))
 
         return params
@@ -139,12 +139,12 @@ class CmdStanPyBackend(IStanBackend):
     def sanitize_custom_inits(default_inits, custom_inits):
         """Validate that custom inits have the correct type and shape, otherwise use defaults."""
         sanitized = {}
-        for param in ['k', 'm', 'sigma_obs']:
+        for param in {'k', 'm', 'sigma_obs'}:
             try:
                 sanitized[param] = float(custom_inits.get(param))
             except Exception:
                 sanitized[param] = default_inits[param]
-        for param in ['delta', 'beta']:
+        for param in {'delta', 'beta'}:
             if default_inits[param].shape == custom_inits[param].shape:
                 sanitized[param] = custom_inits[param]
             else:
