@@ -40,5 +40,12 @@ def pytest_collection_modifyitems(config, items):
 
 
 def pytest_generate_tests(metafunc):
+    """
+    For each test, if `backend` is used as a fixture, add a parametrization equal to the value of the
+    --backend option.
+
+    This is used to re-run the test suite for different probabilistic programming language backends
+    (e.g. cmdstanpy, numpyro).
+    """
     if "backend" in metafunc.fixturenames:
         metafunc.parametrize("backend", metafunc.config.getoption("backend"))
