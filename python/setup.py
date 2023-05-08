@@ -8,7 +8,8 @@ import platform
 from pathlib import Path
 from shutil import copy, copytree, rmtree
 from typing import List
-
+import cmdstanpy.utils as utils
+print(utils.cmdstan_path())
 from setuptools import find_packages, setup, Extension
 from setuptools.command.build_ext import build_ext
 from setuptools.command.build_py import build_py
@@ -18,12 +19,14 @@ from wheel.bdist_wheel import bdist_wheel
 
 MODEL_DIR = "stan"
 MODEL_TARGET_DIR = os.path.join("prophet", "stan_model")
-
+MODEL_GPU = False
+MODEL_MULTI_CORES = False
 CMDSTAN_VERSION = "2.26.1"
 BINARIES_DIR = "bin"
 BINARIES = ["diagnose", "print", "stanc", "stansummary"]
 TBB_PARENT = "stan/lib/stan_math/lib"
 TBB_DIRS = ["tbb", "tbb_2019_U8"]
+OPEN_CL = "-L"+"\"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8/lib/Win32/OpenCL.lib\""
 
 
 def prune_cmdstan(cmdstan_dir: str) -> None:
@@ -105,12 +108,40 @@ def build_cmdstan_model(target_dir):
     target_dir: Directory to copy the compiled model executable and core cmdstan files to.
     """
     import cmdstanpy
+    if MODEL_GPU and MODEL_MULTI_CORES:
+        cpp_options = {
+            'STAN_THREADS': True,
+            'STAN_CPP_OPTIMS': True,
+            'STAN_OPENCL': True,
+            'OPENCL_DEVICE_ID': 0,
+            'OPENCL_PLATFORM_ID': 0,
+            "PRECOMPILED_HEADERS":False,
+            'LDFLAGS': OPEN_CL+' -lOpenCL'
 
+        }
+    elif MODEL_MULTI_CORES:
+                cpp_options = {
+            'STAN_THREADS': True,
+            'STAN_CPP_OPTIMS': True,
+
+        }
+    elif MODEL_GPU:
+        cpp_options = {
+            'STAN_CPP_OPTIMS': True,
+            'STAN_OPENCL': True,
+            'OPENCL_DEVICE_ID': 0,
+            'OPENCL_PLATFORM_ID': 0,
+            "PRECOMPILED_HEADERS":False,
+            'LDFLAGS': OPEN_CL+' -lOpenCL'
+        }
     cmdstan_dir = (Path(target_dir) / f"cmdstan-{CMDSTAN_VERSION}").resolve()
     install_cmdstan_deps(cmdstan_dir)
     model_name = "prophet.stan"
     target_name = "prophet_model.bin"
-    sm = cmdstanpy.CmdStanModel(stan_file=os.path.join(MODEL_DIR, model_name))
+    if MODEL_GPU or MODEL_MULTI_CORES:
+        sm = cmdstanpy.CmdStanModel(stan_file=os.path.join(MODEL_DIR, model_name), cpp_options=cpp_options)
+    else:
+        sm = cmdstanpy.CmdStanModel(stan_file=os.path.join(MODEL_DIR, model_name))
     copy(sm.exe_file, os.path.join(target_dir, target_name))
 
     # Clean up
