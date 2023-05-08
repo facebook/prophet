@@ -1,4 +1,4 @@
-# Prophet: Automatic Forecasting Procedure
+# Prophet: Automatic Forecasting Procedure With python OPENCL/Multi-Core options
 
 ![Build](https://github.com/facebook/prophet/workflows/Build/badge.svg)
 
