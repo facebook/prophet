@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import os
+import sys
 import platform
 from pathlib import Path
 from shutil import copy, copytree, rmtree
@@ -26,9 +27,18 @@ BINARIES_DIR = "bin"
 BINARIES = ["diagnose", "print", "stanc", "stansummary"]
 TBB_PARENT = "stan/lib/stan_math/lib"
 TBB_DIRS = ["tbb", "tbb_2019_U8"]
-OPEN_CL = "-L"+"\"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8/lib/Win32/OpenCL.lib\""
-
-
+if sys.platform.startswith('win'):
+    try:
+        OPEN_CL = "-L\"" + "%CUDA_PATH%/lib/Win32/OpenCL.lib\""
+    except KeyError:
+        raise OSError("Environment variable is not set")
+elif sys.platform.startswith('linux'):
+    try:
+        OPEN_CL = "-L/usr/local/cuda-11.8/lib64/ -lOpenCL"
+    except KeyError:
+        raise OSError("Environment variable is not set")
+else:
+    raise OSError("Unsupported platform: {}".format(sys.platform))
 def prune_cmdstan(cmdstan_dir: str) -> None:
     """
     Keep only the cmdstan executables and tbb files (minimum required to run a cmdstanpy commands on a pre-compiled model).
