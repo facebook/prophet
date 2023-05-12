@@ -54,7 +54,7 @@ class IStanBackend(ABC):
 
 
 class CmdStanPyBackend(IStanBackend):
-    CMDSTAN_VERSION = "2.26.1"
+    CMDSTAN_VERSION = "2.32.1"
     def __init__(self):
         import cmdstanpy
         # this must be set before super.__init__() for load_model to work on Windows
