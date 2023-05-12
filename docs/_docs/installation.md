@@ -69,6 +69,7 @@ After installation, you can [get started!](quick_start.html#python-api)
 ### Anaconda
 
 Prophet can also be installed through conda-forge.
+
 ```bash
 conda install -c conda-forge prophet
 ```
