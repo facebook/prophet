@@ -27,6 +27,8 @@ TBB_PARENT = "stan/lib/stan_math/lib"
 TBB_DIRS = ["tbb", "tbb_2020.3"]
 
 
+IS_WINDOWS = platform.platform().startswith("Win")
+
 def prune_cmdstan(cmdstan_dir: str) -> None:
     """
     Keep only the cmdstan executables and tbb files (minimum required to run a cmdstanpy commands on a pre-compiled model).
@@ -56,12 +58,13 @@ def repackage_cmdstan():
     return os.environ.get("PROPHET_REPACKAGE_CMDSTAN", "").lower() not in ["false", "0"]
 
 
-def maybe_install_cmdstan_toolchain(cmdstan_dir: Path):
+def maybe_install_cmdstan_toolchain() -> bool:
     """Install C++ compilers required to build stan models on Windows machines."""
     import cmdstanpy
 
     try:
         cmdstanpy.utils.cxx_toolchain_path()
+        return False
     except Exception:
         try:
             from cmdstanpy.install_cxx_toolchain import run_rtools_install
@@ -69,17 +72,18 @@ def maybe_install_cmdstan_toolchain(cmdstan_dir: Path):
             # older versions
             from cmdstanpy.install_cxx_toolchain import main as run_rtools_install
 
-        run_rtools_install({"version": None, "dir": str(cmdstan_dir.parent / "RTools"), "verbose": True})
+        run_rtools_install({"version": None, "dir": None, "verbose": True})
         cmdstanpy.utils.cxx_toolchain_path()
-
+        return True
 
 def install_cmdstan_deps(cmdstan_dir: Path):
     import cmdstanpy
     from multiprocessing import cpu_count
+    require_toolchain_cleanup = False
 
     if repackage_cmdstan():
-        if platform.platform().startswith("Win"):
-            maybe_install_cmdstan_toolchain(cmdstan_dir)
+        if IS_WINDOWS:
+            require_toolchain_cleanup = maybe_install_cmdstan_toolchain(cmdstan_dir)
         print("Installing cmdstan to", cmdstan_dir)
         if os.path.isdir(cmdstan_dir):
             rmtree(cmdstan_dir)
@@ -92,8 +96,11 @@ def install_cmdstan_deps(cmdstan_dir: Path):
             cores=cpu_count(),
             progress=True,
         ):
+            if require_toolchain_cleanup:
+                rmtree(cmdstanpy.utils.cxx_toolchain_path())
             raise RuntimeError("CmdStan failed to install in repackaged directory")
 
+    return require_toolchain_cleanup
 
 def build_cmdstan_model(target_dir):
     """
@@ -109,15 +116,22 @@ def build_cmdstan_model(target_dir):
 
     target_cmdstan_dir = (Path(target_dir) / f"cmdstan-{CMDSTAN_VERSION}").resolve()
     with tempfile.TemporaryDirectory() as tmp_dir:
-        cmdstan_dir = (Path(tmp_dir) / f"cmdstan-{CMDSTAN_VERSION}").resolve()
-        install_cmdstan_deps(cmdstan_dir)
+        # long paths on windows can cause problems during build
+        if IS_WINDOWS:
+            cmdstan_dir = (Path(tmp_dir) / f"cmdstan-{CMDSTAN_VERSION}").resolve()
+        else:
+            cmdstan_dir = target_cmdstan_dir
+
+        require_toolchain_cleanup = install_cmdstan_deps(cmdstan_dir)
         model_name = "prophet.stan"
+
         temp_stan_file = copy(os.path.join(MODEL_DIR, model_name), cmdstan_dir)
         sm = cmdstanpy.CmdStanModel(stan_file=temp_stan_file)
-
         target_name = "prophet_model.bin"
         copy(sm.exe_file, os.path.join(target_dir, target_name))
-        copytree(cmdstan_dir, target_cmdstan_dir)
+
+        if IS_WINDOWS:
+            copytree(cmdstan_dir, target_cmdstan_dir)
 
     # Clean up
     for f in Path(MODEL_DIR).iterdir():
@@ -126,6 +140,8 @@ def build_cmdstan_model(target_dir):
 
     if repackage_cmdstan():
         prune_cmdstan(target_cmdstan_dir)
+        if require_toolchain_cleanup:
+            rmtree(cmdstanpy.utils.cxx_toolchain_path())
 
 
 def get_backends_from_env() -> List[str]:
