@@ -83,7 +83,7 @@ def install_cmdstan_deps(cmdstan_dir: Path):
 
     if repackage_cmdstan():
         if IS_WINDOWS:
-            require_toolchain_cleanup = maybe_install_cmdstan_toolchain(cmdstan_dir)
+            require_toolchain_cleanup = maybe_install_cmdstan_toolchain()
         print("Installing cmdstan to", cmdstan_dir)
         if os.path.isdir(cmdstan_dir):
             rmtree(cmdstan_dir)
