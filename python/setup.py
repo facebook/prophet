@@ -79,11 +79,10 @@ def maybe_install_cmdstan_toolchain() -> bool:
 def install_cmdstan_deps(cmdstan_dir: Path):
     import cmdstanpy
     from multiprocessing import cpu_count
-    require_toolchain_cleanup = False
 
     if repackage_cmdstan():
         if IS_WINDOWS:
-            require_toolchain_cleanup = maybe_install_cmdstan_toolchain()
+            maybe_install_cmdstan_toolchain()
         print("Installing cmdstan to", cmdstan_dir)
         if os.path.isdir(cmdstan_dir):
             rmtree(cmdstan_dir)
@@ -96,11 +95,9 @@ def install_cmdstan_deps(cmdstan_dir: Path):
             cores=cpu_count(),
             progress=True,
         ):
-            if require_toolchain_cleanup:
-                rmtree(cmdstanpy.utils.cxx_toolchain_path())
+
             raise RuntimeError("CmdStan failed to install in repackaged directory")
 
-    return require_toolchain_cleanup
 
 def build_cmdstan_model(target_dir):
     """
@@ -122,7 +119,7 @@ def build_cmdstan_model(target_dir):
         else:
             cmdstan_dir = target_cmdstan_dir
 
-        require_toolchain_cleanup = install_cmdstan_deps(cmdstan_dir)
+        install_cmdstan_deps(cmdstan_dir)
         model_name = "prophet.stan"
 
         temp_stan_file = copy(os.path.join(MODEL_DIR, model_name), cmdstan_dir)
@@ -140,8 +137,6 @@ def build_cmdstan_model(target_dir):
 
     if repackage_cmdstan():
         prune_cmdstan(target_cmdstan_dir)
-        if require_toolchain_cleanup:
-            rmtree(cmdstanpy.utils.cxx_toolchain_path())
 
 
 def get_backends_from_env() -> List[str]:
