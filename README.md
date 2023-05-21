@@ -1,9 +1,5 @@
 # Prophet: Automatic Forecasting Procedure With python OPENCL/Multi-Core options
-[
-  ![Donate with PayPal]
-  (https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png)
-]
-(https://www.paypal.com/donate?hosted_button_id=9ELH753DDE98Y)
+[![Donate with PayPal](https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png)](https://www.paypal.com/donate?hosted_button_id=9ELH753DDE98Y)
 ![Build](https://github.com/facebook/prophet/workflows/Build/badge.svg)
 
 [![PyPI Version](https://img.shields.io/pypi/v/prophet.svg)](https://pypi.python.org/pypi/prophet)
