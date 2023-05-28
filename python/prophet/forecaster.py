@@ -367,8 +367,8 @@ class Prophet(object):
                 else:
                     standardize = True
             if standardize:
-                mu = df[name].mean()
-                std = df[name].std()
+                mu = float(df[name].mean())
+                std = float(df[name].std())
                 self.extra_regressors[name]['mu'] = mu
                 self.extra_regressors[name]['std'] = std
 

@@ -5,6 +5,11 @@ title: "Getting Help and Contributing"
 permalink: /docs/contributing.html
 ---
 
+-----
+
+**2023 Update:** We discuss our plans for the future of Prophet in this blog post: [facebook/prophet in 2023 and beyond](https://medium.com/@cuongduong_35162/facebook-prophet-in-2023-and-beyond-c5086151c138)
+
+-----
 Prophet has a non-fixed release cycle but we will be making bugfixes in response to user feedback and adding features. Please let us know if you encounter a bug by [filing an issue](https://github.com/facebook/prophet/issues). Github issues is also the right place to ask questions about using Prophet.
 
 We appreciate all contributions. If you are planning to contribute back bug-fixes, please do so without any further discussion.
