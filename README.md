@@ -85,7 +85,11 @@ After installation, you can [get started!](https://facebook.github.io/prophet/do
 
 ### Anaconda
 
-Prophet can also be installed through conda-forge: `conda install -c conda-forge prophet`.
+Prophet can also be installed through conda-forge.
+
+```bash
+conda install -c conda-forge prophet
+```
 
 ## Installation in Python - Development version
 
