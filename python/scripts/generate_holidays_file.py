@@ -75,6 +75,5 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", "--outfile", default=OUT_CSV_PATH)
     args = parser.parse_args()
-    # execute only if run as a script
     df = generate_holidays_df()
     df.to_csv(args.outfile, index=False)
