@@ -123,7 +123,6 @@ class TestSerialize:
         fcst2 = m2.predict(test)
         assert np.array_equal(fcst["yhat"].values, fcst2["yhat"].values)
 
-    @pytest.mark.skip(reason="skipping until json serialization issue in pandas 2.0 is resolved.")
     def test_backwards_compatibility(self):
         old_versions = {
             "0.6.1.dev0": (29.3669923968994, "fb"),
