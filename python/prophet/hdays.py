@@ -17,6 +17,11 @@ from holidays.countries import Turkey
 from dateutil.easter import easter, EASTER_ORTHODOX
 from dateutil.relativedelta import relativedelta as rd
 
+warnings.warn(
+    "hdays module is deprecated and will be removed in prophet 1.1.5. All holidays should be read directly from the holidays package.",
+    FutureWarning,
+)
+
 
 # Official public holidays at a country level
 # ------------ Holidays in Indonesia---------------------
@@ -441,15 +446,15 @@ class Kyrgyzstan(HolidayBase):
         # Nooruz Mairamy
         name = "Nooruz Mairamy"
         self[date(year, 3, 21)] = name
-        
+
         # Day of the People's April Revolution
         name = "Day of the People's April Revolution"
         self[date(year, 4, 7)] = name
-        
+
         # Spring and Labour Day
         name = "Spring and Labour Day"
         self[date(year, 5, 1)] = name
-        
+
         # Constitution Day
         name = "Constitution Day"
         self[date(year, 5, 5)] = name
@@ -461,15 +466,15 @@ class Kyrgyzstan(HolidayBase):
         # Children's Day
         name = "Russia Day"
         self[date(year, 6, 1)] = name
-        
+
         # Independence Day
         name = "Independence Day"
         self[date(year, 8, 31)] = name
-        
+
         # Day 1 of History and Commemoration of Ancestors
         name = "Day 1 of History and Commemoration of Ancestors"
         self[date(year, 11, 7)] = name
-        
+
         # Day 2 of History and Commemoration of Ancestors
         name = "Day 2 of History and Commemoration of Ancestors"
         self[date(year, 11, 8)] = name
@@ -477,9 +482,9 @@ class Kyrgyzstan(HolidayBase):
         # New Year's Eve
         name = "New Year's Eve"
         self[date(year, 12, 31)] = name
-        
+
         # Islamic Holidays
-        
+
         # Eid ul-Fitr
         # 1st and 2nd day of 10th Islamic month
         name = "Eid al-Fitr"
