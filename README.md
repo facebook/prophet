@@ -36,7 +36,7 @@ Prophet is [open source software](https://code.facebook.com/projects/) released 
 
 ## Installation in R - CRAN
 
-⚠️ **The CRAN version of prophet is fairly outdated. To get the latest bug fixes and updated country holiday data, we suggest installing the latest release with remotes::install_github().**
+⚠️ **The CRAN version of prophet is fairly outdated. To get the latest bug fixes and updated country holiday data, we suggest installing the [latest release](#installation-in-r---latest-release).**
 
 Prophet is a [CRAN package](https://cran.r-project.org/package=prophet) so you can use `install.packages`.
 
