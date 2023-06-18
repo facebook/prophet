@@ -95,7 +95,6 @@ def install_cmdstan_deps(cmdstan_dir: Path):
             cores=cpu_count(),
             progress=True,
         ):
-
             raise RuntimeError("CmdStan failed to install in repackaged directory")
 
 
@@ -121,13 +120,13 @@ def build_cmdstan_model(target_dir):
 
         install_cmdstan_deps(cmdstan_dir)
         model_name = "prophet.stan"
-
-        temp_stan_file = copy(os.path.join(MODEL_DIR, model_name), cmdstan_dir)
+        # note: ensure copy target is a directory not a file.
+        temp_stan_file = copy(os.path.join(MODEL_DIR, model_name), cmdstan_dir.parent.resolve())
         sm = cmdstanpy.CmdStanModel(stan_file=temp_stan_file)
         target_name = "prophet_model.bin"
         copy(sm.exe_file, os.path.join(target_dir, target_name))
 
-        if IS_WINDOWS:
+        if IS_WINDOWS and repackage_cmdstan():
             copytree(cmdstan_dir, target_cmdstan_dir)
 
     # Clean up
