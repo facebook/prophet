@@ -1,0 +1,62 @@
+[build-system]
+requires = [
+  "setuptools>=64",
+  "wheel",
+  "cmdstanpy>=1.0.4",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prophet"
+dynamic = ["version"]
+description = "Automatic Forecasting Procedure"
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+  "cmdstanpy>=1.0.4",
+  "numpy>=1.15.4",
+  "matplotlib>=2.0.0",
+  "pandas>=1.0.4",
+  "LunarCalendar>=0.0.9",
+  "convertdate>=2.1.2",
+  "holidays>=0.25",
+  "python-dateutil>=2.8.0",
+  "tqdm>=4.36.1",
+  "importlib_resources",
+]
+authors = [
+  {name = "Sean J. Taylor", email = "sjtz@pm.me"},
+  {name = "Ben Letham", email = "bletham@fb.com"},
+]
+maintainers = [
+  {name = "Cuong Duong", email = "cuong.duong242@gmail.com"},
+]
+license = {text = "MIT"}
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+]
+
+[project.optional-dependencies]
+dev = [
+  "setuptools>=64",
+  "wheel",
+  "pytest",
+  "jupyterlab",
+  "nbconvert",
+  "plotly",
+]
+parallel = [
+  "dask[dataframe]",
+  "distributed",
+]
+
+[project.urls]
+Homepage = "https://facebook.github.io/prophet/"
+Documentation = "https://facebook.github.io/prophet/"
+Repository = "https://github.com/facebook/prophet"

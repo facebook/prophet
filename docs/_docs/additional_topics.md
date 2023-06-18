@@ -36,14 +36,13 @@ In Python, models should not be saved with pickle; the Stan backend attached to 
 
 ```python
 # Python
-import json
 from prophet.serialize import model_to_json, model_from_json
 
 with open('serialized_model.json', 'w') as fout:
-    json.dump(model_to_json(m), fout)  # Save model
+    fout.write(model_to_json(m))  # Save model
 
 with open('serialized_model.json', 'r') as fin:
-    m = model_from_json(json.load(fin))  # Load model
+    m = model_from_json(fin.read())  # Load model
 ```
 The json file will be portable across systems, and deserialization is backwards compatible with older versions of prophet.
 
@@ -83,35 +82,41 @@ A common setting for forecasting is fitting models that need to be updated as ad
 
 ```python
 # Python
-def stan_init(m):
-    """Retrieve parameters from a trained model.
-    
-    Retrieve parameters from a trained model in the format
-    used to initialize a new Stan model.
-    
+def warm_start_params(m):
+    """
+    Retrieve parameters from a trained model in the format used to initialize a new Stan model.
+    Note that the new Stan model must have these same settings:
+        n_changepoints, seasonality features, mcmc sampling
+    for the retrieved parameters to be valid for the new model.
+
     Parameters
     ----------
     m: A trained model of the Prophet class.
-    
+
     Returns
     -------
     A Dictionary containing retrieved parameters of m.
-    
     """
     res = {}
     for pname in ['k', 'm', 'sigma_obs']:
-        res[pname] = m.params[pname][0][0]
+        if m.mcmc_samples == 0:
+            res[pname] = m.params[pname][0][0]
+        else:
+            res[pname] = np.mean(m.params[pname])
     for pname in ['delta', 'beta']:
-        res[pname] = m.params[pname][0]
+        if m.mcmc_samples == 0:
+            res[pname] = m.params[pname][0]
+        else:
+            res[pname] = np.mean(m.params[pname], axis=0)
     return res
 
-df = pd.read_csv('../examples/example_wp_log_peyton_manning.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
 df1 = df.loc[df['ds'] < '2016-01-19', :]  # All data except the last day
 m1 = Prophet().fit(df1) # A model fit to all data except the last day
 
 
 %timeit m2 = Prophet().fit(df)  # Adding the last day, fitting from scratch
-%timeit m2 = Prophet().fit(df, init=stan_init(m1))  # Adding the last day, warm-starting from m1
+%timeit m2 = Prophet().fit(df, init=warm_start_params(m1))  # Adding the last day, warm-starting from m1
 ```
     1.33 s ± 55.9 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
     185 ms ± 4.46 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
@@ -133,4 +138,3 @@ These github repositories provide examples of building on top of Prophet in ways
 * [forecastr](https://github.com/garethcull/forecastr): A web app that provides a UI for Prophet.
 
 * [NeuralProphet](https://github.com/ourownstory/neural_prophet): A Prophet-style model implemented in pytorch, to be more adaptable and extensible.
-

@@ -60,7 +60,7 @@ forecast <- predict(m, future)
 ```python
 # Python
 m = Prophet(mcmc_samples=300)
-forecast = m.fit(df).predict(future)
+forecast = m.fit(df, show_progress=False).predict(future)
 ```
 This replaces the typical MAP estimation with MCMC sampling, and can take much longer depending on how many observations there are - expect several minutes instead of several seconds. If you do full sampling, then you will see the uncertainty in seasonal components when you plot them:
 
@@ -73,12 +73,8 @@ prophet_plot_components(m, forecast)
 # Python
 fig = m.plot_components(forecast)
 ```
- 
-![png](/prophet/static/uncertainty_intervals_files/uncertainty_intervals_11_0.png) 
+
+![png](/prophet/static/uncertainty_intervals_files/uncertainty_intervals_11_0.png)
 
 
 You can access the raw posterior predictive samples in Python using the method `m.predictive_samples(future)`, or in R using the function `predictive_samples(m, future)`.
-
-
-There are upstream issues in PyStan for Windows which make MCMC sampling extremely slow. The best choice for MCMC sampling in Windows is to use R, or Python in a Linux VM.
-

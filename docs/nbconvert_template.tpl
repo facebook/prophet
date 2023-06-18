@@ -1,4 +1,4 @@
-{%- extends 'markdown.tpl' -%}
+{%- extends 'markdown/index.md.j2' -%}
 
 {%- block header -%}
 ---
@@ -48,8 +48,8 @@ subsections:
 {%- endif -%}
 {%- endblock input_group -%}
 
-{% block data_png %} 
-![png](/prophet/static/{{ output.metadata.filenames['image/png'] }}) 
+{% block data_png %}
+![png](/prophet/static/{{ output.metadata.filenames['image/png'] }})
 {% endblock data_png %}
 
 {% block markdowncell %}

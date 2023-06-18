@@ -300,7 +300,7 @@ time_diff <- function(ds1, ds2, units = "days") {
 
 #' Prepare dataframe for fitting or predicting.
 #'
-#' Adds a time index and scales y. Creates auxillary columns 't', 't_ix',
+#' Adds a time index and scales y. Creates auxiliary columns 't', 't_ix',
 #' 'y_scaled', and 'cap_scaled'. These columns are used during both fitting
 #' and predicting.
 #'
@@ -547,7 +547,9 @@ construct_holiday_dataframe <- function(m, dates) {
     holidays.to.add <- data.frame(
       holiday=setdiff(m$train.holiday.names, all.holidays$holiday)
     )
-    all.holidays <- suppressWarnings(dplyr::bind_rows(all.holidays, holidays.to.add))
+    if (nrow(holidays.to.add) > 0) {
+      all.holidays <- suppressWarnings(dplyr::bind_rows(all.holidays, holidays.to.add))
+    }
   }
   return(all.holidays)
 }
@@ -816,7 +818,7 @@ add_country_holidays <- function(m, country_name) {
 #'
 #' @return List with items
 #'  seasonal.features: Dataframe with regressor features,
-#'  prior.scales: Array of prior scales for each colum of the features
+#'  prior.scales: Array of prior scales for each column of the features
 #'    dataframe.
 #'  component.cols: Dataframe with indicators for which regression components
 #'    correspond to which columns.
@@ -1648,7 +1650,7 @@ sample_predictive_trend <- function(model, df, iteration) {
 #' @export
 make_future_dataframe <- function(m, periods, freq = 'day',
                                   include_history = TRUE) {
-  # For backwards compatability with previous zoo date type,
+  # For backwards compatibility with previous zoo date type,
   if (freq == 'm') {
     freq <- 'month'
   }
