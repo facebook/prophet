@@ -32,10 +32,11 @@ python_shim/build/
 *.envrc
 
 # Development with Python
-python/prophet/bin/
-python/prophet/etc/
-python/prophet/lib/
-python/prophet/pyvenv.cfg
-python/prophet/share/
-python/prophet/stan_model/
+python/**/bin/
+python/**/etc/
+python/**/lib/
+python/**/lib64
+python/**/pyvenv.cfg
+python/**/share/
+python/**/stan_model/
 .Rproj.user

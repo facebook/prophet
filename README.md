@@ -50,7 +50,7 @@ After installation, you can [get started!](https://facebook.github.io/prophet/do
 
 ```r
 install.packages('remotes')
-remotes::install_github('facebook/prophet@*release')
+remotes::install_github('facebook/prophet@*release', subdir = 'R')
 ```
 
 #### Experimental backend - cmdstanr
