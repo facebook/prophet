@@ -6,7 +6,6 @@
 
 from __future__ import absolute_import, division, print_function
 from abc import abstractmethod, ABC
-from ast import Num
 
 from typing import Tuple, Dict, Union
 from collections import OrderedDict
@@ -245,11 +244,16 @@ class NumpyroBackend(IStanBackend):
         init: Dict[str, Union[float, int, list]], data: Dict[str, Union[float, int, list]]
     ) -> Tuple[dict, dict]:
         import jax.numpy as jnp
-        from .numpyro_model import NumpyroModelInput, NumpyroModelParams
+        from .numpyro_model import (
+            construct_changepoint_matrix,
+            NumpyroModelData,
+            NumpyroModelParams,
+        )
 
-        data = {k: v for k, v in data.items() if k in NumpyroModelInput.__annotations__}
+        data = {k: v for k, v in data.items() if k in NumpyroModelData.__annotations__}
+        data["A"] = construct_changepoint_matrix(data["t"], data["t_change"])
         for var in data:
-            if NumpyroModelInput.__annotations__[var] == jnp.ndarray:
+            if NumpyroModelData.__annotations__[var] == jnp.ndarray:
                 data[var] = jnp.array(data[var])
 
         init = {k: v for k, v in init.items() if k in NumpyroModelParams.__annotations__}
@@ -264,18 +268,24 @@ class NumpyroBackend(IStanBackend):
         from numpyro.infer import SVI
         from numpyro.infer.autoguide import AutoDelta, Trace_ELBO
         from numpyro.optim import Adam
-        from .numpyro_model import model
+        from .numpyro_model import get_model
 
         jax.config.update("jax_enable_x64", True)
 
         init, data = self.prepare_data(stan_init, stan_data)
-        guide = AutoDelta(model)
-        optimizer = Adam(0.001)
-        svi = SVI(model, guide, optimizer, loss=Trace_ELBO())
-        rng_key = jax.random.PRNGKey(0)
-        run_params = {"num_steps": 10000, "progress_bar": False}
+        run_params = {
+            "num_steps": 10000,
+            "progress_bar": False,
+            "learning_rate": 0.001,
+            "rng_seed": 0,
+        }
         run_params.update(kwargs)
 
+        model = get_model(stan_data["trend_indicator"])
+        guide = AutoDelta(model)
+        optimizer = Adam(run_params["learning_rate"])
+        svi = SVI(model, guide, optimizer, loss=Trace_ELBO())
+        rng_key = jax.random.PRNGKey(run_params["rng_seed"])
         svi_results = svi.run(
             rng_key=rng_key,
             num_steps=run_params["num_steps"],
@@ -284,6 +294,7 @@ class NumpyroBackend(IStanBackend):
             **data,
         )
         self.stan_fit = svi_results
+        self.stan_fit_params = run_params
         return {
             k.replace("_auto_loc", ""): np.array(v).reshape((1, -1))
             for k, v in svi_results.params.items()
@@ -294,32 +305,38 @@ class NumpyroBackend(IStanBackend):
         import jax.numpy as jnp
         import numpy as np
         from numpyro.infer import NUTS, MCMC
-        from numpyro import set_host_device_count
-        from .numpyro_model import model
+        from .numpyro_model import get_model
 
-        NUM_CHAINS = 4
         jax.config.update("jax_enable_x64", True)
-        set_host_device_count(NUM_CHAINS)
 
         init, data = self.prepare_data(stan_init, stan_data)
-        init = {k: jnp.vstack([jnp.array(v) for _ in range(NUM_CHAINS)]) for k, v in init.items()}
-        for var in ["T", "K", "S", "trend_indicator"]:
-            data[var] = float(data[var])
-        nuts_kernel = NUTS(model)
-        run_params = {"chain_method": "parallel", "progress_bar": False}
+        run_params = {
+            "chain_method": "parallel",
+            "progress_bar": False,
+            "num_chains": 4,
+            "rng_seed": 0,
+        }
         run_params.update(kwargs)
+        init = {
+            k: jnp.vstack([jnp.array(v) for _ in range(run_params["num_chains"])])
+            for k, v in init.items()
+        }
+
+        model = get_model(stan_data["trend_indicator"])
+        nuts_kernel = NUTS(model)
         mcmc = MCMC(
             nuts_kernel,
             num_warmup=samples // 2,
             num_samples=samples // 2,
             thinning=1,
-            num_chains=4,
+            num_chains=run_params["num_chains"],
             chain_method=run_params["chain_method"],
             progress_bar=run_params["progress_bar"],
         )
-        rng_key = jax.random.PRNGKey(0)
+        rng_key = jax.random.PRNGKey(run_params["rng_seed"])
         mcmc.run(rng_key=rng_key, init_params=init, **data)
         self.stan_fit = mcmc
+        self.stan_fit_params = run_params
         return {k: np.array(v) for k, v in mcmc.get_samples(group_by_chain=False).items()}
 
 
