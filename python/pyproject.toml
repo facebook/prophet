@@ -52,6 +52,10 @@ parallel = [
   "dask[dataframe]",
   "distributed",
 ]
+numpyro = [
+  "jax>=0.4",
+  "numpyro>=0.12"
+]
 
 [project.urls]
 Homepage = "https://facebook.github.io/prophet/"
