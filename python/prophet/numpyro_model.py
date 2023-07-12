@@ -56,7 +56,9 @@ def transition_function(
     return (m_pr + gamma_i, t_change, k_s), gamma_i
 
 
-def logistic_gamma(k: float, m: float, delta: jnp.ndarray, t_change: jnp.ndarray) -> jnp.ndarray:
+def logistic_gamma(
+    k: float, m: float, delta: jnp.ndarray, t_change: jnp.ndarray
+) -> jnp.ndarray:
     """
     Calculates the offset parameter adjustments (gamma_j) required at each changepoint assuming logistic growth.
     The equation for gamma_j is defined in page 9 of the original Forecasting at Scale paper: https://peerj.com/preprints/3190.pdf.
@@ -66,7 +68,9 @@ def logistic_gamma(k: float, m: float, delta: jnp.ndarray, t_change: jnp.ndarray
     An array of offset parameter adjustments required at each changepoint.
     """
     k_s = jnp.append(jnp.array(k), k + jnp.cumsum(delta))
-    _, gamma = scan(transition_function, (m, t_change, k_s), jnp.arange(t_change.shape[0]))
+    _, gamma = scan(
+        transition_function, (m, t_change, k_s), jnp.arange(t_change.shape[0])
+    )
     return gamma
 
 
@@ -143,7 +147,11 @@ def construct_changepoint_matrix(t: np.ndarray, t_change: np.ndarray) -> jnp.nda
 
 @jit
 def compute_mu(
-    trend: jnp.ndarray, X: jnp.ndarray, betas: jnp.ndarray, s_m: jnp.ndarray, s_a: jnp.ndarray
+    trend: jnp.ndarray,
+    X: jnp.ndarray,
+    betas: jnp.ndarray,
+    s_m: jnp.ndarray,
+    s_a: jnp.ndarray,
 ) -> jnp.ndarray:
     """
     Calculates the expected value of the response variable y at each time point t.
