@@ -41,7 +41,7 @@ jobs:
     - name: Install and test
       run: |
         cd python
-        python -m pip install -U --editable ".[dev,parallel]"
+        python -m pip install -U --editable ".[dev,parallel,numpyro]"
         python -m pytest prophet/tests/
 
   build-and-test-r:
