@@ -5,15 +5,16 @@
 # LICENSE file in the root directory of this source tree.
 
 from __future__ import absolute_import, division, print_function
-from abc import abstractmethod, ABC
-
-from typing import Tuple, Dict, Union
-from collections import OrderedDict
-from enum import Enum
-import importlib_resources
-import platform
 
 import logging
+import platform
+from abc import ABC, abstractmethod
+from collections import OrderedDict
+from enum import Enum
+from typing import Dict, Tuple, Union
+
+import importlib_resources
+import numpy as np
 
 logger = logging.getLogger("prophet.models")
 
@@ -36,6 +37,34 @@ class IStanBackend(ABC):
                 self.newton_fallback = v
             else:
                 raise ValueError(f"Unknown option {k}")
+
+    @staticmethod
+    def simplify_mcmc_results(params: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
+        """Simplifies dimensions of results from MCMC sampling with multiple chains."""
+        out = {k: v for k, v in params.items()}
+        for par in out:
+            s = out[par].shape
+            if s[1] == 1:
+                out[par] = out[par].reshape((s[0],))
+            if par in ["delta", "beta"] and len(s) < 2:
+                out[par] = out[par].reshape((-1, 1))
+        return out
+
+    @staticmethod
+    def sanitize_custom_inits(default_inits, custom_inits):
+        """Validate that custom inits have the correct type and shape, otherwise use defaults."""
+        sanitized = {}
+        for param in ["k", "m", "sigma_obs"]:
+            try:
+                sanitized[param] = float(custom_inits.get(param))
+            except Exception:
+                sanitized[param] = default_inits[param]
+        for param in ["delta", "beta"]:
+            if default_inits[param].shape == custom_inits[param].shape:
+                sanitized[param] = custom_inits[param]
+            else:
+                sanitized[param] = default_inits[param]
+        return sanitized
 
     @staticmethod
     @abstractmethod
@@ -132,32 +161,7 @@ class CmdStanPyBackend(IStanBackend):
         (samples, c, columns) = res.shape
         res = res.reshape((samples * c, columns))
         params = self.stan_to_dict_numpy(self.stan_fit.column_names, res)
-
-        for par in params:
-            s = params[par].shape
-            if s[1] == 1:
-                params[par] = params[par].reshape((s[0],))
-
-            if par in ["delta", "beta"] and len(s) < 2:
-                params[par] = params[par].reshape((-1, 1))
-
-        return params
-
-    @staticmethod
-    def sanitize_custom_inits(default_inits, custom_inits):
-        """Validate that custom inits have the correct type and shape, otherwise use defaults."""
-        sanitized = {}
-        for param in ["k", "m", "sigma_obs"]:
-            try:
-                sanitized[param] = float(custom_inits.get(param))
-            except Exception:
-                sanitized[param] = default_inits[param]
-        for param in ["delta", "beta"]:
-            if default_inits[param].shape == custom_inits[param].shape:
-                sanitized[param] = custom_inits[param]
-            else:
-                sanitized[param] = default_inits[param]
-        return sanitized
+        return self.simplify_mcmc_results(params)
 
     @staticmethod
     def prepare_data(init, data) -> Tuple[dict, dict]:
@@ -188,9 +192,7 @@ class CmdStanPyBackend(IStanBackend):
         return (cmdstanpy_init, cmdstanpy_data)
 
     @staticmethod
-    def stan_to_dict_numpy(column_names: Tuple[str, ...], data: "np.array"):
-        import numpy as np
-
+    def stan_to_dict_numpy(column_names: Tuple[str, ...], data: np.ndarray):
         output = OrderedDict()
 
         prev = None
@@ -228,7 +230,7 @@ class NumpyroBackend(IStanBackend):
         try:
             import numpyro
         except ImportError as exc:
-            raise Exception("numpyro not found, please try pip install prophet[numpyro]") from exc
+            raise Exception("numpyro not found, please reinstall prophet with `pip install prophet[numpyro]`") from exc
         super().__init__()
         self.newton_fallback = False
 
@@ -244,10 +246,11 @@ class NumpyroBackend(IStanBackend):
         init: Dict[str, Union[float, int, list]], data: Dict[str, Union[float, int, list]]
     ) -> Tuple[dict, dict]:
         import jax.numpy as jnp
+
         from .numpyro_model import (
-            construct_changepoint_matrix,
             NumpyroModelData,
             NumpyroModelParams,
+            construct_changepoint_matrix,
         )
 
         data = {k: v for k, v in data.items() if k in NumpyroModelData.__annotations__}
@@ -255,23 +258,30 @@ class NumpyroBackend(IStanBackend):
         for var in data:
             if NumpyroModelData.__annotations__[var] == jnp.ndarray:
                 data[var] = jnp.array(data[var])
+            else:
+                data[var] = float(data[var])
 
         init = {k: v for k, v in init.items() if k in NumpyroModelParams.__annotations__}
         for var in init:
             if NumpyroModelParams.__annotations__[var] == jnp.ndarray:
                 init[var] = jnp.array(init[var])
+            else:
+                init[var] = float(init[var])
         return init, data
 
     def fit(self, stan_init, stan_data, **kwargs) -> dict:
         import jax
-        import numpy as np
         from numpyro.infer import SVI
         from numpyro.infer.autoguide import AutoDelta, Trace_ELBO
         from numpyro.optim import Adam
+
         from .numpyro_model import get_model
 
         jax.config.update("jax_enable_x64", True)
 
+        if "inits" not in kwargs and "init" in kwargs:
+            stan_init = self.sanitize_custom_inits(stan_init, kwargs["init"])
+            del kwargs["init"]
         init, data = self.prepare_data(stan_init, stan_data)
         run_params = {
             "num_steps": 10000,
@@ -294,7 +304,7 @@ class NumpyroBackend(IStanBackend):
             **data,
         )
         self.stan_fit = svi_results
-        self.stan_fit_params = run_params
+        self.run_params = run_params
         return {
             k.replace("_auto_loc", ""): np.array(v).reshape((1, -1))
             for k, v in svi_results.params.items()
@@ -303,12 +313,15 @@ class NumpyroBackend(IStanBackend):
     def sampling(self, stan_init, stan_data, samples: int, **kwargs) -> dict:
         import jax
         import jax.numpy as jnp
-        import numpy as np
-        from numpyro.infer import NUTS, MCMC
+        from numpyro.infer import MCMC, NUTS
+
         from .numpyro_model import get_model
 
         jax.config.update("jax_enable_x64", True)
 
+        if "inits" not in kwargs and "init" in kwargs:
+            stan_init = self.sanitize_custom_inits(stan_init, kwargs["init"])
+            del kwargs["init"]
         init, data = self.prepare_data(stan_init, stan_data)
         run_params = {
             "chain_method": "parallel",
@@ -336,8 +349,9 @@ class NumpyroBackend(IStanBackend):
         rng_key = jax.random.PRNGKey(run_params["rng_seed"])
         mcmc.run(rng_key=rng_key, init_params=init, **data)
         self.stan_fit = mcmc
-        self.stan_fit_params = run_params
-        return {k: np.array(v) for k, v in mcmc.get_samples(group_by_chain=False).items()}
+        self.run_params = run_params
+        params = {k: np.array(v) for k, v in mcmc.get_samples(group_by_chain=False).items()}
+        return self.simplify_mcmc_results(params)
 
 
 class StanBackendEnum(Enum):
