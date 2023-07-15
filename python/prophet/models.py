@@ -277,8 +277,6 @@ class NumpyroBackend(IStanBackend):
 
         from .numpyro_model import get_model
 
-        jax.config.update("jax_enable_x64", True)
-
         if "inits" not in kwargs and "init" in kwargs:
             stan_init = self.sanitize_custom_inits(stan_init, kwargs["init"])
             del kwargs["init"]
@@ -316,8 +314,6 @@ class NumpyroBackend(IStanBackend):
         from numpyro.infer import MCMC, NUTS
 
         from .numpyro_model import get_model
-
-        jax.config.update("jax_enable_x64", True)
 
         if "inits" not in kwargs and "init" in kwargs:
             stan_init = self.sanitize_custom_inits(stan_init, kwargs["init"])
