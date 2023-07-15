@@ -38,11 +38,18 @@ jobs:
       with:
         path: C:/rtools40
         key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
-    - name: Install and test
+    - name: Install and test (macOS, Linux)
+      if: startsWith(runner.os, 'Windows') != true
       run: |
         cd python
         python -m pip install -U --editable ".[dev,parallel,numpyro]"
-        python -m pytest prophet/tests/
+        python -m pytest prophet/tests/ --backend "CMDSTANPY" "NUMPYRO"
+    - name: Install and test (Windows)
+      if: startsWith(runner.os, 'Windows')
+      run: |
+        cd python
+        python -m pip install -U --editable ".[dev,parallel]"
+        python -m pytest prophet/tests/ --backend "CMDSTANPY"
 
   build-and-test-r:
 
