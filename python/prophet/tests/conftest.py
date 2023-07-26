@@ -16,6 +16,12 @@ def subdaily_univariate_ts() -> pd.DataFrame:
     return pd.read_csv(Path(__file__).parent / "data2.csv", parse_dates=["ds"])
 
 
+@pytest.fixture(scope="package")
+def large_numbers_ts() -> pd.DataFrame:
+    """Sub-daily univariate time series"""
+    return pd.read_csv(Path(__file__).parent / "data3.csv", parse_dates=["ds"])
+
+
 def pytest_configure(config):
     config.addinivalue_line("markers", "slow: mark tests as slow (include in run with --test-slow)")
 

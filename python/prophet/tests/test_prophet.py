@@ -46,6 +46,18 @@ class TestProphetFitPredictDefault:
         res = rmse(future["yhat"], test["y"])
         assert res == pytest.approx(23.44, 0.01), "backend: {}".format(forecaster.stan_backend)
 
+    def test_fit_predict_large_numbers(self, large_numbers_ts, backend):
+        test_days = 30
+        train, test = train_test_split(large_numbers_ts, test_days)
+        forecaster = Prophet(stan_backend=backend)
+        forecaster.fit(train, seed=1237861298)
+        np.random.seed(876543987)
+        future = forecaster.make_future_dataframe(test_days, include_history=False)
+        future = forecaster.predict(future)
+        res = rmse(future["yhat"], test["y"])
+        # this gives ~ 10.64
+        assert res == pytest.approx(93.45, 0.01), "backend: {}".format(forecaster.stan_backend)
+
     @pytest.mark.slow
     def test_fit_predict_sampling(self, daily_univariate_ts, backend):
         test_days = 30
@@ -789,6 +801,7 @@ class TestProphetHolidays:
         m.fit(subdaily_univariate_ts)
         fcst = m.predict()
         assert sum(fcst["special_day"] == 0) == 575
+
 
 
 class TestProphetRegressors:
