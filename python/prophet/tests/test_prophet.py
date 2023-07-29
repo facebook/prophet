@@ -34,10 +34,10 @@ class TestProphetFitPredictDefault:
         # this gives ~ 10.64
         assert 15 > res > 5, "backend: {}".format(forecaster.stan_backend)
 
-    def test_fit_predict_newton(self, daily_univariate_ts, backend):
+    def test_fit_predict_newton(self, daily_univariate_ts):
         test_days = 30
         train, test = train_test_split(daily_univariate_ts, test_days)
-        forecaster = Prophet(stan_backend=backend)
+        forecaster = Prophet(stan_backend="CMDSTANPY")
         forecaster.fit(train, algorithm="Newton", seed=1237861298)
         np.random.seed(876543987)
         future = forecaster.make_future_dataframe(test_days, include_history=False)

@@ -145,7 +145,6 @@ def construct_changepoint_matrix(t: np.ndarray, t_change: np.ndarray) -> jnp.nda
     return jnp.array(A)
 
 
-@jit
 def compute_mu(
     trend: jnp.ndarray,
     X: jnp.ndarray,
@@ -192,14 +191,14 @@ def get_model(trend_indicator: int) -> Callable:
     ) -> None:
         T = t.shape[0]
         S = t_change.shape[0]
+        K = X.shape[1]
 
         k = sample("k", dist.Normal(0, 5))
         m = sample("m", dist.Normal(0, 5))
-        with plate("delta_dim", S):
-            delta = sample("delta", dist.Laplace(0, tau))
+        delta = sample("delta", dist.Laplace(0, jnp.repeat(tau, S)))
         trend = deterministic("trend", trend_function(k, m, delta, t, cap, t_change, A))
         sigma_obs = sample("sigma_obs", dist.HalfNormal(scale=0.5))
-        betas = sample("beta", dist.MultivariateNormal(0, jnp.diag(sigmas)))
+        betas = sample("beta", dist.Normal(0, sigmas))
         mu = deterministic("mu", compute_mu(trend, X, betas, s_m, s_a))
         with plate("data", T):
             sample("obs", dist.Normal(mu, sigma_obs), obs=y)

@@ -238,8 +238,8 @@ class NumpyroBackend(IStanBackend):
     def get_type():
         return StanBackendEnum.NUMPYRO.name
 
-    def load_model(self):
-        """No-op since this backend does not rely on a stan model."""
+    def load_model(self) -> None:
+        pass
 
     @staticmethod
     def prepare_data(
@@ -273,7 +273,7 @@ class NumpyroBackend(IStanBackend):
         import jax
         from numpyro.infer import SVI
         from numpyro.infer.autoguide import AutoDelta, Trace_ELBO
-        from numpyro.optim import Adam
+        from numpyro.optim import Adam, Minimize
 
         from .numpyro_model import get_model
 
@@ -285,24 +285,27 @@ class NumpyroBackend(IStanBackend):
             "num_steps": 10000,
             "progress_bar": False,
             "learning_rate": 0.001,
-            "rng_seed": 0,
+            "seed": 0,
         }
         run_params.update(kwargs)
 
         model = get_model(stan_data["trend_indicator"])
         guide = AutoDelta(model)
         optimizer = Adam(run_params["learning_rate"])
+        optimizer = Minimize(method="BFGS")
         svi = SVI(model, guide, optimizer, loss=Trace_ELBO())
-        rng_key = jax.random.PRNGKey(run_params["rng_seed"])
+        rng_key = jax.random.PRNGKey(run_params["seed"])
         svi_results = svi.run(
             rng_key=rng_key,
             num_steps=run_params["num_steps"],
+            stable_update=True,
             progress_bar=run_params["progress_bar"],
             init_params=init,
             **data,
         )
         self.stan_fit = svi_results
         self.run_params = run_params
+        self.model = model
         return {
             k.replace("_auto_loc", ""): np.array(v).reshape((1, -1))
             for k, v in svi_results.params.items()
@@ -320,10 +323,11 @@ class NumpyroBackend(IStanBackend):
             del kwargs["init"]
         init, data = self.prepare_data(stan_init, stan_data)
         run_params = {
-            "chain_method": "parallel",
+            "chain_method": "sequential",
             "progress_bar": False,
             "num_chains": 4,
-            "rng_seed": 0,
+            "seed": 0,
+            "max_tree_depth": 10,
         }
         run_params.update(kwargs)
         init = {
@@ -332,7 +336,7 @@ class NumpyroBackend(IStanBackend):
         }
 
         model = get_model(stan_data["trend_indicator"])
-        nuts_kernel = NUTS(model)
+        nuts_kernel = NUTS(model, max_tree_depth=run_params["max_tree_depth"])
         mcmc = MCMC(
             nuts_kernel,
             num_warmup=samples // 2,
@@ -342,10 +346,11 @@ class NumpyroBackend(IStanBackend):
             chain_method=run_params["chain_method"],
             progress_bar=run_params["progress_bar"],
         )
-        rng_key = jax.random.PRNGKey(run_params["rng_seed"])
+        rng_key = jax.random.PRNGKey(run_params["seed"])
         mcmc.run(rng_key=rng_key, init_params=init, **data)
         self.stan_fit = mcmc
         self.run_params = run_params
+        self.model = model
         params = {k: np.array(v) for k, v in mcmc.get_samples(group_by_chain=False).items()}
         return self.simplify_mcmc_results(params)
 

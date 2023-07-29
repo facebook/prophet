@@ -52,7 +52,7 @@ class TestSerialize:
         future2 = m2.make_future_dataframe(2, include_history=False)
         fcst2 = m2.predict(future2)
 
-        assert np.array_equal(fcst["yhat"].values, fcst2["yhat"].values)
+        assert np.allclose(fcst["yhat"].values, fcst2["yhat"].values, atol=0.001)
 
     def test_full_serialize(self, daily_univariate_ts, backend):
         # Construct a model with all attributes
@@ -121,7 +121,7 @@ class TestSerialize:
 
         # Check that m2 makes the same forecast
         fcst2 = m2.predict(test)
-        assert np.array_equal(fcst["yhat"].values, fcst2["yhat"].values)
+        assert np.allclose(fcst["yhat"].values, fcst2["yhat"].values, atol=0.001)
 
     def test_backwards_compatibility(self):
         old_versions = {

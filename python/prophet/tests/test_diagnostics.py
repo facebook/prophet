@@ -38,6 +38,8 @@ class TestCrossValidation:
     @pytest.mark.parametrize("parallel_method", PARALLEL_METHODS)
     def test_cross_validation(self, ts_short, parallel_method, backend):
         m = Prophet(stan_backend=backend)
+        if not diagnostics.is_backend_parallel_compatible(backend, parallel_method):
+            return
         m.fit(ts_short)
         # Calculate the number of cutoff points(k)
         horizon = pd.Timedelta("4 days")
