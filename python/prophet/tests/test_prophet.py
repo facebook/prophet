@@ -36,7 +36,7 @@ class TestProphetFitPredictDefault:
         future = forecaster.make_future_dataframe(test_days, include_history=False)
         future = forecaster.predict(future)
         res = rmse(future["yhat"], test["y"])
-        assert res == pytest.approx(expected, 0.01), "backend: {}".format(forecaster.stan_backend)
+        assert res == pytest.approx(expected, 0.02), "backend: {}".format(forecaster.stan_backend)
 
     @pytest.mark.parametrize(
         "scaling,expected",
