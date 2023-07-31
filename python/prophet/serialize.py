@@ -27,7 +27,7 @@ SIMPLE_ATTRIBUTES = [
     'yearly_seasonality', 'weekly_seasonality', 'daily_seasonality',
     'seasonality_mode', 'seasonality_prior_scale', 'changepoint_prior_scale',
     'holidays_prior_scale', 'mcmc_samples', 'interval_width', 'uncertainty_samples',
-    'y_scale', 'logistic_floor', 'country_holidays', 'component_modes'
+    'y_scale', 'y_min', 'scaling', 'logistic_floor', 'country_holidays', 'component_modes'
 ]
 
 PD_SERIES = ['changepoints', 'history_dates', 'train_holiday_names']
@@ -144,6 +144,23 @@ def model_from_dict(model_dict):
     """
     model = Prophet()  # We will overwrite all attributes set in init anyway
     # Simple types
+
+    for attribute in PD_DATAFRAME:
+        if model_dict[attribute] is None:
+            setattr(model, attribute, None)
+        else:
+            df = pd.read_json(StringIO(model_dict[attribute]), typ='frame', orient='table', convert_dates=['ds'])
+            if attribute == 'train_component_cols':
+                # Special handling because of named index column
+                df.columns.name = 'component'
+                df.index.name = 'col'
+            setattr(model, attribute, df)
+    
+    # backwards compat with prophet <=1.1.4
+    if 'scaling' not in model_dict:
+        model_dict['scaling'] = 'absmax'
+        model_dict['y_min'] = 0.
+
     for attribute in SIMPLE_ATTRIBUTES:
         setattr(model, attribute, model_dict[attribute])
     for attribute in PD_SERIES:
@@ -160,16 +177,6 @@ def model_from_dict(model_dict):
         setattr(model, attribute, pd.Timestamp.utcfromtimestamp(model_dict[attribute]).tz_localize(None))
     for attribute in PD_TIMEDELTA:
         setattr(model, attribute, pd.Timedelta(seconds=model_dict[attribute]))
-    for attribute in PD_DATAFRAME:
-        if model_dict[attribute] is None:
-            setattr(model, attribute, None)
-        else:
-            df = pd.read_json(StringIO(model_dict[attribute]), typ='frame', orient='table', convert_dates=['ds'])
-            if attribute == 'train_component_cols':
-                # Special handling because of named index column
-                df.columns.name = 'component'
-                df.index.name = 'col'
-            setattr(model, attribute, df)
     for attribute in NP_ARRAY:
         setattr(model, attribute, np.array(model_dict[attribute]))
     for attribute in ORDEREDDICT:

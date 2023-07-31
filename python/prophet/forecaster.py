@@ -94,7 +94,8 @@ class Prophet(object):
             mcmc_samples=0,
             interval_width=0.80,
             uncertainty_samples=1000,
-            stan_backend=None
+            stan_backend=None,
+            scaling: str = 'absmax',
     ):
         self.growth = growth
 
@@ -121,9 +122,13 @@ class Prophet(object):
         self.mcmc_samples = mcmc_samples
         self.interval_width = interval_width
         self.uncertainty_samples = uncertainty_samples
+        if scaling not in ("absmax", "minmax"):
+            raise ValueError("scaling must be one of 'absmax' or 'minmax'")
+        self.scaling = scaling
 
         # Set during fitting or by other methods
         self.start = None
+        self.y_min = None
         self.y_scale = None
         self.logistic_floor = False
         self.t_scale = None
@@ -313,7 +318,10 @@ class Prophet(object):
             if 'floor' not in df:
                 raise ValueError('Expected column "floor".')
         else:
-            df['floor'] = 0
+            if self.scaling == "absmax":
+                df['floor'] = 0.
+            elif self.scaling == "minmax":
+                df['floor'] = self.y_min
         if self.growth == 'logistic':
             if 'cap' not in df:
                 raise ValueError(
@@ -346,14 +354,25 @@ class Prophet(object):
         """
         if not initialize_scales:
             return
+
         if self.growth == 'logistic' and 'floor' in df:
             self.logistic_floor = True
-            floor = df['floor']
+            if self.scaling == "absmax":
+                self.y_min = float((df['y'] - df['floor']).abs().min())
+                self.y_scale = float((df['y'] - df['floor']).abs().max())
+            elif self.scaling == "minmax":
+                self.y_min = df['floor'].min()
+                self.y_scale = float(df['cap'].max() - self.y_min)
         else:
-            floor = 0.
-        self.y_scale = float((df['y'] - floor).abs().max())
+            if self.scaling == "absmax":
+                self.y_min = 0.
+                self.y_scale = float((df['y']).abs().max())
+            elif self.scaling == "minmax":
+                self.y_min = df['y'].min()
+                self.y_scale =  float(df['y'].max() - self.y_min)
         if self.y_scale == 0:
             self.y_scale = 1.0
+
         self.start = df['ds'].min()
         self.t_scale = df['ds'].max() - self.start
         for name, props in self.extra_regressors.items():

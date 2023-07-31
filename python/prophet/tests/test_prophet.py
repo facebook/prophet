@@ -22,41 +22,53 @@ def rmse(predictions, targets) -> float:
 
 
 class TestProphetFitPredictDefault:
-    def test_fit_predict(self, daily_univariate_ts, backend):
+    @pytest.mark.parametrize(
+        "scaling,expected",
+        [("absmax", 10.64), ("minmax", 11.13)],
+        ids=["absmax", "minmax"]
+    )
+    def test_fit_predict(self, daily_univariate_ts, backend, scaling, expected):
         test_days = 30
         train, test = train_test_split(daily_univariate_ts, test_days)
-        forecaster = Prophet(stan_backend=backend)
+        forecaster = Prophet(stan_backend=backend, scaling=scaling)
         forecaster.fit(train, seed=1237861298)
         np.random.seed(876543987)
         future = forecaster.make_future_dataframe(test_days, include_history=False)
         future = forecaster.predict(future)
         res = rmse(future["yhat"], test["y"])
-        # this gives ~ 10.64
-        assert 15 > res > 5, "backend: {}".format(forecaster.stan_backend)
+        assert res == pytest.approx(expected, 0.01), "backend: {}".format(forecaster.stan_backend)
 
-    def test_fit_predict_newton(self, daily_univariate_ts, backend):
+    @pytest.mark.parametrize(
+        "scaling,expected",
+        [("absmax", 23.44), ("minmax", 11.29)],
+        ids=["absmax", "minmax"]
+    )
+    def test_fit_predict_newton(self, daily_univariate_ts, backend, scaling, expected):
         test_days = 30
         train, test = train_test_split(daily_univariate_ts, test_days)
-        forecaster = Prophet(stan_backend=backend)
+        forecaster = Prophet(stan_backend=backend, scaling=scaling)
         forecaster.fit(train, algorithm="Newton", seed=1237861298)
         np.random.seed(876543987)
         future = forecaster.make_future_dataframe(test_days, include_history=False)
         future = forecaster.predict(future)
-        # this gives ~ 10.64
         res = rmse(future["yhat"], test["y"])
-        assert res == pytest.approx(23.44, 0.01), "backend: {}".format(forecaster.stan_backend)
+        assert res == pytest.approx(expected, 0.01), "backend: {}".format(forecaster.stan_backend)
 
-    def test_fit_predict_large_numbers(self, large_numbers_ts, backend):
+    @pytest.mark.parametrize(
+        "scaling,expected",
+        [("absmax", 127.01), ("minmax", 93.45)],
+        ids=["absmax", "minmax"]
+    )
+    def test_fit_predict_large_numbers(self, large_numbers_ts, backend, scaling, expected):
         test_days = 30
         train, test = train_test_split(large_numbers_ts, test_days)
-        forecaster = Prophet(stan_backend=backend)
+        forecaster = Prophet(stan_backend=backend, scaling=scaling)
         forecaster.fit(train, seed=1237861298)
         np.random.seed(876543987)
         future = forecaster.make_future_dataframe(test_days, include_history=False)
         future = forecaster.predict(future)
         res = rmse(future["yhat"], test["y"])
-        # this gives ~ 10.64
-        assert res == pytest.approx(93.45, 0.01), "backend: {}".format(forecaster.stan_backend)
+        assert res == pytest.approx(expected, 0.01), "backend: {}".format(forecaster.stan_backend)
 
     @pytest.mark.slow
     def test_fit_predict_sampling(self, daily_univariate_ts, backend):
@@ -197,6 +209,26 @@ class TestProphetDataPrep:
         m2.fit(train)
         assert m2.history["y_scaled"][0] == pytest.approx(1.0, 0.01)
 
+    def test_logistic_floor_minmax(self, daily_univariate_ts, backend):
+        """Test the scaling of y with logistic growth and a floor/cap."""
+        train, _ = train_test_split(daily_univariate_ts, daily_univariate_ts.shape[0] // 2)
+        train["floor"] = 10.0
+        train["cap"] = 80.0
+        m = Prophet(growth="logistic", stan_backend=backend, scaling="minmax")
+        m.fit(train)
+        assert m.logistic_floor
+        assert "floor" in m.history
+        assert m.history["y_scaled"].min() > 0.0
+        assert m.history["y_scaled"].max() < 1.0
+        for col in ["y", "floor", "cap"]:
+            train[col] += 10.0
+        m2 = Prophet(growth="logistic", stan_backend=backend, scaling="minmax")
+        m2.fit(train)
+        assert m2.history["y_scaled"].min() > 0.0
+        assert m2.history["y_scaled"].max() < 1.0
+        # Check that the scaling is the same
+        assert m2.history['y_scaled'].mean() == m.history['y_scaled'].mean()
+
     def test_make_future_dataframe(self, daily_univariate_ts, backend):
         train = daily_univariate_ts.head(468 // 2)
         forecaster = Prophet(stan_backend=backend)
@@ -237,8 +269,28 @@ class TestProphetTrendComponent:
         assert k == 0
         assert m == pytest.approx(0.49335657, abs=1e-4)
 
-    def test_flat_growth(self, backend):
-        m = Prophet(growth="flat", stan_backend=backend)
+    def test_growth_init_minmax(self, daily_univariate_ts, backend):
+        model = Prophet(growth="logistic", stan_backend=backend, scaling="minmax")
+        train = daily_univariate_ts.iloc[:468].copy()
+        train["cap"] = train["y"].max()
+
+        history = model.setup_dataframe(train, initialize_scales=True)
+
+        k, m = model.linear_growth_init(history)
+        assert k == pytest.approx(0.4053406)
+        assert m == pytest.approx(0.3775322)
+
+        k, m = model.logistic_growth_init(history)
+        assert k == pytest.approx(1.782523, abs=1e-4)
+        assert m == pytest.approx(0.280521, abs=1e-4)
+
+        k, m = model.flat_growth_init(history)
+        assert k == 0
+        assert m == pytest.approx(0.32792770, abs=1e-4)
+
+    @pytest.mark.parametrize("scaling",["absmax","minmax"])
+    def test_flat_growth(self, backend, scaling):
+        m = Prophet(growth="flat", stan_backend=backend, scaling=scaling)
         x = np.linspace(0, 2 * np.pi, 8 * 7)
         history = pd.DataFrame(
             {
@@ -252,8 +304,8 @@ class TestProphetTrendComponent:
         m_ = m.params["m"][0, 0]
         k = m.params["k"][0, 0]
         assert k == pytest.approx(0.0)
-        assert fcst["trend"].unique()[0] == pytest.approx(m_ * m.y_scale)
-        assert np.round(m_ * m.y_scale) == 30.0
+        assert fcst["trend"].unique()[0] == pytest.approx((m_ * m.y_scale) + m.y_min)
+        assert np.round((m_ * m.y_scale) + m.y_min) == 30.0
 
     def test_piecewise_linear(self, backend):
         model = Prophet(stan_backend=backend)
