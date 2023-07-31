@@ -18,7 +18,7 @@ def subdaily_univariate_ts() -> pd.DataFrame:
 
 @pytest.fixture(scope="package")
 def large_numbers_ts() -> pd.DataFrame:
-    """Sub-daily univariate time series"""
+    """Univariate time series with large values to test scaling"""
     return pd.read_csv(Path(__file__).parent / "data3.csv", parse_dates=["ds"])
 
 
