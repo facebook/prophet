@@ -88,6 +88,7 @@ class Prophet(object):
             daily_seasonality='auto',
             holidays=None,
             seasonality_mode='additive',
+            holiday_mode='additive',
             seasonality_prior_scale=10.0,
             holidays_prior_scale=10.0,
             changepoint_prior_scale=0.05,
@@ -115,6 +116,7 @@ class Prophet(object):
         self.holidays = holidays
 
         self.seasonality_mode = seasonality_mode
+        self.holiday_mode = holiday_mode
         self.seasonality_prior_scale = float(seasonality_prior_scale)
         self.changepoint_prior_scale = float(changepoint_prior_scale)
         self.holidays_prior_scale = float(holidays_prior_scale)
@@ -198,6 +200,10 @@ class Prophet(object):
         if self.seasonality_mode not in ['additive', 'multiplicative']:
             raise ValueError(
                 'seasonality_mode must be "additive" or "multiplicative"'
+            )
+        if self.holiday_mode not in ['additive', 'multiplicative']:
+            raise ValueError(
+                'holiday_mode must be "additive" or "multiplicative"'
             )
 
     def validate_column_name(self, name, check_holidays=True,
@@ -817,7 +823,7 @@ class Prophet(object):
             )
             seasonal_features.append(features)
             prior_scales.extend(holiday_priors)
-            modes[self.seasonality_mode].extend(holiday_names)
+            modes[self.holiday_mode].extend(holiday_names)
 
         # Additional regressors
         for name, props in self.extra_regressors.items():
@@ -882,7 +888,7 @@ class Prophet(object):
             modes[mode].append(mode + '_terms')
             modes[mode].append('extra_regressors_' + mode)
         # After all of the additive/multiplicative groups have been added,
-        modes[self.seasonality_mode].append('holidays')
+        modes[self.holiday_mode].append('holidays')
         # Convert to a binary matrix
         component_cols = pd.crosstab(
             components['col'], components['component'],
