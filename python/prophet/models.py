@@ -272,8 +272,9 @@ class NumpyroBackend(IStanBackend):
     def fit(self, stan_init, stan_data, **kwargs) -> dict:
         import jax
         from numpyro.infer import SVI
+        from numpyro.infer import init_to_value
         from numpyro.infer.autoguide import AutoDelta, Trace_ELBO
-        from numpyro.optim import Adam, Minimize
+        from numpyro.optim import Adam
 
         from .numpyro_model import get_model
 
@@ -290,9 +291,8 @@ class NumpyroBackend(IStanBackend):
         run_params.update(kwargs)
 
         model = get_model(stan_data["trend_indicator"])
-        guide = AutoDelta(model)
+        guide = AutoDelta(model, init_loc_fn=init_to_value(values=init))
         optimizer = Adam(run_params["learning_rate"])
-        optimizer = Minimize(method="BFGS")
         svi = SVI(model, guide, optimizer, loss=Trace_ELBO())
         rng_key = jax.random.PRNGKey(run_params["seed"])
         svi_results = svi.run(
@@ -300,7 +300,6 @@ class NumpyroBackend(IStanBackend):
             num_steps=run_params["num_steps"],
             stable_update=True,
             progress_bar=run_params["progress_bar"],
-            init_params=init,
             **data,
         )
         self.stan_fit = svi_results
@@ -314,7 +313,7 @@ class NumpyroBackend(IStanBackend):
     def sampling(self, stan_init, stan_data, samples: int, **kwargs) -> dict:
         import jax
         import jax.numpy as jnp
-        from numpyro.infer import MCMC, NUTS
+        from numpyro.infer import MCMC, NUTS, init_to_median
 
         from .numpyro_model import get_model
 
