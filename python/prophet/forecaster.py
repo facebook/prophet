@@ -88,7 +88,7 @@ class Prophet(object):
             daily_seasonality='auto',
             holidays=None,
             seasonality_mode='additive',
-            holiday_mode='additive',
+            holiday_mode=None,
             seasonality_prior_scale=10.0,
             holidays_prior_scale=10.0,
             changepoint_prior_scale=0.05,
@@ -116,7 +116,11 @@ class Prophet(object):
         self.holidays = holidays
 
         self.seasonality_mode = seasonality_mode
-        self.holiday_mode = holiday_mode
+        if holiday_mode is None:
+            self.holiday_mode = seasonality_mode
+        else:
+            self.holiday_mode = holiday_mode
+
         self.seasonality_prior_scale = float(seasonality_prior_scale)
         self.changepoint_prior_scale = float(changepoint_prior_scale)
         self.holidays_prior_scale = float(holidays_prior_scale)
