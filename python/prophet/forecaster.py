@@ -53,6 +53,7 @@ class Prophet(object):
         optionally can have a column prior_scale specifying the prior scale for
         that holiday.
     seasonality_mode: 'additive' (default) or 'multiplicative'.
+    holiday_mode: 'additive' or 'multiplicative'. Defaults to seasonality_mode.
     seasonality_prior_scale: Parameter modulating the strength of the
         seasonality model. Larger values allow the model to fit larger seasonal
         fluctuations, smaller values dampen the seasonality. Can be specified
