@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from __future__ import absolute_import, division, print_function
+import dataclasses
 
 import logging
 import platform
@@ -271,9 +272,9 @@ class NumpyroBackend(IStanBackend):
 
     def fit(self, stan_init, stan_data, **kwargs) -> dict:
         import jax
-        from numpyro.infer import SVI
-        from numpyro.infer import init_to_value
-        from numpyro.infer.autoguide import AutoDelta, Trace_ELBO
+        from numpyro.infer import SVI, init_to_value
+        from numpyro.infer.autoguide import AutoDelta
+        from numpyro.infer.elbo import Trace_ELBO
         from numpyro.optim import Adam
 
         from .numpyro_model import get_model

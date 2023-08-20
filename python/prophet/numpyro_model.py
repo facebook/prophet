@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-from typing import Callable, Tuple
+from typing import Callable
 
 import jax.numpy as jnp
 import numpy as np
 import numpyro.distributions as dist
 from jax import jit
-from jax.lax import scan
 from jax.scipy.special import expit
 from numpyro import deterministic, plate, sample
 
@@ -33,32 +32,7 @@ def linear_trend(
     return time_dependent + constant
 
 
-def transition_function(
-    carry: Tuple[float, np.ndarray, np.ndarray], index: int
-) -> Tuple[Tuple[float, np.ndarray, np.ndarray], float]:
-    """
-    Helper function for calculating the offset parameter adjustments required at each changepoint.
-
-    Parameters
-    ----------
-    carry: A tuple containing the previous offset parameter value, the changepoint times,
-        and the cumulative growth rate after each changepoint.
-    index: The index of the current changepoint.
-
-    Returns
-    -------
-    A tuple containing:
-        - A tuple containing the updated offset parameter value, the changepoint times, and the cumulative growth rate at each changepoint.
-        - The offset parameter adjustment required at the current changepoint.
-    """
-    m_pr, t_change, k_s = carry
-    gamma_i = (t_change[index] - m_pr) * (1 - k_s[index] / k_s[index + 1])
-    return (m_pr + gamma_i, t_change, k_s), gamma_i
-
-
-def logistic_gamma(
-    k: float, m: float, delta: jnp.ndarray, t_change: jnp.ndarray
-) -> jnp.ndarray:
+def logistic_gamma(k: float, m: float, delta: jnp.ndarray, t_change: jnp.ndarray) -> jnp.ndarray:
     """
     Calculates the offset parameter adjustments (gamma_j) required at each changepoint assuming logistic growth.
     The equation for gamma_j is defined in page 9 of the original Forecasting at Scale paper: https://peerj.com/preprints/3190.pdf.
@@ -67,10 +41,13 @@ def logistic_gamma(
     -------
     An array of offset parameter adjustments required at each changepoint.
     """
-    k_s = jnp.append(jnp.array(k), k + jnp.cumsum(delta))
-    _, gamma = scan(
-        transition_function, (m, t_change, k_s), jnp.arange(t_change.shape[0])
-    )
+    k_s = jnp.append(jnp.array([k]), k + jnp.cumsum(delta))
+    gamma = jnp.zeros_like(t_change)
+    m_pr = m
+    for i in range(gamma.shape[0]):
+        adjusted_gamma = (t_change[i] - m_pr) * (1 - k_s[i] / k_s[i + 1])
+        gamma = gamma.at[i].set(adjusted_gamma)
+        m_pr += adjusted_gamma
     return gamma
 
 
@@ -93,8 +70,7 @@ def logistic_trend(
     An array of trend values at each time point.
     """
     gamma = logistic_gamma(k, m, delta, t_change)
-    inv_logit = expit(jnp.multiply(k + A.dot(delta), (t - (m + A.dot(gamma)))))
-    return jnp.multiply(cap, inv_logit)
+    return cap * expit((k + jnp.matmul(A, delta)) * (t - (m + jnp.matmul(A, gamma))))
 
 
 @jit
