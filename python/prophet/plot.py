@@ -867,7 +867,7 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
         holiday_features.columns = holiday_features.columns.str.replace('_delim_', '', regex=False)
         holiday_features.columns = holiday_features.columns.str.replace('+0', '', regex=False)
         text = pd.Series(data='', index=holiday_features.index)
-        for holiday_feature, idxs in holiday_features.iteritems():
+        for holiday_feature, idxs in holiday_features.items():
             text[idxs.astype(bool) & (text != '')] += '<br>'  # Add newline if additional holiday
             text[idxs.astype(bool)] += holiday_feature
 
