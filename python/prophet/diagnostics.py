@@ -58,7 +58,7 @@ def generate_cutoffs(df, horizon, initial, period):
     return list(reversed(result))
 
 
-def cross_validation(model, horizon, period=None, initial=None, parallel=None, cutoffs=None, disable_tqdm=False, predict_columns=['ds','yhat']):
+def cross_validation(model, horizon, period=None, initial=None, parallel=None, cutoffs=None, disable_tqdm=False, predict_columns=None):
     """Cross-Validation for time series.
 
     Computes forecasts from historical cutoff points, which user can input.
@@ -83,6 +83,8 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         above.
     parallel : {None, 'processes', 'threads', 'dask', object}
     disable_tqdm: if True it disables the progress bar that would otherwise show up when parallel=None
+    predict_columns: List of strings e.g. ['ds', 'yhat', 'trend'].
+        Columns with date and forecast to be returned in output.
 
         How to parallelize the forecast computation. By default no parallelism
         is used.
@@ -121,6 +123,9 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
     df = model.history.copy().reset_index(drop=True)
     horizon = pd.Timedelta(horizon)
 
+    if predict_columns is None:
+        predict_columns = ['ds', 'yhat']
+        
     if model.uncertainty_samples:
         predict_columns.extend(['yhat_lower', 'yhat_upper'])
         
