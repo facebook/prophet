@@ -1,15 +1,14 @@
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, Tuple
 
 import jax.numpy as jnp
 import numpy as np
 import numpyro.distributions as dist
-from jax import jit
 from jax.scipy.special import expit
-from numpyro import deterministic, plate, sample
+from jax.lax import scan
+from numpyro import deterministic, sample
 
 
-@jit
 def linear_trend(
     k: float,
     m: float,
@@ -32,7 +31,32 @@ def linear_trend(
     return time_dependent + constant
 
 
-def logistic_gamma(k: float, m: float, delta: jnp.ndarray, t_change: jnp.ndarray) -> jnp.ndarray:
+def transition_function(
+    carry: Tuple[float, np.ndarray, np.ndarray], index: int
+) -> Tuple[Tuple[float, np.ndarray, np.ndarray], float]:
+    """
+    Helper function for calculating the offset parameter adjustments required at each changepoint.
+
+    Parameters
+    ----------
+    carry: A tuple containing the previous offset parameter value, the changepoint times,
+        and the cumulative growth rate after each changepoint.
+    index: The index of the current changepoint.
+
+    Returns
+    -------
+    A tuple containing:
+        - A tuple containing the updated offset parameter value, the changepoint times, and the cumulative growth rate at each changepoint.
+        - The offset parameter adjustment required at the current changepoint.
+    """
+    m_pr, t_change, k_s = carry
+    gamma_i = (t_change[index] - m_pr) * (1 - k_s[index] / k_s[index + 1])
+    return (m_pr + gamma_i, t_change, k_s), gamma_i
+
+
+def logistic_gamma(
+    k: float, m: float, delta: jnp.ndarray, t_change: jnp.ndarray
+) -> jnp.ndarray:
     """
     Calculates the offset parameter adjustments (gamma_j) required at each changepoint assuming logistic growth.
     The equation for gamma_j is defined in page 9 of the original Forecasting at Scale paper: https://peerj.com/preprints/3190.pdf.
@@ -41,17 +65,13 @@ def logistic_gamma(k: float, m: float, delta: jnp.ndarray, t_change: jnp.ndarray
     -------
     An array of offset parameter adjustments required at each changepoint.
     """
-    k_s = jnp.append(jnp.array([k]), k + jnp.cumsum(delta))
-    gamma = jnp.zeros_like(t_change)
-    m_pr = m
-    for i in range(gamma.shape[0]):
-        adjusted_gamma = (t_change[i] - m_pr) * (1 - k_s[i] / k_s[i + 1])
-        gamma = gamma.at[i].set(adjusted_gamma)
-        m_pr += adjusted_gamma
+    k_s = jnp.append(jnp.array(k), k + jnp.cumsum(delta))
+    _, gamma = scan(
+        transition_function, (m, t_change, k_s), jnp.arange(t_change.shape[0])
+    )
     return gamma
 
 
-@jit
 def logistic_trend(
     k: float,
     m: float,
@@ -73,7 +93,6 @@ def logistic_trend(
     return cap * expit((k + jnp.matmul(A, delta)) * (t - (m + jnp.matmul(A, gamma))))
 
 
-@jit
 def flat_trend(
     k: float,
     m: float,
@@ -121,7 +140,6 @@ def construct_changepoint_matrix(t: np.ndarray, t_change: np.ndarray) -> jnp.nda
     return jnp.array(A)
 
 
-@jit
 def compute_mu(
     trend: jnp.ndarray,
     X: jnp.ndarray,
@@ -166,10 +184,7 @@ def get_model(trend_indicator: int) -> Callable:
         s_a: jnp.ndarray,
         s_m: jnp.ndarray,
     ) -> None:
-        T = t.shape[0]
         S = t_change.shape[0]
-        K = X.shape[1]
-
         k = sample("k", dist.Normal(0, 5))
         m = sample("m", dist.Normal(0, 5))
         delta = sample("delta", dist.Laplace(0, jnp.repeat(tau, S)))
@@ -177,7 +192,6 @@ def get_model(trend_indicator: int) -> Callable:
         sigma_obs = sample("sigma_obs", dist.HalfNormal(scale=0.5))
         betas = sample("beta", dist.Normal(0, sigmas))
         mu = deterministic("mu", compute_mu(trend, X, betas, s_m, s_a))
-
         sample("obs", dist.Normal(mu, sigma_obs), obs=y)
 
     return model
