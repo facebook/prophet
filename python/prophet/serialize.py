@@ -129,6 +129,13 @@ def model_to_json(model):
     return json.dumps(model_json)
 
 
+def _handle_simple_attributes_backwards_compat(model_dict):
+    """Handle backwards compatibility for SIMPLE_ATTRIBUTES."""
+    # prophet<=1.1.4: handle scaling parameters introduced in #2470
+    if 'scaling' not in model_dict:
+        model_dict['scaling'] = 'absmax'
+        model_dict['y_min'] = 0.
+
 def model_from_dict(model_dict):
     """Recreate a Prophet model from a dictionary.
 
@@ -144,23 +151,7 @@ def model_from_dict(model_dict):
     """
     model = Prophet()  # We will overwrite all attributes set in init anyway
     # Simple types
-
-    for attribute in PD_DATAFRAME:
-        if model_dict[attribute] is None:
-            setattr(model, attribute, None)
-        else:
-            df = pd.read_json(StringIO(model_dict[attribute]), typ='frame', orient='table', convert_dates=['ds'])
-            if attribute == 'train_component_cols':
-                # Special handling because of named index column
-                df.columns.name = 'component'
-                df.index.name = 'col'
-            setattr(model, attribute, df)
-    
-    # backwards compat with prophet <=1.1.4
-    if 'scaling' not in model_dict:
-        model_dict['scaling'] = 'absmax'
-        model_dict['y_min'] = 0.
-
+    _handle_simple_attributes_backwards_compat(model_dict)
     for attribute in SIMPLE_ATTRIBUTES:
         setattr(model, attribute, model_dict[attribute])
     for attribute in PD_SERIES:
@@ -177,6 +168,16 @@ def model_from_dict(model_dict):
         setattr(model, attribute, pd.Timestamp.utcfromtimestamp(model_dict[attribute]).tz_localize(None))
     for attribute in PD_TIMEDELTA:
         setattr(model, attribute, pd.Timedelta(seconds=model_dict[attribute]))
+    for attribute in PD_DATAFRAME:
+        if model_dict[attribute] is None:
+            setattr(model, attribute, None)
+        else:
+            df = pd.read_json(StringIO(model_dict[attribute]), typ='frame', orient='table', convert_dates=['ds'])
+            if attribute == 'train_component_cols':
+                # Special handling because of named index column
+                df.columns.name = 'component'
+                df.index.name = 'col'
+            setattr(model, attribute, df)
     for attribute in NP_ARRAY:
         setattr(model, attribute, np.array(model_dict[attribute]))
     for attribute in ORDEREDDICT:
