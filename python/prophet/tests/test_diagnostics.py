@@ -128,7 +128,7 @@ class TestCrossValidation:
             (["4 days", "4 days", "115 days"], 7),
         ):
             n_calls = 0
-            df_cv = diagnostics.cross_validation(m, *args, extra_output_columns=["trend"})
+            df_cv = diagnostics.cross_validation(m, *args, extra_output_columns=["trend"])
             # check single forecast function called expected number of times
             assert n_calls == forecasts
             assert "trend" in df_cv.columns
