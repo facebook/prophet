@@ -27,7 +27,7 @@ SIMPLE_ATTRIBUTES = [
     'yearly_seasonality', 'weekly_seasonality', 'daily_seasonality',
     'seasonality_mode', 'seasonality_prior_scale', 'changepoint_prior_scale',
     'holidays_prior_scale', 'mcmc_samples', 'interval_width', 'uncertainty_samples',
-    'y_scale', 'logistic_floor', 'country_holidays', 'component_modes'
+    'y_scale', 'y_min', 'scaling', 'logistic_floor', 'country_holidays', 'component_modes'
 ]
 
 PD_SERIES = ['changepoints', 'history_dates', 'train_holiday_names']
@@ -129,6 +129,13 @@ def model_to_json(model):
     return json.dumps(model_json)
 
 
+def _handle_simple_attributes_backwards_compat(model_dict):
+    """Handle backwards compatibility for SIMPLE_ATTRIBUTES."""
+    # prophet<=1.1.4: handle scaling parameters introduced in #2470
+    if 'scaling' not in model_dict:
+        model_dict['scaling'] = 'absmax'
+        model_dict['y_min'] = 0.
+
 def model_from_dict(model_dict):
     """Recreate a Prophet model from a dictionary.
 
@@ -144,6 +151,7 @@ def model_from_dict(model_dict):
     """
     model = Prophet()  # We will overwrite all attributes set in init anyway
     # Simple types
+    _handle_simple_attributes_backwards_compat(model_dict)
     for attribute in SIMPLE_ATTRIBUTES:
         setattr(model, attribute, model_dict[attribute])
     for attribute in PD_SERIES:
