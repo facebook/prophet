@@ -73,6 +73,7 @@ class TestCrossValidation:
         with pytest.raises(ValueError, match="'parallel' should be one"):
             diagnostics.cross_validation(m, horizon="4 days", parallel=object())
 
+    # old
     def test_check_single_cutoff_forecast_func_calls(self, ts_short, monkeypatch, backend):
         m = Prophet(stan_backend=backend)
         m.fit(ts_short)
@@ -101,6 +102,38 @@ class TestCrossValidation:
             _ = diagnostics.cross_validation(m, *args)
             # check single forecast function called expected number of times
             assert n_calls == forecasts
+
+    # new
+    def test_check_extra_output_columns_cross_validation(self, ts_short, monkeypatch, backend):
+        m = Prophet(stan_backend=backend)
+        m.fit(ts_short)
+
+        def mock_predict(df, model, cutoff, horizon, predict_columns):
+            nonlocal n_calls
+            n_calls = n_calls + 1
+            return pd.DataFrame(
+                {
+                    "ds": pd.date_range(start="2012-09-17", periods=3),
+                    "yhat": np.arange(16, 19),
+                    "yhat_lower": np.arange(15, 18),
+                    "yhat_upper": np.arange(17, 20),
+                    "y": np.arange(16.5, 19.5),
+                    "cutoff": [datetime.date(2012, 9, 15)] * 3,
+                    "trend": np.arange(16, 19),
+                }
+            )
+
+        monkeypatch.setattr(diagnostics, "single_cutoff_forecast", mock_predict)
+        # cross validation  with 3 and 7 forecasts
+        for args, forecasts in (
+            (["4 days", "10 days", "115 days"], 3),
+            (["4 days", "4 days", "115 days"], 7),
+        ):
+            n_calls = 0
+            df_cv = diagnostics.cross_validation(m, *args, extra_output_columns=["trend"})
+            # check single forecast function called expected number of times
+            assert n_calls == forecasts
+            assert "trend" in df_cv.columns
 
     @pytest.mark.parametrize("growth", ["logistic", "flat"])
     def test_cross_validation_logistic_or_flat_growth(self, growth, ts_short, backend):
