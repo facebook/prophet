@@ -26,7 +26,7 @@ SIMPLE_ATTRIBUTES = [
     'growth', 'n_changepoints', 'specified_changepoints', 'changepoint_range',
     'yearly_seasonality', 'weekly_seasonality', 'daily_seasonality',
     'seasonality_mode', 'seasonality_prior_scale', 'changepoint_prior_scale',
-    'holiday_mdoe', 'holidays_prior_scale', 'mcmc_samples', 'interval_width', 'uncertainty_samples',
+    'holiday_mode', 'holidays_prior_scale', 'mcmc_samples', 'interval_width', 'uncertainty_samples',
     'y_scale', 'y_min', 'scaling', 'logistic_floor', 'country_holidays', 'component_modes'
 ]
 
