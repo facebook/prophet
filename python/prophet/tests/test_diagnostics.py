@@ -73,7 +73,6 @@ class TestCrossValidation:
         with pytest.raises(ValueError, match="'parallel' should be one"):
             diagnostics.cross_validation(m, horizon="4 days", parallel=object())
 
-    # old
     def test_check_single_cutoff_forecast_func_calls(self, ts_short, monkeypatch, backend):
         m = Prophet(stan_backend=backend)
         m.fit(ts_short)
@@ -103,7 +102,6 @@ class TestCrossValidation:
             # check single forecast function called expected number of times
             assert n_calls == forecasts
 
-    # new
     def test_check_extra_output_columns_cross_validation(self, ts_short, monkeypatch, backend):
         m = Prophet(stan_backend=backend)
         m.fit(ts_short)
