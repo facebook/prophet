@@ -123,12 +123,14 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
     df = model.history.copy().reset_index(drop=True)
     horizon = pd.Timedelta(horizon)
     predict_columns = ['ds', 'yhat']
-    
-    if extra_output_columns is not None:
-        predict_columns.extend([c for c in extra_output_columns if c not in predict_columns])
         
     if model.uncertainty_samples:
         predict_columns.extend(['yhat_lower', 'yhat_upper'])
+
+    if extra_output_columns is not None:
+        if isinstance(extra_output_columns, str):
+            extra_output_columns = [extra_output_columns]
+        predict_columns.extend([c for c in extra_output_columns if c not in predict_columns])
         
     # Identify largest seasonality period
     period_max = 0.
