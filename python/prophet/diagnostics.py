@@ -82,10 +82,6 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         cross validation. If not provided, they are generated as described
         above.
     parallel : {None, 'processes', 'threads', 'dask', object}
-    disable_tqdm: if True it disables the progress bar that would otherwise show up when parallel=None
-    extra_output_columns: List of strings e.g. ['ds', 'yhat', 'trend'].
-        Columns with date and forecast to be returned in output.
-
         How to parallelize the forecast computation. By default no parallelism
         is used.
 
@@ -111,6 +107,10 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
                         for args in zip(*iterables)
                      ]
                      return results
+                     
+    disable_tqdm: if True it disables the progress bar that would otherwise show up when parallel=None
+    extra_output_columns: A String or List of Strings e.g. 'trend' or ['trend'].
+         Additional columns to 'yhat' and 'ds' to be returned in output.
 
     Returns
     -------
