@@ -122,7 +122,6 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
     
     df = model.history.copy().reset_index(drop=True)
     horizon = pd.Timedelta(horizon)
-    
     predict_columns = ['ds', 'yhat']
     
     if extra_output_columns is not None:
