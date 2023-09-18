@@ -549,16 +549,16 @@ class TestProphetSeasonalComponent:
         with pytest.raises(ValueError):
             Prophet(seasonality_mode="batman", stan_backend=backend)
 
-    def test_set_holiday_mode(self, backend):
+    def test_set_holidays_mode(self, backend):
         # Setting attribute
         m = Prophet(stan_backend=backend)
-        assert m.holiday_mode == "additive"
+        assert m.holidays_mode == "additive"
         m = Prophet(seasonality_mode="multiplicative", stan_backend=backend)
-        assert m.holiday_mode == "multiplicative"
-        m = Prophet(holiday_mode="multiplicative", stan_backend=backend)
-        assert m.holiday_mode == "multiplicative"
+        assert m.holidays_mode == "multiplicative"
+        m = Prophet(holidays_mode="multiplicative", stan_backend=backend)
+        assert m.holidays_mode == "multiplicative"
         with pytest.raises(ValueError):
-            Prophet(holiday_mode="batman", stan_backend=backend)
+            Prophet(holidays_mode="batman", stan_backend=backend)
 
     def test_seasonality_modes(self, daily_univariate_ts, backend):
         # Model with holidays, seasonalities, and extra regressors

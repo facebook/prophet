@@ -53,7 +53,6 @@ class Prophet(object):
         optionally can have a column prior_scale specifying the prior scale for
         that holiday.
     seasonality_mode: 'additive' (default) or 'multiplicative'.
-    holiday_mode: 'additive' or 'multiplicative'. Defaults to seasonality_mode.
     seasonality_prior_scale: Parameter modulating the strength of the
         seasonality model. Larger values allow the model to fit larger seasonal
         fluctuations, smaller values dampen the seasonality. Can be specified
@@ -76,6 +75,7 @@ class Prophet(object):
         uncertainty estimation and speed up the calculation.
     stan_backend: str as defined in StanBackendEnum default: None - will try to
         iterate over all available backends and find the working one
+    holidays_mode: 'additive' or 'multiplicative'. Defaults to seasonality_mode.
     """
 
     def __init__(
@@ -89,7 +89,6 @@ class Prophet(object):
             daily_seasonality='auto',
             holidays=None,
             seasonality_mode='additive',
-            holiday_mode=None,
             seasonality_prior_scale=10.0,
             holidays_prior_scale=10.0,
             changepoint_prior_scale=0.05,
@@ -98,6 +97,7 @@ class Prophet(object):
             uncertainty_samples=1000,
             stan_backend=None,
             scaling: str = 'absmax',
+            holidays_mode=None,
     ):
         self.growth = growth
 
@@ -117,9 +117,9 @@ class Prophet(object):
         self.holidays = holidays
 
         self.seasonality_mode = seasonality_mode
-        self.holiday_mode = holiday_mode
-        if holiday_mode is None:
-            self.holiday_mode = self.seasonality_mode
+        self.holidays_mode = holidays_mode
+        if holidays_mode is None:
+            self.holidays_mode = self.seasonality_mode
 
         self.seasonality_prior_scale = float(seasonality_prior_scale)
         self.changepoint_prior_scale = float(changepoint_prior_scale)
@@ -205,9 +205,9 @@ class Prophet(object):
             raise ValueError(
                 'seasonality_mode must be "additive" or "multiplicative"'
             )
-        if self.holiday_mode not in ['additive', 'multiplicative']:
+        if self.holidays_mode not in ['additive', 'multiplicative']:
             raise ValueError(
-                'holiday_mode must be "additive" or "multiplicative"'
+                'holidays_mode must be "additive" or "multiplicative"'
             )
 
     def validate_column_name(self, name, check_holidays=True,
@@ -827,7 +827,7 @@ class Prophet(object):
             )
             seasonal_features.append(features)
             prior_scales.extend(holiday_priors)
-            modes[self.holiday_mode].extend(holiday_names)
+            modes[self.holidays_mode].extend(holiday_names)
 
         # Additional regressors
         for name, props in self.extra_regressors.items():
@@ -892,7 +892,7 @@ class Prophet(object):
             modes[mode].append(mode + '_terms')
             modes[mode].append('extra_regressors_' + mode)
         # After all of the additive/multiplicative groups have been added,
-        modes[self.holiday_mode].append('holidays')
+        modes[self.holidays_mode].append('holidays')
         # Convert to a binary matrix
         component_cols = pd.crosstab(
             components['col'], components['component'],

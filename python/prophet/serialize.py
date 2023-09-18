@@ -26,8 +26,9 @@ SIMPLE_ATTRIBUTES = [
     'growth', 'n_changepoints', 'specified_changepoints', 'changepoint_range',
     'yearly_seasonality', 'weekly_seasonality', 'daily_seasonality',
     'seasonality_mode', 'seasonality_prior_scale', 'changepoint_prior_scale',
-    'holiday_mode', 'holidays_prior_scale', 'mcmc_samples', 'interval_width', 'uncertainty_samples',
-    'y_scale', 'y_min', 'scaling', 'logistic_floor', 'country_holidays', 'component_modes'
+    'holidays_prior_scale', 'mcmc_samples', 'interval_width', 'uncertainty_samples',
+    'y_scale', 'y_min', 'scaling', 'logistic_floor', 'country_holidays', 'component_modes',
+    'holidays_mode'
 ]
 
 PD_SERIES = ['changepoints', 'history_dates', 'train_holiday_names']
@@ -135,9 +136,9 @@ def _handle_simple_attributes_backwards_compat(model_dict):
     if 'scaling' not in model_dict:
         model_dict['scaling'] = 'absmax'
         model_dict['y_min'] = 0.
-    # : handle holiday_mode parameter introduced in #2477
-    if 'holiday_mode' not in model_dict:
-        model_dict['holiday_mode'] = model_dict['seasonality_mode']
+    # : handle holidays_mode parameter introduced in #2477
+    if 'holidays_mode' not in model_dict:
+        model_dict['holidays_mode'] = model_dict['seasonality_mode']
 
 def model_from_dict(model_dict):
     """Recreate a Prophet model from a dictionary.
