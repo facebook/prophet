@@ -101,8 +101,9 @@ class TestCrossValidation:
             _ = diagnostics.cross_validation(m, *args)
             # check single forecast function called expected number of times
             assert n_calls == forecasts
-
-    def test_check_extra_output_columns_cross_validation(self, ts_short, backend):
+    
+    @pytest.mark.parametrize("extra_output_columns", ["trend", ["trend"]])
+    def test_check_extra_output_columns_cross_validation(self, ts_short, backend, extra_output_columns):
         m = Prophet(stan_backend=backend)
         m.fit(ts_short)
         df_cv = diagnostics.cross_validation(
@@ -110,7 +111,7 @@ class TestCrossValidation:
             horizon="1 days",
             period="1 days",
             initial="140 days",
-            extra_output_columns=["trend"]
+            extra_output_columns=extra_output_columns
         )
         assert "trend" in df_cv.columns
 
