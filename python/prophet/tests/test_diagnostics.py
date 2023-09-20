@@ -339,6 +339,7 @@ class TestProphetCopy:
             else:
                 assert (m1.holidays == m2.holidays).values.all()
             assert m1.country_holidays == m2.country_holidays
+            assert m1.holidays_mode == m2.holidays_mode
             assert m1.seasonality_mode == m2.seasonality_mode
             assert m1.seasonality_prior_scale == m2.seasonality_prior_scale
             assert m1.changepoint_prior_scale == m2.changepoint_prior_scale
