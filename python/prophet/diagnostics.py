@@ -58,7 +58,7 @@ def generate_cutoffs(df, horizon, initial, period):
     return list(reversed(result))
 
 
-def cross_validation(model, horizon, period=None, initial=None, parallel=None, cutoffs=None, disable_tqdm=False):
+def cross_validation(model, horizon, period=None, initial=None, parallel=None, cutoffs=None, disable_tqdm=False, extra_output_columns=None):
     """Cross-Validation for time series.
 
     Computes forecasts from historical cutoff points, which user can input.
@@ -82,8 +82,6 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         cross validation. If not provided, they are generated as described
         above.
     parallel : {None, 'processes', 'threads', 'dask', object}
-    disable_tqdm: if True it disables the progress bar that would otherwise show up when parallel=None
-
         How to parallelize the forecast computation. By default no parallelism
         is used.
 
@@ -109,6 +107,10 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
                         for args in zip(*iterables)
                      ]
                      return results
+                     
+    disable_tqdm: if True it disables the progress bar that would otherwise show up when parallel=None
+    extra_output_columns: A String or List of Strings e.g. 'trend' or ['trend'].
+         Additional columns to 'yhat' and 'ds' to be returned in output.
 
     Returns
     -------
@@ -120,10 +122,15 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
     
     df = model.history.copy().reset_index(drop=True)
     horizon = pd.Timedelta(horizon)
-
     predict_columns = ['ds', 'yhat']
+        
     if model.uncertainty_samples:
         predict_columns.extend(['yhat_lower', 'yhat_upper'])
+
+    if extra_output_columns is not None:
+        if isinstance(extra_output_columns, str):
+            extra_output_columns = [extra_output_columns]
+        predict_columns.extend([c for c in extra_output_columns if c not in predict_columns])
         
     # Identify largest seasonality period
     period_max = 0.
