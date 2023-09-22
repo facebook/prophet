@@ -131,7 +131,7 @@ Using `cmdstanpy` with Windows requires a Unix-compatible C compiler such as min
 #### Python
 
 - We now rely solely on `holidays` package for country holidays.
-- Upgraded cmdstan version to 2.31.0, enabling Apple M1 support.
+- Upgraded cmdstan version to 2.33.0, enabling Apple M2 support.
 - Fixed bug with Windows installation caused by long paths.
 
 #### R
