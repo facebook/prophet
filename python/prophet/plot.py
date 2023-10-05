@@ -89,7 +89,13 @@ def plot(
     ax.set_ylabel(ylabel)
     if include_legend:
         ax.legend()
-    fig.tight_layout()
+    # Check if user passed in an ax
+    if ax is None:
+        fig.tight_layout()
+    else:
+        # Check fig.get_tight_layout() before calling fig.tight_layout()
+        if fig.get_tight_layout():
+            fig.tight_layout()
     return fig
 
 
