@@ -63,7 +63,7 @@ def plot(
     -------
     A matplotlib figure.
     """
-    user_provided_ax = False if ax is None else True  # Track whether ax was provided by the user
+    user_provided_ax = False if ax is None else True
     if ax is None:
         fig = plt.figure(facecolor='w', figsize=figsize)
         ax = fig.add_subplot(111)
@@ -90,7 +90,6 @@ def plot(
     ax.set_ylabel(ylabel)
     if include_legend:
         ax.legend()
-    # Only call fig.tight_layout() if the user didn't provide an ax
     if not user_provided_ax:
         fig.tight_layout()
     return fig
