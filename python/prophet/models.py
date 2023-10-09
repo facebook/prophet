@@ -6,7 +6,8 @@
 
 from __future__ import absolute_import, division, print_function
 from abc import abstractmethod, ABC
-from typing import Tuple
+from dataclasses import dataclass
+from typing import Sequence, Tuple
 from collections import OrderedDict
 from enum import Enum
 import importlib_resources
@@ -16,6 +17,36 @@ import logging
 logger = logging.getLogger('prophet.models')
 
 PLATFORM = "win" if platform.platform().startswith("Win") else "unix"
+
+class TrendIndicator(Enum):
+    LINEAR = 0
+    LOGISTIC = 1
+    FLAT = 2
+
+@dataclass
+class ModelInputData:
+    T: int
+    S: int
+    K: int
+    tau: float
+    trend_indicator: int
+    y: Sequence[float]  # length T
+    t: Sequence[float]  # length T
+    cap: Sequence[float]  # length T
+    t_change: Sequence[float]  # length S
+    s_a: Sequence[int]  # length K
+    s_m: Sequence[int]  # length K
+    X: Sequence[Sequence[float]]  # shape (T, K)
+    sigmas: Sequence[float]  # length K
+
+@dataclass
+class ModelParams:
+    k: float
+    m: float
+    delta: Sequence[float]  # length S
+    beta: Sequence[float]  # length K
+    sigma_obs: float
+
 
 class IStanBackend(ABC):
     def __init__(self):
