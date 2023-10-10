@@ -15,15 +15,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ["macos-latest", "ubuntu-latest", "windows-latest"]
+        os: ["macos-latest", "ubuntu-latest", "windows-latest", "macos-latest-xlarge"]
         cibw_arch: ["native"]
         # Build one wheel (ABI = none) using first build spec, then test on all python versions.
-        cibw_build: ["cp37-* cp38-* cp39-* cp310-* cp311-*"]
+        cibw_build: ["cp39-* cp310-* cp311-*"]
         include:
           - os: ubuntu-latest
             cibw_arch: aarch64
             # Each test takes 30 mins, which is too long to run sequentially, so we test once only.
-            cibw_build: "cp37-*"
+            cibw_build: "cp39-*"
       fail-fast: false
 
     steps:
@@ -36,7 +36,14 @@ jobs:
           Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
 
       - name: "Checkout repo"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      # Temporary, until pipx is added to the macOS large runner image
+      - name: "Install pipx"
+        if: matrix.os == 'macos-latest-xlarge'
+        run: |
+          brew install pipx
+          pipx ensurepath
 
       - name: "Restore RTools40"
         if: startsWith(runner.os, 'Windows')
@@ -53,7 +60,7 @@ jobs:
           platforms: arm64
 
       - name: "Build wheels"
-        uses: pypa/cibuildwheel@v2.11.4
+        uses: pypa/cibuildwheel@v2.16.2
         with:
           package-dir: python
         env:
