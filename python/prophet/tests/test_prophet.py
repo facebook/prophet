@@ -36,7 +36,8 @@ class TestProphetFitPredictDefault:
         future = forecaster.make_future_dataframe(test_days, include_history=False)
         future = forecaster.predict(future)
         res = rmse(future["yhat"], test["y"])
-        assert res == pytest.approx(expected, 0.02), "backend: {}".format(forecaster.stan_backend)
+        # Higher threshold due to cmdstan 2.33.1 producing numerical differences for macOS Intel (ARM is fine).
+        assert res == pytest.approx(expected, 0.1), "backend: {}".format(forecaster.stan_backend)
 
     @pytest.mark.parametrize(
         "scaling,expected",

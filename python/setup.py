@@ -20,7 +20,7 @@ from wheel.bdist_wheel import bdist_wheel
 MODEL_DIR = "stan"
 MODEL_TARGET_DIR = os.path.join("prophet", "stan_model")
 
-CMDSTAN_VERSION = "2.31.0"
+CMDSTAN_VERSION = "2.33.1"
 BINARIES_DIR = "bin"
 BINARIES = ["diagnose", "print", "stanc", "stansummary"]
 TBB_PARENT = "stan/lib/stan_math/lib"
