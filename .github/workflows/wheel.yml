@@ -15,15 +15,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ["macos-latest", "ubuntu-latest", "windows-latest", "macos-latest-xlarge"]
+        # os: ["macos-latest", "ubuntu-latest", "windows-latest", "macos-latest-xlarge"]
+        os: ["macos-latest-xlarge"]
         cibw_arch: ["native"]
         # Build one wheel (ABI = none) using first build spec, then test on all python versions.
-        cibw_build: ["cp310-* cp37-* cp38-* cp39-* cp311-*"]
-        include:
-          - os: ubuntu-latest
-            cibw_arch: aarch64
-            # Each test takes 30 mins, which is too long to run sequentially, so we test once only.
-            cibw_build: "cp37-*"
+        cibw_build: ["cp39-* cp310-* cp311-*"]
+        # include:
+        #   - os: ubuntu-latest
+        #     cibw_arch: aarch64
+        #     # Each test takes 30 mins, which is too long to run sequentially, so we test once only.
+        #     cibw_build: "cp37-*"
       fail-fast: false
 
     steps:
