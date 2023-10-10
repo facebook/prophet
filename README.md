@@ -1,3 +1,4 @@
+
 # Prophet: Automatic Forecasting Procedure
 
 ![Build](https://github.com/facebook/prophet/workflows/Build/badge.svg)
@@ -125,6 +126,30 @@ Make sure compilers (gcc, g++, build-essential) and Python development tools (py
 Using `cmdstanpy` with Windows requires a Unix-compatible C compiler such as mingw-gcc. If cmdstanpy is installed first, one can be installed via the `cmdstanpy.install_cxx_toolchain` command.
 
 ## Changelog
+
+### Version 1.1.5 (2023.10.10)
+
+#### Python
+
+- Upgraded cmdstan version to 2.33.1, enabling Apple M2 support.
+- Added pre-built wheels for macOS arm64 architecture (M1, M2 chips)
+- Added argument `scaling` to the `Prophet()` instantiation. Allows `minmax` scaling on `y` instead of
+  `absmax` scaling (dividing by the maximum value). `scaling='absmax'` by default, preserving the
+  behaviour of previous versions.
+- Added argument `holidays_mode` to the `Prophet()` instantiation. Allows holidays regressors to have
+  a different mode than seasonality regressors. `holidays_mode` takes the same value as `seasonality_mode`
+  if not specified, preserving the behaviour of previous versions.
+- Added two methods to the `Prophet` object: `preprocess()` and `calculate_initial_params()`. These
+  do not need to be called and will not change the model fitting process. Their purpose is to provide
+  clarity on the pre-processing steps taken (`y` scaling, creating fourier series, regressor scaling,
+  setting changepoints, etc.) before the data is passed to the stan model.
+- Added argument `extra_output_columns` to `cross_validation()`. The user can specify additional columns
+  from `predict()` to include in the final output alongside `ds` and `yhat`, for example `extra_output_columns=['trend']`.
+- prophet's custom `hdays` module was deprecated last version and is now removed.
+
+#### R
+
+- Updated `holidays` data based on holidays version 0.34.
 
 ### Version 1.1.4 (2023.05.30)
 
