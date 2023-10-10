@@ -36,7 +36,14 @@ jobs:
           Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
 
       - name: "Checkout repo"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      # Temporary, until pipx is added to the macOS large runner image
+      - name: "Install pipx"
+        if: matrix.os == 'macos-latest-xlarge'
+        run: |
+          brew install pipx
+          pipx ensurepath
 
       - name: "Restore RTools40"
         if: startsWith(runner.os, 'Windows')
@@ -53,7 +60,7 @@ jobs:
           platforms: arm64
 
       - name: "Build wheels"
-        uses: pypa/cibuildwheel@v2.11.4
+        uses: pypa/cibuildwheel@v2.16.2
         with:
           package-dir: python
         env:
