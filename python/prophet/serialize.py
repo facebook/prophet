@@ -132,11 +132,11 @@ def model_to_json(model):
 
 def _handle_simple_attributes_backwards_compat(model_dict):
     """Handle backwards compatibility for SIMPLE_ATTRIBUTES."""
-    # prophet<=1.1.4: handle scaling parameters introduced in #2470
+    # prophet<1.1.5: handle scaling parameters introduced in #2470
     if 'scaling' not in model_dict:
         model_dict['scaling'] = 'absmax'
         model_dict['y_min'] = 0.
-    # : handle holidays_mode parameter introduced in #2477
+    # prophet<1.1.5: handle holidays_mode parameter introduced in #2477
     if 'holidays_mode' not in model_dict:
         model_dict['holidays_mode'] = model_dict['seasonality_mode']
 
