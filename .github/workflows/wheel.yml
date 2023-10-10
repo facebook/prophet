@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ["macos-latest", "ubuntu-latest", "windows-latest"]
+        os: ["macos-latest", "ubuntu-latest", "windows-latest", "macos-latest-xlarge"]
         cibw_arch: ["native"]
         # Build one wheel (ABI = none) using first build spec, then test on all python versions.
         cibw_build: ["cp37-* cp38-* cp39-* cp310-* cp311-*"]
