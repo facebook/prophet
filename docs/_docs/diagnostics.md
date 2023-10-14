@@ -20,8 +20,8 @@ subsections:
 Prophet includes functionality for time series cross validation to measure forecast error using historical data. This is done by selecting cutoff points in the history, and for each of them fitting the model using data only up to that cutoff point. We can then compare the forecasted values to the actual values. This figure illustrates a simulated historical forecast on the Peyton Manning dataset, where the model was fit to an initial history of 5 years, and a forecast was made on a one year horizon.
 
 
- 
-![png](/prophet/static/diagnostics_files/diagnostics_4_0.png) 
+
+![png](/prophet/static/diagnostics_files/diagnostics_4_0.png)
 
 
 [The Prophet paper](https://peerj.com/preprints/3190.pdf) gives further description of simulated historical forecasts.
@@ -270,8 +270,8 @@ plot_cross_validation_metric(df.cv, metric = 'mape')
 from prophet.plot import plot_cross_validation_metric
 fig = plot_cross_validation_metric(df_cv, metric='mape')
 ```
- 
-![png](/prophet/static/diagnostics_files/diagnostics_17_0.png) 
+
+![png](/prophet/static/diagnostics_files/diagnostics_17_0.png)
 
 
 The size of the rolling window in the figure can be changed with the optional argument `rolling_window`, which specifies the proportion of forecasts to use in each rolling window. The default is 0.1, corresponding to 10% of rows from `df_cv` included in each window; increasing this will lead to a smoother average curve in the figure. The `initial` period should be long enough to capture all of the components of the model, in particular seasonalities and extra regressors: at least a year for yearly seasonality, at least a week for weekly seasonality, etc.
@@ -454,8 +454,4 @@ The Prophet model has a number of input parameters that one might consider tunin
 
 
 - `uncertainty_samples`: The uncertainty intervals are computed as quantiles from the posterior predictive interval, and the posterior predictive interval is estimated with Monte Carlo sampling. This parameter is the number of samples to use (defaults to 1000). The running time for predict will be linear in this number. Making it smaller will increase the variance (Monte Carlo error) of the uncertainty interval, and making it larger will reduce that variance. So, if the uncertainty estimates seem jagged this could be increased to further smooth them out, but it likely will not need to be changed. As with `interval_width`, this parameter only affects the uncertainty intervals and changing it will not affect in any way the forecast `yhat`; it does not need to be tuned.
-
-
-
-- `stan_backend`: If both pystan and cmdstanpy backends set up, the backend can be specified. The predictions will be the same, this will not be tuned.
 

@@ -99,3 +99,4 @@ fig = m.plot(m.predict(future))
 ```
 
 ![png](/prophet/static/outliers_files/outliers_13_0.png)
+

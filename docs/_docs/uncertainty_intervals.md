@@ -78,3 +78,4 @@ fig = m.plot_components(forecast)
 
 
 You can access the raw posterior predictive samples in Python using the method `m.predictive_samples(future)`, or in R using the function `predictive_samples(m, future)`.
+

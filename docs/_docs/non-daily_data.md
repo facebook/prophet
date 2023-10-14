@@ -95,7 +95,7 @@ The forecast seems quite poor, with much larger fluctuations in the future than 
 
 ```R
 # R
-future2 <- future %>%
+future2 <- future %>% 
   filter(as.numeric(format(ds, "%H")) < 6)
 fcst <- predict(m, future2)
 plot(m, fcst)
@@ -200,3 +200,4 @@ In monthly data, yearly seasonality can also be modeled with binary extra regres
 
 
 Holiday effects are applied to the particular date on which the holiday was specified. With data that has been aggregated to weekly or monthly frequency, holidays that don't fall on the particular date used in the data will be ignored: for example, a Monday holiday in a weekly time series where each data point is on a Sunday. To include holiday effects in the model, the holiday will need to be moved to the date in the history dataframe for which the effect is desired. Note that with weekly or monthly aggregated data, many holiday effects will be well-captured by the yearly seasonality, so added holidays may only be necessary for holidays that occur in different weeks throughout the time series.
+

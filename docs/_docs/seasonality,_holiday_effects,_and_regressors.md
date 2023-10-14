@@ -8,6 +8,8 @@ subsections:
     id: modeling-holidays-and-special-events
   - title: Built-in Country Holidays
     id: built-in-country-holidays
+  - title: Holidays for subdivisions (Python)
+    id: holidays-for-subdivisions-(python)
   - title: Fourier Order for Seasonalities
     id: fourier-order-for-seasonalities
   - title: Specifying Custom Seasonalities
@@ -99,8 +101,8 @@ The holiday effect can be seen in the `forecast` dataframe:
 
 ```R
 # R
-forecast %>%
-  select(ds, playoff, superbowl) %>%
+forecast %>% 
+  select(ds, playoff, superbowl) %>% 
   filter(abs(playoff + superbowl) > 0) %>%
   tail(10)
 ```
@@ -248,14 +250,14 @@ You can see which holidays were included by looking at the `train_holiday_names`
 # R
 m$train.holiday.names
 ```
-     [1] "playoff"                     "superbowl"
-     [3] "New Year's Day"              "Martin Luther King Jr. Day"
-     [5] "Washington's Birthday"       "Memorial Day"
-     [7] "Independence Day"            "Labor Day"
-     [9] "Columbus Day"                "Veterans Day"
-    [11] "Veterans Day (Observed)"     "Thanksgiving"
+     [1] "playoff"                     "superbowl"                  
+     [3] "New Year's Day"              "Martin Luther King Jr. Day" 
+     [5] "Washington's Birthday"       "Memorial Day"               
+     [7] "Independence Day"            "Labor Day"                  
+     [9] "Columbus Day"                "Veterans Day"               
+    [11] "Veterans Day (Observed)"     "Thanksgiving"               
     [13] "Christmas Day"               "Independence Day (Observed)"
-    [15] "Christmas Day (Observed)"    "New Year's Day (Observed)"
+    [15] "Christmas Day (Observed)"    "New Year's Day (Observed)"  
 
 
 ```python
@@ -285,7 +287,7 @@ m.train_holiday_names
 
 
 
-The holidays for each country are provided by the `holidays` package in Python. A list of available countries, and the country name to use, is available on their page: https://github.com/dr-prodigy/python-holidays. In addition to those countries, Prophet includes holidays for these countries: Brazil (BR), Indonesia (ID), India (IN), Malaysia (MY), Vietnam (VN), Thailand (TH), Philippines (PH), Pakistan (PK), Bangladesh (BD), Egypt (EG), China (CN), and Russian (RU), Korea (KR), Belarus (BY), and United Arab Emirates (AE).
+The holidays for each country are provided by the `holidays` package in Python. A list of available countries, and the country name to use, is available on their page: https://github.com/vacanza/python-holidays/.
 
 
 
@@ -310,6 +312,112 @@ fig = m.plot_components(forecast)
 ![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_24_0.png)
 
 
+<a id="holidays-for-subdivisions-(python)"> </a>
+
+#### Holidays for subdivisions (Python)
+
+
+
+We can use the utility function `make_holidays_df` to easily create custom holidays DataFrames, e.g. for certain states, using data from the [holidays](https://pypi.org/project/holidays/) package. This can be passed directly to the `Prophet()` constructor.
+
+
+```python
+# Python
+from prophet.make_holidays import make_holidays_df
+
+nsw_holidays = make_holidays_df(
+    year_list=[2019 + i for i in range(10)], country='AU', province='NSW'
+)
+nsw_holidays.head(n=10)
+```
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>ds</th>
+      <th>holiday</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2019-01-26</td>
+      <td>Australia Day</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2019-01-28</td>
+      <td>Australia Day (Observed)</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2019-04-25</td>
+      <td>Anzac Day</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2019-12-25</td>
+      <td>Christmas Day</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2019-12-26</td>
+      <td>Boxing Day</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2019-04-20</td>
+      <td>Easter Saturday</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2019-04-21</td>
+      <td>Easter Sunday</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2019-10-07</td>
+      <td>Labour Day</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>2019-06-10</td>
+      <td>Queen's Birthday</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>2019-08-05</td>
+      <td>Bank Holiday</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+```python
+# Python
+from prophet import Prophet
+
+m_nsw = Prophet(holidays=nsw_holidays)
+```
 <a id="fourier-order-for-seasonalities"> </a>
 
 ### Fourier Order for Seasonalities
@@ -331,7 +439,7 @@ m = Prophet().fit(df)
 a = plot_yearly(m)
 ```
 
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_27_0.png)
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_30_0.png)
 
 
 The default values are often appropriate, but they can be increased when the seasonality needs to fit higher-frequency changes, and generally be less smooth. The Fourier order can be specified for each built-in seasonality when instantiating the model, here it is increased to 20:
@@ -349,7 +457,7 @@ m = Prophet(yearly_seasonality=20).fit(df)
 a = plot_yearly(m)
 ```
 
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_30_0.png)
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_33_0.png)
 
 
 Increasing the number of Fourier terms allows the seasonality to fit faster changing cycles, but can also lead to overfitting: N Fourier terms corresponds to 2N variables used for modeling the cycle
@@ -389,7 +497,7 @@ forecast = m.fit(df).predict(future)
 fig = m.plot_components(forecast)
 ```
 
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_33_0.png)
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_36_0.png)
 
 
 <a id="seasonalities-that-depend-on-other-factors"> </a>
@@ -453,7 +561,7 @@ forecast = m.fit(df).predict(future)
 fig = m.plot_components(forecast)
 ```
 
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_39_0.png)
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_42_0.png)
 
 
 Both of the seasonalities now show up in the components plots above. We can see that during the on-season when games are played every Sunday, there are large increases on Sunday and Monday that are completely absent during the off-season.
@@ -470,8 +578,8 @@ If you find that the holidays are overfitting, you can adjust their prior scale 
 # R
 m <- prophet(df, holidays = holidays, holidays.prior.scale = 0.05)
 forecast <- predict(m, future)
-forecast %>%
-  select(ds, playoff, superbowl) %>%
+forecast %>% 
+  select(ds, playoff, superbowl) %>% 
   filter(abs(playoff + superbowl) > 0) %>%
   tail(10)
 ```
@@ -641,7 +749,7 @@ forecast = m.predict(future)
 fig = m.plot_components(forecast)
 ```
 
-![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_49_0.png)
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_52_0.png)
 
 
 NFL Sundays could also have been handled using the "holidays" interface described above, by creating a list of past and future NFL Sundays. The `add_regressor` function provides a more general interface for defining extra linear regressors, and in particular does not require that the regressor be a binary indicator. Another time series could be used as a regressor, although its future values would have to be known.
@@ -656,7 +764,11 @@ The `add_regressor` function has optional arguments for specifying the prior sca
 
 
 
-The extra regressor must be known for both the history and for future dates. It thus must either be something that has known future values (such as `nfl_sunday`), or something that has separately been forecasted elsewhere. The weather regressors used in the notebook linked above is a good example of an extra regressor that has forecasts that can be used for future values. One can also use as a regressor another time series that has been forecasted with a time series model, such as Prophet. For instance, if `r(t)` is included as a regressor for `y(t)`, Prophet can be used to forecast `r(t)` and then that forecast can be plugged in as the future values when forecasting `y(t)`. A note of caution around this approach: This will probably not be useful unless `r(t)` is somehow easier to forecast then `y(t)`. This is because error in the forecast of `r(t)` will produce error in the forecast of `y(t)`. One setting where this can be useful is in hierarchical time series, where there is top-level forecast that has higher signal-to-noise and is thus easier to forecast. Its forecast can be included in the forecast for each lower-level series.
+The extra regressor must be known for both the history and for future dates. It thus must either be something that has known future values (such as `nfl_sunday`), or something that has separately been forecasted elsewhere. The weather regressors used in the notebook linked above is a good example of an extra regressor that has forecasts that can be used for future values. 
+
+
+
+One can also use as a regressor another time series that has been forecasted with a time series model, such as Prophet. For instance, if `r(t)` is included as a regressor for `y(t)`, Prophet can be used to forecast `r(t)` and then that forecast can be plugged in as the future values when forecasting `y(t)`. A note of caution around this approach: This will probably not be useful unless `r(t)` is somehow easier to forecast than `y(t)`. This is because error in the forecast of `r(t)` will produce error in the forecast of `y(t)`. One setting where this can be useful is in hierarchical time series, where there is top-level forecast that has higher signal-to-noise and is thus easier to forecast. Its forecast can be included in the forecast for each lower-level series.
 
 
 
@@ -670,4 +782,5 @@ Extra regressors are put in the linear component of the model, so the underlying
 
 
 
-To extract the beta coefficients of the extra regressors, use the utility function `regressor_coefficients` (`from prophet.utilities import regressor_coefficients` in Python, `prophet::regressor_coefficients` in R) on the fitted model. The estimated beta coefficient for each regressor roughly represents the increase in prediction value for a unit increase in the regressor value (note that the coefficients returned are always on the scale of the original data). If `mcmc_samples` is specified, a credible interval for each coefficient is also returned, which can help identify whether each regressor is "statistically significant".
+To extract the beta coefficients of the extra regressors, use the utility function `regressor_coefficients` (`from prophet.utilities import regressor_coefficients` in Python, `prophet::regressor_coefficients` in R) on the fitted model. The estimated beta coefficient for each regressor roughly represents the increase in prediction value for a unit increase in the regressor value (note that the coefficients returned are always on the scale of the original data). If `mcmc_samples` is specified, a credible interval for each coefficient is also returned, which can help identify whether the regressor is meaningful to the model (a credible interval that includes the 0 value suggests the regressor is not meaningful).
+

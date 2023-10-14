@@ -4,14 +4,32 @@ docid: "handling_shocks"
 title: "Handling Shocks"
 permalink: /docs/handling_shocks.html
 subsections:
+  - title: Case Study - Pedestrian Activity
+    id: case-study---pedestrian-activity
+  - title: Default model without any adjustments
+    id: default-model-without-any-adjustments
   - title: Treating COVID-19 lockdowns as a one-off holidays
     id: treating-covid-19-lockdowns-as-a-one-off-holidays
   - title: Sense checking the trend
     id: sense-checking-the-trend
   - title: Changes in seasonality between pre- and post-COVID
     id: changes-in-seasonality-between-pre--and-post-covid
+  - title: Further reading
+    id: further-reading
 ---
+```python
+# Python
+%matplotlib inline
+from prophet import Prophet
+import pandas as pd
+from matplotlib import pyplot as plt
+import logging
+logging.getLogger('prophet').setLevel(logging.ERROR)
+import warnings
+warnings.filterwarnings("ignore")
 
+plt.rcParams['figure.figsize'] = 9, 6
+```
 As a result of the lockdowns caused by the COVID-19 pandemic, many time series experienced "shocks" during 2020, e.g. spikes in media consumption (Netflix, YouTube), e-commerce transactions (Amazon, eBay), whilst attendance to in-person events declined dramatically.
 
 
@@ -39,7 +57,7 @@ In this page we'll explore some strategies for capturing these effects using Pro
 
 
 
-For this case study we'll use [Pedestrian Sensor data from the City of Melbourne](https://data.melbourne.vic.gov.au/Transport/Pedestrian-Counting-System-Monthly-counts-per-hour/b2ak-trbp). This data measures foot traffic from sensors in various places in the central business district, and we've chosen one sensor (`Sensor_ID = 4`) and aggregated the values to a daily grain.
+For this case study we'll use [Pedestrian Sensor data from the City of Melbourne](https://data.melbourne.vic.gov.au/Transport/Pedestrian-Counting-System-Monthly-counts-per-hour/b2ak-trbp). This data measures foot traffic from sensors in various places in the central business district, and we've chosen one sensor (`Sensor_ID = 4`) and aggregated the values to a daily grain. 
 
 
 
@@ -87,6 +105,9 @@ m = m.fit(df)
 future = m.make_future_dataframe(periods=366)
 forecast = m.predict(future)
 ```
+    02:53:41 - cmdstanpy - INFO - Chain [1] start processing
+    02:53:41 - cmdstanpy - INFO - Chain [1] done processing
+
 
 ```python
 # Python
@@ -106,7 +127,7 @@ m.plot_components(forecast);
 ![png](/prophet/static/handling_shocks_files/handling_shocks_9_0.png)
 
 
-The model seems to fit reasonably to past data, but notice how we're capturing the dips, and the spikes after the dips, as a part of the trend component.
+The model seems to fit reasonably to past data, but notice how we're capturing the dips, and the spikes after the dips, as a part of the trend component. 
 
 
 
@@ -218,6 +239,9 @@ m2 = m2.fit(df)
 future2 = m2.make_future_dataframe(periods=366)
 forecast2 = m2.predict(future2)
 ```
+    02:53:44 - cmdstanpy - INFO - Chain [1] start processing
+    02:53:45 - cmdstanpy - INFO - Chain [1] done processing
+
 
 ```python
 # Python
@@ -276,7 +300,7 @@ a = add_changepoints_to_plot(fig.gca(), m2, forecast2)
 ![png](/prophet/static/handling_shocks_files/handling_shocks_18_0.png)
 
 
-The detected changepoints look reasonable, and the future trend tracks the latest upwards trend in activity, but not to the extent of late 2020. This seems suitable for a best guess of future activity.
+The detected changepoints look reasonable, and the future trend tracks the latest upwards trend in activity, but not to the extent of late 2020. This seems suitable for a best guess of future activity. 
 
 
 
@@ -287,7 +311,7 @@ We can see what the forecast would look like if we wanted to emphasize COVID pat
 # Python
 m3_changepoints = (
     # 10 potential changepoints in 2.5 years
-    pd.date_range('2017-06-02', '2020-01-01', periods=10).date.tolist() +
+    pd.date_range('2017-06-02', '2020-01-01', periods=10).date.tolist() + 
     # 15 potential changepoints in 1 year 2 months
     pd.date_range('2020-02-01', '2021-04-01', periods=15).date.tolist()
 )
@@ -299,6 +323,9 @@ m3 = Prophet(holidays=lockdowns, changepoints=m3_changepoints, changepoint_prior
 m3 = m3.fit(df)
 forecast3 = m3.predict(future2)
 ```
+    02:53:49 - cmdstanpy - INFO - Chain [1] start processing
+    02:53:52 - cmdstanpy - INFO - Chain [1] done processing
+
 
 ```python
 # Python
@@ -365,6 +392,9 @@ m4.add_seasonality(
 # Python
 m4 = m4.fit(df2)
 ```
+    02:53:55 - cmdstanpy - INFO - Chain [1] start processing
+    02:53:56 - cmdstanpy - INFO - Chain [1] done processing
+
 
 We also need to create the `pre_covid` and `post_covid` flags in the future dataframe. This is so that Prophet can apply the correct weekly seasonality parameters to each future date.
 
@@ -417,3 +447,9 @@ A lot of the content in this page was inspired by this [GitHub discussion](https
 
 
 Overall though it's difficult to be confident in our forecasts in these environments when rules are constantly changing and outbreaks occur randomly. In this scenario it's more important to constantly re-train / re-evaluate our models and clearly communicate the increased uncertainty in forecasts.
+
+
+```python
+# Python
+
+```

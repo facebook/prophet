@@ -53,7 +53,7 @@ The json file will be portable across systems, and deserialization is backwards 
 
 
 
-For time series that exhibit strong seasonality patterns rather than trend changes, it may be useful to force the trend growth rate to be flat. This can be achieved simply by passing `growth=flat` when creating the model:
+For time series that exhibit strong seasonality patterns rather than trend changes, or when we want to rely on the pattern of exogenous regressors (e.g. for causal inference with time series), it may be useful to force the trend growth rate to be flat. This can be achieved simply by passing `growth=flat` when creating the model:
 
 
 ```R
@@ -110,7 +110,7 @@ def warm_start_params(m):
             res[pname] = np.mean(m.params[pname], axis=0)
     return res
 
-df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
+df = pd.read_csv('../examples/example_wp_log_peyton_manning.csv')
 df1 = df.loc[df['ds'] < '2016-01-19', :]  # All data except the last day
 m1 = Prophet().fit(df1) # A model fit to all data except the last day
 
@@ -133,8 +133,21 @@ There are few caveats that should be kept in mind when considering warm-starting
 
 ### External references
 
+
+
+As we discuss in our [2023 blog post on the state of Prophet](https://medium.com/@cuongduong_35162/facebook-prophet-in-2023-and-beyond-c5086151c138), we have no plans to further develop the underlying Prophet model. If you're looking for state-of-the-art forecasting accuracy, we recommend the following libraries:
+
+
+
+* [`statsforecast`](https://github.com/Nixtla/statsforecast), and other packages from the Nixtla group such as [`hierarchicalforecast`](https://github.com/Nixtla/hierarchicalforecast) and [`neuralforecast`](https://github.com/Nixtla/neuralforecast).
+
+* [`NeuralProphet`](https://neuralprophet.com/), a Prophet-style model implemented in PyTorch, to be more adaptable and extensible.
+
+
+
 These github repositories provide examples of building on top of Prophet in ways that may be of broad interest:
+
+
 
 * [forecastr](https://github.com/garethcull/forecastr): A web app that provides a UI for Prophet.
 
-* [NeuralProphet](https://github.com/ourownstory/neural_prophet): A Prophet-style model implemented in pytorch, to be more adaptable and extensible.

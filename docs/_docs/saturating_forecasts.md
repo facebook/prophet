@@ -24,11 +24,11 @@ Prophet allows you to make forecasts using a [logistic growth](https://en.wikipe
 
 ```R
 # R
-df <- read.csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_R.csv')
+df <- read.csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
 ```
 ```python
 # Python
-df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_R.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
 ```
 We must specify the carrying capacity in a column `cap`. Here we will assume a particular value, but this would usually be set using data or expertise about the market size.
 
@@ -119,3 +119,4 @@ fig = m.plot(fcst)
 
 
 To use a logistic growth trend with a saturating minimum, a maximum capacity must also be specified.
+
