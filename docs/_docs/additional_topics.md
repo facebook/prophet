@@ -70,7 +70,7 @@ m <- prophet(df, growth='flat')
 # Python
 m = Prophet(growth='flat')
 ```
-Below is a comparison of counterfactual forecasting under two methods: using linear growth for a single time series, versus flat growth with an exogenous regressor.
+Below is a comparison of counterfactual forecasting with exogenous regressors using linear versus flat growth.
 
 
 ```python
@@ -87,7 +87,10 @@ target = "location_41"
 cutoff = pd.to_datetime("2023-04-17 00:00:00")
 
 df = (
-    pd.read_csv("../examples/example_pedestrians_multivariate.csv", parse_dates=["ds"])
+    pd.read_csv(
+        "https://raw.githubusercontent.com/facebook/prophet/main/examples/example_pedestrians_multivariate.csv", 
+        parse_dates=["ds"]
+    )
     .rename(columns={target: "y"})
 )
 train = df.loc[df["ds"] < cutoff]
@@ -153,15 +156,15 @@ ax.legend();
 ![png](/prophet/static/additional_topics_files/additional_topics_18_0.png)
 
 
-In this example, trends in the target sensor location can be mostly explained by the exogenous regressor (a nearby sensor). The model with linear growth assumes a growing trend and this leads to larger and larger over-predictions in the test period, while the model with the flat trend is mostly driven by trends in the exogenous regressor, which results in a sizeable MAPE improvement.
+In this example, the target sensor values can be mostly explained by the exogenous regressor (a nearby sensor). The model with linear growth assumes an increasing trend and this leads to larger and larger over-predictions in the test period, while the flat growth model mostly follows movements in the exogenous regressor and this results in a sizeable MAPE improvement.
 
 
 
-Note that forecasting with exogenous regressors is only effective when we can be confident in the future values of the regressor -- the example above is most relevant to time series causal inference, where we want to forecast what a time series would have looked like in the past, and hence the exogenous regressor values are known.
+Note that forecasting with exogenous regressors is only effective when we can be confident in the future values of the regressor. The example above is relevant to causal inference using time series, where we want to understand what `y` would have looked like for a past time period, and hence the exogenous regressor values are known.
 
 
 
-If the flat trend is used on a time series that doesn't have a constant trend, without exogenous regressors, any trend will be fit with the noise term and so there will be high predictive uncertainty in the forecast.
+In other cases -- where we don't have exogenous regressors or have to predict their future values -- if flat growth is used on a time series that doesn't have a constant trend, any trend will be fit with the noise term and so there will be high predictive uncertainty in the forecast.
 
 
 <a id="custom-trends"> </a>
@@ -212,7 +215,7 @@ def warm_start_params(m):
             res[pname] = np.mean(m.params[pname], axis=0)
     return res
 
-df = pd.read_csv('../examples/example_wp_log_peyton_manning.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
 df1 = df.loc[df['ds'] < '2016-01-19', :]  # All data except the last day
 m1 = Prophet().fit(df1) # A model fit to all data except the last day
 
@@ -242,38 +245,27 @@ Before model fitting, Prophet scales `y` by dividing by the maximum value in the
 
 ```python
 # Python
-large_y = pd.read_csv("https://raw.githubusercontent.com/facebook/prophet/main/python/prophet/tests/data3.csv", parse_dates=["ds"])
+large_y = pd.read_csv(
+    "https://raw.githubusercontent.com/facebook/prophet/main/python/prophet/tests/data3.csv", 
+    parse_dates=["ds"]
+)
 ```
 ```python
 # Python
 m1 = Prophet(scaling="absmax")
-m1.fit(large_y)
+m1 = m1.fit(large_y)
 ```
-    01:42:10 - cmdstanpy - INFO - Chain [1] start processing
-    01:42:10 - cmdstanpy - INFO - Chain [1] done processing
-
-
-
-
-
-    <prophet.forecaster.Prophet at 0x7f253353bee0>
-
+    08:11:23 - cmdstanpy - INFO - Chain [1] start processing
+    08:11:23 - cmdstanpy - INFO - Chain [1] done processing
 
 
 ```python
 # Python
 m2 = Prophet(scaling="minmax")
-m2.fit(large_y)
+m2 = m2.fit(large_y)
 ```
-    01:42:19 - cmdstanpy - INFO - Chain [1] start processing
-    01:42:19 - cmdstanpy - INFO - Chain [1] done processing
-
-
-
-
-
-    <prophet.forecaster.Prophet at 0x7f253352d910>
-
+    08:11:29 - cmdstanpy - INFO - Chain [1] start processing
+    08:11:29 - cmdstanpy - INFO - Chain [1] done processing
 
 
 ```python
@@ -298,12 +290,12 @@ m2.plot(m2.predict(large_y));
 
 
 
-For debugging, it's useful to understand how the raw data has been transformed before being passed to the underlying generalized additive model. We can call the `.preprocess()` method to see the data that will be passed to the stan fit routine, and `.calculate_init_params()` to see how the parameters are initialized in the fit routine.
+For debugging, it's useful to understand how the raw data has been transformed before being passed to the stan fit routine. We can call the `.preprocess()` method to see all the inputs to stan, and `.calculate_init_params()` to see how the model parameters will be initialized.
 
 
 ```python
 # Python
-df = pd.read_csv('../examples/example_wp_log_peyton_manning.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
 m = Prophet()
 transformed = m.preprocess(df)
 ```
