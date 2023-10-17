@@ -12,8 +12,8 @@ subsections:
     id: custom-trends
   - title: Updating fitted models
     id: updating-fitted-models
-  - title: 'minmax' scaling (new in 1.1.5)
-    id: 'minmax'-scaling-(new-in-1.1.5)
+  - title: minmax scaling (new in 1.1.5)
+    id: minmax-scaling-(new-in-1.1.5)
   - title: Inspecting transformed data (new in 1.1.5)
     id: inspecting-transformed-data-(new-in-1.1.5)
   - title: External references
@@ -231,9 +231,9 @@ As can be seen, the parameters from the previous model are passed in to the fitt
 There are few caveats that should be kept in mind when considering warm-starting. First, warm-starting may work well for small updates to the data (like the addition of one day in the example above) but can be worse than fitting from scratch if there are large changes to the data (i.e., a lot of days have been added). This is because when a large amount of history is added, the location of the changepoints will be very different between the two models, and so the parameters from the previous model may actually produce a bad trend initialization. Second, as a detail, the number of changepoints need to be consistent from one model to the next or else an error will be raised because the changepoint prior parameter `delta` will be the wrong size.
 
 
-<a id="'minmax'-scaling-(new-in-1.1.5)"> </a>
+<a id="minmax-scaling-(new-in-1.1.5)"> </a>
 
-### 'minmax' scaling (new in 1.1.5)
+### minmax scaling (new in 1.1.5)
 
 
 
