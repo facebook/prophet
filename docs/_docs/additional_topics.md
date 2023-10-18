@@ -240,7 +240,7 @@ There are few caveats that should be kept in mind when considering warm-starting
 
 
 
-Before model fitting, Prophet scales `y` by dividing by the maximum value in the history. For datasets with very large `y` values, the scaled `y` values may be compressed to a very small range (i.e. `[0.99999... - 1.0]`), which causes a bad fit. This can be fixed by setting `scaling='absmax'` in the Prophet constructor.
+Before model fitting, Prophet scales `y` by dividing by the maximum value in the history. For datasets with very large `y` values, the scaled `y` values may be compressed to a very small range (i.e. `[0.99999... - 1.0]`), which causes a bad fit. This can be fixed by setting `scaling='minmax'` in the Prophet constructor.
 
 
 ```python
