@@ -903,7 +903,7 @@ class Prophet(object):
             if name not in component_cols:
                 component_cols[name] = 0
         # Remove the placeholder
-        component_cols.drop('zeros', axis=1, inplace=True, errors='ignore')
+        components_cols = component_cols.drop('zeros', axis=1, errors='ignore')
         # Validation
         if (max(component_cols['additive_terms']
             + component_cols['multiplicative_terms']) > 1):
