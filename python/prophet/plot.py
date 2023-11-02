@@ -69,8 +69,8 @@ def plot(
         ax = fig.add_subplot(111)
     else:
         fig = ax.get_figure()
-    fcst_t = fcst['ds'].dt.to_pydatetime()
-    ax.plot(m.history['ds'].dt.to_pydatetime(), m.history['y'], 'k.',
+    fcst_t = fcst['ds']
+    ax.plot(m.history['ds'], m.history['y'], 'k.',
             label='Observed data points')
     ax.plot(fcst_t, fcst['yhat'], ls='-', c='#0072B2', label='Forecast')
     if 'cap' in fcst and plot_cap:
