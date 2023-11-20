@@ -244,6 +244,16 @@ class TestProphetDataPrep:
         assert len(future) == 3
         assert np.all(future["ds"].values == correct.values)
 
+    def test_make_future_dataframe_include_history(self, daily_univariate_ts, backend):
+        train = daily_univariate_ts.head(468 // 2).copy()
+        #cover history with NAs
+        train.loc[train.sample(10).index, "y"] = np.nan
+        
+        forecaster = Prophet(stan_backend=backend)
+        forecaster.fit(train)
+        future = forecaster.make_future_dataframe(periods=3, freq="D", include_history=True)
+
+        assert len(future) == train.shape[0] + 3
 
 class TestProphetTrendComponent:
     def test_invalid_growth_input(self, backend):
