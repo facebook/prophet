@@ -903,7 +903,7 @@ class Prophet(object):
             if name not in component_cols:
                 component_cols[name] = 0
         # Remove the placeholder
-        component_cols.drop('zeros', axis=1, inplace=True, errors='ignore')
+        components_cols = component_cols.drop('zeros', axis=1, errors='ignore')
         # Validation
         if (max(component_cols['additive_terms']
             + component_cols['multiplicative_terms']) > 1):
@@ -1828,7 +1828,7 @@ class Prophet(object):
         return fn(a, *args, **kwargs)
 
     def make_future_dataframe(self, periods, freq='D', include_history=True):
-        """Simulate the trend using the extrapolated generative model.
+        """Create a future dataframe for forecasting.
 
         Parameters
         ----------
@@ -1853,10 +1853,9 @@ class Prophet(object):
         last_date = self.history_dates.max()
         dates = pd.date_range(
             start=last_date,
-            periods=periods + 1,  # An extra in case we include start
+            periods=periods + 1,
             freq=freq)
-        dates = dates[dates > last_date]  # Drop start if equals last_date
-        dates = dates[:periods]  # Return correct number of periods
+        dates = dates[dates > last_date]
 
         if include_history:
             dates = np.concatenate((np.array(self.history_dates), dates))
