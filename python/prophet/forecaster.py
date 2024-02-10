@@ -1854,8 +1854,9 @@ class Prophet(object):
         dates = pd.date_range(
             start=last_date,
             periods=periods + 1,
-            freq=freq)[1:]
-        
+            freq=freq)
+        dates = dates[dates > last_date]
+
         if include_history:
             dates = np.concatenate((np.array(self.history_dates), dates))
 
