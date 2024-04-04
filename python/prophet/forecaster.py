@@ -320,7 +320,7 @@ class Prophet(object):
 
         if df.index.name == 'ds':
             df.index.name = None
-        df = df.sort_values('ds')
+        df = df.sort_values('ds', kind='mergesort')
         df = df.reset_index(drop=True)
 
         self.initialize_scales(initialize_scales, df)
