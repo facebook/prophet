@@ -234,7 +234,9 @@ class TestPerformanceMetrics:
             metrics=["coverage", "mse"],
         )
         assert set(df_horizon.columns) == {"coverage", "mse", "horizon"}
-        # Handle zero y and yhat and skip MAPE
+        # Skip MAPE
+        df_cv.loc[0, "y"] = 0.0
+        # Handle zero y and yhat
         df_cv["y"] = 0.0
         df_cv["yhat"] = 0.0
         df_horizon = diagnostics.performance_metrics(
