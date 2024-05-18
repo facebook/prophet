@@ -15,7 +15,7 @@ dyplot.prophet(x, fcst, uncertainty = TRUE, ...)
 should be plotted, which will only be done if x$uncertainty.samples > 0. Must be
 present in fcst as yhat_lower and yhat_upper.}
 
-\item{...}{additional arguments passed to dygraph::dygraph}
+\item{...}{additional arguments passed to dygraphs::dygraph}
 }
 \value{
 A dygraph plot.
