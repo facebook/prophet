@@ -630,6 +630,7 @@ def smape(df, w):
     Dataframe with columns horizon and smape.
     """
     sape = np.abs(df['y'] - df['yhat']) / ((np.abs(df['y']) + np.abs(df['yhat'])) / 2)
+    sape = sape.fillna(0)
     if w < 0:
         return pd.DataFrame({'horizon': df['horizon'], 'smape': sape})
     return rolling_mean_by_h(

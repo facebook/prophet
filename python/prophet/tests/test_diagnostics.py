@@ -241,6 +241,13 @@ class TestPerformanceMetrics:
             metrics=["coverage", "mape"],
         )
         assert set(df_horizon.columns) == {"coverage", "horizon"}
+        # Handle zero y and yhat
+        df_cv["y"] = 0.0
+        df_cv["yhat"] = 0.0
+        df_horizon = diagnostics.performance_metrics(
+            df_cv,
+        )
+        assert set(df_horizon.columns) == {"coverage", "horizon", "mae", "mdape", "mse", "rmse", "smape"}
         df_horizon = diagnostics.performance_metrics(
             df_cv,
             metrics=["mape"],
