@@ -456,7 +456,7 @@ class Prophet(object):
         dates: pd.Series,
         period: Union[int, float],
         series_order: int,
-    ) -> NDArray[np.float_]:
+    ) -> NDArray[np.float64]:
         """Provides Fourier series components with the specified frequency
         and order.
 
