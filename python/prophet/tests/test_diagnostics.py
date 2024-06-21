@@ -348,9 +348,9 @@ class TestProphetCopy:
                 assert m1.changepoints == m2.changepoints
             else:
                 assert m1.changepoints.equals(m2.changepoints)
-            assert False == m2.yearly_seasonality
-            assert False == m2.weekly_seasonality
-            assert False == m2.daily_seasonality
+            assert m2.yearly_seasonality is False
+            assert m2.weekly_seasonality is False
+            assert m2.daily_seasonality is False
             assert m1.yearly_seasonality == ("yearly" in m2.seasonalities)
             assert m1.weekly_seasonality == ("weekly" in m2.seasonalities)
             assert m1.daily_seasonality == ("daily" in m2.seasonalities)
