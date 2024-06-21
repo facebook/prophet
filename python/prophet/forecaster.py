@@ -1448,6 +1448,12 @@ class Prophet(object):
                 sim_values[key], lower_p, axis=1)
             series['{}_upper'.format(key)] = self.percentile(
                 sim_values[key], upper_p, axis=1)
+ 
+        percentiles = np.arange(5, 100, 5)
+        for key in ['yhat', 'trend']:
+            for p in percentiles:
+                series[f'{key}_{p}_%ile'] = self.percentile(
+                    sim_values[key], p, axis=1)
 
         return pd.DataFrame(series)
 
