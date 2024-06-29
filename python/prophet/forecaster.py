@@ -320,7 +320,7 @@ class Prophet(object):
 
         if df.index.name == 'ds':
             df.index.name = None
-        df = df.sort_values('ds', kind='mergesort')
+        df = df.sort_values('ds')
         df = df.reset_index(drop=True)
 
         self.initialize_scales(initialize_scales, df)
@@ -456,7 +456,7 @@ class Prophet(object):
         dates: pd.Series,
         period: Union[int, float],
         series_order: int,
-    ) -> NDArray[np.float_]:
+    ) -> NDArray[np.float64]:
         """Provides Fourier series components with the specified frequency
         and order.
 
@@ -1130,7 +1130,7 @@ class Prophet(object):
         history = df[df['y'].notnull()].copy()
         if history.shape[0] < 2:
             raise ValueError('Dataframe has less than 2 non-NaN rows.')
-        self.history_dates = pd.to_datetime(pd.Series(df['ds'].unique(), name='ds')).sort_values()
+        self.history_dates = pd.to_datetime(pd.Series(history['ds'].unique(), name='ds')).sort_values()
 
         self.history = self.setup_dataframe(history, initialize_scales=True)
         self.set_auto_seasonalities()
