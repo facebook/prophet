@@ -225,7 +225,7 @@ def plot_forecast_component(
     if not ax:
         fig = plt.figure(facecolor='w', figsize=figsize)
         ax = fig.add_subplot(111)
-    fcst_t = fcst['ds'].dt.to_pydatetime()
+    fcst_t = fcst['ds']
     artists += ax.plot(fcst_t, fcst[name], ls='-', c='#0072B2')
     if 'cap' in fcst and plot_cap:
         artists += ax.plot(fcst_t, fcst['cap'], ls='--', c='k')
@@ -348,10 +348,10 @@ def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6), n
     df_y = seasonality_plot_df(m, days)
     seas = m.predict_seasonal_components(df_y)
     artists += ax.plot(
-        df_y['ds'].dt.to_pydatetime(), seas[name], ls='-', c='#0072B2')
+        df_y['ds'], seas[name], ls='-', c='#0072B2')
     if uncertainty and m.uncertainty_samples:
         artists += [ax.fill_between(
-            df_y['ds'].dt.to_pydatetime(), seas[name + '_lower'],
+            df_y['ds'], seas[name + '_lower'],
             seas[name + '_upper'], color='#0072B2', alpha=0.2)]
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
     months = MonthLocator(range(1, 13), bymonthday=1, interval=2)
@@ -394,11 +394,11 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
     days = pd.to_datetime(np.linspace(start.value, end.value, plot_points))
     df_y = seasonality_plot_df(m, days)
     seas = m.predict_seasonal_components(df_y)
-    artists += ax.plot(df_y['ds'].dt.to_pydatetime(), seas[name], ls='-',
+    artists += ax.plot(df_y['ds'], seas[name], ls='-',
                         c='#0072B2')
     if uncertainty and m.uncertainty_samples:
         artists += [ax.fill_between(
-            df_y['ds'].dt.to_pydatetime(), seas[name + '_lower'],
+            df_y['ds'], seas[name + '_lower'],
             seas[name + '_upper'], color='#0072B2', alpha=0.2)]
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
     n_ticks = 8
