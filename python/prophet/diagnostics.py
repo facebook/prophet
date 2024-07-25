@@ -322,6 +322,10 @@ def prophet_copy(m, cutoff=None):
     m2.country_holidays = deepcopy(m.country_holidays)
     return m2
 
+PERFORMANCE_METRICS=dict()
+def register_performance_metric(func):
+    PERFORMANCE_METRICS[func.__name__] = func
+    return func
 
 def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
     """Compute performance metrics from cross-validation results.
