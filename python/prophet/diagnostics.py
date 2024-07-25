@@ -334,7 +334,7 @@ def register_performance_metric(func):
 
     Registered metric should return following 
     -------
-    Dataframe with columns horizon and mse.
+    Dataframe with columns horizon and metric.
     """
     PERFORMANCE_METRICS[func.__name__] = func
     return func
