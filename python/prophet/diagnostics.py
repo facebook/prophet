@@ -405,7 +405,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
     # Compute all metrics
     dfs = {}
     for metric in metrics:
-        dfs[metric] = eval(metric)(df_m, w)
+        dfs[metric] = PERFORMANCE_METRICS[metric](df_m, w)
     res = dfs[metrics[0]]
     for i in range(1, len(metrics)):
         res_m = dfs[metrics[i]]
