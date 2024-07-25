@@ -394,7 +394,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
         metrics.remove('coverage')
     if len(set(metrics)) != len(metrics):
         raise ValueError('Input metrics must be a list of unique values')
-    if not set(metrics).issubset(set(valid_metrics)):
+    if not set(metrics).issubset(set(PERFORMANCE_METRICS)):
         raise ValueError(
             'Valid values for metrics are: {}'.format(valid_metrics)
         )

@@ -33,6 +33,27 @@ try:
 except ImportError:
     pass
 
+@diagnostics.register_performance_metric
+def mase(df, w):
+    """Mean absolute scale error
+
+        Parameters
+        ----------
+        df: Cross-validation results dataframe.
+        w: Aggregation window size.
+
+        Returns
+        -------
+        Dataframe with columns horizon and mase.
+    """
+    e = (df['y'] - df['yhat'])
+    d = np.abs(np.diff(df['y'])).sum()/(df['y'].shape[0]-1)
+    se = np.abs(e/d)
+    if w < 0:
+        return pd.DataFrame({'horizon': df['horizon'], 'mase': se})
+    return diagnostics.rolling_mean_by_h(
+        x=se.values, h=df['horizon'].values, w=w, name='mase'
+    )
 
 class TestCrossValidation:
     @pytest.mark.parametrize("parallel_method", PARALLEL_METHODS)
@@ -231,9 +252,9 @@ class TestPerformanceMetrics:
         # Custom list of metrics
         df_horizon = diagnostics.performance_metrics(
             df_cv,
-            metrics=["coverage", "mse"],
+            metrics=["coverage", "mse", "mase"],
         )
-        assert set(df_horizon.columns) == {"coverage", "mse", "horizon"}
+        assert set(df_horizon.columns) == {"coverage", "mse", "mase","horizon"}
         # Skip MAPE
         df_cv.loc[0, "y"] = 0.0
         df_horizon = diagnostics.performance_metrics(
