@@ -325,6 +325,17 @@ def prophet_copy(m, cutoff=None):
 
 PERFORMANCE_METRICS=dict()
 def register_performance_metric(func):
+    """Register custom performance metric
+
+    Parameters that your metric should contain
+    ----------
+    df: Cross-validation results dataframe.
+    w: Aggregation window size.
+
+    Registered metric should return following 
+    -------
+    Dataframe with columns horizon and mse.
+    """
     PERFORMANCE_METRICS[func.__name__] = func
     return func
 
