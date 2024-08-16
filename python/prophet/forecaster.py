@@ -25,6 +25,7 @@ logger = logging.getLogger('prophet')
 logger.setLevel(logging.INFO)
 NANOSECONDS_TO_SECONDS = 1000 * 1000 * 1000
 
+
 class Prophet(object):
     """Prophet forecaster.
 
@@ -77,6 +78,7 @@ class Prophet(object):
     stan_backend: str as defined in StanBackendEnum default: None - will try to
         iterate over all available backends and find the working one
     holidays_mode: 'additive' or 'multiplicative'. Defaults to seasonality_mode.
+    negative_values: bool check to set all yhat_lower negative prediction values in the DataFrame to 0.
     """
 
     def __init__(
@@ -99,6 +101,7 @@ class Prophet(object):
             stan_backend=None,
             scaling: str = 'absmax',
             holidays_mode=None,
+            negative_prediction_values=True
     ):
         self.growth = growth
 
@@ -150,6 +153,7 @@ class Prophet(object):
         self.train_component_cols = None
         self.component_modes = None
         self.train_holiday_names = None
+        self.negative_prediction_values = negative_prediction_values
         self.fit_kwargs = {}
         self.validate_inputs()
         self._load_stan_backend(stan_backend)
@@ -1282,6 +1286,9 @@ class Prophet(object):
             cols.append('cap')
         if self.logistic_floor:
             cols.append('floor')
+        if not self.negative_prediction_values:
+            df['trend'] = df['trend'].clip(lower=0)
+
         # Add in forecast components
         df2 = pd.concat((df[cols], intervals, seasonal_components), axis=1)
         df2['yhat'] = (
@@ -1444,10 +1451,16 @@ class Prophet(object):
 
         series = {}
         for key in ['yhat', 'trend']:
-            series['{}_lower'.format(key)] = self.percentile(
-                sim_values[key], lower_p, axis=1)
-            series['{}_upper'.format(key)] = self.percentile(
-                sim_values[key], upper_p, axis=1)
+            if self.negative_prediction_values:
+                series['{}_lower'.format(key)] = self.percentile(
+                    sim_values[key], lower_p, axis=1)
+                series['{}_upper'.format(key)] = self.percentile(
+                    sim_values[key], upper_p, axis=1)
+            else:
+                series['{}_lower'.format(key)] = np.clip(
+                    self.percentile(sim_values[key], lower_p, axis=1), a_min=0, a_max=None)
+                series['{}_upper'.format(key)] = np.clip(
+                    self.percentile(sim_values[key], upper_p, axis=1), a_min=0, a_max=None)
 
         return pd.DataFrame(series)
 
