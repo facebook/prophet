@@ -1189,6 +1189,37 @@ class Prophet(object):
             sigma_obs=1.0,
         )
 
+    def calculate_and_clip_percentile(self, data, component, comp, lower_p, upper_p):
+        """
+        A helper function to calculate the lower and upper percentiles for a given component.
+
+        Parameters:
+        - data: dict or similar
+            The data structure where the calculated percentiles will be stored.
+        - component: str
+            The name of the component for which the percentiles are being calculated.
+        - comp: array-like
+            The data for which percentiles are to be calculated.
+        - lower_p: float
+            The percentile to calculate for the lower bound.
+        - upper_p: float
+            The percentile to calculate for the upper bound.
+
+        Returns:
+        - None
+            The function directly modifies the `data` structure by adding the lower and upper percentile values.
+        """
+        lower = self.percentile(comp, lower_p, axis=1)
+        upper = self.percentile(comp, upper_p, axis=1)
+
+        if not self.negative_prediction_values:
+            lower = np.clip(lower, a_min=0, a_max=None)
+            upper = np.clip(upper, a_min=0, a_max=None)
+
+        data[component + '_lower'] = lower
+        data[component + '_upper'] = upper
+
+
     def fit(self, df, **kwargs):
         """Fit the Prophet model.
 
@@ -1422,14 +1453,17 @@ class Prophet(object):
             comp = np.matmul(X, beta_c.transpose())
             if component in self.component_modes['additive']:
                 comp *= self.y_scale
-            data[component] = np.nanmean(comp, axis=1)
+
+            if self.negative_prediction_values:
+                data[component] = np.nanmean(comp, axis=1)
+            else:
+                data[component] = np.clip(np.nanmean(comp, axis=1), a_min=0, a_max=None)
+
             if self.uncertainty_samples:
-                data[component + '_lower'] = self.percentile(
-                    comp, lower_p, axis=1,
+                self.calculate_and_clip_percentile(
+                    data, component, comp, lower_p, upper_p
                 )
-                data[component + '_upper'] = self.percentile(
-                    comp, upper_p, axis=1,
-                )
+
         return pd.DataFrame(data)
 
     def predict_uncertainty(self, df: pd.DataFrame, vectorized: bool) -> pd.DataFrame:
@@ -1451,16 +1485,9 @@ class Prophet(object):
 
         series = {}
         for key in ['yhat', 'trend']:
-            if self.negative_prediction_values:
-                series['{}_lower'.format(key)] = self.percentile(
-                    sim_values[key], lower_p, axis=1)
-                series['{}_upper'.format(key)] = self.percentile(
-                    sim_values[key], upper_p, axis=1)
-            else:
-                series['{}_lower'.format(key)] = np.clip(
-                    self.percentile(sim_values[key], lower_p, axis=1), a_min=0, a_max=None)
-                series['{}_upper'.format(key)] = np.clip(
-                    self.percentile(sim_values[key], upper_p, axis=1), a_min=0, a_max=None)
+            self.calculate_and_clip_percentile(
+                series, key, sim_values[key], lower_p, upper_p
+            )
 
         return pd.DataFrame(series)
 

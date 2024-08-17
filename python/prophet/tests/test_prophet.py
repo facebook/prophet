@@ -30,7 +30,7 @@ class TestProphetFitPredictDefault:
     def test_fit_predict(self, daily_univariate_ts, backend, scaling, expected):
         test_days = 30
         train, test = train_test_split(daily_univariate_ts, test_days)
-        forecaster = Prophet(stan_backend=backend, scaling=scaling)
+        forecaster = Prophet(stan_backend=backend, scaling=scaling, negative_prediction_values=False)
         forecaster.fit(train, seed=1237861298)
         np.random.seed(876543987)
         future = forecaster.make_future_dataframe(test_days, include_history=False)
