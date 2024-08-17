@@ -78,7 +78,7 @@ class Prophet(object):
     stan_backend: str as defined in StanBackendEnum default: None - will try to
         iterate over all available backends and find the working one
     holidays_mode: 'additive' or 'multiplicative'. Defaults to seasonality_mode.
-    negative_values: bool check to set all yhat_lower negative prediction values in the DataFrame to 0.
+    negative_prediction_values: bool check to set all yhat_lower negative prediction values in the DataFrame to 0.
     """
 
     def __init__(
