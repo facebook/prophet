@@ -60,7 +60,7 @@ jobs:
           platforms: arm64
 
       - name: "Build wheels"
-        uses: pypa/cibuildwheel@v2
+        uses: pypa/cibuildwheel@v2.21.1
         with:
           package-dir: python
         env:
@@ -111,7 +111,7 @@ jobs:
         find . -name '*.whl' -exec mv '{}' dist/ \;
 
     - name: Upload
-      uses: pypa/gh-action-pypi-publish@v1
+      uses: pypa/gh-action-pypi-publish@v1.10.2
       with:
         user: ${{ secrets.PYPI_USERNAME }}
         password: ${{ secrets.PYPI_PASSWORD }}
