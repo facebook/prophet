@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ["macos-latest", "ubuntu-latest", "windows-latest", "macos-latest-xlarge"]
+        os: ["macos-13", "ubuntu-latest", "windows-latest", "macos-latest-xlarge"]
         cibw_arch: ["native"]
         # Build one wheel (ABI = none) using first build spec, then test on all python versions.
         cibw_build: ["cp39-* cp310-* cp311-*"]
@@ -37,13 +37,6 @@ jobs:
 
       - name: "Checkout repo"
         uses: actions/checkout@v4
-
-      # Temporary, until pipx is added to the macOS large runner image
-      - name: "Install pipx"
-        if: matrix.os == 'macos-latest-xlarge'
-        run: |
-          brew install pipx
-          pipx ensurepath
 
       - name: "Restore RTools40"
         if: startsWith(runner.os, 'Windows')
