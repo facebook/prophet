@@ -48,19 +48,19 @@ jobs:
       - name: "Restore RTools40"
         if: startsWith(runner.os, 'Windows')
         id: cache-rtools
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: C:/rtools40
           key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
 
       - name: Set up QEMU
         if: matrix.cibw_arch == 'aarch64'
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64
 
       - name: "Build wheels"
-        uses: pypa/cibuildwheel@v2.16.2
+        uses: pypa/cibuildwheel@v2
         with:
           package-dir: python
         env:
@@ -75,7 +75,7 @@ jobs:
           CIBW_TEST_COMMAND: pytest --pyargs prophet
 
       - name: "Upload wheel as artifact"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: artifact-${{ matrix.os }}-${{ matrix.cibw_arch }}-wheel
           path: "./**/*.whl"
@@ -84,12 +84,12 @@ jobs:
     name: Make source distribution
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - run: pipx run build --sdist
       working-directory: python
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: artifact-source-dist
         path: "./**/dist/*.tar.gz"
@@ -101,7 +101,7 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
     - name: Download all artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
 
     - name: Copy artifacts to dist/ folder
       run: |
@@ -111,7 +111,7 @@ jobs:
         find . -name '*.whl' -exec mv '{}' dist/ \;
 
     - name: Upload
-      uses: pypa/gh-action-pypi-publish@v1.4.2
+      uses: pypa/gh-action-pypi-publish@v1
       with:
         user: ${{ secrets.PYPI_USERNAME }}
         password: ${{ secrets.PYPI_PASSWORD }}
