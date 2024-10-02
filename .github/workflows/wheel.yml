@@ -93,6 +93,9 @@ jobs:
     needs: [make-wheels, make-sdist]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
+    environment: release
+    permissions:
+      id-token: write
     steps:
     - name: Download all artifacts
       uses: actions/download-artifact@v4
@@ -106,6 +109,3 @@ jobs:
 
     - name: Upload
       uses: pypa/gh-action-pypi-publish@v1.10.2
-      with:
-        user: ${{ secrets.PYPI_USERNAME }}
-        password: ${{ secrets.PYPI_PASSWORD }}
