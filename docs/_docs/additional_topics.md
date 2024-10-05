@@ -204,15 +204,31 @@ def warm_start_params(m):
     """
     res = {}
     for pname in ['k', 'm', 'sigma_obs']:
-        if m.mcmc_samples == 0:
-            res[pname] = m.params[pname][0][0]
-        else:
-            res[pname] = np.mean(m.params[pname])
+        param = m.params.get(pname)
+        if param is not None:
+            if m.mcmc_samples == 0:
+                if np.isscalar(param):
+                    res[pname] = param
+                elif param.ndim == 1:
+                    res[pname] = param[0]
+                else:
+                    res[pname] = param[0][0]
+            else:
+                res[pname] = np.mean(param)
+
     for pname in ['delta', 'beta']:
-        if m.mcmc_samples == 0:
-            res[pname] = m.params[pname][0]
-        else:
-            res[pname] = np.mean(m.params[pname], axis=0)
+        param = m.params.get(pname)
+        if param is not None:
+            if m.mcmc_samples == 0:
+                if np.isscalar(param):
+                    res[pname] = param
+                elif param.ndim == 1:
+                    res[pname] = param[0]
+                else:
+                    res[pname] = param[0]
+            else:
+                res[pname] = np.mean(param, axis=0)
+
     return res
 
 df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
