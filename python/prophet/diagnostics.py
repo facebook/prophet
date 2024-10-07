@@ -323,6 +323,23 @@ def prophet_copy(m, cutoff=None):
     return m2
 
 
+PERFORMANCE_METRICS=dict()
+def register_performance_metric(func):
+    """Register custom performance metric
+
+    Parameters that your metric should contain
+    ----------
+    df: Cross-validation results dataframe.
+    w: Aggregation window size.
+
+    Registered metric should return following 
+    -------
+    Dataframe with columns horizon and metric.
+    """
+    PERFORMANCE_METRICS[func.__name__] = func
+    return func
+
+
 def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
     """Compute performance metrics from cross-validation results.
 
@@ -377,7 +394,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
         metrics.remove('coverage')
     if len(set(metrics)) != len(metrics):
         raise ValueError('Input metrics must be a list of unique values')
-    if not set(metrics).issubset(set(valid_metrics)):
+    if not set(metrics).issubset(set(PERFORMANCE_METRICS)):
         raise ValueError(
             'Valid values for metrics are: {}'.format(valid_metrics)
         )
@@ -399,7 +416,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
     # Compute all metrics
     dfs = {}
     for metric in metrics:
-        dfs[metric] = eval(metric)(df_m, w)
+        dfs[metric] = PERFORMANCE_METRICS[metric](df_m, w)
     res = dfs[metrics[0]]
     for i in range(1, len(metrics)):
         res_m = dfs[metrics[i]]
@@ -518,6 +535,7 @@ def rolling_median_by_h(x, h, w, name):
 # as a dataframe, given a window size for rolling aggregation.
 
 
+@register_performance_metric
 def mse(df, w):
     """Mean squared error
 
@@ -538,6 +556,7 @@ def mse(df, w):
     )
 
 
+@register_performance_metric
 def rmse(df, w):
     """Root mean squared error
 
@@ -556,6 +575,7 @@ def rmse(df, w):
     return res
 
 
+@register_performance_metric
 def mae(df, w):
     """Mean absolute error
 
@@ -576,6 +596,7 @@ def mae(df, w):
     )
 
 
+@register_performance_metric
 def mape(df, w):
     """Mean absolute percent error
 
@@ -596,6 +617,7 @@ def mape(df, w):
     )
 
 
+@register_performance_metric
 def mdape(df, w):
     """Median absolute percent error
 
@@ -616,6 +638,7 @@ def mdape(df, w):
     )
 
 
+@register_performance_metric
 def smape(df, w):
     """Symmetric mean absolute percentage error
     based on Chen and Yang (2004) formula
@@ -638,6 +661,7 @@ def smape(df, w):
     )
 
 
+@register_performance_metric
 def coverage(df, w):
     """Coverage
 
