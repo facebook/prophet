@@ -1454,10 +1454,7 @@ class Prophet(object):
             if component in self.component_modes['additive']:
                 comp *= self.y_scale
 
-            if self.negative_prediction_values:
-                data[component] = np.nanmean(comp, axis=1)
-            else:
-                data[component] = np.clip(np.nanmean(comp, axis=1), a_min=0, a_max=None)
+            data[component] = np.nanmean(comp, axis=1)
 
             if self.uncertainty_samples:
                 self.calculate_and_clip_percentile(
