@@ -1326,6 +1326,10 @@ class Prophet(object):
                 df2['trend'] * (1 + df2['multiplicative_terms'])
                 + df2['additive_terms']
         )
+
+        if not self.negative_prediction_values:
+            df2['yhat'] = df2['yhat'].clip(lower=0)
+
         return df2
 
     @staticmethod

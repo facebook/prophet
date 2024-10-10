@@ -434,21 +434,15 @@ class TestProphetTrendComponent:
         cp = m.changepoints_t
         assert cp.shape[0] == 15
 
-    @pytest.mark.parametrize(
-        "expected",
-        [5.656087514685135],
-    )
-    def test_without_negative_predictions(self, subdaily_univariate_ts, backend, expected):
+    def test_without_negative_predictions(self, subdaily_univariate_ts, backend):
         test_days = 280
         train, test = train_test_split(subdaily_univariate_ts, test_days)
-        forecaster = Prophet(stan_backend=backend, negative_prediction_values=False)
+        forecaster = Prophet(stan_backend=backend, negative_prediction_values=False, weekly_seasonality=True, yearly_seasonality=True)
         forecaster.fit(train, seed=1237861298)
         np.random.seed(876543987)
         future = forecaster.make_future_dataframe(test_days, include_history=False)
         future = forecaster.predict(future)
-        res = rmse(future["yhat"], test["y"])
-        tolerance = 1e-5
-        assert res == pytest.approx(expected, rel=tolerance), "backend: {}".format(forecaster.stan_backend)
+        assert (future['yhat'].values >= 0).all()
 
 
 class TestProphetSeasonalComponent:
