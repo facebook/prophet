@@ -455,135 +455,34 @@ for params in all_params:
 tuning_results = pd.DataFrame(all_params)
 tuning_results['rmse'] = rmses
 print(tuning_results)
-```
-    19:39:23 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:23 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:23 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:23 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:23 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:23 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:23 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:23 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:24 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:24 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:24 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:24 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:24 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:24 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:24 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:24 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:25 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:25 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:25 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:25 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:25 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:25 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:25 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:25 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:26 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:26 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:26 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:26 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:26 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:26 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:26 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:26 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:27 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:27 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:27 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:27 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:27 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:27 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:27 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:27 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:28 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:28 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:28 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:28 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:28 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:28 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:28 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:28 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:29 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:29 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:29 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:29 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:29 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:29 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:29 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:29 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:30 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:30 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:30 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:30 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:30 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:30 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:31 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:31 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:31 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:32 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:32 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:32 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:32 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:32 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:32 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:32 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:33 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:33 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:34 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:34 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:34 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:34 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:34 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:34 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:35 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:35 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:36 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:36 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:36 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:36 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:36 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:36 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:36 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:37 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:37 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:38 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:38 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:38 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:38 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:38 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:38 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:39 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:40 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:40 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:40 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:40 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:40 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:40 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:41 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:42 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:42 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:42 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:42 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:43 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:43 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:43 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:43 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:44 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:44 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:44 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:44 - cmdstanpy - INFO - Chain [1] start processing
-    19:39:45 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:45 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:45 - cmdstanpy - INFO - Chain [1] done processing
-    19:39:45 - cmdstanpy - INFO - Chain [1] start processing
+``` 
 
+  changepoint_prior_scale  seasonality_prior_scale      rmse
+      0                     0.001                     0.01  0.757694
+      1                     0.001                     0.10  0.743399
+      2                     0.001                     1.00  0.753387
+      3                     0.001                    10.00  0.762890
+      4                     0.010                     0.01  0.542315
+      5                     0.010                     0.10  0.535546
+      6                     0.010                     1.00  0.527008
+      7                     0.010                    10.00  0.541544
+      8                     0.100                     0.01  0.524835
+      9                     0.100                     0.10  0.516061
+      10                    0.100                     1.00  0.521406
+      11                    0.100                    10.00  0.518580
+      12                    0.500                     0.01  0.532140
+      13                    0.500                     0.10  0.524668
+      14                    0.500                     1.00  0.521130
+      15                    0.500                    10.00  0.522980
 
 ```python
 # Python
 best_params = all_params[np.argmin(rmses)]
 print(best_params)
 ```
+
+  {'changepoint_prior_scale': 0.1, 'seasonality_prior_scale': 0.1}
+
 Alternatively, parallelization could be done across parameter combinations by parallelizing the loop above.
 
 
