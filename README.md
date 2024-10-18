@@ -127,6 +127,17 @@ Using `cmdstanpy` with Windows requires a Unix-compatible C compiler such as min
 
 ## Changelog
 
+### Version 1.1.6 (2024.09.29)
+
+#### Python
+
+- Bug fixes: include predictions for dates with missing `y` the history, zero division error in cross validation metrics.
+- Changed `NDArray[np.float_]` to `NDArray[np.float64]` to be compatible with numpy 2.0
+
+#### R
+
+- Updated `holidays` data based on holidays version 0.57.
+
 ### Version 1.1.5 (2023.10.10)
 
 #### Python
