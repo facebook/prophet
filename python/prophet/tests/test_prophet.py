@@ -239,7 +239,7 @@ class TestProphetDataPrep:
         assert len(future) == 3
         assert np.all(future["ds"].values == correct.values)
 
-        future = forecaster.make_future_dataframe(periods=3, freq="M", include_history=False)
+        future = forecaster.make_future_dataframe(periods=3, freq=pd.tseries.offsets.MonthEnd(1), include_history=False)
         correct = pd.DatetimeIndex(["2013-04-30", "2013-05-31", "2013-06-30"])
         assert len(future) == 3
         assert np.all(future["ds"].values == correct.values)
