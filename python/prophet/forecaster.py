@@ -1461,8 +1461,11 @@ class Prophet(object):
             data[component] = np.nanmean(comp, axis=1)
 
             if self.uncertainty_samples:
-                self.calculate_and_clip_percentile(
-                    data, component, comp, lower_p, upper_p
+                data[component + '_lower'] = self.percentile(
+                    comp, lower_p, axis=1,
+                )
+                data[component + '_upper'] = self.percentile(
+                    comp, upper_p, axis=1,
                 )
 
         return pd.DataFrame(data)
