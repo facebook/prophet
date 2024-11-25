@@ -140,3 +140,23 @@ class TestSerialize:
             future = m.make_future_dataframe(10)
             fcst = m.predict(future)
             assert fcst["yhat"].values[-1] == pytest.approx(pred_val)
+
+
+    def test_fit_kwargs_conversion(self, daily_univariate_ts, backend):
+        from prophet.serialize import model_to_dict
+        m = Prophet(stan_backend=backend)
+        df = daily_univariate_ts.head(daily_univariate_ts.shape[0] - 30)
+        m.fit(df)
+        m.fit_kwargs['init'] = {'param1': np.array([1.0, 2.0]), 'param2': np.float64(3.0)}
+        
+        model_dict = model_to_dict(m)
+        
+        assert model_dict['fit_kwargs']['init']['param1'] == [1.0, 2.0]
+        assert model_dict['fit_kwargs']['init']['param2'] == 3.0
+
+
+    def test_model_to_dict_unfitted_model(self):
+        from prophet.serialize import model_to_dict
+        m = Prophet()
+        with pytest.raises(ValueError, match="This can only be used to serialize models that have already been fit."):
+            model_to_dict(m)

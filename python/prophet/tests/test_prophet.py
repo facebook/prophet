@@ -982,3 +982,47 @@ class TestProphetWarmStart:
             daily_univariate_ts.iloc[:510], init=warm_start_params(m), show_progress=False
         )
         assert m2.params["delta"].shape == (200, 25)
+
+
+    def test_invalid_scaling_parameter(self, daily_univariate_ts, backend):
+        with pytest.raises(ValueError, match="scaling must be one of 'absmax' or 'minmax'"):
+            Prophet(scaling="invalid", stan_backend=backend).fit(daily_univariate_ts)
+
+
+    def test_holidays_missing_ds_column(self, daily_univariate_ts, backend):
+        holidays = pd.DataFrame({
+            "holiday": ["xmas"]
+        })
+        with pytest.raises(ValueError, match='holidays must be a DataFrame with "ds" and "holiday" columns.'):
+            Prophet(holidays=holidays, stan_backend=backend).fit(daily_univariate_ts)
+
+
+    def test_holidays_upper_window_less_than_zero(self, daily_univariate_ts, backend):
+        holidays = pd.DataFrame({
+            "ds": pd.to_datetime(["2016-12-25"]),
+            "holiday": ["xmas"],
+            "lower_window": [-1],
+            "upper_window": [-2]
+        })
+        with pytest.raises(ValueError, match="Holiday upper_window should be >= 0"):
+            Prophet(holidays=holidays, stan_backend=backend).fit(daily_univariate_ts)
+
+
+    def test_holidays_lower_window_greater_than_zero(self, daily_univariate_ts, backend):
+        holidays = pd.DataFrame({
+            "ds": pd.to_datetime(["2016-12-25"]),
+            "holiday": ["xmas"],
+            "lower_window": [1],
+            "upper_window": [0]
+        })
+        with pytest.raises(ValueError, match="Holiday lower_window should be <= 0"):
+            Prophet(holidays=holidays, stan_backend=backend).fit(daily_univariate_ts)
+
+
+    def test_holidays_with_nan(self, daily_univariate_ts, backend):
+        holidays = pd.DataFrame({
+            "ds": pd.to_datetime(["2016-12-25", None]),
+            "holiday": ["xmas", "xmas"]
+        })
+        with pytest.raises(ValueError, match="Found a NaN in holidays dataframe."):
+            Prophet(holidays=holidays, stan_backend=backend).fit(daily_univariate_ts)
