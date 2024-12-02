@@ -905,8 +905,8 @@ class Prophet(object):
         # Remove the placeholder
         component_cols.drop('zeros', axis=1, inplace=True, errors='ignore')
         # Validation
-        if (max(component_cols['additive_terms']
-            + component_cols['multiplicative_terms']) > 1):
+        if ((component_cols['additive_terms']
+            + component_cols['multiplicative_terms']).max() > 1):
             raise Exception('A bug occurred in seasonal components.')
         # Compare to the training, if set.
         if self.train_component_cols is not None:
