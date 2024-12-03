@@ -416,8 +416,8 @@ class Prophet(object):
             if len(self.changepoints) == 0:
                 pass
             else:
-                too_low = min(self.changepoints) < self.history['ds'].min()
-                too_high = max(self.changepoints) > self.history['ds'].max()
+                too_low = self.changepoints.min() < self.history['ds'].min()
+                too_high = self.changepoints.max() > self.history['ds'].max()
                 if too_low or too_high:
                     raise ValueError(
                         'Changepoints must fall within training data.')
