@@ -56,6 +56,7 @@ def make_holidays_df(year_list, country, province=None, state=None):
     ----------
     year_list: a list of years
     country: country name
+    province: province name
 
     Returns
     -------
