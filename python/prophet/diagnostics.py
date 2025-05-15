@@ -14,8 +14,6 @@ import concurrent.futures
 import numpy as np
 import pandas as pd
 
-from prophet.forecaster import Prophet
-
 logger = logging.getLogger('prophet')
 
 
@@ -271,7 +269,7 @@ def single_cutoff_forecast(df, model, cutoff, horizon, predict_columns):
     ], axis=1)
 
 
-def prophet_copy(m, cutoff=None) -> Prophet:
+def prophet_copy(m, cutoff=None):
     """Copy Prophet object
 
     Parameters
