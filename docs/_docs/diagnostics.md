@@ -455,25 +455,116 @@ for params in all_params:
 tuning_results = pd.DataFrame(all_params)
 tuning_results['rmse'] = rmses
 print(tuning_results)
-``` 
+```
 
-  changepoint_prior_scale  seasonality_prior_scale      rmse
-      0                     0.001                     0.01  0.757694
-      1                     0.001                     0.10  0.743399
-      2                     0.001                     1.00  0.753387
-      3                     0.001                    10.00  0.762890
-      4                     0.010                     0.01  0.542315
-      5                     0.010                     0.10  0.535546
-      6                     0.010                     1.00  0.527008
-      7                     0.010                    10.00  0.541544
-      8                     0.100                     0.01  0.524835
-      9                     0.100                     0.10  0.516061
-      10                    0.100                     1.00  0.521406
-      11                    0.100                    10.00  0.518580
-      12                    0.500                     0.01  0.532140
-      13                    0.500                     0.10  0.524668
-      14                    0.500                     1.00  0.521130
-      15                    0.500                    10.00  0.522980
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>changepoint_prior_scale</th>
+      <th>seasonality_prior_scale</th>
+      <th>rmse</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.001</td>
+      <td>0.01</td>
+      <td>0.757694</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.001</td>
+      <td>0.10</td>
+      <td>0.743399</td>
+    </tr>
+    <tr>
+      <th>2</th>​
+      <td>0.001</td>
+      <td>1.00</td>
+      <td>0.753387</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.001</td>
+      <td>10.00</td>
+      <td>0.762890</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.010</td>
+      <td>0.01</td>
+      <td>0.542315</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.010</td>
+      <td>0.10</td>
+      <td>0.535546</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>0.010</td>
+      <td>1.00</td>
+      <td>0.527008</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>0.010</td>
+      <td>10.00</td>
+      <td>0.541544</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>0.100</td>
+      <td>0.01</td>
+      <td>0.524835</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>0.100</td>
+      <td>0.10</td>
+      <td>0.516061</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>0.100</td>
+      <td>1.00</td>
+      <td>0.521406</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>0.100</td>
+      <td>10.00</td>
+      <td>0.518580</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>0.500</td>
+      <td>0.01</td>
+      <td>0.532140</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>0.500</td>
+      <td>0.10</td>
+      <td>0.524668</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>0.500</td>
+      <td>1.00</td>
+      <td>0.521130</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>0.500</td>
+      <td>10.00</td>
+      <td>0.522980</td>
+    </tr>
+  </tbody>
+</table>
 
 ```python
 # Python
