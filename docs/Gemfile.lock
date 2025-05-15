@@ -227,8 +227,7 @@ GEM
     rb-fsevent (0.10.4)
     rb-inotify (0.10.1)
       ffi (~> 1.0)
-    rexml (3.3.6)
-      strscan
+    rexml (3.3.9)
     rouge (3.26.0)
     ruby2_keywords (0.0.2)
     rubyzip (2.3.0)
@@ -243,7 +242,6 @@ GEM
       faraday (> 0.8, < 2.0)
     simpleidn (0.1.1)
       unf (~> 0.1.4)
-    strscan (3.1.0)
     terminal-table (1.8.0)
       unicode-display_width (~> 1.1, >= 1.1.1)
     typhoeus (1.4.0)
