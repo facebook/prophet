@@ -14,6 +14,8 @@ import concurrent.futures
 import numpy as np
 import pandas as pd
 
+from prophet.forecaster import Prophet
+
 logger = logging.getLogger('prophet')
 
 
@@ -260,6 +262,8 @@ def single_cutoff_forecast(df, model, cutoff, horizon, predict_columns):
     yhat = m.predict(df[index_predicted][columns])
     # Merge yhat(predicts), y(df, original data) and cutoff
 
+    m.stan_backend.cleanup()
+
     return pd.concat([
         yhat[predict_columns],
         df[index_predicted][['y']].reset_index(drop=True),
@@ -267,7 +271,7 @@ def single_cutoff_forecast(df, model, cutoff, horizon, predict_columns):
     ], axis=1)
 
 
-def prophet_copy(m, cutoff=None):
+def prophet_copy(m, cutoff=None) -> Prophet:
     """Copy Prophet object
 
     Parameters

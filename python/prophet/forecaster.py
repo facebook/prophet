@@ -18,7 +18,7 @@ import pandas as pd
 from numpy.typing import NDArray
 
 from prophet.make_holidays import get_holiday_names, make_holidays_df
-from prophet.models import StanBackendEnum, ModelInputData, ModelParams, TrendIndicator
+from prophet.models import StanBackendEnum, ModelInputData, ModelParams, TrendIndicator, IStanBackend
 from prophet.plot import (plot, plot_components)
 
 logger = logging.getLogger('prophet')
@@ -26,6 +26,8 @@ logger.setLevel(logging.INFO)
 NANOSECONDS_TO_SECONDS = 1000 * 1000 * 1000
 
 class Prophet(object):
+    stan_backend: IStanBackend
+    
     """Prophet forecaster.
 
     Parameters

@@ -11,6 +11,7 @@ from typing import Sequence, Tuple
 from collections import OrderedDict
 from enum import Enum
 import importlib_resources
+import pathlib
 import platform
 
 import logging
@@ -64,6 +65,10 @@ class IStanBackend(ABC):
                 self.newton_fallback = v
             else:
                 raise ValueError(f'Unknown option {k}')
+    
+    def cleanup(self):
+        """Clean up temporary files created during model fitting."""
+        pass
 
 
     @staticmethod
@@ -166,6 +171,14 @@ class CmdStanPyBackend(IStanBackend):
 
         return params
 
+    def cleanup(self):
+        import cmdstanpy
+        
+        if hasattr(self , "stan_fit"):
+            fit_result: cmdstanpy.CmdStanMLE | cmdstanpy.CmdStanMCMC = self.stan_fit
+            for fpath in fit_result.runset.csv_files:
+                pathlib.Path(fpath).unlink(missing_ok=True)
+                
     @staticmethod
     def sanitize_custom_inits(default_inits, custom_inits):
         """Validate that custom inits have the correct type and shape, otherwise use defaults."""
