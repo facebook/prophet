@@ -260,6 +260,8 @@ def single_cutoff_forecast(df, model, cutoff, horizon, predict_columns):
     yhat = m.predict(df[index_predicted][columns])
     # Merge yhat(predicts), y(df, original data) and cutoff
 
+    m.stan_backend.cleanup()
+
     return pd.concat([
         yhat[predict_columns],
         df[index_predicted][['y']].reset_index(drop=True),
