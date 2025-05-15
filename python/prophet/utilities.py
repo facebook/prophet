@@ -49,7 +49,7 @@ def regressor_coefficients(m):
         Only different to `coef` if `mcmc_samples > 0`.
     - `coef`: Expected value of the coefficient.
     - `coef_upper`: Upper bound for the coefficient, estimated from MCMC samples.
-        Only to different to `coef` if `mcmc_samples > 0`.
+        Only different to `coef` if `mcmc_samples > 0`.
     """
     assert len(m.extra_regressors) > 0, 'No extra regressors found.'
     coefs = []

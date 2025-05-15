@@ -50,7 +50,7 @@ jobs:
     strategy:
       matrix:
         config:
-          - {os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+          - {os: ubuntu-22.04, r: 'release', rspm: "https://packagemanager.example.com/our-cran/__linux__/jammy/latest"}
       fail-fast: false
 
     env:
@@ -86,7 +86,7 @@ jobs:
         while read -r cmd
         do
           eval sudo $cmd
-        done < <(Rscript -e 'writeLines(remotes::system_requirements(os = "ubuntu", os_release = "20.04", path = "R/"))')
+        done < <(Rscript -e 'writeLines(remotes::system_requirements(os = "ubuntu", os_release = "22.04", path = "R/"))')
     - name: Install dependencies
       run: |
         remotes::install_deps(pkgdir = "R/", dependencies = NA)

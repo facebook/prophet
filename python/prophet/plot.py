@@ -486,7 +486,7 @@ def plot_cross_validation_metric(
     for each prediction, and aggregated over a rolling window with horizon.
 
     This uses prophet.diagnostics.performance_metrics to compute the metrics.
-    Valid values of metric are 'mse', 'rmse', 'mae', 'mape', and 'coverage'.
+    Valid values of metric are 'mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', and 'coverage'.
 
     rolling_window is the proportion of data included in the rolling window of
     aggregation. The default value of 0.1 means 10% of data are included in the
@@ -499,7 +499,7 @@ def plot_cross_validation_metric(
     Parameters
     ----------
     df_cv: The output from prophet.diagnostics.cross_validation.
-    metric: Metric name, one of ['mse', 'rmse', 'mae', 'mape', 'coverage'].
+    metric: Metric name, one of ['mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage'].
     rolling_window: Proportion of data to use for rolling average of metric.
         In [0, 1]. Defaults to 0.1.
     ax: Optional matplotlib axis on which to plot. If not given, a new figure
@@ -579,6 +579,7 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
     changepoints_threshold: Threshold on trend change magnitude for significance.
     xlabel: Optional label name on X-axis
     ylabel: Optional label name on Y-axis
+    figsize: The plot's size (in px).
 
     Returns
     -------
@@ -775,7 +776,7 @@ def plot_components_plotly(
 
 
 def plot_forecast_component_plotly(m, fcst, name, uncertainty=True, plot_cap=False, figsize=(900, 300)):
-    """Plot an particular component of the forecast using Plotly.
+    """Plot a particular component of the forecast using Plotly.
     See plot_plotly() for Plotly setup instructions
 
     Parameters
