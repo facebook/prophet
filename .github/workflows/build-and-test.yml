@@ -71,25 +71,23 @@ jobs:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: |
-            any::rcmdcheck
-            any::knitr
-            any::testthat
-            any::readr
-            any::rmarkdown
-          needs: check
-          working-directory: ${{ env.PKGDIR }}
+      # Install dependencies - separating the steps to fix dependency conflicts
+      - name: Install dependencies
+        run: |
+          install.packages('remotes')
+          remotes::install_deps(dependencies = TRUE)
+          remotes::install_cran(c("rcmdcheck", "knitr", "testthat", "readr", "rmarkdown"))
+        shell: Rscript {0}
+        working-directory: ${{ env.PKGDIR }}
 
-      # Install Stan packages if needed
+      # Install Stan packages separately if needed
       - name: Install Stan packages
         run: |
           install.packages(c("cmdstanr", "posterior"), repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
         shell: Rscript {0}
-        working-directory: ${{ env.PKGDIR }}
 
-      - uses: r-lib/actions/check-r-package@v2
+      - name: Check
+        uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
