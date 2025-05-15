@@ -75,7 +75,8 @@ class Prophet(object):
         uncertainty intervals. Settings this value to 0 or False will disable
         uncertainty estimation and speed up the calculation.
     stan_backend: str as defined in StanBackendEnum default: None - will try to
-        iterate over all available backends and find the working one
+        iterate over all available backends and find the working one.
+    scaling: 'absmax' (default) or 'minmax'.
     holidays_mode: 'additive' or 'multiplicative'. Defaults to seasonality_mode.
     """
 
@@ -1541,6 +1542,15 @@ class Prophet(object):
     ) -> List[Dict[str, np.ndarray]]:
         """Simulate observations from the extrapolated generative model. Vectorized version of sample_model().
 
+        Parameters
+        ----------
+        df: Prediction dataframe.
+        seasonal_features: pd.DataFrame of seasonal features.
+        iteration: Int sampling iteration to use parameters from.
+        s_a: Indicator vector for additive components.
+        s_m: Indicator vector for multiplicative components.
+        n_samples: Number of future paths of the trend to simulate.
+
         Returns
         -------
         List (length n_samples) of dictionaries with arrays for trend and yhat, each ordered like df['t'].
@@ -1618,6 +1628,12 @@ class Prophet(object):
 
     def sample_predictive_trend_vectorized(self, df: pd.DataFrame, n_samples: int, iteration: int = 0) -> np.ndarray:
         """Sample draws of the future trend values. Vectorized version of sample_predictive_trend().
+
+        Parameters
+        ----------
+        df: Prediction dataframe.
+        iteration: Int sampling iteration to use parameters from.
+        n_samples: Number of future paths of the trend to simulate.
 
         Returns
         -------

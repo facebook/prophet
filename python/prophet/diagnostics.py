@@ -81,19 +81,19 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
     cutoffs: list of pd.Timestamp specifying cutoffs to be used during
         cross validation. If not provided, they are generated as described
         above.
-    parallel : {None, 'processes', 'threads', 'dask', object}
+    parallel: {None, 'processes', 'threads', 'dask', object}
         How to parallelize the forecast computation. By default no parallelism
         is used.
 
-        * None : No parallelism.
-        * 'processes' : Parallelize with concurrent.futures.ProcessPoolExectuor.
-        * 'threads' : Parallelize with concurrent.futures.ThreadPoolExecutor.
+        * None: No parallelism.
+        * 'processes': Parallelize with concurrent.futures.ProcessPoolExecutor.
+        * 'threads': Parallelize with concurrent.futures.ThreadPoolExecutor.
             Note that some operations currently hold Python's Global Interpreter
             Lock, so parallelizing with threads may be slower than training
             sequentially.
         * 'dask': Parallelize with Dask.
            This requires that a dask.distributed Client be created.
-        * object : Any instance with a `.map` method. This method will
+        * object: Any instance with a `.map` method. This method will
           be called with :func:`single_cutoff_forecast` and a sequence of
           iterables where each element is the tuple of arguments to pass to
           :func:`single_cutoff_forecast`
@@ -132,7 +132,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
             extra_output_columns = [extra_output_columns]
         predict_columns.extend([c for c in extra_output_columns if c not in predict_columns])
         
-    # Identify largest seasonality period
+    # Identify the largest seasonality period
     period_max = 0.
     for s in model.seasonalities.values():
         period_max = max(period_max, s['period'])
@@ -214,7 +214,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
 
 def single_cutoff_forecast(df, model, cutoff, horizon, predict_columns):
     """Forecast for single cutoff. Used in cross validation function
-    when evaluating for multiple cutoffs either sequentially or in parallel .
+    when evaluating for multiple cutoffs either sequentially or in parallel.
 
     Parameters
     ----------
@@ -274,7 +274,7 @@ def prophet_copy(m, cutoff=None):
     ----------
     m: Prophet model.
     cutoff: pd.Timestamp or None, default None.
-        cuttoff Timestamp for changepoints member variable.
+        cutoff Timestamp for changepoints member variable.
         changepoints are only retained if 'changepoints <= cutoff'
 
     Returns
@@ -344,7 +344,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
     """Compute performance metrics from cross-validation results.
 
     Computes a suite of performance metrics on the output of cross-validation.
-    By default the following metrics are included:
+    By default, the following metrics are included:
     'mse': mean squared error
     'rmse': root mean squared error
     'mae': mean absolute error
