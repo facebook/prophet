@@ -47,11 +47,11 @@ jobs:
   build-and-test-r:
 
     runs-on: ${{ matrix.config.os }}
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    name: R ${{ matrix.config.os }} (${{ matrix.config.r }})
     strategy:
       matrix:
         config:
-          - {os: ubuntu-latest, r: 'release', rspm: "https://packagemanager.posit.co/cran/__linux__/jammy/latest"}
+          - {os: ubuntu-22.04, r: 'release', rspm: "https://packagemanager.example.com/our-cran/__linux__/jammy/latest"}
       fail-fast: false
 
     env:
