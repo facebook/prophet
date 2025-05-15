@@ -1003,9 +1003,9 @@ parse_seasonality_args <- function(m, name, arg, auto.disable, default.order) {
     } else {
       fourier.order <- default.order
     }
-  } else if (arg == TRUE) {
+  } else if (isTRUE(arg)) {
     fourier.order <- default.order
-  } else if (arg == FALSE) {
+  } else if (isFALSE(arg)) {
     fourier.order <- 0
   } else {
     fourier.order <- arg
