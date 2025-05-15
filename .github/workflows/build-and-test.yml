@@ -51,14 +51,13 @@ jobs:
     strategy:
       matrix:
         config:
-          - {os: ubuntu-22.04, r: 'release', rspm: "https://packagemanager.example.com/our-cran/__linux__/jammy/latest"}
+          - {os: ubuntu-22.04, r: 'release'}
       fail-fast: false
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
-      RSPM: ${{ matrix.config.rspm }}
       PKGDIR: "R/"
 
     steps:
