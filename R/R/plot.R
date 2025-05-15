@@ -470,7 +470,7 @@ dyplot.prophet <- function(x, fcst, uncertainty=TRUE,
     forecastCols <- c('yhat')
   }
   # convert to xts for easier date handling by dygraph
-  dfTS <- xts::xts(df %>% dplyr::select_(.dots=colsToKeep), order.by = df$ds)
+  dfTS <- xts::xts(df %>% dplyr::select(.dots=colsToKeep), order.by = df$ds)
 
   # base plot
   dyBase <- dygraphs::dygraph(dfTS, ...)
