@@ -59,6 +59,7 @@ jobs:
       R_KEEP_PKG_SOURCE: yes
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       RSPM: ${{ matrix.config.rspm }}
+      PKGDIR: "R/"
 
     steps:
       - uses: actions/checkout@v4
@@ -79,16 +80,17 @@ jobs:
             any::readr
             any::rmarkdown
           needs: check
-          working-directory: ${{ matrix.config.pkgdir || '.' }}
+          working-directory: ${{ env.PKGDIR }}
 
       # Install Stan packages if needed
       - name: Install Stan packages
         run: |
           install.packages(c("cmdstanr", "posterior"), repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
         shell: Rscript {0}
+        working-directory: ${{ env.PKGDIR }}
 
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
-          working-directory: ${{ matrix.config.pkgdir || '.' }}
+          working-directory: ${{ env.PKGDIR }}
