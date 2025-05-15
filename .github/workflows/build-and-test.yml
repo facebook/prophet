@@ -50,7 +50,7 @@ jobs:
     strategy:
       matrix:
         config:
-          - {os: ubuntu-22.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+          - {os: ubuntu-22.04, r: 'release', rspm: "https://packagemanager.example.com/our-cran/__linux__/jammy/latest"}
       fail-fast: false
 
     env:
