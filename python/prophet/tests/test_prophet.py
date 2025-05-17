@@ -255,6 +255,7 @@ class TestProphetDataPrep:
 
         assert len(future) == train.shape[0] + 3
 
+
 class TestProphetTrendComponent:
     def test_invalid_growth_input(self, backend):
         msg = 'Parameter "growth" should be "linear", ' '"logistic" or "flat".'
@@ -432,6 +433,16 @@ class TestProphetTrendComponent:
         assert m.n_changepoints == 15
         cp = m.changepoints_t
         assert cp.shape[0] == 15
+
+    def test_without_negative_predictions(self, subdaily_univariate_ts, backend):
+        test_days = 280
+        train, test = train_test_split(subdaily_univariate_ts, test_days)
+        forecaster = Prophet(stan_backend=backend, negative_prediction_values=False, weekly_seasonality=True, yearly_seasonality=True)
+        forecaster.fit(train, seed=1237861298)
+        np.random.seed(876543987)
+        future = forecaster.make_future_dataframe(test_days, include_history=False)
+        future = forecaster.predict(future)
+        assert (future['yhat'].values >= 0).all()
 
 
 class TestProphetSeasonalComponent:
@@ -875,7 +886,6 @@ class TestProphetHolidays:
         m.fit(subdaily_univariate_ts)
         fcst = m.predict()
         assert sum(fcst["special_day"] == 0) == 575
-
 
 
 class TestProphetRegressors:
