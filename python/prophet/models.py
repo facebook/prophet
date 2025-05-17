@@ -174,10 +174,17 @@ class CmdStanPyBackend(IStanBackend):
     def cleanup(self):
         import cmdstanpy
         
-        if hasattr(self , "stan_fit"):
+        if hasattr(self, "stan_fit"):
             fit_result: cmdstanpy.CmdStanMLE | cmdstanpy.CmdStanMCMC = self.stan_fit
-            for fpath in fit_result.runset.csv_files:
-                pathlib.Path(fpath).unlink(missing_ok=True)
+            to_remove = (
+                fit_result.runset.csv_files + 
+                fit_result.runset.diagnostic_files + 
+                fit_result.runset.stdout_files + 
+                fit_result.runset.profile_files
+            )
+            for fpath in to_remove:
+                if pathlib.Path(fpath).is_file():
+                    pathlib.Path(fpath).unlink()
                 
     @staticmethod
     def sanitize_custom_inits(default_inits, custom_inits):
