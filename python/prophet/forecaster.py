@@ -25,6 +25,7 @@ logger = logging.getLogger('prophet')
 logger.setLevel(logging.INFO)
 NANOSECONDS_TO_SECONDS = 1000 * 1000 * 1000
 
+
 class Prophet(object):
     stan_backend: IStanBackend
     
@@ -80,6 +81,7 @@ class Prophet(object):
         iterate over all available backends and find the working one.
     scaling: 'absmax' (default) or 'minmax'.
     holidays_mode: 'additive' or 'multiplicative'. Defaults to seasonality_mode.
+    negative_prediction_values: bool check to set all negative prediction values in the DataFrame to 0.
     """
 
     def __init__(
@@ -102,6 +104,7 @@ class Prophet(object):
             stan_backend=None,
             scaling: str = 'absmax',
             holidays_mode=None,
+            negative_prediction_values=True
     ):
         self.growth = growth
 
@@ -153,6 +156,7 @@ class Prophet(object):
         self.train_component_cols = None
         self.component_modes = None
         self.train_holiday_names = None
+        self.negative_prediction_values = negative_prediction_values
         self.fit_kwargs = {}
         self.validate_inputs()
         self._load_stan_backend(stan_backend)
@@ -1188,6 +1192,37 @@ class Prophet(object):
             sigma_obs=1.0,
         )
 
+    def calculate_and_clip_percentile(self, data, component, comp, lower_p, upper_p):
+        """
+        A helper function to calculate the lower and upper percentiles for a given component.
+
+        Parameters:
+        - data: dict or similar
+            The data structure where the calculated percentiles will be stored.
+        - component: str
+            The name of the component for which the percentiles are being calculated.
+        - comp: array-like
+            The data for which percentiles are to be calculated.
+        - lower_p: float
+            The percentile to calculate for the lower bound.
+        - upper_p: float
+            The percentile to calculate for the upper bound.
+
+        Returns:
+        - None
+            The function directly modifies the `data` structure by adding the lower and upper percentile values.
+        """
+        lower = self.percentile(comp, lower_p, axis=1)
+        upper = self.percentile(comp, upper_p, axis=1)
+
+        if not self.negative_prediction_values:
+            lower = np.clip(lower, a_min=0, a_max=None)
+            upper = np.clip(upper, a_min=0, a_max=None)
+
+        data[component + '_lower'] = lower
+        data[component + '_upper'] = upper
+
+
     def fit(self, df, **kwargs):
         """Fit the Prophet model.
 
@@ -1285,12 +1320,19 @@ class Prophet(object):
             cols.append('cap')
         if self.logistic_floor:
             cols.append('floor')
+        if not self.negative_prediction_values:
+            df['trend'] = df['trend'].clip(lower=0)
+
         # Add in forecast components
         df2 = pd.concat((df[cols], intervals, seasonal_components), axis=1)
         df2['yhat'] = (
                 df2['trend'] * (1 + df2['multiplicative_terms'])
                 + df2['additive_terms']
         )
+
+        if not self.negative_prediction_values:
+            df2['yhat'] = df2['yhat'].clip(lower=0)
+
         return df2
 
     @staticmethod
@@ -1418,7 +1460,9 @@ class Prophet(object):
             comp = np.matmul(X, beta_c.transpose())
             if component in self.component_modes['additive']:
                 comp *= self.y_scale
+
             data[component] = np.nanmean(comp, axis=1)
+
             if self.uncertainty_samples:
                 data[component + '_lower'] = self.percentile(
                     comp, lower_p, axis=1,
@@ -1426,6 +1470,7 @@ class Prophet(object):
                 data[component + '_upper'] = self.percentile(
                     comp, upper_p, axis=1,
                 )
+
         return pd.DataFrame(data)
 
     def predict_uncertainty(self, df: pd.DataFrame, vectorized: bool) -> pd.DataFrame:
@@ -1447,10 +1492,9 @@ class Prophet(object):
 
         series = {}
         for key in ['yhat', 'trend']:
-            series['{}_lower'.format(key)] = self.percentile(
-                sim_values[key], lower_p, axis=1)
-            series['{}_upper'.format(key)] = self.percentile(
-                sim_values[key], upper_p, axis=1)
+            self.calculate_and_clip_percentile(
+                series, key, sim_values[key], lower_p, upper_p
+            )
 
         return pd.DataFrame(series)
 
