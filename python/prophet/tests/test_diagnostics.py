@@ -12,6 +12,7 @@ import pytest
 
 from prophet import Prophet, diagnostics
 
+import logging
 
 @pytest.fixture(scope="module")
 def ts_short(daily_univariate_ts):
@@ -401,3 +402,49 @@ class TestProphetCopy:
         assert (changepoints == m2.changepoints).all()
         assert "custom" in m2.seasonalities
         assert "binary_feature" in m2.extra_regressors
+
+
+    def test_cross_validation_dask_import_error(self, ts_short, backend, monkeypatch):
+        m = Prophet(stan_backend=backend)
+        m.fit(ts_short)
+        
+        # Simulate dask not being installed
+        import sys
+        if 'dask' in sys.modules:
+            del sys.modules['dask']
+        
+        with pytest.raises(ImportError, match="parallel='dask' requires the optional dependency dask."):
+            diagnostics.cross_validation(m, horizon="4 days", parallel="dask")
+
+
+    def test_cross_validation_min_cutoff_value_error(self, ts_short, backend):
+        m = Prophet(stan_backend=backend)
+        m.fit(ts_short)
+        cutoffs = [ts_short['ds'].min(), pd.Timestamp("2012-07-01")]
+        with pytest.raises(ValueError, match="Minimum cutoff value is not strictly greater than min date in history"):
+            diagnostics.cross_validation(m, horizon="4 days", cutoffs=cutoffs)
+
+
+    def test_cross_validation_initial_window_warning(self, ts_short, backend, caplog):
+        m = Prophet(stan_backend=backend)
+        m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
+        m.fit(ts_short)
+        with caplog.at_level(logging.WARNING):
+            diagnostics.cross_validation(
+                m, horizon="4 days", period="10 days", initial="20 days"
+            )
+        assert any("Seasonality has period of" in message for message in caplog.messages)
+
+
+    def test_cross_validation_max_cutoff_value_error(self, ts_short, backend):
+        m = Prophet(stan_backend=backend)
+        m.fit(ts_short)
+        cutoffs = [pd.Timestamp("2012-12-31")]
+        with pytest.raises(ValueError, match="Maximum cutoff value is greater than end date minus horizon"):
+            diagnostics.cross_validation(m, horizon="4 days", cutoffs=cutoffs)
+
+
+    def test_cross_validation_unfit_model_exception(self):
+        m = Prophet()
+        with pytest.raises(Exception, match="Model has not been fit"):
+            diagnostics.cross_validation(m, horizon="4 days")
