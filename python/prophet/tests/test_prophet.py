@@ -64,7 +64,7 @@ class TestProphetFitPredictDefault:
         test_days = 30
         train, test = train_test_split(large_numbers_ts, test_days)
         forecaster = Prophet(stan_backend=backend, scaling=scaling)
-        forecaster.fit(train, seed=1237861298)
+        forecaster.fit(train, seed=1237861298, sig_figs=6)
         np.random.seed(876543987)
         future = forecaster.make_future_dataframe(test_days, include_history=False)
         future = forecaster.predict(future)
@@ -248,7 +248,7 @@ class TestProphetDataPrep:
         train = daily_univariate_ts.head(468 // 2).copy()
         #cover history with NAs
         train.loc[train.sample(10).index, "y"] = np.nan
-        
+
         forecaster = Prophet(stan_backend=backend)
         forecaster.fit(train)
         future = forecaster.make_future_dataframe(periods=3, freq="D", include_history=True)
