@@ -31,7 +31,12 @@
       envir=prophet_model_env
     )
   },
-  error = function(cond) {}
+  error = function(cond) {
+    warning(paste("Failed to load Prophet Stan model during package initialization:",
+                  cond$message, 
+                  "\nThis may cause Prophet functions to fail.",
+                  "\nTry reinstalling the package or check that Stan is properly configured."))
+  }
   )
 }
 
