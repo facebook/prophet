@@ -10,7 +10,7 @@ import dataclasses
 import logging
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
-from datetime import timedelta
+from datetime import timedelta, date
 from typing import Dict, List, Union
 
 import numpy as np
@@ -25,6 +25,32 @@ logger = logging.getLogger('prophet')
 logger.setLevel(logging.INFO)
 NANOSECONDS_TO_SECONDS = 1000 * 1000 * 1000
 
+def _validate_ds_ns_range(ds_series) -> None:
+    # pandas ns bounds
+    ns_min = date(1677, 9, 21)
+    ns_max = date(2262, 4, 11)
+
+    def _to_date(x):
+        try:
+            # handles 'YYYY-MM-DD...' strings; slice keeps date part
+            return date.fromisoformat(str(x)[:10])
+        except Exception:
+            return None
+
+    parsed = ds_series.map(_to_date)
+
+    if parsed.isna().any():
+        bad = ds_series[parsed.isna()].iloc[0]
+        raise ValueError(f"Invalid ds value (cannot parse to date): {bad}")
+
+    oob = (parsed < ns_min) | (parsed > ns_max)
+    if oob.any():
+        bad = ds_series[oob].iloc[0]
+        raise ValueError(
+            f"Prophet supports pandas datetime64[ns] only "
+            f"({ns_min.isoformat()} to {ns_max.isoformat()}). "
+            f"Out-of-range ds value: {bad}"
+        )
 class Prophet(object):
     stan_backend: IStanBackend
     
@@ -213,7 +239,8 @@ class Prophet(object):
             raise ValueError(
                 'holidays_mode must be "additive" or "multiplicative"'
             )
-
+    
+    
     def validate_column_name(self, name, check_holidays=True,
                              check_seasonalities=True, check_regressors=True):
         """Validates the name of a seasonality, holiday, or regressor.
@@ -1125,6 +1152,8 @@ class Prophet(object):
         Saves the preprocessed data to the instantiated object, and also returns the relevant components
         as a ModelInputData object.
         """
+        _validate_ds_ns_range(df["ds"])
+
         if ('ds' not in df) or ('y' not in df):
             raise ValueError(
                 'Dataframe must have columns "ds" and "y" with the dates and '
