@@ -174,7 +174,7 @@ class CmdStanPyBackend(IStanBackend):
     def cleanup(self):
         import cmdstanpy
         
-        if hasattr(self, "stan_fit"):
+        if hasattr(self, "stan_fit") and self.stan_fit is not None:
             fit_result: cmdstanpy.CmdStanMLE | cmdstanpy.CmdStanMCMC = self.stan_fit
             to_remove = (
                 fit_result.runset.csv_files + 
