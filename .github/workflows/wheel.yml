@@ -53,6 +53,7 @@ jobs:
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
+            MACOSX_DEPLOYMENT_TARGET="${{ matrix.os == 'macos-14-large' && 10.11 || 11.0 }}"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014 # distributed cmdstan binary is broken with manylinux_2_28
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_SKIP: "*musllinux*"
