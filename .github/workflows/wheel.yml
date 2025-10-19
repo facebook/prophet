@@ -16,8 +16,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - macos-15-large # Intel
-          - macos-15-xlarge # ARM64
+          - macos-14-intel # Intel
+          - macos-14 # ARM64
           - ubuntu-24.04 # Intel
           - ubuntu-24.04-arm # ARM64
           - windows-latest
@@ -34,11 +34,6 @@ jobs:
           (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
           $os_version = (Get-CimInstance Win32_OperatingSystem).version
           Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
-
-      - name: "Set environment variables (MacOS)"
-        if: startsWith(runner.os, 'macOS')
-        run: |
-          echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d '.' -f 1-2)" >> $env:GITHUB_ENV
 
       - name: "Checkout repo"
         uses: actions/checkout@v5
