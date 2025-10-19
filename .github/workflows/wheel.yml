@@ -28,12 +28,17 @@ jobs:
 
     steps:
       - name: "Set environment variables (Windows)"
-        if: startsWith(runner.os, 'Windows')
         shell: pwsh
+        if: startsWith(runner.os, 'Windows')
         run: |
           (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
           $os_version = (Get-CimInstance Win32_OperatingSystem).version
           Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
+
+      - name: "Set environment variables (MacOS)"
+        if: startsWith(runner.os, 'macOS')
+        run: |
+          echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d '.' -f 1-2)" >> $env:GITHUB_ENV
 
       - name: "Checkout repo"
         uses: actions/checkout@v5
@@ -53,6 +58,7 @@ jobs:
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014 # manylinux_2_28 cannot distribute cmdstan
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
