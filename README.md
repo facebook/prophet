@@ -127,6 +127,8 @@ Using `cmdstanpy` with Windows requires a Unix-compatible C compiler such as min
 
 ## Changelog
 
+See [Release Notes](https://github.com/facebook/prophet/releases).
+
 ### Version 1.1.6 (2024.09.29)
 
 #### Python

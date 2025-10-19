@@ -15,28 +15,28 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ["macos-13", "ubuntu-latest", "windows-latest", "macos-latest-xlarge"]
+        os:
+          - macos-14-large # Intel
+          - macos-14-xlarge # ARM64
+          - ubuntu-24.04 # Intel
+          - ubuntu-24.04-arm # ARM64
+          - windows-latest
         cibw_arch: ["native"]
         # Build one wheel (ABI = none) using first build spec, then test on all python versions.
-        cibw_build: ["cp39-* cp310-* cp311-*"]
-        include:
-          - os: ubuntu-latest
-            cibw_arch: aarch64
-            # Each test takes 30 mins, which is too long to run sequentially, so we test once only.
-            cibw_build: "cp39-*"
+        cibw_build: ["cp310-* cp311-* cp312-*"]
       fail-fast: false
 
     steps:
       - name: "Set environment variables (Windows)"
-        if: startsWith(runner.os, 'Windows')
         shell: pwsh
+        if: startsWith(runner.os, 'Windows')
         run: |
           (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
           $os_version = (Get-CimInstance Win32_OperatingSystem).version
           Echo "OS_VERSION=$os_version" >> $env:GITHUB_ENV
 
       - name: "Checkout repo"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: "Restore RTools40"
         if: startsWith(runner.os, 'Windows')
@@ -46,21 +46,15 @@ jobs:
           path: C:/rtools40
           key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
 
-      - name: Set up QEMU
-        if: matrix.cibw_arch == 'aarch64'
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-
       - name: "Build wheels"
-        uses: pypa/cibuildwheel@v2.23.3
+        uses: pypa/cibuildwheel@v3.2.1
         with:
           package-dir: python
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
-            MACOSX_DEPLOYMENT_TARGET="${{ matrix.os == 'macos-13' && 10.11 || 11.0 }}"
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+            MACOSX_DEPLOYMENT_TARGET="${{ matrix.os == 'macos-14-large' && 10.11 || 11.0 }}"
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014 # distributed cmdstan binary is broken with manylinux_2_28
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
