@@ -49,6 +49,7 @@ def prune_cmdstan(cmdstan_dir: str) -> None:
             os.remove(f)
     for tbb_dir in TBB_DIRS:
         copytree(original_dir / TBB_PARENT / tbb_dir, temp_dir / TBB_PARENT / tbb_dir)
+    copy(original_dir / "makefile", temp_dir / "makefile")
 
     rmtree(original_dir)
     temp_dir.rename(original_dir)
