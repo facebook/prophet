@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from prophet import Prophet
+from prophet import Prophet, diagnostics
 from prophet.utilities import warm_start_params
 
 
@@ -966,6 +966,71 @@ class TestProphetRegressors:
         m.add_regressor("constant_feature")
         m.fit(df)
         assert m.extra_regressors["constant_feature"]["std"] == 1
+
+    def _make_regressor_df(self):
+        rng = np.random.default_rng(12345)
+        n = 90
+        reg = rng.normal(0, 1, n).cumsum()
+        y = 0.5 * reg + rng.normal(0, 0.5, n)
+        return pd.DataFrame(
+            {"ds": pd.date_range("2020-01-01", periods=n, freq="D"), "y": y, "reg": reg}
+        )
+
+    def test_regressor_predictor_affects_predict_outputs(self, backend):
+        df = self._make_regressor_df()
+        train = df.iloc[:70]
+        future_df = df.iloc[70:]
+
+        base = Prophet(uncertainty_samples=300, stan_backend=backend)
+        base.add_regressor("reg")
+        base.fit(train)
+        fcst_base = base.predict(future_df[["ds", "reg"]])
+
+        pred = Prophet(uncertainty_samples=300, stan_backend=backend)
+        pred.add_regressor("reg", regressor_predictor=True)
+        pred.fit(train)
+        fcst_pred = pred.predict(future_df[["ds"]])
+
+        mae_base = np.mean(np.abs(fcst_base["yhat"].values - future_df["y"].values))
+        mae_pred = np.mean(np.abs(fcst_pred["yhat"].values - future_df["y"].values))
+        assert mae_pred >= mae_base - 1e-8
+
+        width_base = np.mean(fcst_base["yhat_upper"] - fcst_base["yhat_lower"])
+        width_pred = np.mean(fcst_pred["yhat_upper"] - fcst_pred["yhat_lower"])
+        assert width_pred > width_base
+
+    def test_regressor_predictor_cross_validation_metrics(self, backend):
+        df = self._make_regressor_df()
+
+        base = Prophet(uncertainty_samples=300, stan_backend=backend)
+        base.add_regressor("reg")
+        base.fit(df)
+        cv_base = diagnostics.cross_validation(
+            base,
+            horizon="5 days",
+            period="5 days",
+            initial="40 days",
+            disable_tqdm=True,
+        )
+
+        pred = Prophet(uncertainty_samples=300, stan_backend=backend)
+        pred.add_regressor("reg", regressor_predictor=True)
+        pred.fit(df)
+        cv_pred = diagnostics.cross_validation(
+            pred,
+            horizon="5 days",
+            period="5 days",
+            initial="40 days",
+            disable_tqdm=True,
+        )
+
+        rmse_base = np.sqrt(np.mean((cv_base["yhat"] - cv_base["y"]) ** 2))
+        rmse_pred = np.sqrt(np.mean((cv_pred["yhat"] - cv_pred["y"]) ** 2))
+        assert rmse_pred >= rmse_base - 1e-8
+
+        width_base = np.mean(cv_base["yhat_upper"] - cv_base["yhat_lower"])
+        width_pred = np.mean(cv_pred["yhat_upper"] - cv_pred["yhat_lower"])
+        assert width_pred > width_base
 
     def test_regressor_predictor_used_for_future(self, backend, monkeypatch):
         df = pd.DataFrame(
