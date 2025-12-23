@@ -970,10 +970,11 @@ class TestProphetRegressors:
     def _make_regressor_df(self):
         rng = np.random.default_rng(12345)
         n = 90
-        reg = rng.normal(0, 1, n).cumsum()
-        y = 0.5 * reg + rng.normal(0, 0.5, n)
+        reg = rng.normal(0, 0.5, n).cumsum()
+        y_clean = 0.5 * reg
+        y = y_clean + rng.normal(0, 0.25, n)
         return pd.DataFrame(
-            {"ds": pd.date_range("2020-01-01", periods=n, freq="D"), "y": y, "reg": reg}
+            {"ds": pd.date_range("2020-01-01", periods=n, freq="D"), "y": y, "reg": reg, "y_clean": y_clean}
         )
 
     def test_regressor_predictor_affects_predict_outputs(self, backend):
@@ -994,6 +995,9 @@ class TestProphetRegressors:
         mae_base = np.mean(np.abs(fcst_base["yhat"].values - future_df["y"].values))
         mae_pred = np.mean(np.abs(fcst_pred["yhat"].values - future_df["y"].values))
         assert mae_pred >= mae_base - 1e-8
+        assert mae_pred < 3.0
+        clean_mae = np.mean(np.abs(fcst_pred["yhat"].values - future_df["y_clean"].values))
+        assert clean_mae < 3.0
 
         width_base = np.mean(fcst_base["yhat_upper"] - fcst_base["yhat_lower"])
         width_pred = np.mean(fcst_pred["yhat_upper"] - fcst_pred["yhat_lower"])

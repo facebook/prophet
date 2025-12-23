@@ -177,6 +177,34 @@ class TestCrossValidation:
         df_merged = pd.merge(df_cv, ts_short, "left", on="ds")
         assert np.sum((df_merged["y_x"] - df_merged["y_y"]) ** 2) == pytest.approx(0.0)
 
+    def test_cross_validation_metrics_with_regressor_predictor(self, backend):
+        rng = np.random.default_rng(2024)
+        n = 90
+        reg = rng.normal(0, 0.5, n).cumsum()
+        y = 0.6 * reg + rng.normal(0, 0.25, n)
+        df = pd.DataFrame(
+            {"ds": pd.date_range("2020-01-01", periods=n, freq="D"), "y": y, "reg": reg}
+        )
+
+        base = Prophet(uncertainty_samples=300, stan_backend=backend)
+        base.add_regressor("reg")
+        base.fit(df)
+        cv_base = diagnostics.cross_validation(
+            base, horizon="5 days", period="5 days", initial="40 days", disable_tqdm=True
+        )
+        metrics_base = diagnostics.performance_metrics(cv_base, metrics=["rmse", "mape"])
+
+        pred = Prophet(uncertainty_samples=300, stan_backend=backend)
+        pred.add_regressor("reg", regressor_predictor=True)
+        pred.fit(df)
+        cv_pred = diagnostics.cross_validation(
+            pred, horizon="5 days", period="5 days", initial="40 days", disable_tqdm=True
+        )
+        metrics_pred = diagnostics.performance_metrics(cv_pred, metrics=["rmse", "mape"])
+
+        assert metrics_pred["rmse"].values[-1] >= metrics_base["rmse"].values[-1] - 1e-8
+        assert metrics_pred["mape"].values[-1] >= metrics_base["mape"].values[-1] - 1e-8
+
     def test_cross_validation_with_regressor_predictor(self, backend, monkeypatch):
         df = pd.DataFrame(
             {
