@@ -897,10 +897,12 @@ class TestProphetRegressors:
         # Check that standardizations are correctly set
         assert m.extra_regressors["binary_feature"] == {
             "prior_scale": 0.2,
-            "mu": 0,
-            "std": 1,
+            "mu": 0.0,
+            "std": 1.0,
             "standardize": "auto",
             "mode": "additive",
+            "predictor_spec": None,
+            "predictor": None,
         }
         assert m.extra_regressors["numeric_feature"]["prior_scale"] == 0.5
         assert m.extra_regressors["numeric_feature"]["mu"] == 254.5
@@ -964,6 +966,33 @@ class TestProphetRegressors:
         m.add_regressor("constant_feature")
         m.fit(df)
         assert m.extra_regressors["constant_feature"]["std"] == 1
+
+    def test_regressor_predictor_used_for_future(self, backend, monkeypatch):
+        df = pd.DataFrame(
+            {
+                "ds": pd.date_range("2020-01-01", periods=50, freq="D"),
+                "y": np.linspace(0, 10, 50),
+                "extra": np.linspace(0, 5, 50),
+            }
+        )
+        m = Prophet(stan_backend=backend)
+        m.add_regressor("extra", regressor_predictor=True)
+        m.fit(df)
+
+        calls = []
+        original_predict = Prophet.predict
+
+        def spy(self, df=None, vectorized=True):
+            if getattr(self, "_regressor_name", None):
+                calls.append(self._regressor_name)
+            return original_predict(self, df, vectorized)
+
+        monkeypatch.setattr(Prophet, "predict", spy)
+
+        future = m.make_future_dataframe(periods=5, include_history=False)
+        fcst = m.predict(future)
+        assert fcst.shape[0] == 5
+        assert any(call == "extra" for call in calls)
 
 
 class TestProphetWarmStart:

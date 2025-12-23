@@ -177,6 +177,37 @@ class TestCrossValidation:
         df_merged = pd.merge(df_cv, ts_short, "left", on="ds")
         assert np.sum((df_merged["y_x"] - df_merged["y_y"]) ** 2) == pytest.approx(0.0)
 
+    def test_cross_validation_with_regressor_predictor(self, backend, monkeypatch):
+        df = pd.DataFrame(
+            {
+                "ds": pd.date_range("2020-01-01", periods=80, freq="D"),
+                "y": np.linspace(0, 20, 80),
+                "extra": np.linspace(5, 15, 80),
+            }
+        )
+        m = Prophet(stan_backend=backend)
+        m.add_regressor("extra", regressor_predictor=True)
+        m.fit(df)
+
+        calls = []
+        original_predict = Prophet.predict
+
+        def spy(self, df=None, vectorized=True):
+            if getattr(self, "_regressor_name", None):
+                calls.append(self._regressor_name)
+            return original_predict(self, df, vectorized)
+
+        monkeypatch.setattr(Prophet, "predict", spy)
+
+        diagnostics.cross_validation(
+            m,
+            horizon="5 days",
+            period="5 days",
+            initial="30 days",
+            disable_tqdm=True,
+        )
+        assert any(call == "extra" for call in calls)
+
     def test_cross_validation_default_value_check(self, ts_short, backend):
         m = Prophet(stan_backend=backend)
         m.fit(ts_short)
