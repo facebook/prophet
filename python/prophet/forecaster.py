@@ -651,8 +651,8 @@ class Prophet(object):
         standardize: optional, specify whether this regressor will be
             standardized prior to fitting. Can be 'auto' (standardize if not
             binary), True, or False.
-         mode: optional, 'additive' or 'multiplicative'. Defaults to
-         self.seasonality_mode.
+        mode: optional, 'additive' or 'multiplicative'. Defaults to
+            self.seasonality_mode.
         regressor_predictor: optional. If provided, fits a dedicated Prophet
             model to forecast this regressor. Set to True to use default Prophet
             parameters, or provide a dict of keyword arguments for the
