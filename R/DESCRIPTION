@@ -14,6 +14,7 @@ Description: Implements a procedure for forecasting time series data based on
     handles outliers well.
 URL: https://github.com/facebook/prophet
 BugReports: https://github.com/facebook/prophet/issues
+Maintainer: TODO <maintainer@example.com>
 Depends:
     R (>= 3.4.0),
     Rcpp (>= 0.12.0),
@@ -41,7 +42,7 @@ Suggests:
     testthat,
     readr,
     rmarkdown
-SystemRequirements: GNU make, C++11
+SystemRequirements: GNU make, C++14
 Biarch: true
 License: MIT + file LICENSE
 LinkingTo:
