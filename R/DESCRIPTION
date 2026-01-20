@@ -41,7 +41,7 @@ Suggests:
     testthat,
     readr,
     rmarkdown
-SystemRequirements: GNU make, C++11
+SystemRequirements: GNU make, C++17
 Biarch: true
 License: MIT + file LICENSE
 LinkingTo:
