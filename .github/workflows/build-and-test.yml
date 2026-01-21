@@ -91,7 +91,6 @@ jobs:
         shell: Rscript {0}
 
       - name: Check
-        id: check
         uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
