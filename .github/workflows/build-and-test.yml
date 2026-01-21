@@ -96,3 +96,10 @@ jobs:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
           working-directory: ${{ env.PKGDIR }}
+
+      - name: Upload package source
+        if: always() # Upload even if the check step fails
+        uses: actions/upload-artifact@v4
+        with:
+          name: r-source-package
+          path: "**/*.tar.gz"
