@@ -103,4 +103,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: r-source-package
-          path: ${{ steps.check.outputs.package-archive }}
+          path: ${{ env.PKGDIR  }}/*.tar.gz
