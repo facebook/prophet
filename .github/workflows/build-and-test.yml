@@ -91,8 +91,16 @@ jobs:
         shell: Rscript {0}
 
       - name: Check
+        id: check
         uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
           working-directory: ${{ env.PKGDIR }}
+
+      - name: Upload package source
+        if: always() # Upload even if the check step fails
+        uses: actions/upload-artifact@v4
+        with:
+          name: r-source-package
+          path: ${{ steps.check.outputs.package-archive }}
