@@ -87,7 +87,7 @@ jobs:
       # Install Stan packages separately if needed
       - name: Install Stan packages
         run: |
-          install.packages(c("cmdstanr", "posterior"), repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
+          install.packages(c("cmdstanr", "posterior"), repos = c("https://stan-dev.r-universe.dev", getOption("repos")))
         shell: Rscript {0}
 
       - name: Check

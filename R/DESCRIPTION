@@ -1,7 +1,7 @@
 Package: prophet
 Title: Automatic Forecasting Procedure
 Version: 1.1.7
-Date: 2024-09-29
+Date: 2026-01-22
 Authors@R: c(
   person("Cuong", "Duong", email = "cuong.duong242@gmail.com", role = c("cre", "aut")),
   person("Sean", "Taylor", email = "sjtz@pm.me", role = "aut"),
