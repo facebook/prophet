@@ -42,6 +42,7 @@ Suggests:
     testthat,
     readr,
     rmarkdown
+Additional_repositories: https://stan-dev.r-universe.dev
 SystemRequirements: GNU make, C++17
 Biarch: true
 License: MIT + file LICENSE
