@@ -14,7 +14,7 @@ readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
   "cmdstanpy>=1.0.4",
-  "numpy>=1.15.4",
+  "numpy>=1.15.4,<2.4.0",
   "matplotlib>=2.0.0",
   "pandas>=1.0.4,<3",
   "holidays>=0.25,<1",
