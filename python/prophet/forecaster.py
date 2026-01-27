@@ -477,7 +477,30 @@ class Prophet(object):
             raise ValueError("series_order must be >= 1")
 
         # convert to days since epoch
-        t = dates.to_numpy(dtype=np.int64) // NANOSECONDS_TO_SECONDS / (3600 * 24.)
+        # Handle both nanosecond and microsecond precision datetimes
+        dt_values = dates.to_numpy(dtype=np.int64)
+        # Get the unit from the dtype (ns, us, ms, or s)
+        dtype_str = str(dates.dtype)
+        if '[' in dtype_str and ']' in dtype_str:
+            unit = dtype_str.split('[')[1].split(']')[0]
+        elif hasattr(dates.dtype, 'unit'):
+            unit = dates.dtype.unit
+        else:
+            # Fallback for older pandas versions
+            unit = 'ns'
+
+        # Convert to seconds based on the unit
+        if unit == 'ns':
+            t = dt_values / NANOSECONDS_TO_SECONDS / (3600 * 24.)
+        elif unit == 'us':
+            t = dt_values / (1000 * 1000) / (3600 * 24.)
+        elif unit == 'ms':
+            t = dt_values / 1000 / (3600 * 24.)
+        elif unit == 's':
+            t = dt_values / (3600 * 24.)
+        else:
+            # Default to nanoseconds for unknown units
+            t = dt_values / NANOSECONDS_TO_SECONDS / (3600 * 24.)
 
         x_T = t * np.pi * 2
         fourier_components = np.empty((dates.shape[0], 2 * series_order))
@@ -936,7 +959,7 @@ class Prophet(object):
         group_cols = new_comp['col'].unique()
         if len(group_cols) > 0:
             new_comp = pd.DataFrame({'col': group_cols, 'component': name})
-            components = pd.concat([components, new_comp])
+            components = pd.concat([components, new_comp], ignore_index=True)
         return components
 
     def parse_seasonality_args(self, name, arg, auto_disable, default_order):
@@ -1332,16 +1355,19 @@ class Prophet(object):
         Vector y(t).
         """
         # Compute offset changes
-        k_cum = np.concatenate((np.atleast_1d(k), np.cumsum(deltas) + k))
+        # Ensure k and m are scalars for numpy 2.x compatibility
+        k_scalar = np.asarray(k).item() if np.asarray(k).size == 1 else k
+        m_scalar = np.asarray(m).item() if np.asarray(m).size == 1 else m
+        k_cum = np.concatenate((np.atleast_1d(k_scalar), np.cumsum(deltas) + k_scalar))
         gammas = np.zeros(len(changepoint_ts))
         for i, t_s in enumerate(changepoint_ts):
             gammas[i] = (
-                    (t_s - m - np.sum(gammas))
+                    (t_s - m_scalar - np.sum(gammas))
                     * (1 - k_cum[i] / k_cum[i + 1])  # noqa W503
             )
         # Get cumulative rate and offset at each t
-        k_t = k * np.ones_like(t)
-        m_t = m * np.ones_like(t)
+        k_t = k_scalar * np.ones_like(t)
+        m_t = m_scalar * np.ones_like(t)
         for s, t_s in enumerate(changepoint_ts):
             indx = t >= t_s
             k_t[indx] += deltas[s]

@@ -14,9 +14,9 @@ readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
   "cmdstanpy>=1.0.4",
-  "numpy>=1.15.4,<2.4.0",
+  "numpy>=1.15.4",
   "matplotlib>=2.0.0",
-  "pandas>=1.0.4,<3",
+  "pandas>=1.0.4",
   "holidays>=0.25,<1",
   "tqdm>=4.36.1",
   "importlib_resources",
@@ -37,6 +37,7 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
 ]
 
 [project.optional-dependencies]
