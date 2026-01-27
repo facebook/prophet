@@ -40,7 +40,10 @@ class TestSerialize:
             elif k in PD_SERIES and v is not None:
                 assert v.equals(m2.__dict__[k])
             elif k in PD_DATAFRAME and v is not None:
-                pd.testing.assert_frame_equal(v, m2.__dict__[k], check_index_type=False)
+                # check_dtype=False since .fit() and .predict() will cooerce to the correct types
+                pd.testing.assert_frame_equal(
+                    v, m2.__dict__[k], check_index_type=False, check_dtype=False
+                )
             elif k == "changepoints_t":
                 assert np.array_equal(v, m.__dict__[k])
             else:
@@ -111,7 +114,10 @@ class TestSerialize:
             elif k in PD_SERIES and v is not None:
                 assert v.equals(m2.__dict__[k])
             elif k in PD_DATAFRAME and v is not None:
-                pd.testing.assert_frame_equal(v, m2.__dict__[k], check_index_type=False)
+                # check_dtype=False since .fit() and .predict() will cooerce to the correct types
+                pd.testing.assert_frame_equal(
+                    v, m2.__dict__[k], check_index_type=False, check_dtype=False
+                )
             elif k == "changepoints_t":
                 assert np.array_equal(v, m.__dict__[k])
             else:
