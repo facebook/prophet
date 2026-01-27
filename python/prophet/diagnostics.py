@@ -11,6 +11,7 @@ from tqdm.auto import tqdm
 from copy import deepcopy
 import concurrent.futures
 import multiprocessing
+import sys
 
 import numpy as np
 import pandas as pd
@@ -177,9 +178,11 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         if parallel == "threads":
             pool = concurrent.futures.ThreadPoolExecutor()
         elif parallel == "processes":
-            pool = concurrent.futures.ProcessPoolExecutor(
-                mp_context=multiprocessing.get_context("forkserver")
-            )
+            if sys.platform.startswith("win") or sys.platform == "darwin":
+                ctx = multiprocessing.get_context("spawn")
+            else:
+                ctx = multiprocessing.get_context("forkserver")
+            pool = concurrent.futures.ProcessPoolExecutor(mp_context=ctx)
         elif parallel == "dask":
             try:
                 from dask.distributed import get_client

@@ -27,7 +27,7 @@ NANOSECONDS_TO_SECONDS = 1000 * 1000 * 1000
 
 class Prophet(object):
     stan_backend: IStanBackend
-    
+
     """Prophet forecaster.
 
     Parameters
@@ -476,31 +476,8 @@ class Prophet(object):
         if not (series_order >= 1):
             raise ValueError("series_order must be >= 1")
 
-        # convert to days since epoch
-        # Handle both nanosecond and microsecond precision datetimes
-        dt_values = dates.to_numpy(dtype=np.int64)
-        # Get the unit from the dtype (ns, us, ms, or s)
-        dtype_str = str(dates.dtype)
-        if '[' in dtype_str and ']' in dtype_str:
-            unit = dtype_str.split('[')[1].split(']')[0]
-        elif hasattr(dates.dtype, 'unit'):
-            unit = dates.dtype.unit
-        else:
-            # Fallback for older pandas versions
-            unit = 'ns'
-
-        # Convert to seconds based on the unit
-        if unit == 'ns':
-            t = dt_values / NANOSECONDS_TO_SECONDS / (3600 * 24.)
-        elif unit == 'us':
-            t = dt_values / (1000 * 1000) / (3600 * 24.)
-        elif unit == 'ms':
-            t = dt_values / 1000 / (3600 * 24.)
-        elif unit == 's':
-            t = dt_values / (3600 * 24.)
-        else:
-            # Default to nanoseconds for unknown units
-            t = dt_values / NANOSECONDS_TO_SECONDS / (3600 * 24.)
+        epoch = pd.Timestamp("1970-01-01", tz=dates.dt.tz)
+        t = (dates - epoch).dt.total_seconds() / (24 * 60 * 60)
 
         x_T = t * np.pi * 2
         fourier_components = np.empty((dates.shape[0], 2 * series_order))
