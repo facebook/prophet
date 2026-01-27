@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates.
 
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-
-from __future__ import absolute_import, division, print_function
 
 import dataclasses
 import logging
@@ -19,7 +16,7 @@ from numpy.typing import NDArray
 
 from prophet.make_holidays import get_holiday_names, make_holidays_df
 from prophet.models import StanBackendEnum, ModelInputData, ModelParams, TrendIndicator, IStanBackend
-from prophet.plot import (plot, plot_components)
+from prophet.plot import plot, plot_components
 
 logger = logging.getLogger('prophet')
 logger.setLevel(logging.INFO)
