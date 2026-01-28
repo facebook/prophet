@@ -24,11 +24,11 @@ Prophet allows you to make forecasts using a [logistic growth](https://en.wikipe
 
 ```R
 # R
-df <- read.csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
+df <- read.csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_R.csv')
 ```
 ```python
 # Python
-df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_R.csv')
 ```
 We must specify the carrying capacity in a column `cap`. Here we will assume a particular value, but this would usually be set using data or expertise about the market size.
 
