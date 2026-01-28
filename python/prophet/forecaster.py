@@ -16,6 +16,8 @@ if TYPE_CHECKING:
     from typing import TypeAlias
     from typing_extensions import Self
 
+    import matplotlib.pyplot as plt
+
     _Mode: TypeAlias = Literal['additive', 'multiplicative']
 
 import numpy as np
@@ -2034,14 +2036,14 @@ class Prophet:
     def plot(
         self,
         fcst: pd.DataFrame,
-        ax: object | None = None,
+        ax: plt.Axes | None = None,
         uncertainty: bool = True,
         plot_cap: bool = True,
         xlabel: str = 'ds',
         ylabel: str = 'y',
         figsize: tuple[int, int] = (10, 6),
         include_legend: bool = False,
-    ):
+    ) -> plt.Figure:
         """Plot the Prophet forecast.
 
         Parameters
@@ -2074,7 +2076,7 @@ class Prophet:
         weekly_start: int = 0,
         yearly_start: int = 0,
         figsize: tuple[int, int] | None = None,
-    ):
+    ) -> plt.Figure:
         """Plot the Prophet forecast components.
 
         Will plot whichever are available of: trend, holidays, weekly
@@ -2103,3 +2105,4 @@ class Prophet:
             weekly_start=weekly_start, yearly_start=yearly_start,
             figsize=figsize
         )
+ 
