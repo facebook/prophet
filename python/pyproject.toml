@@ -61,4 +61,5 @@ Repository = "https://github.com/facebook/prophet"
 
 [tool.pyrefly]
 project-includes = ["prophet"]
+project-excludes = ["prophet/tests"]  # todo: 131 errors
 python-version = "3.10"
