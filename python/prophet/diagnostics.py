@@ -311,6 +311,7 @@ def single_cutoff_forecast(
     yhat = m.predict(df[index_predicted][columns])
     # Merge yhat(predicts), y(df, original data) and cutoff
 
+    assert m.stan_backend
     m.stan_backend.cleanup()
 
     return pd.concat([
