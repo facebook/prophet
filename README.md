@@ -129,6 +129,44 @@ Using `cmdstanpy` with Windows requires a Unix-compatible C compiler such as min
 
 See [Release Notes](https://github.com/facebook/prophet/releases).
 
+### Version 1.3.0 (2026.01.27)
+
+#### Python
+
+- Support pandas>=3.0 and numpy>=2.4.
+
+### Version 1.2.2 (2026.01.25)
+
+#### Python
+
+- Version constraints on pandas (`<3`) and numpy (`<2.4`).
+
+#### R
+- Update build requirements to C++17 to Comply with CRAN Policy.
+- Add .tar.gz upload for R package to CI.
+- Re-generated holidays.csv for R package.
+
+### Version 1.2.1 (2025.10.22)
+
+#### Python
+
+- Also copy makefile to fake cmdstan.
+
+### Version 1.2.0 (2025.05.30)
+
+#### Python
+
+- Use latest CmdStan.
+- Add null check to CmdStanPyBackend cleanup() function.
+
+### Version 1.1.7 (2025.05.30)
+
+#### Python
+
+- Enable creation of custom performance metrics.
+- chore: address pandas futurewarning from "M" being deprecated.
+- cleanup() for cross_validate.
+
 ### Version 1.1.6 (2024.09.29)
 
 #### Python

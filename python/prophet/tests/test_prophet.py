@@ -305,7 +305,7 @@ class TestProphetTrendComponent:
         x = np.linspace(0, 2 * np.pi, 8 * 7)
         history = pd.DataFrame(
             {
-                "ds": pd.date_range(start="2020-01-01", periods=8 * 7, freq="d"),
+                "ds": pd.date_range(start="2020-01-01", periods=8 * 7, freq="D"),
                 "y": 30 + np.sin(x * 8.0),
             }
         )
