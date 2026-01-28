@@ -38,6 +38,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Typing :: Typed",
 ]
 
 [project.optional-dependencies]
@@ -48,6 +49,7 @@ dev = [
   "jupyterlab",
   "nbconvert",
   "plotly",
+  "pyrefly==0.50.0",
 ]
 parallel = [
   "dask[dataframe]",
@@ -58,3 +60,9 @@ parallel = [
 Homepage = "https://facebook.github.io/prophet/"
 Documentation = "https://facebook.github.io/prophet/"
 Repository = "https://github.com/facebook/prophet"
+
+
+[tool.pyrefly]
+project-includes = ["prophet"]
+project-excludes = ["prophet/tests"]  # todo: 131 errors
+python-version = "3.10"
