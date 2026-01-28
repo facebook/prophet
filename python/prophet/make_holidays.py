@@ -3,13 +3,15 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from __future__ import annotations
+
 import numpy as np
 import pandas as pd
 
 import holidays
 
 
-def get_country_holidays_class(country):
+def get_country_holidays_class(country: str) -> type[holidays.HolidayBase]:
     """Get class for a supported country.
 
     Parameters
@@ -31,7 +33,7 @@ def get_country_holidays_class(country):
     return getattr(holidays, country)
 
 
-def get_holiday_names(country):
+def get_holiday_names(country: str) -> set[str]:
     """Return all possible holiday names of given country
 
     Parameters
@@ -46,7 +48,12 @@ def get_holiday_names(country):
     return set(country_holidays(language="en_US", years=np.arange(1995, 2045)).values())
 
 
-def make_holidays_df(year_list, country, province=None, state=None):
+def make_holidays_df(
+    year_list: list[int],
+    country: str,
+    province: str | None = None,
+    state: str | None = None,  # unused
+) -> pd.DataFrame:
     """Make dataframe of holidays for given years and countries
 
     Parameters
