@@ -57,3 +57,8 @@ parallel = [
 Homepage = "https://facebook.github.io/prophet/"
 Documentation = "https://facebook.github.io/prophet/"
 Repository = "https://github.com/facebook/prophet"
+
+
+[tool.pyrefly]
+project-includes = ["prophet"]
+python-version = "3.10"
