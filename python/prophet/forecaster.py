@@ -31,8 +31,6 @@ logger.setLevel(logging.INFO)
 NANOSECONDS_TO_SECONDS = 1000 * 1000 * 1000
 
 class Prophet:
-    stan_backend: IStanBackend
-
     """Prophet forecaster.
 
     Parameters
@@ -122,7 +120,7 @@ class Prophet:
     component_modes: dict[_Mode, list[str]] | None
     train_holiday_names: pd.Series | None
     fit_kwargs: dict[str, Any]
-    stan_backend: IStanBackend
+    stan_backend: IStanBackend | None
 
     def __init__(
         self,
@@ -209,6 +207,7 @@ class Prophet:
             # pyrefly:ignore[not-callable]
             self.stan_backend = StanBackendEnum.get_backend_class(stan_backend)()
 
+        assert self.stan_backend
         logger.debug("Loaded stan backend: %s", self.stan_backend.get_type())
 
     def validate_inputs(self) -> None:
@@ -1305,6 +1304,7 @@ class Prophet:
 
         dat = dataclasses.asdict(model_inputs)
         stan_init = dataclasses.asdict(initial_params)
+        stan_backend = cast(IStanBackend, self.stan_backend)
 
         history = cast(pd.DataFrame, self.history)
         if history['y'].min() == history['y'].max() and \
@@ -1314,11 +1314,11 @@ class Prophet:
             for par in self.params:
                 self.params[par] = np.array([self.params[par]])
         elif self.mcmc_samples > 0:
-            self.params = self.stan_backend.sampling(stan_init, dat, self.mcmc_samples, **kwargs)
+            self.params = stan_backend.sampling(stan_init, dat, self.mcmc_samples, **kwargs)
         else:
-            self.params = self.stan_backend.fit(stan_init, dat, **kwargs)
+            self.params = stan_backend.fit(stan_init, dat, **kwargs)
 
-        self.stan_fit = self.stan_backend.stan_fit
+        self.stan_fit = stan_backend.stan_fit
         # If no changepoints were requested, replace delta with 0s
         if len(cast(pd.Series, self.changepoints)) == 0:
             # Fold delta into the base rate k
