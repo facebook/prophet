@@ -88,10 +88,21 @@ def model_to_dict(model):
     for attribute in NP_ARRAY:
         model_dict[attribute] = getattr(model, attribute).tolist()
     for attribute in ORDEREDDICT:
-        model_dict[attribute] = [
-            list(getattr(model, attribute).keys()),
-            getattr(model, attribute),
-        ]
+        if attribute == 'extra_regressors':
+            cleaned = OrderedDict()
+            for name, props in getattr(model, attribute).items():
+                props_copy = deepcopy(props)
+                props_copy['predictor'] = None
+                cleaned[name] = props_copy
+            model_dict[attribute] = [
+                list(cleaned.keys()),
+                cleaned,
+            ]
+        else:
+            model_dict[attribute] = [
+                list(getattr(model, attribute).keys()),
+                getattr(model, attribute),
+            ]
     # Other attributes with special handling
     # fit_kwargs -> Transform any numpy types before serializing.
     # They do not need to be transformed back on deserializing.

@@ -129,6 +129,30 @@ class TestSerialize:
         fcst2 = m2.predict(test)
         assert np.array_equal(fcst["yhat"].values, fcst2["yhat"].values)
 
+    def test_serialize_model_with_regressor_predictor(self, tmp_path, backend):
+        df = pd.DataFrame(
+            {
+                "ds": pd.date_range("2020-01-01", periods=50, freq="D"),
+                "y": np.linspace(0, 5, 50),
+                "extra": np.linspace(10, 20, 50),
+            }
+        )
+        m = Prophet(uncertainty_samples=50, stan_backend=backend)
+        m.add_regressor("extra", regressor_predictor=True)
+        m.fit(df)
+
+        path = tmp_path / "model_regressor.json"
+        path.write_text(model_to_json(m))
+        m2 = model_from_json(path.read_text())
+
+        assert "extra" in m2.extra_regressors
+        assert m2.extra_regressors["extra"]["predictor_spec"] == {}
+        assert m2.extra_regressors["extra"]["predictor"] is None
+
+        future = pd.DataFrame({"ds": pd.date_range("2020-02-20", periods=5, freq="D")})
+        future["extra"] = np.linspace(20, 22, 5)
+        m2.predict(future)
+
     def test_backwards_compatibility(self):
         old_versions = {
             "0.6.1.dev0": (29.3669923968994, "fb"),
