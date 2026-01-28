@@ -48,6 +48,7 @@ dev = [
   "jupyterlab",
   "nbconvert",
   "plotly",
+  "pyrefly==0.50.0",
 ]
 parallel = [
   "dask[dataframe]",
