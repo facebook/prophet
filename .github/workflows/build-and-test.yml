@@ -48,6 +48,8 @@ jobs:
         cd python
         python -m pip install -U --editable ".[dev,parallel]"
         python -m pytest prophet/tests/
+    - name: Type-check with Pyrefly
+      run: python -m pyrefly check --output-format=github
 
   build-and-test-r:
 
