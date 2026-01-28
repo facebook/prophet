@@ -15,7 +15,9 @@ import pandas as pd
 from prophet.diagnostics import performance_metrics
 
 if TYPE_CHECKING:
-    from typing import Literal, Sequence, TypeVar
+    from typing import Literal, Sequence, TypeVar, type_check_only
+    from typing_extensions import TypedDict
+    
     from prophet.forecaster import Prophet
     
     import matplotlib.pyplot as plt
@@ -23,8 +25,14 @@ if TYPE_CHECKING:
 
     _AxT = TypeVar('_AxT', bound=plt.Axes)
 
+    @type_check_only
+    class _PlotlyProps(TypedDict):
+        traces: list[go.Scatter]
+        xaxis: go.layout.XAxis
+        yaxis: go.layout.YAxis
 
-logger = logging.getLogger('prophet.plot')
+
+logger: logging.Logger = logging.getLogger('prophet.plot')
 
 
 try:
@@ -797,7 +805,12 @@ def plot_plotly(
 
 
 def plot_components_plotly(
-        m, fcst, uncertainty=True, plot_cap=True, figsize=(900, 200)):
+    m: Prophet,
+    fcst: pd.DataFrame,
+    uncertainty: bool = True,
+    plot_cap: bool = True,
+    figsize: tuple[int, int] = (900, 200),
+) -> go.Figure:
     """Plot the Prophet forecast components using Plotly.
     See plot_plotly() for Plotly setup instructions
 
@@ -859,7 +872,14 @@ def plot_components_plotly(
     return fig
 
 
-def plot_forecast_component_plotly(m, fcst, name, uncertainty=True, plot_cap=False, figsize=(900, 300)):
+def plot_forecast_component_plotly(
+    m: Prophet,
+    fcst: pd.DataFrame,
+    name: str,
+    uncertainty: bool = True,
+    plot_cap: bool = False,
+    figsize: tuple[int, int] = (900, 300)
+) -> go.Figure:
     """Plot a particular component of the forecast using Plotly.
     See plot_plotly() for Plotly setup instructions
 
@@ -890,7 +910,12 @@ def plot_forecast_component_plotly(m, fcst, name, uncertainty=True, plot_cap=Fal
     return fig
 
 
-def plot_seasonality_plotly(m, name, uncertainty=True, figsize=(900, 300)):
+def plot_seasonality_plotly(
+    m: Prophet,
+    name: str,
+    uncertainty: bool = True,
+    figsize: tuple[int, int] = (900, 300)
+) -> go.Figure:
     """Plot a custom seasonal component using Plotly.
     See plot_plotly() for Plotly setup instructions
 
@@ -918,7 +943,13 @@ def plot_seasonality_plotly(m, name, uncertainty=True, figsize=(900, 300)):
     return fig
 
 
-def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_cap=False):
+def get_forecast_component_plotly_props(
+    m: Prophet,
+    fcst: pd.DataFrame,
+    name: str,
+    uncertainty: bool = True,
+    plot_cap: bool = False,
+) -> _PlotlyProps:
     """Prepares a dictionary for plotting the selected forecast component with Plotly
 
     Parameters
@@ -955,8 +986,10 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
         holiday_features.columns = holiday_features.columns.str.replace('+0', '', regex=False)
         text = pd.Series(data='', index=holiday_features.index)
         for holiday_feature, idxs in holiday_features.items():
+            # https://github.com/facebook/pyrefly/issues/2248
+            # pyrefly:ignore[unsupported-operation]
             text[idxs.astype(bool) & (text != '')] += '<br>'  # Add newline if additional holiday
-            text[idxs.astype(bool)] += holiday_feature
+            text[idxs.astype(bool)] += holiday_feature  # pyrefly:ignore[unsupported-operation]
 
     traces = []
     traces.append(go.Scatter(
@@ -1019,12 +1052,17 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
     yaxis = go.layout.YAxis(rangemode='normal' if name == 'trend' else 'tozero',
                             title=go.layout.yaxis.Title(text=name),
                             zerolinecolor=zeroline_color)
+    assert m.component_modes
     if name in m.component_modes['multiplicative']:
         yaxis.update(tickformat='%', hoverformat='.2%')
     return {'traces': traces, 'xaxis': xaxis, 'yaxis': yaxis}
 
 
-def get_seasonality_plotly_props(m, name, uncertainty=True):
+def get_seasonality_plotly_props(
+    m: Prophet,
+    name: str,
+    uncertainty: bool = True,
+) -> _PlotlyProps:
     """Prepares a dictionary for plotting the selected seasonality with Plotly
 
     Parameters
@@ -1047,6 +1085,7 @@ def get_seasonality_plotly_props(m, name, uncertainty=True):
     start = pd.to_datetime('2017-01-01 0000')
     period = m.seasonalities[name]['period']
     end = start + pd.Timedelta(days=period)
+    assert m.history is not None
     if (m.history['ds'].dt.hour == 0).all():  # Day Precision
         plot_points = np.floor(period).astype(int)
     elif (m.history['ds'].dt.minute == 0).all():  # Hour Precision

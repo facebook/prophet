@@ -28,7 +28,7 @@ from prophet.make_holidays import get_holiday_names, make_holidays_df
 from prophet.models import StanBackendEnum, ModelInputData, ModelParams, TrendIndicator, IStanBackend
 from prophet.plot import plot, plot_components
 
-logger = logging.getLogger('prophet')
+logger: logging.Logger = logging.getLogger('prophet')
 logger.setLevel(logging.INFO)
 NANOSECONDS_TO_SECONDS = 1000 * 1000 * 1000
 
@@ -90,13 +90,14 @@ class Prophet:
     growth: Literal["linear", "logistic", "flat"]
     changepoints: pd.Series[pd.Timestamp] | None
     n_changepoints: int
+    specified_changepoints: bool
     changepoint_range: float
     yearly_seasonality: Literal["auto"] | int
     weekly_seasonality: Literal["auto"] | int
     daily_seasonality: Literal["auto"] | int
     holidays: pd.DataFrame | None
-    seasonality_mode: Literal["additive", "multiplicative"]
-    holidays_mode: Literal["additive", "multiplicative"]
+    seasonality_mode: _Mode
+    holidays_mode: _Mode
     seasonality_prior_scale: float
     holidays_prior_scale: float
     changepoint_prior_scale: float
@@ -111,8 +112,8 @@ class Prophet:
     logistic_floor: bool
     t_scale: pd.Timedelta | None
     changepoints_t: npt.NDArray[np.float64] | None
-    seasonalities: OrderedDict[str, dict]
-    extra_regressors: OrderedDict[str, dict]
+    seasonalities: OrderedDict[str, dict[str, Any]]
+    extra_regressors: OrderedDict[str, dict[str, Any]]
     country_holidays: str | None
     stan_fit: Any | None
     params: dict[str, Any]
@@ -134,7 +135,7 @@ class Prophet:
         weekly_seasonality: Literal["auto"] | int = "auto",
         daily_seasonality: Literal["auto"] | int = "auto",
         holidays: pd.DataFrame | None = None,
-        seasonality_mode: Literal["additive", "multiplicative"] = "additive",
+        seasonality_mode: _Mode = "additive",
         seasonality_prior_scale: SupportsFloat = 10.0,
         holidays_prior_scale: SupportsFloat = 10.0,
         changepoint_prior_scale: SupportsFloat = 0.05,
@@ -143,7 +144,7 @@ class Prophet:
         uncertainty_samples: int = 1000,
         stan_backend: str | None = None,
         scaling: Literal["absmax", "minmax"] = "absmax",
-        holidays_mode: Literal["additive", "multiplicative"] | None = None,
+        holidays_mode: _Mode | None = None,
     ) -> None:
         self.growth = growth
 
@@ -689,7 +690,7 @@ class Prophet:
         prior_scale: float | None = None,
         standardize: Literal['auto'] | bool = 'auto',
         mode: _Mode | None = None,
-    ):
+    ) -> Self:
         """Add an additional regressor to be used for fitting and predicting.
 
         The dataframe passed to `fit` and `predict` will have a column with the
@@ -1020,7 +1021,13 @@ class Prophet:
             components = pd.concat([components, new_comp], ignore_index=True)
         return components
 
-    def parse_seasonality_args(self, name: str, arg, auto_disable: bool, default_order: int) -> int:
+    def parse_seasonality_args(
+        self,
+        name: str,
+        arg: Literal['auto'] | int,
+        auto_disable: bool,
+        default_order: int,
+    ) -> int:
         """Get number of fourier components for built-in seasonalities.
 
         Parameters
@@ -1200,7 +1207,7 @@ class Prophet:
         m = df['y_scaled'].mean()
         return k, m
 
-    def preprocess(self, df: pd.DataFrame, **kwargs) -> ModelInputData:
+    def preprocess(self, df: pd.DataFrame, **kwargs: Any) -> ModelInputData:
         """
         Reformats historical data, standardizes y and extra regressors, sets seasonalities and changepoints.
 
@@ -1984,7 +1991,7 @@ class Prophet:
         df = self.setup_dataframe(df.copy())
         return self.sample_posterior_predictive(df, vectorized)
 
-    def percentile(self, a, *args, **kwargs):
+    def percentile(self, a: npt.ArrayLike, *args: Any, **kwargs: Any) -> np.ndarray:
         """
         We rely on np.nanpercentile in the rare instances where there
         are a small number of bad samples with MCMC that contain NaNs.

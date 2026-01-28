@@ -41,7 +41,7 @@ if TYPE_CHECKING:
         def map(self, __f: Callable[..., object], *its: Iterable[object]) -> Any: ...
 
 
-logger = logging.getLogger('prophet')
+logger: logging.Logger = logging.getLogger('prophet')
 
 
 def generate_cutoffs(

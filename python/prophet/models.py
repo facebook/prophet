@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 
 import logging
-logger = logging.getLogger('prophet.models')
+logger: logging.Logger = logging.getLogger('prophet.models')
 
 if TYPE_CHECKING:
     from cmdstanpy import CmdStanMCMC, CmdStanMLE, CmdStanModel
