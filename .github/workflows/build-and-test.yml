@@ -57,13 +57,12 @@ jobs:
       - uses: astral-sh/setup-uv@v7
         with:
           activate-environment: true
-          working-directory: python
 
       - name: Install
-        run: uv pip install ".[dev,parallel]"
+        run: cd python && uv pip install ".[dev,parallel]"
 
       - name: Typecheck with pyrefly
-        run: cd python && pyrefly check --output-format=github
+        run: pyrefly check --output-format=github
 
   build-and-test-r:
 
