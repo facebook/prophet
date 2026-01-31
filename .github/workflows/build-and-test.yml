@@ -63,7 +63,7 @@ jobs:
         run: uv pip install ".[dev,parallel]"
 
       - name: Typecheck with pyrefly
-        run: uv run pyrefly check --output-format=github
+        run: cd python && pyrefly check --output-format=github
 
   build-and-test-r:
 
