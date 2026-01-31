@@ -254,7 +254,7 @@ def cross_validation(
         ]
 
     # Combine all predicted pd.DataFrame into one pd.DataFrame
-    return pd.concat(predicts, axis=0).reset_index(drop=True)
+    return pd.concat(cast("Iterable[Any]", predicts), axis=0).reset_index(drop=True)
 
 
 def single_cutoff_forecast(
