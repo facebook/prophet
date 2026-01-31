@@ -49,6 +49,21 @@ jobs:
         python -m pip install -U --editable ".[dev,parallel]"
         python -m pytest prophet/tests/
 
+  typecheck-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          activate-environment: true
+
+      - name: Install
+        run: cd python && uv pip install ".[dev,parallel]"
+
+      - name: Typecheck with pyrefly
+        run: cd python && pyrefly check --output-format=github
+
   build-and-test-r:
 
     runs-on: ${{ matrix.config.os }}

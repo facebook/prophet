@@ -3,23 +3,21 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from __future__ import annotations
+
 from collections import OrderedDict
 from copy import deepcopy
 from io import StringIO
 import json
-from pathlib import Path
+from typing import Any, Final
 
 import numpy as np
 import pandas as pd
 
+from prophet.__version__ import __version__
 from prophet.forecaster import Prophet
 
-about = {}
-here = Path(__file__).parent.resolve()
-with open(here / "__version__.py", "r") as f:
-    exec(f.read(), about)
-
-SIMPLE_ATTRIBUTES = [
+SIMPLE_ATTRIBUTES: Final[list[str]] = [
     'growth', 'n_changepoints', 'specified_changepoints', 'changepoint_range',
     'yearly_seasonality', 'weekly_seasonality', 'daily_seasonality',
     'seasonality_mode', 'seasonality_prior_scale', 'changepoint_prior_scale',
@@ -28,20 +26,20 @@ SIMPLE_ATTRIBUTES = [
     'holidays_mode'
 ]
 
-PD_SERIES = ['changepoints', 'history_dates', 'train_holiday_names']
+PD_SERIES: Final[list[str]] = ["changepoints", "history_dates", "train_holiday_names"]
 
-PD_TIMESTAMP = ['start']
+PD_TIMESTAMP: Final[list[str]] = ["start"]
 
-PD_TIMEDELTA = ['t_scale']
+PD_TIMEDELTA: Final[list[str]] = ["t_scale"]
 
-PD_DATAFRAME = ['holidays', 'history', 'train_component_cols']
+PD_DATAFRAME: Final[list[str]] = ["holidays", "history", "train_component_cols"]
 
-NP_ARRAY = ['changepoints_t']
+NP_ARRAY: Final[list[str]] = ["changepoints_t"]
 
-ORDEREDDICT = ['seasonalities', 'extra_regressors']
+ORDEREDDICT: Final[list[str]] = ["seasonalities", "extra_regressors"]
 
 
-def model_to_dict(model):
+def model_to_dict(model: Prophet) -> dict[str, Any]:
     """Convert a Prophet model to a dictionary suitable for JSON serialization.
 
     Model must be fitted. Skips Stan objects that are not needed for predict.
@@ -104,11 +102,11 @@ def model_to_dict(model):
     # Params (Dict[str, np.ndarray])
     model_dict['params'] = {k: v.tolist() for k, v in model.params.items()}
     # Attributes that are skipped: stan_fit, stan_backend
-    model_dict['__prophet_version'] = about["__version__"]
+    model_dict["__prophet_version"] = __version__
     return model_dict
 
 
-def model_to_json(model):
+def model_to_json(model: Prophet) -> str:
     """Serialize a Prophet model to json string.
 
     Model must be fitted. Skips Stan objects that are not needed for predict.
@@ -127,7 +125,7 @@ def model_to_json(model):
     return json.dumps(model_json)
 
 
-def _handle_simple_attributes_backwards_compat(model_dict):
+def _handle_simple_attributes_backwards_compat(model_dict: dict[str, Any]) -> None:
     """Handle backwards compatibility for SIMPLE_ATTRIBUTES."""
     # prophet<1.1.5: handle scaling parameters introduced in #2470
     if 'scaling' not in model_dict:
@@ -137,7 +135,7 @@ def _handle_simple_attributes_backwards_compat(model_dict):
     if 'holidays_mode' not in model_dict:
         model_dict['holidays_mode'] = model_dict['seasonality_mode']
 
-def model_from_dict(model_dict):
+def model_from_dict(model_dict: dict[str, Any]) -> Prophet:
     """Recreate a Prophet model from a dictionary.
 
     Recreates models that were converted with model_to_dict.
@@ -199,7 +197,7 @@ def model_from_dict(model_dict):
     return model
 
 
-def model_from_json(model_json):
+def model_from_json(model_json: str) -> Prophet:
     """Deserialize a Prophet model from json string.
 
     Deserializes models that were serialized with model_to_json.

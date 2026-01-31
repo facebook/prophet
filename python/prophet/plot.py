@@ -3,7 +3,10 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 import pandas as pd
@@ -11,8 +14,25 @@ import pandas as pd
 # TODO: separate performance_metrics into a different module. there is an implicit circular import between forecaster.py and diagnostics.py
 from prophet.diagnostics import performance_metrics
 
-logger = logging.getLogger('prophet.plot')
+if TYPE_CHECKING:
+    from typing import Literal, Sequence, TypeVar, type_check_only
+    from typing_extensions import TypedDict
+    
+    from prophet.forecaster import Prophet
+    
+    import matplotlib.pyplot as plt
+    import plotly.graph_objs as go
 
+    _AxT = TypeVar('_AxT', bound=plt.Axes)
+
+    @type_check_only
+    class _PlotlyProps(TypedDict):
+        traces: list[go.Scatter]
+        xaxis: go.layout.XAxis
+        yaxis: go.layout.YAxis
+
+
+logger: logging.Logger = logging.getLogger('prophet.plot')
 
 
 try:
@@ -38,9 +58,16 @@ except ImportError:
 
 
 def plot(
-    m, fcst, ax=None, uncertainty=True, plot_cap=True, xlabel='ds', ylabel='y',
-    figsize=(10, 6), include_legend=False
-):
+    m: Prophet,
+    fcst: pd.DataFrame,
+    ax: plt.Axes | None = None,
+    uncertainty: bool = True,
+    plot_cap: bool = True,
+    xlabel: str = "ds",
+    ylabel: str = "y",
+    figsize: tuple[int, int] = (10, 6),
+    include_legend: bool = False,
+) -> plt.Figure:
     """Plot the Prophet forecast.
 
     Parameters
@@ -66,10 +93,10 @@ def plot(
         fig = plt.figure(facecolor='w', figsize=figsize)
         ax = fig.add_subplot(111)
     else:
-        fig = ax.get_figure()
+        fig = cast('plt.Figure', ax.get_figure())
     fcst_t = fcst['ds']
-    ax.plot(m.history['ds'], m.history['y'], 'k.',
-            label='Observed data points')
+    history = cast('pd.DataFrame', m.history)
+    ax.plot(history['ds'], history['y'], 'k.', label='Observed data points')
     ax.plot(fcst_t, fcst['yhat'], ls='-', c='#0072B2', label='Forecast')
     if 'cap' in fcst and plot_cap:
         ax.plot(fcst_t, fcst['cap'], ls='--', c='k', label='Maximum capacity')
@@ -94,9 +121,14 @@ def plot(
 
 
 def plot_components(
-    m, fcst, uncertainty=True, plot_cap=True, weekly_start=0, yearly_start=0,
-    figsize=None
-):
+    m: Prophet,
+    fcst: pd.DataFrame,
+    uncertainty: bool = True,
+    plot_cap: bool = True,
+    weekly_start: int = 0,
+    yearly_start: int = 0,
+    figsize: tuple[int, int] | None = None,
+) -> plt.Figure:
     """Plot the Prophet forecast components.
 
     Will plot whichever are available of: trend, holidays, weekly
@@ -154,8 +186,8 @@ def plot_components(
 
     multiplicative_axes = []
 
-    dt = m.history['ds'].diff()
-    min_dt = dt.iloc[dt.values.nonzero()[0]].min() 
+    dt = cast('pd.DataFrame', m.history)['ds'].diff()
+    min_dt = dt.iloc[cast('np.ndarray', dt.values).nonzero()[0]].min() 
 
     for ax, plot_name in zip(axes, components):
         if plot_name == 'trend':
@@ -188,6 +220,7 @@ def plot_components(
                 m=m, fcst=fcst, name=plot_name, ax=ax, uncertainty=uncertainty,
                 plot_cap=False,
             )
+        assert m.component_modes is not None
         if plot_name in m.component_modes['multiplicative']:
             multiplicative_axes.append(ax)
 
@@ -199,8 +232,14 @@ def plot_components(
 
 
 def plot_forecast_component(
-    m, fcst, name, ax=None, uncertainty=True, plot_cap=False, figsize=(10, 6)
-):
+    m: Prophet,
+    fcst: pd.DataFrame,
+    name: str,
+    ax: plt.Axes | None = None,
+    uncertainty: bool = True,
+    plot_cap: bool = False,
+    figsize: tuple[int, int] = (10, 6),
+) -> Sequence[plt.Artist]:
     """Plot a particular component of the forecast.
 
     Parameters
@@ -241,12 +280,16 @@ def plot_forecast_component(
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
     ax.set_xlabel('ds')
     ax.set_ylabel(name)
+    assert m.component_modes
     if name in m.component_modes['multiplicative']:
         ax = set_y_as_percent(ax)
     return artists
 
 
-def seasonality_plot_df(m, ds):
+def seasonality_plot_df(
+    m: Prophet,
+    ds: Sequence[pd.Timestamp] | pd.DatetimeIndex,
+) -> pd.DataFrame:
     """Prepare dataframe for plotting seasonal components.
 
     Parameters
@@ -270,7 +313,14 @@ def seasonality_plot_df(m, ds):
     return df
 
 
-def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), name='weekly'):
+def plot_weekly(
+    m: Prophet,
+    ax: plt.Axes | None = None,
+    uncertainty: bool = True,
+    weekly_start: int = 0,
+    figsize: tuple[int, int] = (10, 6),
+    name: str = 'weekly',
+) -> Sequence[plt.Artist]:
     """Plot the weekly component of the forecast.
 
     Parameters
@@ -316,7 +366,14 @@ def plot_weekly(m, ax=None, uncertainty=True, weekly_start=0, figsize=(10, 6), n
     return artists
 
 
-def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6), name='yearly'):
+def plot_yearly(
+    m: Prophet,
+    ax: plt.Axes | None = None,
+    uncertainty: bool = True,
+    yearly_start: int = 0,
+    figsize: tuple[int, int] = (10, 6),
+    name: str = 'yearly',
+) -> Sequence[plt.Artist]:
     """Plot the yearly component of the forecast.
 
     Parameters
@@ -363,7 +420,13 @@ def plot_yearly(m, ax=None, uncertainty=True, yearly_start=0, figsize=(10, 6), n
     return artists
 
 
-def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
+def plot_seasonality(
+    m: Prophet,
+    name: str,
+    ax: plt.Axes | None = None,
+    uncertainty: bool = True,
+    figsize: tuple[int, int] = (10, 6),
+) -> Sequence[plt.Artist]:
     """Plot a custom seasonal component.
 
     Parameters
@@ -389,7 +452,8 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
     period = m.seasonalities[name]['period']
     end = start + pd.Timedelta(days=period)
     plot_points = 200
-    days = pd.to_datetime(np.linspace(start.value, end.value, plot_points))
+    # https://github.com/pandas-dev/pandas-stubs/issues/1645
+    days = pd.to_datetime(np.linspace(start.value, end.value, plot_points))  # pyrefly:ignore[no-matching-overload]
     df_y = seasonality_plot_df(m, days)
     seas = m.predict_seasonal_components(df_y)
     artists += ax.plot(df_y['ds'], seas[name], ls='-',
@@ -400,7 +464,8 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
             seas[name + '_upper'], color='#0072B2', alpha=0.2)]
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
     n_ticks = 8
-    xticks = pd.to_datetime(np.linspace(start.value, end.value, n_ticks)
+    # https://github.com/pandas-dev/pandas-stubs/issues/1645
+    xticks = pd.to_datetime(np.linspace(start.value, end.value, n_ticks)  # pyrefly:ignore[no-matching-overload]
         ).to_pydatetime()
     ax.set_xticks(xticks)
     if name == 'yearly':
@@ -430,7 +495,7 @@ def plot_seasonality(m, name, ax=None, uncertainty=True, figsize=(10, 6)):
     return artists
 
 
-def set_y_as_percent(ax):
+def set_y_as_percent(ax: _AxT) -> _AxT:
     yticks = 100 * ax.get_yticks()
     yticklabels = ['{0:.4g}%'.format(y) for y in yticks]
     ax.set_yticks(ax.get_yticks().tolist())
@@ -439,8 +504,14 @@ def set_y_as_percent(ax):
 
 
 def add_changepoints_to_plot(
-    ax, m, fcst, threshold=0.01, cp_color='r', cp_linestyle='--', trend=True,
-):
+    ax: plt.Axes,
+    m: Prophet,
+    fcst: pd.DataFrame,
+    threshold: float = 0.01,
+    cp_color: str = 'r',
+    cp_linestyle: str = '--',
+    trend: bool = True,
+) -> list[plt.Line2D]:
     """Add markers for significant changepoints to prophet forecast plot.
 
     Example:
@@ -463,7 +534,9 @@ def add_changepoints_to_plot(
     """
     artists = []
     if trend:
-        artists.append(ax.plot(fcst['ds'], fcst['trend'], c=cp_color))
+        artists.extend(ax.plot(fcst['ds'], fcst['trend'], c=cp_color))
+    
+    assert m.changepoints is not None
     signif_changepoints = m.changepoints[
         np.abs(np.nanmean(m.params['delta'], axis=0)) >= threshold
     ] if len(m.changepoints) > 0 else []
@@ -473,9 +546,14 @@ def add_changepoints_to_plot(
 
 
 def plot_cross_validation_metric(
-    df_cv, metric, rolling_window=0.1, ax=None, figsize=(10, 6), color='b',
-    point_color='gray'
-):
+    df_cv: pd.DataFrame,
+    metric: str,
+    rolling_window: float = 0.1,
+    ax: plt.Axes | None = None,
+    figsize: tuple[int, int] = (10, 6),
+    color: str = 'b',
+    point_color: str = 'gray',
+) -> plt.Figure:
     """Plot a performance metric vs. forecast horizon from cross validation.
 
     Cross validation produces a collection of out-of-sample model predictions
@@ -514,15 +592,19 @@ def plot_cross_validation_metric(
         fig = plt.figure(facecolor='w', figsize=figsize)
         ax = fig.add_subplot(111)
     else:
-        fig = ax.get_figure()
+        fig = cast('plt.Figure', ax.get_figure())
     # Get the metric at the level of individual predictions, and with the rolling window.
     df_none = performance_metrics(df_cv, metrics=[metric], rolling_window=-1)
     df_h = performance_metrics(df_cv, metrics=[metric], rolling_window=rolling_window)
+    
+    assert df_none is not None
+    assert df_h is not None
 
     # Some work because matplotlib does not handle timedelta
     # Target ~10 ticks.
     tick_w = max(df_none['horizon'].astype('timedelta64[ns]')) / 10.
     # Find the largest time resolution that has <1 unit per bin.
+    dts: list[Literal["D", "h", "m", "s", "ms", "us", "ns"]]
     dts = ['D', 'h', 'm', 's', 'ms', 'us', 'ns']
     dt_names = [
         'days', 'hours', 'minutes', 'seconds', 'milliseconds', 'microseconds',
@@ -541,8 +623,8 @@ def plot_cross_validation_metric(
         if np.timedelta64(1, dt) < np.timedelta64(tick_w, 'ns'):
             break
 
-    x_plt = df_none['horizon'].astype('timedelta64[ns]').view(np.int64) / float(dt_conversions[i])
-    x_plt_h = df_h['horizon'].astype('timedelta64[ns]').view(np.int64) / float(dt_conversions[i])
+    x_plt = np.asarray(df_none['horizon'].astype('timedelta64[ns]')).view(np.int64) / float(dt_conversions[i])
+    x_plt_h = np.asarray(df_h['horizon'].astype('timedelta64[ns]')).view(np.int64) / float(dt_conversions[i])
 
     ax.plot(x_plt, df_none[metric], '.', alpha=0.1, c=point_color)
     ax.plot(x_plt_h, df_h[metric], '-', c=color)
@@ -553,8 +635,18 @@ def plot_cross_validation_metric(
     return fig
 
 
-def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoints=False,
-                changepoints_threshold=0.01, xlabel='ds', ylabel='y', figsize=(900, 600)):
+def plot_plotly(
+    m: Prophet,
+    fcst: pd.DataFrame,
+    uncertainty: bool = True,
+    plot_cap: bool = True,
+    trend: bool = False,
+    changepoints: bool = False,
+    changepoints_threshold: float = 0.01,
+    xlabel: str = 'ds',
+    ylabel: str = 'y',
+    figsize: tuple[int, int] = (900, 600)
+) -> go.Figure:
     """Plot the Prophet forecast with Plotly offline.
 
     Plotting in Jupyter Notebook requires initializing plotly.offline.init_notebook_mode():
@@ -593,6 +685,7 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
 
     data = []
     # Add actual
+    assert m.history
     data.append(go.Scatter(
         name='Actual',
         x=m.history['ds'],
@@ -657,6 +750,7 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
             line=dict(color=trend_color, width=line_width),
         ))
     # Add changepoints
+    assert m.changepoints
     if changepoints and len(m.changepoints) > 0:
         signif_changepoints = m.changepoints[
             np.abs(np.nanmean(m.params['delta'], axis=0)) >= changepoints_threshold
@@ -711,7 +805,12 @@ def plot_plotly(m, fcst, uncertainty=True, plot_cap=True, trend=False, changepoi
 
 
 def plot_components_plotly(
-        m, fcst, uncertainty=True, plot_cap=True, figsize=(900, 200)):
+    m: Prophet,
+    fcst: pd.DataFrame,
+    uncertainty: bool = True,
+    plot_cap: bool = True,
+    figsize: tuple[int, int] = (900, 200),
+) -> go.Figure:
     """Plot the Prophet forecast components using Plotly.
     See plot_plotly() for Plotly setup instructions
 
@@ -773,7 +872,14 @@ def plot_components_plotly(
     return fig
 
 
-def plot_forecast_component_plotly(m, fcst, name, uncertainty=True, plot_cap=False, figsize=(900, 300)):
+def plot_forecast_component_plotly(
+    m: Prophet,
+    fcst: pd.DataFrame,
+    name: str,
+    uncertainty: bool = True,
+    plot_cap: bool = False,
+    figsize: tuple[int, int] = (900, 300)
+) -> go.Figure:
     """Plot a particular component of the forecast using Plotly.
     See plot_plotly() for Plotly setup instructions
 
@@ -804,7 +910,12 @@ def plot_forecast_component_plotly(m, fcst, name, uncertainty=True, plot_cap=Fal
     return fig
 
 
-def plot_seasonality_plotly(m, name, uncertainty=True, figsize=(900, 300)):
+def plot_seasonality_plotly(
+    m: Prophet,
+    name: str,
+    uncertainty: bool = True,
+    figsize: tuple[int, int] = (900, 300)
+) -> go.Figure:
     """Plot a custom seasonal component using Plotly.
     See plot_plotly() for Plotly setup instructions
 
@@ -832,7 +943,13 @@ def plot_seasonality_plotly(m, name, uncertainty=True, figsize=(900, 300)):
     return fig
 
 
-def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_cap=False):
+def get_forecast_component_plotly_props(
+    m: Prophet,
+    fcst: pd.DataFrame,
+    name: str,
+    uncertainty: bool = True,
+    plot_cap: bool = False,
+) -> _PlotlyProps:
     """Prepares a dictionary for plotting the selected forecast component with Plotly
 
     Parameters
@@ -869,8 +986,10 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
         holiday_features.columns = holiday_features.columns.str.replace('+0', '', regex=False)
         text = pd.Series(data='', index=holiday_features.index)
         for holiday_feature, idxs in holiday_features.items():
+            # https://github.com/facebook/pyrefly/issues/2248
+            # pyrefly:ignore[unsupported-operation]
             text[idxs.astype(bool) & (text != '')] += '<br>'  # Add newline if additional holiday
-            text[idxs.astype(bool)] += holiday_feature
+            text[idxs.astype(bool)] += holiday_feature  # pyrefly:ignore[unsupported-operation]
 
     traces = []
     traces.append(go.Scatter(
@@ -933,12 +1052,17 @@ def get_forecast_component_plotly_props(m, fcst, name, uncertainty=True, plot_ca
     yaxis = go.layout.YAxis(rangemode='normal' if name == 'trend' else 'tozero',
                             title=go.layout.yaxis.Title(text=name),
                             zerolinecolor=zeroline_color)
+    assert m.component_modes
     if name in m.component_modes['multiplicative']:
         yaxis.update(tickformat='%', hoverformat='.2%')
     return {'traces': traces, 'xaxis': xaxis, 'yaxis': yaxis}
 
 
-def get_seasonality_plotly_props(m, name, uncertainty=True):
+def get_seasonality_plotly_props(
+    m: Prophet,
+    name: str,
+    uncertainty: bool = True,
+) -> _PlotlyProps:
     """Prepares a dictionary for plotting the selected seasonality with Plotly
 
     Parameters
@@ -961,6 +1085,7 @@ def get_seasonality_plotly_props(m, name, uncertainty=True):
     start = pd.to_datetime('2017-01-01 0000')
     period = m.seasonalities[name]['period']
     end = start + pd.Timedelta(days=period)
+    assert m.history is not None
     if (m.history['ds'].dt.hour == 0).all():  # Day Precision
         plot_points = np.floor(period).astype(int)
     elif (m.history['ds'].dt.minute == 0).all():  # Hour Precision

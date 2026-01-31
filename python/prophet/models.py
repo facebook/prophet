@@ -3,17 +3,31 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from __future__ import annotations
+
 from abc import abstractmethod, ABC
 from dataclasses import dataclass
-from typing import Sequence, Tuple
 from collections import OrderedDict
 from enum import Enum
 import importlib.resources
 import pathlib
 import platform
+from typing import TYPE_CHECKING, Any, Sequence, cast
+
+import numpy as np
+import pandas as pd
 
 import logging
-logger = logging.getLogger('prophet.models')
+logger: logging.Logger = logging.getLogger('prophet.models')
+
+if TYPE_CHECKING:
+    from cmdstanpy import CmdStanMCMC, CmdStanMLE, CmdStanModel
+    from typing_extensions import TypedDict, Unpack, type_check_only, final
+
+    @type_check_only
+    @final
+    class _IStanBackendOptions(TypedDict, total=False):
+        newton_fallback: bool
 
 PLATFORM = "win" if platform.platform().startswith("Win") else "unix"
 
@@ -29,67 +43,86 @@ class ModelInputData:
     K: int
     tau: float
     trend_indicator: int
-    y: Sequence[float]  # length T
-    t: Sequence[float]  # length T
-    cap: Sequence[float]  # length T
-    t_change: Sequence[float]  # length S
-    s_a: Sequence[int]  # length K
-    s_m: Sequence[int]  # length K
-    X: Sequence[Sequence[float]]  # shape (T, K)
+    y: Sequence[float] | pd.Series  # length T
+    t: Sequence[float] | pd.Series  # length T
+    cap: Sequence[float] | np.ndarray | pd.Series  # length T
+    t_change: Sequence[float] | np.ndarray  # length S
+    s_a: Sequence[int] | pd.Series  # length K
+    s_m: Sequence[int] | pd.Series  # length K
+    X: Sequence[Sequence[float]] | pd.DataFrame  # shape (T, K)
     sigmas: Sequence[float]  # length K
 
 @dataclass
 class ModelParams:
     k: float
     m: float
-    delta: Sequence[float]  # length S
-    beta: Sequence[float]  # length K
+    delta: Sequence[float] | np.ndarray  # length S
+    beta: Sequence[float] | np.ndarray  # length K
     sigma_obs: float
 
 
 class IStanBackend(ABC):
-    def __init__(self):
+    model: Any
+    stan_fit: Any | None
+    newton_fallback: bool
+    
+    def __init__(self) -> None:
         self.model = self.load_model()
         self.stan_fit = None
         self.newton_fallback = True
 
-    def set_options(self, **kwargs):
+    def set_options(self, **kwargs: Unpack[_IStanBackendOptions]) -> None:
         """
         Specify model options as kwargs.
          * newton_fallback [bool]: whether to fallback to Newton if L-BFGS fails
         """
         for k, v in kwargs.items():
             if k == 'newton_fallback':
-                self.newton_fallback = v
+                self.newton_fallback = cast(bool, v)
             else:
                 raise ValueError(f'Unknown option {k}')
     
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Clean up temporary files created during model fitting."""
         pass
 
 
     @staticmethod
     @abstractmethod
-    def get_type():
+    def get_type() -> str:
         pass
 
     @abstractmethod
-    def load_model(self):
+    def load_model(self) -> Any:
         pass
 
     @abstractmethod
-    def fit(self, stan_init, stan_data, **kwargs) -> dict:
+    def fit(
+        self,
+        stan_init: dict[str, float],
+        stan_data: dict[str, Any],
+        **kwargs: Any,
+    ) -> dict[str, Any]:
         pass
 
     @abstractmethod
-    def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
+    def sampling(
+        self,
+        stan_init: dict[str, float],
+        stan_data: dict[str, Any],
+        samples: int,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
         pass
 
 
 class CmdStanPyBackend(IStanBackend):
     CMDSTAN_VERSION = "2.37.0"
-    def __init__(self):
+
+    model: CmdStanModel
+    stan_fit: CmdStanMLE | CmdStanMCMC | None
+    
+    def __init__(self) -> None:
         import cmdstanpy
         # this must be set before super.__init__() for load_model to work on Windows
         local_cmdstan = importlib.resources.files("prophet") / "stan_model" / f"cmdstan-{self.CMDSTAN_VERSION}"
@@ -98,15 +131,20 @@ class CmdStanPyBackend(IStanBackend):
         super().__init__()
 
     @staticmethod
-    def get_type():
+    def get_type() -> str:
         return StanBackendEnum.CMDSTANPY.name
 
-    def load_model(self):
+    def load_model(self) -> CmdStanModel:
         import cmdstanpy
         model_file = importlib.resources.files("prophet") / "stan_model" / "prophet_model.bin"
         return cmdstanpy.CmdStanModel(exe_file=str(model_file))
 
-    def fit(self, stan_init, stan_data, **kwargs):
+    def fit(
+        self,
+        stan_init: dict[str, float], 
+        stan_data: dict[str, Any],
+        **kwargs: Any,
+    ) -> OrderedDict[str, np.ndarray]:
         if 'inits' not in kwargs and 'init' in kwargs:
             stan_init = self.sanitize_custom_inits(stan_init, kwargs['init'])
             del kwargs['init']
@@ -115,7 +153,7 @@ class CmdStanPyBackend(IStanBackend):
         args = dict(
             data=data_list,
             inits=inits_list,
-            algorithm='Newton' if data_list['T'] < 100 else 'LBFGS',
+            algorithm='Newton' if cast(float, data_list['T']) < 100 else 'LBFGS',
             iter=int(1e4),
         )
         args.update(kwargs)
@@ -135,7 +173,13 @@ class CmdStanPyBackend(IStanBackend):
             params[par] = params[par].reshape((1, -1))
         return params
 
-    def sampling(self, stan_init, stan_data, samples, **kwargs) -> dict:
+    def sampling(
+        self,
+        stan_init: dict[str, float],
+        stan_data: dict[str, Any],
+        samples: int,
+        **kwargs: Any,
+    ) -> OrderedDict[str, np.ndarray]:
         if 'inits' not in kwargs and 'init' in kwargs:
             stan_init = self.sanitize_custom_inits(stan_init, kwargs['init'])
             del kwargs['init']
@@ -169,28 +213,31 @@ class CmdStanPyBackend(IStanBackend):
 
         return params
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         import cmdstanpy
-        
+
         if hasattr(self, "stan_fit") and self.stan_fit is not None:
             fit_result: cmdstanpy.CmdStanMLE | cmdstanpy.CmdStanMCMC = self.stan_fit
             to_remove = (
-                fit_result.runset.csv_files + 
-                fit_result.runset.diagnostic_files + 
-                fit_result.runset.stdout_files + 
+                fit_result.runset.csv_files +
+                fit_result.runset.diagnostic_files +
+                fit_result.runset.stdout_files +
                 fit_result.runset.profile_files
             )
             for fpath in to_remove:
                 if pathlib.Path(fpath).is_file():
                     pathlib.Path(fpath).unlink()
-                
+
     @staticmethod
-    def sanitize_custom_inits(default_inits, custom_inits):
+    def sanitize_custom_inits(
+        default_inits: dict[str, Any],
+        custom_inits: dict[str, Any],
+    ) -> dict[str, float | Any]:
         """Validate that custom inits have the correct type and shape, otherwise use defaults."""
         sanitized = {}
         for param in ['k', 'm', 'sigma_obs']:
             try:
-                sanitized[param] = float(custom_inits.get(param))
+                sanitized[param] = float(custom_inits[param])
             except Exception:
                 sanitized[param] = default_inits[param]
         for param in ['delta', 'beta']:
@@ -201,7 +248,10 @@ class CmdStanPyBackend(IStanBackend):
         return sanitized
 
     @staticmethod
-    def prepare_data(init, data) -> Tuple[dict, dict]:
+    def prepare_data(
+        init: dict[str, Any],
+        data: dict[str, Any],
+    ) -> tuple[dict[str, float | list[float]], dict[str, float | list[float]]]:
         """Converts np.ndarrays to lists that can be read by cmdstanpy."""
         cmdstanpy_data = {
             'T': data['T'],
@@ -229,12 +279,13 @@ class CmdStanPyBackend(IStanBackend):
         return (cmdstanpy_init, cmdstanpy_data)
 
     @staticmethod
-    def stan_to_dict_numpy(column_names: Tuple[str, ...], data: 'np.array'):
-        import numpy as np
+    def stan_to_dict_numpy(
+        column_names: Sequence[str],
+        data: np.ndarray,
+    ) -> OrderedDict[str, np.ndarray]:
+        output: OrderedDict[str, np.ndarray] = OrderedDict()
 
-        output = OrderedDict()
-
-        prev = None
+        prev: str | None = None
 
         start = 0
         end = 0
@@ -261,6 +312,7 @@ class CmdStanPyBackend(IStanBackend):
             raise RuntimeError(
                 "Found repeated column name"
             )
+        assert prev is not None
         if two_dims:
             output[prev] = np.array(data[:, start:end])
         else:
@@ -274,7 +326,7 @@ class StanBackendEnum(Enum):
     CMDSTANPY = CmdStanPyBackend
 
     @staticmethod
-    def get_backend_class(name: str) -> IStanBackend:
+    def get_backend_class(name: str) -> type[IStanBackend]:
         try:
             return StanBackendEnum[name].value
         except KeyError as e:

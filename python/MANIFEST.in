@@ -8,3 +8,6 @@ prune prophet/stan_model
 # Necessary for tests to run
 include prophet/tests/*.csv
 include prophet/tests/*.json
+
+# PEP 561
+include prophet/py.typed

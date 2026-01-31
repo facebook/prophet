@@ -3,10 +3,19 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, cast
+
 import numpy as np
 import pandas as pd
 
-def regressor_index(m, name):
+if TYPE_CHECKING:
+    from prophet.forecaster import Prophet
+    import numpy.typing as npt
+
+
+def regressor_index(m: Prophet, name: str) -> np.intp:
     """Given the name of a regressor, return its (column) index in the `beta` matrix.
 
     Parameters
@@ -18,11 +27,10 @@ def regressor_index(m, name):
     -------
     The column index of the regressor in the `beta` matrix.
     """
-    return np.extract(
-        m.train_component_cols[name] == 1, m.train_component_cols.index
-    )[0]
+    cols = cast(pd.DataFrame, m.train_component_cols)
+    return np.extract(cols[name] == 1, cols.index)[0]
 
-def regressor_coefficients(m):
+def regressor_coefficients(m: Prophet) -> pd.DataFrame:
     """Summarise the coefficients of the extra regressors used in the model.
 
     For additive regressors, the coefficient represents the incremental impact
@@ -73,7 +81,7 @@ def regressor_coefficients(m):
 
     return pd.DataFrame(coefs)
 
-def warm_start_params(m):
+def warm_start_params(m: Prophet) -> dict[str, npt.NDArray[np.float64] | np.float64]:
     """
     Retrieve parameters from a trained model in the format used to initialize a new Stan model.
     Note that the new Stan model must have these same settings:
