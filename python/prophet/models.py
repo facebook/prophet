@@ -125,7 +125,10 @@ class CmdStanPyBackend(IStanBackend):
     def __init__(self) -> None:
         import cmdstanpy
         # this must be set before super.__init__() for load_model to work on Windows
-        local_cmdstan = importlib.resources.files("prophet") / "stan_model" / f"cmdstan-{self.CMDSTAN_VERSION}"
+        local_cmdstan = cast(
+            pathlib.Path,
+            importlib.resources.files("prophet") / "stan_model" / f"cmdstan-{self.CMDSTAN_VERSION}",
+        )
         if local_cmdstan.exists():
             cmdstanpy.set_cmdstan_path(str(local_cmdstan))
         super().__init__()
