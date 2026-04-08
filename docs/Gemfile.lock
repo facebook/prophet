@@ -7,8 +7,8 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
-    addressable (2.8.0)
-      public_suffix (>= 2.0.2, < 5.0)
+    addressable (2.9.0)
+      public_suffix (>= 2.0.2, < 8.0)
     coffee-script (2.4.1)
       coffee-script-source
       execjs
@@ -222,7 +222,7 @@ GEM
       sawyer (~> 0.8.0, >= 0.5.3)
     pathutil (0.16.2)
       forwardable-extended (~> 2.6)
-    public_suffix (3.1.1)
+    public_suffix (4.0.7)
     racc (1.8.1)
     rb-fsevent (0.10.4)
     rb-inotify (0.10.1)
