@@ -1892,7 +1892,7 @@ class Prophet:
         np.ndarray[tuple[int], np.dtype[np.float64]],
     ]:
         """
-        Creates a matrix of slope-deltas where these changes occured in training data according to the trained prophet obj
+        Creates a matrix of slope-deltas where these changes occurred in training data according to the trained prophet obj
         """
         if single_diff is None:
             single_diff = np.diff(t_time).mean()
