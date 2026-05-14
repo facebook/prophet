@@ -116,7 +116,11 @@ def plot(
     if include_legend:
         ax.legend()
     if not user_provided_ax:
-        fig.tight_layout()
+        try:
+            if fig.get_layout_engine() is None:
+                fig.tight_layout()
+        except AttributeError:
+            fig.tight_layout()
     return fig
 
 
@@ -224,7 +228,11 @@ def plot_components(
         if plot_name in m.component_modes['multiplicative']:
             multiplicative_axes.append(ax)
 
-    fig.tight_layout()
+    try:
+        if fig.get_layout_engine() is None:
+            fig.tight_layout()
+    except AttributeError:
+        fig.tight_layout()
     # Reset multiplicative axes labels after tight_layout adjustment
     for ax in multiplicative_axes:
         ax = set_y_as_percent(ax)
