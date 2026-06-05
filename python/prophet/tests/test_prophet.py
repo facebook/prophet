@@ -6,6 +6,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+import logging
 
 from prophet import Prophet
 from prophet.utilities import warm_start_params
@@ -20,6 +21,15 @@ def train_test_split(ts_data: pd.DataFrame, n_test_rows: int) -> pd.DataFrame:
 def rmse(predictions, targets) -> float:
     return np.sqrt(np.mean((predictions - targets) ** 2))
 
+def _short_monthly_ts() -> pd.DataFrame:
+    # Mirrors facebook/prophet#2709: a single annual cycle of monthly data.
+    return pd.DataFrame({
+        "ds": pd.date_range("2025-01-01", periods=12, freq="MS"),
+        "y": [
+            361.06, 33880.23, 29431.62, 17337.68, 208032.5, 515776.5,
+            848975.0, 837513.2, 1237904.0, 2246456.0, 1982927.0, 2421611.0,
+        ],
+    })
 
 class TestProphetFitPredictDefault:
     @pytest.mark.parametrize(
@@ -516,6 +526,28 @@ class TestProphetSeasonalComponent:
             "mode": "additive",
             "condition_name": None,
         }
+
+    def test_yearly_seasonality_warns_on_short_history(self, caplog):
+        m = Prophet(
+            yearly_seasonality=True,
+            weekly_seasonality=False,
+            daily_seasonality=False,
+        )
+        with caplog.at_level(logging.WARNING, logger="prophet"):
+            m.fit(_short_monthly_ts())
+        assert "yearly" in m.seasonalities
+        assert any(
+            "less than 730 days" in r.getMessage() for r in caplog.records
+        ), "expected an under-identification warning for short yearly history"
+
+    def test_yearly_seasonality_no_warning_on_auto(self, caplog):
+        m = Prophet(weekly_seasonality=False, daily_seasonality=False)
+        with caplog.at_level(logging.WARNING, logger="prophet"):
+            m.fit(_short_monthly_ts())
+        assert "yearly" not in m.seasonalities
+        assert not any(
+            "less than 730 days" in r.getMessage() for r in caplog.records
+        ), "auto-disabled yearly seasonality should not emit the warning"
 
     def test_auto_daily_seasonality(self, daily_univariate_ts, subdaily_univariate_ts, backend):
         # Should be enabled

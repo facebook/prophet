@@ -1083,6 +1083,15 @@ class Prophet:
         yearly_disable = last - first < pd.Timedelta(days=730)
         fourier_order = self.parse_seasonality_args(
             'yearly', self.yearly_seasonality, yearly_disable, 10)
+        if fourier_order > 0 and yearly_disable:
+            logger.warning(
+                'Yearly seasonality is enabled with less than 730 days '
+                '(approximately 2 years) of history. The model may be '
+                'under-identified, and the trend/seasonality decomposition '
+                'can be unstable and dependent on the Prophet/Stan version. '
+                'Consider disabling yearly seasonality or providing more '
+                'history.'
+            )
         if fourier_order > 0:
             self.seasonalities['yearly'] = {
                 'period': 365.25,
