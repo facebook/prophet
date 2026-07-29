@@ -1,23 +1,55 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates.
 
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from __future__ import absolute_import, division, print_function
+from __future__ import annotations
 
 import logging
 from tqdm.auto import tqdm
 from copy import deepcopy
 import concurrent.futures
+import multiprocessing
+import sys
+from typing import TYPE_CHECKING, Final, Literal, cast
 
 import numpy as np
 import pandas as pd
 
-logger = logging.getLogger('prophet')
+if TYPE_CHECKING:
+    from typing import (
+        Any,
+        Callable,
+        Iterable,
+        Protocol,
+        TypeAlias,
+        TypeVar,
+        type_check_only,
+    )
+
+    import dask.distributed as dd
+
+    from .forecaster import Prophet
+
+    _ModelT = TypeVar('_ModelT', bound=Prophet)
+
+    _PerformanceMetric: TypeAlias = Callable[[pd.DataFrame, int], pd.DataFrame]
+    _PerformanceMetricT = TypeVar("_PerformanceMetricT", bound=_PerformanceMetric)
+
+    @type_check_only
+    class _SupportsMap(Protocol):
+        def map(self, __f: Callable[..., object], *its: Iterable[object]) -> Any: ...
 
 
-def generate_cutoffs(df, horizon, initial, period):
+logger: logging.Logger = logging.getLogger('prophet')
+
+
+def generate_cutoffs(
+    df: pd.DataFrame,
+    horizon: pd.Timedelta,
+    initial: pd.Timedelta,
+    period: pd.Timedelta,
+) -> list[pd.Timestamp]:
     """Generate cutoff dates
 
     Parameters
@@ -58,7 +90,16 @@ def generate_cutoffs(df, horizon, initial, period):
     return list(reversed(result))
 
 
-def cross_validation(model, horizon, period=None, initial=None, parallel=None, cutoffs=None, disable_tqdm=False, extra_output_columns=None):
+def cross_validation(
+    model: Prophet,
+    horizon: str | pd.Timedelta,
+    period: str | pd.Timedelta | None = None,
+    initial: str | pd.Timedelta | None = None,
+    parallel: Literal["processes", "threads", "dask"] | _SupportsMap | None = None,
+    cutoffs: list[pd.Timestamp] | None = None,
+    disable_tqdm: bool = False,
+    extra_output_columns: str | list[str] | None = None,
+) -> pd.DataFrame:
     """Cross-Validation for time series.
 
     Computes forecasts from historical cutoff points, which user can input.
@@ -107,7 +148,7 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
                         for args in zip(*iterables)
                      ]
                      return results
-                     
+
     disable_tqdm: if True it disables the progress bar that would otherwise show up when parallel=None
     extra_output_columns: A String or List of Strings e.g. 'trend' or ['trend'].
          Additional columns to 'yhat' and 'ds' to be returned in output.
@@ -116,14 +157,14 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
     -------
     A pd.DataFrame with the forecast, actual value and cutoff.
     """
-    
+
     if model.history is None:
         raise Exception('Model has not been fit. Fitting the model provides contextual parameters for cross validation.')
-    
+
     df = model.history.copy().reset_index(drop=True)
     horizon = pd.Timedelta(horizon)
     predict_columns = ['ds', 'yhat']
-        
+
     if model.uncertainty_samples:
         predict_columns.extend(['yhat_lower', 'yhat_upper'])
 
@@ -131,12 +172,12 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         if isinstance(extra_output_columns, str):
             extra_output_columns = [extra_output_columns]
         predict_columns.extend([c for c in extra_output_columns if c not in predict_columns])
-        
+
     # Identify the largest seasonality period
     period_max = 0.
     for s in model.seasonalities.values():
         period_max = max(period_max, s['period'])
-    seasonality_dt = pd.Timedelta(str(period_max) + ' days')    
+    seasonality_dt = pd.Timedelta(str(period_max) + ' days')
 
     if cutoffs is None:
         # Set period
@@ -152,15 +193,15 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         cutoffs = generate_cutoffs(df, horizon, initial, period)
     else:
         # add validation of the cutoff to make sure that the min cutoff is strictly greater than the min date in the history
-        if min(cutoffs) <= df['ds'].min(): 
+        if min(cutoffs) <= df['ds'].min():
             raise ValueError("Minimum cutoff value is not strictly greater than min date in history")
         # max value of cutoffs is <= (end date minus horizon)
-        end_date_minus_horizon = df['ds'].max() - horizon 
-        if max(cutoffs) > end_date_minus_horizon: 
+        end_date_minus_horizon = df['ds'].max() - horizon
+        if max(cutoffs) > end_date_minus_horizon:
             raise ValueError("Maximum cutoff value is greater than end date minus horizon, no value for cross-validation remaining")
         initial = cutoffs[0] - df['ds'].min()
-        
-    # Check if the initial window 
+
+    # Check if the initial window
     # (that is, the amount of time between the start of the history and the first cutoff)
     # is less than the maximum seasonality period
     if initial < seasonality_dt:
@@ -175,7 +216,11 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         if parallel == "threads":
             pool = concurrent.futures.ThreadPoolExecutor()
         elif parallel == "processes":
-            pool = concurrent.futures.ProcessPoolExecutor()
+            if sys.platform.startswith("win") or sys.platform == "darwin":
+                ctx = multiprocessing.get_context("spawn")
+            else:
+                ctx = multiprocessing.get_context("forkserver")
+            pool = concurrent.futures.ProcessPoolExecutor(mp_context=ctx)
         elif parallel == "dask":
             try:
                 from dask.distributed import get_client
@@ -200,19 +245,25 @@ def cross_validation(model, horizon, period=None, initial=None, parallel=None, c
         predicts = pool.map(single_cutoff_forecast, *iterables)
         if parallel == "dask":
             # convert Futures to DataFrames
-            predicts = pool.gather(predicts)
+            predicts = cast("dd.Client", pool).gather(predicts)
 
     else:
         predicts = [
-            single_cutoff_forecast(df, model, cutoff, horizon, predict_columns) 
+            single_cutoff_forecast(df, model, cutoff, horizon, predict_columns)
             for cutoff in (tqdm(cutoffs) if not disable_tqdm else cutoffs)
         ]
 
     # Combine all predicted pd.DataFrame into one pd.DataFrame
-    return pd.concat(predicts, axis=0).reset_index(drop=True)
+    return pd.concat(cast("Iterable[Any]", predicts), axis=0).reset_index(drop=True)
 
 
-def single_cutoff_forecast(df, model, cutoff, horizon, predict_columns):
+def single_cutoff_forecast(
+    df: pd.DataFrame,
+    model: Prophet,
+    cutoff: pd.Timestamp,
+    horizon: pd.Timedelta,
+    predict_columns: list[str],
+) -> pd.DataFrame:
     """Forecast for single cutoff. Used in cross validation function
     when evaluating for multiple cutoffs either sequentially or in parallel.
 
@@ -260,6 +311,7 @@ def single_cutoff_forecast(df, model, cutoff, horizon, predict_columns):
     yhat = m.predict(df[index_predicted][columns])
     # Merge yhat(predicts), y(df, original data) and cutoff
 
+    assert m.stan_backend
     m.stan_backend.cleanup()
 
     return pd.concat([
@@ -269,7 +321,7 @@ def single_cutoff_forecast(df, model, cutoff, horizon, predict_columns):
     ], axis=1)
 
 
-def prophet_copy(m, cutoff=None):
+def prophet_copy(m: _ModelT, cutoff: pd.Timestamp | None = None) -> _ModelT:
     """Copy Prophet object
 
     Parameters
@@ -291,6 +343,7 @@ def prophet_copy(m, cutoff=None):
         if cutoff is not None:
             # Filter change points '< cutoff'
             last_history_date = max(m.history['ds'][m.history['ds'] <= cutoff])
+            assert changepoints is not None
             changepoints = changepoints[changepoints < last_history_date]
     else:
         changepoints = None
@@ -325,8 +378,8 @@ def prophet_copy(m, cutoff=None):
     return m2
 
 
-PERFORMANCE_METRICS=dict()
-def register_performance_metric(func):
+PERFORMANCE_METRICS: Final[dict[str, Callable[..., Any]]] = {}
+def register_performance_metric(func: _PerformanceMetricT) -> _PerformanceMetricT:
     """Register custom performance metric
 
     Parameters that your metric should contain
@@ -334,7 +387,7 @@ def register_performance_metric(func):
     df: Cross-validation results dataframe.
     w: Aggregation window size.
 
-    Registered metric should return following 
+    Registered metric should return following
     -------
     Dataframe with columns horizon and metric.
     """
@@ -342,7 +395,12 @@ def register_performance_metric(func):
     return func
 
 
-def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
+def performance_metrics(
+    df: pd.DataFrame,
+    metrics: list[str] | None = None,
+    rolling_window: float = 0.1,
+    monthly: bool = False,
+) -> pd.DataFrame | None:
     """Compute performance metrics from cross-validation results.
 
     Computes a suite of performance metrics on the output of cross-validation.
@@ -382,7 +440,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
         use ['mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage'].
     rolling_window: Proportion of data to use in each rolling window for
         computing the metrics. Should be in [0, 1] to average.
-    monthly: monthly=True will compute horizons as numbers of calendar months 
+    monthly: monthly=True will compute horizons as numbers of calendar months
         from the cutoff date, starting from 0 for the cutoff month.
 
     Returns
@@ -427,7 +485,7 @@ def performance_metrics(df, metrics=None, rolling_window=0.1, monthly=False):
     return res
 
 
-def rolling_mean_by_h(x, h, w, name):
+def rolling_mean_by_h(x: np.ndarray, h: np.ndarray, w: int, name: str) -> pd.DataFrame:
     """Compute a rolling mean of x, after first aggregating by h.
 
     Right-aligned. Computes a single mean for each unique value of h. Each
@@ -477,10 +535,10 @@ def rolling_mean_by_h(x, h, w, name):
     res_x = res_x[(trailing_i + 1):]
 
     return pd.DataFrame({'horizon': res_h, name: res_x})
-    
 
 
-def rolling_median_by_h(x, h, w, name):
+
+def rolling_median_by_h(x: np.ndarray, h: np.ndarray, w: int, name: str) -> pd.DataFrame:
     """Compute a rolling median of x, after first aggregating by h.
 
     Right-aligned. Computes a single median for each unique value of h. Each
@@ -538,7 +596,7 @@ def rolling_median_by_h(x, h, w, name):
 
 
 @register_performance_metric
-def mse(df, w):
+def mse(df: pd.DataFrame, w: int) -> pd.DataFrame:
     """Mean squared error
 
     Parameters
@@ -554,12 +612,15 @@ def mse(df, w):
     if w < 0:
         return pd.DataFrame({'horizon': df['horizon'], 'mse': se})
     return rolling_mean_by_h(
-        x=se.values, h=df['horizon'].values, w=w, name='mse'
+        x=cast(np.ndarray, se.values),
+        h=cast(np.ndarray, df['horizon'].values),
+        w=w,
+        name='mse',
     )
 
 
 @register_performance_metric
-def rmse(df, w):
+def rmse(df: pd.DataFrame, w: int) -> pd.DataFrame:
     """Root mean squared error
 
     Parameters
@@ -578,7 +639,7 @@ def rmse(df, w):
 
 
 @register_performance_metric
-def mae(df, w):
+def mae(df: pd.DataFrame, w: int) -> pd.DataFrame:
     """Mean absolute error
 
     Parameters
@@ -590,16 +651,19 @@ def mae(df, w):
     -------
     Dataframe with columns horizon and mae.
     """
-    ae = np.abs(df['y'] - df['yhat'])
+    ae = (df['y'] - df['yhat']).abs()
     if w < 0:
         return pd.DataFrame({'horizon': df['horizon'], 'mae': ae})
     return rolling_mean_by_h(
-        x=ae.values, h=df['horizon'].values, w=w, name='mae'
+        x=cast(np.ndarray, ae.values),
+        h=cast(np.ndarray, df['horizon'].values),
+        w=w,
+        name='mae',
     )
 
 
 @register_performance_metric
-def mape(df, w):
+def mape(df: pd.DataFrame, w: int) -> pd.DataFrame:
     """Mean absolute percent error
 
     Parameters
@@ -611,16 +675,19 @@ def mape(df, w):
     -------
     Dataframe with columns horizon and mape.
     """
-    ape = np.abs((df['y'] - df['yhat']) / df['y'])
+    ape = ((df['y'] - df['yhat']) / df['y']).abs()
     if w < 0:
         return pd.DataFrame({'horizon': df['horizon'], 'mape': ape})
     return rolling_mean_by_h(
-        x=ape.values, h=df['horizon'].values, w=w, name='mape'
+        x=cast(np.ndarray, ape.values),
+        h=cast(np.ndarray, df['horizon'].values),
+        w=w,
+        name='mape',
     )
 
 
 @register_performance_metric
-def mdape(df, w):
+def mdape(df: pd.DataFrame, w: int) -> pd.DataFrame:
     """Median absolute percent error
 
     Parameters
@@ -632,16 +699,19 @@ def mdape(df, w):
     -------
     Dataframe with columns horizon and mdape.
     """
-    ape = np.abs((df['y'] - df['yhat']) / df['y'])
+    ape = ((df['y'] - df['yhat']) / df['y']).abs()
     if w < 0:
         return pd.DataFrame({'horizon': df['horizon'], 'mdape': ape})
     return rolling_median_by_h(
-        x=ape.values, h=df['horizon'], w=w, name='mdape'
+        x=cast(np.ndarray, ape.values),
+        h=cast(np.ndarray, df['horizon'].values),
+        w=w,
+        name='mdape',
     )
 
 
 @register_performance_metric
-def smape(df, w):
+def smape(df: pd.DataFrame, w: int) -> pd.DataFrame:
     """Symmetric mean absolute percentage error
     based on Chen and Yang (2004) formula
 
@@ -654,17 +724,20 @@ def smape(df, w):
     -------
     Dataframe with columns horizon and smape.
     """
-    sape = np.abs(df['y'] - df['yhat']) / ((np.abs(df['y']) + np.abs(df['yhat'])) / 2)
+    sape = (df['y'] - df['yhat']).abs() / ((np.abs(df['y']) + np.abs(df['yhat'])) / 2)
     sape = sape.fillna(0)
     if w < 0:
         return pd.DataFrame({'horizon': df['horizon'], 'smape': sape})
     return rolling_mean_by_h(
-        x=sape.values, h=df['horizon'].values, w=w, name='smape'
+        x=cast(np.ndarray, sape.values),
+        h=cast(np.ndarray, df['horizon'].values),
+        w=w,
+        name='smape',
     )
 
 
 @register_performance_metric
-def coverage(df, w):
+def coverage(df: pd.DataFrame, w: int) -> pd.DataFrame:
     """Coverage
 
     Parameters
@@ -680,5 +753,8 @@ def coverage(df, w):
     if w < 0:
         return pd.DataFrame({'horizon': df['horizon'], 'coverage': is_covered})
     return rolling_mean_by_h(
-        x=is_covered.values, h=df['horizon'].values, w=w, name='coverage'
+        x=cast(np.ndarray, is_covered.values),
+        h=cast(np.ndarray, df['horizon'].values),
+        w=w,
+        name='coverage',
     )
