@@ -49,7 +49,7 @@ dev = [
   "nbconvert",
   "plotly",
   "pyrefly==0.50.0",
-  "pdoc>=15,<16",
+  "pdoc",
 ]
 parallel = [
   "dask[dataframe]",

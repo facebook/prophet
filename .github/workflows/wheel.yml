@@ -23,7 +23,7 @@ jobs:
           - windows-latest
         cibw_arch: ["native"]
         # Build one wheel (ABI = none) using first build spec, then test on all python versions.
-        cibw_build: ["cp310-* cp311-* cp312-*"]
+        cibw_build: ["cp311-* cp312-* cp313-* cp314-*"]
       fail-fast: false
 
     steps:
