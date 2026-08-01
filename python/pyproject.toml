@@ -45,6 +45,7 @@ dev = [
   "wheel",
   "pytest",
   "jupyterlab",
+  "ipywidgets",
   "nbconvert",
   "plotly",
   "pyrefly==0.50.0",
@@ -59,6 +60,8 @@ Homepage = "https://facebook.github.io/prophet/"
 Documentation = "https://facebook.github.io/prophet/"
 Repository = "https://github.com/facebook/prophet"
 
+[tool.pytest.ini_options]
+testpaths = ["prophet/tests"]
 
 [tool.pyrefly]
 project-includes = ["prophet"]

@@ -22,6 +22,8 @@ subsections:
     id: additional-regressors
   - title: Coefficients of additional regressors
     id: coefficients-of-additional-regressors
+  - title: Uncertainty in future regressor values
+    id: uncertainty-in-future-regressor-values
 ---
 <a id="modeling-holidays-and-special-events"> </a>
 
@@ -784,3 +786,235 @@ Extra regressors are put in the linear component of the model, so the underlying
 
 To extract the beta coefficients of the extra regressors, use the utility function `regressor_coefficients` (`from prophet.utilities import regressor_coefficients` in Python, `prophet::regressor_coefficients` in R) on the fitted model. The estimated beta coefficient for each regressor roughly represents the increase in prediction value for a unit increase in the regressor value (note that the coefficients returned are always on the scale of the original data). If `mcmc_samples` is specified, a credible interval for each coefficient is also returned, which can help identify whether the regressor is meaningful to the model (a credible interval that includes the 0 value suggests the regressor is not meaningful).
 
+
+<a id="uncertainty-in-future-regressor-values"> </a>
+
+## Uncertainty in future regressor values
+
+
+
+In the examples above, regressor values are linked to holidays / calendar events, so their future values are known and can be set directly in the `future` DataFrame and passed to `.predict()`.
+
+
+
+In multi-stage prediction pipelines, future regressor values are unknown and carry uncertainty. As of Prophet v1.4.0 there is support for nested Prophet models (one per extra_regressor) that integrate natively with `.predict()` and `cross_validate()`.
+
+
+
+1. In `.add_regressor()`, set `predict_spec` to enable a nested Prophet model for that regressor. `predictor_spec=True` uses defaults; pass a dictionary like `predict_spec={'changepoint_range': 0.7}` for a custom config. Note that we only support **simple** nested Prophet models, so models that require custom seasonalities with `.add_seasonality()` or their own regressors via `.add_regressor()` are **not** supported.
+
+
+
+2. When running `predict()` on the main model, regressor values are filled with the `yhat` values from their respective nested Prophet models.
+
+
+
+3. When running `cross_validate()` on the main model, each run will first predict the regressor values for the lookahead range, and those values are used to predict `y` for the lookahead range. This prevents data leakage and overstated cross-validation results. 
+
+
+```python
+# Python
+import logging
+logging.basicConfig(level=logging.INFO)
+
+import numpy as np
+import pandas as pd
+
+from prophet import Prophet
+from prophet.diagnostics import cross_validation, performance_metrics
+
+pedestrians = (
+    pd.read_csv(
+        'https://raw.githubusercontent.com/facebook/prophet/main/examples/example_pedestrians_multivariate.csv',
+        parse_dates=["ds"],
+    )
+    .astype({"location_4": np.float64, "location_41": np.float64})
+    .rename({"location_41": "y"}, axis=1)
+)
+
+target = "location_41"
+
+test_mask = pedestrians["ds"] >= pd.to_datetime("2023-04-24 00:00:00")
+pedestrians_train = pedestrians.loc[~test_mask]
+pedestrians_test = pedestrians.loc[test_mask]
+```
+```python
+# Python
+m1 = Prophet(
+    changepoint_range=0.9,
+    seasonality_prior_scale=5.0,
+)
+m1.add_regressor("location_4", mode="additive", regressor_predictor={"seasonality_prior_scale": 10.0});
+```
+```python
+# Python
+m1.fit(pedestrians_train);
+```
+    INFO:prophet:Disabling yearly seasonality. Run prophet with yearly_seasonality=True to override this.
+    INFO:prophet:Fitting regressor model 'location_4' with 552 observations
+    INFO:prophet:Disabling yearly seasonality. Run prophet with yearly_seasonality=True to override this.
+    INFO:cmdstanpy:Chain [1] start processing
+    INFO:cmdstanpy:Chain [1] done processing
+    INFO:cmdstanpy:Chain [1] start processing
+    INFO:cmdstanpy:Chain [1] done processing
+
+
+```python
+# Python
+preds = m1.predict(pedestrians_test)
+```
+    INFO:prophet:Running regressor model 'location_4' for 168 future dates
+    INFO:prophet:Collected 1000 predictive samples for regressor 'location_4'
+
+
+```python
+# Python
+m1.plot(preds);
+```
+
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_59_0.png)
+
+
+```python
+# Python
+m1.plot_components(preds);
+```
+
+![png](/prophet/static/seasonality,_holiday_effects,_and_regressors_files/seasonality,_holiday_effects,_and_regressors_60_0.png)
+
+
+```python
+# Python
+m1_cv = cross_validation(
+    m1,
+    horizon=pd.Timedelta(3, unit="D"),
+    period=pd.Timedelta(5, unit="D"),
+    initial=pd.Timedelta(14, unit="D"),
+)
+```
+    INFO:prophet:Making 2 forecasts with cutoffs between 2023-04-15 23:00:00 and 2023-04-20 23:00:00
+
+
+
+      0%|          | 0/2 [00:00<?, ?it/s]
+
+
+    INFO:prophet:Fitting regressor model 'location_4' with 360 observations
+    INFO:prophet:Disabling yearly seasonality. Run prophet with yearly_seasonality=True to override this.
+    INFO:cmdstanpy:Chain [1] start processing
+    INFO:cmdstanpy:Chain [1] done processing
+    INFO:cmdstanpy:Chain [1] start processing
+    INFO:cmdstanpy:Chain [1] done processing
+    INFO:prophet:Running regressor model 'location_4' for 72 future dates
+    INFO:prophet:Collected 1000 predictive samples for regressor 'location_4'
+    INFO:prophet:Fitting regressor model 'location_4' with 480 observations
+    INFO:prophet:Disabling yearly seasonality. Run prophet with yearly_seasonality=True to override this.
+    INFO:cmdstanpy:Chain [1] start processing
+    INFO:cmdstanpy:Chain [1] done processing
+    INFO:cmdstanpy:Chain [1] start processing
+    INFO:cmdstanpy:Chain [1] done processing
+    INFO:prophet:Running regressor model 'location_4' for 72 future dates
+    INFO:prophet:Collected 1000 predictive samples for regressor 'location_4'
+
+
+```python
+# Python
+performance_metrics(m1_cv).tail(n=5).round(4)
+```
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>horizon</th>
+      <th>mse</th>
+      <th>rmse</th>
+      <th>mae</th>
+      <th>mape</th>
+      <th>mdape</th>
+      <th>smape</th>
+      <th>coverage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>61</th>
+      <td>2 days 20:00:00</td>
+      <td>121911.5202</td>
+      <td>349.1583</td>
+      <td>230.5407</td>
+      <td>0.0627</td>
+      <td>0.0506</td>
+      <td>0.0654</td>
+      <td>0.9286</td>
+    </tr>
+    <tr>
+      <th>62</th>
+      <td>2 days 21:00:00</td>
+      <td>120364.2551</td>
+      <td>346.9355</td>
+      <td>233.8541</td>
+      <td>0.0707</td>
+      <td>0.0547</td>
+      <td>0.0722</td>
+      <td>0.9286</td>
+    </tr>
+    <tr>
+      <th>63</th>
+      <td>2 days 22:00:00</td>
+      <td>117161.5735</td>
+      <td>342.2887</td>
+      <td>217.8324</td>
+      <td>0.0674</td>
+      <td>0.0539</td>
+      <td>0.0689</td>
+      <td>0.9286</td>
+    </tr>
+    <tr>
+      <th>64</th>
+      <td>2 days 23:00:00</td>
+      <td>127608.6985</td>
+      <td>357.2236</td>
+      <td>239.9352</td>
+      <td>0.0878</td>
+      <td>0.0601</td>
+      <td>0.0866</td>
+      <td>0.9286</td>
+    </tr>
+    <tr>
+      <th>65</th>
+      <td>3 days 00:00:00</td>
+      <td>192080.9740</td>
+      <td>438.2704</td>
+      <td>308.6779</td>
+      <td>0.2583</td>
+      <td>0.0734</td>
+      <td>0.1865</td>
+      <td>0.8571</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+```python
+# Python
+
+```

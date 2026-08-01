@@ -116,7 +116,11 @@ def plot(
     if include_legend:
         ax.legend()
     if not user_provided_ax:
-        fig.tight_layout()
+        try:
+            if fig.get_layout_engine() is None:
+                fig.tight_layout()
+        except AttributeError:
+            fig.tight_layout()
     return fig
 
 
@@ -224,7 +228,11 @@ def plot_components(
         if plot_name in m.component_modes['multiplicative']:
             multiplicative_axes.append(ax)
 
-    fig.tight_layout()
+    try:
+        if fig.get_layout_engine() is None:
+            fig.tight_layout()
+    except AttributeError:
+        fig.tight_layout()
     # Reset multiplicative axes labels after tight_layout adjustment
     for ax in multiplicative_axes:
         ax = set_y_as_percent(ax)
@@ -541,7 +549,8 @@ def add_changepoints_to_plot(
         np.abs(np.nanmean(m.params['delta'], axis=0)) >= threshold
     ] if len(m.changepoints) > 0 else []
     for cp in signif_changepoints:
-        artists.append(ax.axvline(x=cp, c=cp_color, ls=cp_linestyle))
+        # Matplotlib stubs type axvline x as float; pandas Timestamp is accepted at runtime.
+        artists.append(ax.axvline(x=cp, c=cp_color, ls=cp_linestyle))  # pyrefly:ignore[bad-argument-type]
     return artists
 
 
