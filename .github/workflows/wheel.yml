@@ -23,7 +23,7 @@ jobs:
           - windows-latest
         cibw_arch: ["native"]
         # Build one wheel (ABI = none) using first build spec, then test on all python versions.
-        cibw_build: ["cp310-* cp311-* cp312-* cp313-*"]
+        cibw_build: ["cp311-* cp312-* cp313-* cp314-*"]
       fail-fast: false
 
     steps:
@@ -54,8 +54,10 @@ jobs:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             MACOSX_DEPLOYMENT_TARGET="${{ matrix.os == 'macos-14-large' && 10.11 || 11.0 }}"
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28 # distributed cmdstan binary is broken with manylinux_2_28
-          # CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014 # distributed cmdstan binary is broken with manylinux_2_28
+          # cmdstan binary is broken with manylinux_2_28 (optimization failures)
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+          # ...but some dependencies do not support manylinux2014 wheels, so need to be built from source
+          CIBW_BEFORE_ALL_LINUX: "yum install -y libjpeg-turbo-devel zlib-devel"
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: ${{ matrix.cibw_arch }}

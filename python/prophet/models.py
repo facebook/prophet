@@ -117,7 +117,7 @@ class IStanBackend(ABC):
 
 
 class CmdStanPyBackend(IStanBackend):
-    CMDSTAN_VERSION = "2.39.0"
+    CMDSTAN_VERSION = "2.37.0"
 
     model: CmdStanModel
     stan_fit: CmdStanMLE | CmdStanMCMC | None
