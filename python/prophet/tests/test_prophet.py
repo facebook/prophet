@@ -22,7 +22,7 @@ def rmse(predictions, targets) -> float:
     return np.sqrt(np.mean((predictions - targets) ** 2))
 
 def _short_monthly_ts() -> pd.DataFrame:
-    # Mirrors facebook/prophet#2709: a single annual cycle of monthly data.
+    # A single annual cycle of monthly data.
     return pd.DataFrame({
         "ds": pd.date_range("2025-01-01", periods=12, freq="MS"),
         "y": [
@@ -527,11 +527,12 @@ class TestProphetSeasonalComponent:
             "condition_name": None,
         }
 
-    def test_yearly_seasonality_warns_on_short_history(self, caplog):
+    def test_yearly_seasonality_warns_on_short_history(self, caplog, backend):
         m = Prophet(
             yearly_seasonality=True,
             weekly_seasonality=False,
             daily_seasonality=False,
+            stan_backend=backend,
         )
         with caplog.at_level(logging.WARNING, logger="prophet"):
             m.fit(_short_monthly_ts())
@@ -540,8 +541,8 @@ class TestProphetSeasonalComponent:
             "less than 730 days" in r.getMessage() for r in caplog.records
         ), "expected an under-identification warning for short yearly history"
 
-    def test_yearly_seasonality_no_warning_on_auto(self, caplog):
-        m = Prophet(weekly_seasonality=False, daily_seasonality=False)
+    def test_yearly_seasonality_no_warning_on_auto(self, caplog, backend):
+        m = Prophet(weekly_seasonality=False, daily_seasonality=False, stan_backend=backend)
         with caplog.at_level(logging.WARNING, logger="prophet"):
             m.fit(_short_monthly_ts())
         assert "yearly" not in m.seasonalities
