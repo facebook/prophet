@@ -124,6 +124,8 @@ class Prophet:
     train_holiday_names: pd.Series | None
     fit_kwargs: dict[str, Any]
     stan_backend: IStanBackend | None
+    # Optional marker set on nested regressor-predictor models for diagnostics/tests.
+    _regressor_name: str | None
 
     def __init__(
         self,
@@ -195,6 +197,7 @@ class Prophet:
         self.component_modes = None
         self.train_holiday_names = None
         self.fit_kwargs = {}
+        self._regressor_name = None
         self.validate_inputs()
         self._load_stan_backend(stan_backend)
 
@@ -742,10 +745,9 @@ class Prophet:
         if regressor_predictor:
             if isinstance(regressor_predictor, dict):
                 predictor_spec = deepcopy(regressor_predictor)
-            elif regressor_predictor is True:
-                predictor_spec = {}
             else:
-                raise ValueError("regressor_predictor must be True or a dict of Prophet parameters")
+                # Truthy non-dict values (typically True) use default Prophet params.
+                predictor_spec = {}
         self.extra_regressors[name] = {
             'prior_scale': prior_scale,
             'standardize': standardize,
@@ -779,12 +781,14 @@ class Prophet:
 
     def _prepare_regressors_for_predict(
         self, df: pd.DataFrame, n_samples: int | None = None
-    ):
+    ) -> tuple[pd.DataFrame, dict[str, npt.NDArray[np.float64]] | None]:
         """Populate regressor columns using fitted regressor models if present.
 
         Returns updated dataframe and optional regressor sample draws.
         """
-        regressor_samples = {} if n_samples else None
+        regressor_samples: dict[str, npt.NDArray[np.float64]] | None = (
+            {} if n_samples else None
+        )
         last_history_date = self.history['ds'].max() if self.history is not None else None
         for name, props in self.extra_regressors.items():
             predictor = props.get('predictor')
@@ -792,7 +796,11 @@ class Prophet:
                 continue
             if name not in df:
                 df[name] = np.nan
-            future_mask = df['ds'] > last_history_date if last_history_date is not None else df[name].isna()
+            future_mask = (
+                df['ds'] > last_history_date
+                if last_history_date is not None
+                else df[name].isna()
+            )
             history_mask = ~future_mask
             if history_mask.any():
                 missing_hist = history_mask & df[name].isna()
@@ -800,25 +808,37 @@ class Prophet:
                     hist_lookup = self.history.set_index('ds')[name]
                     props = self.extra_regressors[name]
                     hist_lookup = hist_lookup * props['std'] + props['mu']
-                    df.loc[missing_hist, name] = hist_lookup.reindex(df.loc[missing_hist, 'ds']).values
+                    df.loc[missing_hist, name] = hist_lookup.reindex(
+                        df.loc[missing_hist, 'ds']
+                    ).to_numpy()
             if future_mask.any():
                 future_dates = df.loc[future_mask, 'ds']
                 reg_future = pd.DataFrame({'ds': future_dates})
-                logger.info("Running regressor model '%s' for %d future dates", name, len(reg_future))
+                logger.info(
+                    "Running regressor model '%s' for %d future dates",
+                    name,
+                    len(reg_future),
+                )
                 reg_pred = predictor.predict(reg_future)
-                df.loc[future_mask, name] = reg_pred['yhat'].values
-                if n_samples:
+                df.loc[future_mask, name] = reg_pred['yhat'].to_numpy()
+                if n_samples and regressor_samples is not None:
                     sample_dict = predictor.predictive_samples(reg_future)
                     reg_samples = sample_dict['yhat']
-                    samples_full = np.tile(df[name].values[:, None], (1, reg_samples.shape[1]))
-                    samples_full[future_mask, :] = reg_samples
+                    samples_full = np.tile(
+                        df[name].to_numpy()[:, None], (1, reg_samples.shape[1])
+                    )
+                    # Use boolean indexing on ndarray, not pandas ExtensionArray 2D slice.
+                    samples_full[future_mask.to_numpy(), :] = reg_samples
                     regressor_samples[name] = samples_full
                     logger.info(
-                        "Collected %d predictive samples for regressor '%s'", reg_samples.shape[1], name
+                        "Collected %d predictive samples for regressor '%s'",
+                        reg_samples.shape[1],
+                        name,
                     )
             elif n_samples and regressor_samples is not None:
+                n_draws = n_samples if isinstance(n_samples, int) else 1
                 regressor_samples[name] = np.tile(
-                    df[name].values[:, None], (1, n_samples if isinstance(n_samples, int) else 1)
+                    df[name].to_numpy()[:, None], (1, n_draws)
                 )
         if regressor_samples is not None and len(regressor_samples) == 0:
             regressor_samples = None
@@ -1641,7 +1661,10 @@ class Prophet:
         return pd.DataFrame(data)
 
     def predict_uncertainty(
-        self, df: pd.DataFrame, vectorized: bool, regressor_samples: Optional[Dict[str, np.ndarray]] = None
+        self,
+        df: pd.DataFrame,
+        vectorized: bool,
+        regressor_samples: dict[str, npt.NDArray[np.float64]] | None = None,
     ) -> pd.DataFrame:
         """Prediction intervals for yhat and trend.
 
@@ -1700,16 +1723,20 @@ class Prophet:
             self.make_all_seasonality_features(df)
         )
         sim_values = {'yhat': [], 'trend': []}
+        regressor_positions: dict[str, int] = {}
+        regressor_draw_counts: dict[str, int] = {}
         if regressor_samples:
             vectorized = False
-            regressor_positions = {
-                name: seasonal_features.columns.get_loc(name)
-                for name in regressor_samples
-                if name in seasonal_features.columns
-            }
-            regressor_draw_counts = {
-                name: regressor_samples[name].shape[1] for name in regressor_samples
-            }
+            for name in regressor_samples:
+                if name not in seasonal_features.columns:
+                    continue
+                pos = seasonal_features.columns.get_loc(name)
+                if not isinstance(pos, (int, np.integer)):
+                    raise ValueError(
+                        f"Expected a unique column position for regressor '{name}'"
+                    )
+                regressor_positions[name] = int(pos)
+                regressor_draw_counts[name] = regressor_samples[name].shape[1]
         sample_counter = 0
         for i in range(n_iterations):
             if vectorized:
@@ -1730,7 +1757,9 @@ class Prophet:
                         for name, pos in regressor_positions.items():
                             draw_count = regressor_draw_counts[name]
                             use_idx = sample_counter % draw_count
-                            seasonal_features_sample.iloc[:, pos] = regressor_samples[name][:, use_idx]
+                            seasonal_features_sample.iloc[:, int(pos)] = (
+                                regressor_samples[name][:, use_idx]
+                            )
                     sims.append(
                         self.sample_model(
                             df=df,

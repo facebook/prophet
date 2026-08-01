@@ -541,7 +541,8 @@ def add_changepoints_to_plot(
         np.abs(np.nanmean(m.params['delta'], axis=0)) >= threshold
     ] if len(m.changepoints) > 0 else []
     for cp in signif_changepoints:
-        artists.append(ax.axvline(x=cp, c=cp_color, ls=cp_linestyle))
+        # Matplotlib stubs type axvline x as float; pandas Timestamp is accepted at runtime.
+        artists.append(ax.axvline(x=cp, c=cp_color, ls=cp_linestyle))  # pyrefly:ignore[bad-argument-type]
     return artists
 
 
