@@ -8,14 +8,38 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for details on how to add or modify con
 
 ## Jupyter Notebooks
 
-Most of the `doc` pages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebook/prophet/tree/main/notebooks) directory at the base of the source tree.  Please make changes there and then rebuild the docs:
+Most of the user-facing `doc` pages are generated from [Jupyter notebooks](http://jupyter.org/) in the [notebooks](https://github.com/facebook/prophet/tree/main/notebooks) directory at the base of the source tree. Please make changes there and then rebuild the docs:
 
 ```
 $ cd docs
 $ make notebooks
 ```
 
-Make sure you have installed [rpy2](https://rpy2.bitbucket.io/) so that the R code can be run as well.
+### API Reference
+
+The Python API reference is generated with [pdoc](https://pdoc.dev/) directly
+from the package source. It includes the public modules, classes, methods, and
+their docstrings, with cross-links between documented objects.
+
+Install the Python development dependencies, then either generate the static
+reference for inclusion in the Jekyll site or serve it directly for a demo:
+
+```
+$ cd python
+$ uv pip install --python .venv/bin/python -e ".[dev]"
+$ cd ../docs
+
+# Generate docs/api/; `bundle exec jekyll serve` will serve it at /prophet/api/
+$ make api
+
+# Serve only the API reference at http://localhost:8080/
+$ make serve-api
+```
+
+`docs/api/` is generated **and committed**. Run `make api` and include the
+updated files in the same change whenever the public Python API or its
+docstrings change. The existing GitHub Pages build will publish those static
+files with the rest of `docs/` when the change reaches `main`.
 
 ### Run the Site Locally
 

@@ -15,6 +15,10 @@
 
 -----
 
+**2026 Update:** Prophet is in maintenance mode as of v1.4.0. Only bug fixes, dependency bumps, and changes to the R package to meet parity with Python will be accepted. No new features are planned. 
+
+-----
+
 **2023 Update:** We discuss our plans for the future of Prophet in this blog post: [facebook/prophet in 2023 and beyond](https://medium.com/@cuongduong_35162/facebook-prophet-in-2023-and-beyond-c5086151c138)
 
 -----
@@ -128,6 +132,13 @@ Using `cmdstanpy` with Windows requires a Unix-compatible C compiler such as min
 ## Changelog
 
 See [Release Notes](https://github.com/facebook/prophet/releases).
+
+### Version 1.4.0 (2026.08.01)
+
+#### Python
+
+- Supported nested Prophet models for extra regressors.
+- Publish (static) API docs.
 
 ### Version 1.3.0 (2026.01.27)
 

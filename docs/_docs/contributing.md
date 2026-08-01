@@ -195,8 +195,6 @@ $ cd docs
 $ make notebooks
 ```
 
-Make sure you have installed [rpy2](https://rpy2.bitbucket.io/) so that the R code can be run as well.
-
 In R, the documentation for the source code must also generated if new parameters are added or a new function is created. This is documented with ``roxygen``.
 
 Run the command below before submitting a PR with any changes to the R code to update the function documentation:
