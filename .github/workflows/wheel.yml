@@ -16,11 +16,11 @@ jobs:
     strategy:
       matrix:
         os:
-          - macos-14-large # Intel
-          - macos-14-xlarge # ARM64
+          # - macos-14-large # Intel
+          # - macos-14-xlarge # ARM64
           - ubuntu-24.04 # Intel
-          - ubuntu-24.04-arm # ARM64
-          - windows-latest
+          # - ubuntu-24.04-arm # ARM64
+          # - windows-latest
         cibw_arch: ["native"]
         # Build one wheel (ABI = none) using first build spec, then test on all python versions.
         cibw_build: ["cp311-* cp312-* cp313-* cp314-*"]
@@ -47,17 +47,14 @@ jobs:
           key: ${{ runner.os }}-${{ env.OS_VERSION }}-rtools-v1
 
       - name: "Build wheels"
-        uses: pypa/cibuildwheel@v3.2.1
+        uses: pypa/cibuildwheel@v4.2.0
         with:
           package-dir: python
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             MACOSX_DEPLOYMENT_TARGET="${{ matrix.os == 'macos-14-large' && 10.11 || 11.0 }}"
-          # cmdstan binary is broken with manylinux_2_28 (optimization failures)
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          # ...but some dependencies do not support manylinux2014 wheels, so need to be built from source
-          CIBW_BEFORE_ALL_LINUX: "yum install -y libjpeg-turbo-devel zlib-devel"
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
