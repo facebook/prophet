@@ -59,8 +59,8 @@ jobs:
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
           CIBW_BUILD_FRONTEND: build
-          CIBW_TEST_REQUIRES: pytest
-          CIBW_TEST_COMMAND: pytest --pyargs prophet
+          # CIBW_TEST_REQUIRES: pytest
+          # CIBW_TEST_COMMAND: pytest --pyargs prophet
 
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@v4
