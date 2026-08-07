@@ -16,11 +16,11 @@ jobs:
     strategy:
       matrix:
         os:
-          - macos-14-large # Intel
-          - macos-14-xlarge # ARM64
+          # - macos-14-large # Intel
+          # - macos-14-xlarge # ARM64
           - ubuntu-24.04 # Intel
-          - ubuntu-24.04-arm # ARM64
-          - windows-latest
+          # - ubuntu-24.04-arm # ARM64
+          # - windows-latest
         cibw_arch: ["native"]
         # Build one wheel (ABI = none) using first build spec, then test on all python versions.
         cibw_build: ["cp311-* cp312-* cp313-* cp314-*"]
