@@ -60,7 +60,7 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-            python scripts/repair_wheel_linux.py {wheel} {dest_dir}
+            python python/scripts/repair_wheel_linux.py {wheel} {dest_dir}
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
