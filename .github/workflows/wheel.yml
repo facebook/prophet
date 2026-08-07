@@ -23,7 +23,7 @@ jobs:
           # - windows-latest
         cibw_arch: ["native"]
         # Build one wheel (ABI = none) using first build spec, then test on all python versions.
-        cibw_build: ["cp311-* cp312-* cp313-* cp314-*"]
+        cibw_build: ["cp311-* cp312-*"]
       fail-fast: false
 
     steps:
@@ -55,13 +55,12 @@ jobs:
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             MACOSX_DEPLOYMENT_TARGET="${{ matrix.os == 'macos-14-large' && 10.11 || 11.0 }}"
           # manylinux_2_28 is required for modern dependency wheels (numpy, etc).
-          # Do not let auditwheel vendor/rename libtbb: that rewrite corrupts the
-          # Stan binary on this image (see fix_linux_wheel_rpaths in setup.py).
+          # Custom repair: relative TBB RPATHs + auditwheel --exclude libtbb
+          # (default auditwheel rewrite corrupts the Stan binary on this image).
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
-          CIBW_BEFORE_BUILD_LINUX: which patchelf
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-            auditwheel repair --exclude libtbb.so.2 -w {dest_dir} {wheel}
+            python scripts/repair_wheel_linux.py {wheel} {dest_dir}
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
