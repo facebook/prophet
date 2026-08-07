@@ -19,9 +19,11 @@ Instead:
 from __future__ import annotations
 
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
+import time
 import zipfile
 from pathlib import Path
 
@@ -69,6 +71,7 @@ def _fix_bundled_tbb_rpaths(root: Path, patchelf: str) -> None:
     if not _can_set_rpath(patchelf, model_bin):
         raise RuntimeError(f"Expected dynamic Stan model binary at {model_bin}")
     _set_rpath(patchelf, model_bin, f"$ORIGIN/{tbb_rel}")
+    _ensure_executable(model_bin)
 
     if not tbb_lib.is_file() or not _can_set_rpath(patchelf, tbb_lib):
         raise RuntimeError(f"Expected dynamic TBB library at {tbb_lib}")
@@ -78,15 +81,32 @@ def _fix_bundled_tbb_rpaths(root: Path, patchelf: str) -> None:
     bin_dir = cmdstan_dir / "bin"
     if bin_dir.is_dir():
         for exe in bin_dir.iterdir():
-            if exe.is_file() and _can_set_rpath(patchelf, exe):
+            if not exe.is_file():
+                continue
+            _ensure_executable(exe)
+            if _can_set_rpath(patchelf, exe):
                 _set_rpath(patchelf, exe, "$ORIGIN/../stan/lib/stan_math/lib/tbb")
 
 
+def _ensure_executable(path: Path) -> None:
+    mode = path.stat().st_mode
+    path.chmod(mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+
 def _repack_wheel(extract_dir: Path, dest_wheel: Path) -> None:
+    # Preserve Unix modes (especially +x on prophet_model.bin / cmdstan tools).
     with zipfile.ZipFile(dest_wheel, "w", compression=zipfile.ZIP_DEFLATED) as zf:
         for path in sorted(extract_dir.rglob("*")):
-            if path.is_file():
-                zf.write(path, path.relative_to(extract_dir).as_posix())
+            if not path.is_file():
+                continue
+            rel = path.relative_to(extract_dir).as_posix()
+            st = path.stat()
+            info = zipfile.ZipInfo(rel)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = (st.st_mode & 0xFFFF) << 16
+            info.date_time = time.localtime(st.st_mtime)[:6]
+            with open(path, "rb") as fh:
+                zf.writestr(info, fh.read())
 
 
 def main(argv: list[str]) -> int:
