@@ -16,11 +16,11 @@ jobs:
     strategy:
       matrix:
         os:
-          # - macos-14-large # Intel
-          # - macos-14-xlarge # ARM64
+          - macos-14-large # Intel
+          - macos-14-xlarge # ARM64
           - ubuntu-24.04 # Intel
-          # - ubuntu-24.04-arm # ARM64
-          # - windows-latest
+          - ubuntu-24.04-arm # ARM64
+          - windows-latest
         cibw_arch: ["native"]
         # Build one wheel (ABI = none) using first build spec, then test on all python versions.
         cibw_build: ["cp311-* cp312-* cp313-* cp314-*"]
@@ -54,13 +54,22 @@ jobs:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             MACOSX_DEPLOYMENT_TARGET="${{ matrix.os == 'macos-14-large' && 10.11 || 11.0 }}"
+          # manylinux_2_28 is required for modern dependency wheels (numpy, etc).
+          # setup.py bundles TBB with $ORIGIN RPATHs and we exclude libtbb from
+          # auditwheel; letting auditwheel rewrite the Stan binary corrupts ELF
+          # headers (PT_DYNAMIC outside PT_LOAD) and causes optimize SIGSEGV (-11).
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
+          # setup.py runs patchelf during the build to set $ORIGIN RPATHs.
+          CIBW_BEFORE_BUILD_LINUX: which patchelf
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+            auditwheel repair --exclude libtbb.so.2 -w {dest_dir} {wheel}
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_SKIP: "*musllinux*"
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
           CIBW_BUILD_FRONTEND: build
-          # CIBW_TEST_REQUIRES: pytest
-          # CIBW_TEST_COMMAND: pytest --pyargs prophet
+          CIBW_TEST_REQUIRES: pytest
+          CIBW_TEST_COMMAND: pytest --pyargs prophet
 
       - name: "Upload wheel as artifact"
         uses: actions/upload-artifact@v4

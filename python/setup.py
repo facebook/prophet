@@ -5,10 +5,12 @@
 
 import os
 import platform
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 from shutil import copy, copytree, rmtree
 from typing import List
-import tempfile
 
 from setuptools import find_packages, setup, Extension
 from setuptools.command.build_ext import build_ext
@@ -28,6 +30,9 @@ TBB_DIRS = ["tbb", "tbb_2020.3"]
 
 
 IS_WINDOWS = platform.platform().startswith("Win")
+IS_LINUX = platform.system() == "Linux"
+TBB_LIB_DIR = f"cmdstan-{CMDSTAN_VERSION}/stan/lib/stan_math/lib/tbb"
+
 
 def prune_cmdstan(cmdstan_dir: str) -> None:
     """
@@ -49,10 +54,67 @@ def prune_cmdstan(cmdstan_dir: str) -> None:
             os.remove(f)
     for tbb_dir in TBB_DIRS:
         copytree(original_dir / TBB_PARENT / tbb_dir, temp_dir / TBB_PARENT / tbb_dir)
+
+    # Drop compile artifacts; only shared libraries are needed at runtime.
+    tbb_runtime_dir = temp_dir / TBB_PARENT / "tbb"
+    if tbb_runtime_dir.is_dir():
+        for f in tbb_runtime_dir.iterdir():
+            if f.is_file() and f.suffix in {".o", ".d", ".def"}:
+                os.remove(f)
+
     copy(original_dir / "makefile", temp_dir / "makefile")
 
     rmtree(original_dir)
     temp_dir.rename(original_dir)
+
+
+def _patchelf(*args: str) -> None:
+    """Run patchelf, required when building Linux wheels."""
+    patchelf = shutil.which("patchelf")
+    if patchelf is None:
+        if os.environ.get("CIBUILDWHEEL"):
+            raise RuntimeError(
+                "patchelf is required when building Linux wheels so TBB can be "
+                "bundled without auditwheel rewriting ELF headers."
+            )
+        print("patchelf not found; leaving Linux RPATHs unchanged")
+        return
+    subprocess.check_call([patchelf, *args])
+
+
+def fix_linux_rpaths(target_dir: str) -> None:
+    """
+    Point Stan binaries at the TBB we already ship inside the package.
+
+    CmdStan writes absolute build-directory RPATHs. auditwheel then rewrites
+    those ELF headers to vendor TBB into *.libs, but on newer manylinux images
+    that rewrite leaves PT_DYNAMIC outside any PT_LOAD and the model binary
+    immediately SIGSEGVs (cmdstanpy error -11). Keep the original soname and a
+    $ORIGIN-relative RPATH instead, and exclude libtbb from auditwheel.
+    """
+    if not IS_LINUX:
+        return
+
+    target = Path(target_dir)
+    model_bin = target / "prophet_model.bin"
+    tbb_dir = target / TBB_LIB_DIR
+    tbb_lib = tbb_dir / "libtbb.so.2"
+
+    if model_bin.exists():
+        _patchelf("--set-rpath", f"$ORIGIN/{TBB_LIB_DIR}", str(model_bin))
+
+    if tbb_lib.exists():
+        _patchelf("--set-rpath", "$ORIGIN", str(tbb_lib))
+
+    cmdstan_bin_dir = target / f"cmdstan-{CMDSTAN_VERSION}" / BINARIES_DIR
+    if cmdstan_bin_dir.is_dir():
+        for exe in cmdstan_bin_dir.iterdir():
+            if exe.is_file() and os.access(exe, os.X_OK):
+                _patchelf(
+                    "--set-rpath",
+                    "$ORIGIN/../stan/lib/stan_math/lib/tbb",
+                    str(exe),
+                )
 
 
 def repackage_cmdstan():
@@ -127,6 +189,14 @@ def build_cmdstan_model(target_dir):
         target_name = "prophet_model.bin"
         copy(sm.exe_file, os.path.join(target_dir, target_name))
 
+        # CmdStan also leaves the un-renamed executable next to the .stan file.
+        stale_exe = Path(sm.exe_file)
+        if stale_exe.exists() and stale_exe.name != target_name:
+            try:
+                stale_exe.unlink()
+            except OSError:
+                pass
+
         if IS_WINDOWS and repackage_cmdstan():
             copytree(cmdstan_dir, target_cmdstan_dir)
 
@@ -137,6 +207,7 @@ def build_cmdstan_model(target_dir):
 
     if repackage_cmdstan():
         prune_cmdstan(target_cmdstan_dir)
+        fix_linux_rpaths(target_dir)
 
 
 def get_backends_from_env() -> List[str]:
