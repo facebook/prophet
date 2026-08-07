@@ -82,6 +82,26 @@ def _patchelf(*args: str) -> None:
     subprocess.check_call([patchelf, *args])
 
 
+def _is_dynamic_elf(path: Path) -> bool:
+    """Return True if path is a dynamically linked ELF (has a .dynamic section)."""
+    patchelf = shutil.which("patchelf")
+    if patchelf is None:
+        return False
+    try:
+        with open(path, "rb") as f:
+            if f.read(4) != b"\x7fELF":
+                return False
+        # stanc is shipped statically linked; only patch binaries that need TBB.
+        result = subprocess.run(
+            [patchelf, "--print-rpath", str(path)],
+            capture_output=True,
+            text=True,
+        )
+        return result.returncode == 0
+    except OSError:
+        return False
+
+
 def fix_linux_rpaths(target_dir: str) -> None:
     """
     Point Stan binaries at the TBB we already ship inside the package.
@@ -95,21 +115,32 @@ def fix_linux_rpaths(target_dir: str) -> None:
     if not IS_LINUX:
         return
 
+    if shutil.which("patchelf") is None:
+        if os.environ.get("CIBUILDWHEEL"):
+            raise RuntimeError(
+                "patchelf is required when building Linux wheels so TBB can be "
+                "bundled without auditwheel rewriting ELF headers."
+            )
+        print("patchelf not found; leaving Linux RPATHs unchanged")
+        return
+
     target = Path(target_dir)
     model_bin = target / "prophet_model.bin"
-    tbb_dir = target / TBB_LIB_DIR
-    tbb_lib = tbb_dir / "libtbb.so.2"
+    tbb_lib = target / TBB_LIB_DIR / "libtbb.so.2"
 
-    if model_bin.exists():
-        _patchelf("--set-rpath", f"$ORIGIN/{TBB_LIB_DIR}", str(model_bin))
+    if not model_bin.exists() or not _is_dynamic_elf(model_bin):
+        raise RuntimeError(f"Expected dynamic Stan model binary at {model_bin}")
+    _patchelf("--set-rpath", f"$ORIGIN/{TBB_LIB_DIR}", str(model_bin))
 
-    if tbb_lib.exists():
-        _patchelf("--set-rpath", "$ORIGIN", str(tbb_lib))
+    if not tbb_lib.exists() or not _is_dynamic_elf(tbb_lib):
+        raise RuntimeError(f"Expected dynamic TBB library at {tbb_lib}")
+    _patchelf("--set-rpath", "$ORIGIN", str(tbb_lib))
 
+    # Only the dynamically linked CmdStan helpers need TBB. stanc is static.
     cmdstan_bin_dir = target / f"cmdstan-{CMDSTAN_VERSION}" / BINARIES_DIR
     if cmdstan_bin_dir.is_dir():
         for exe in cmdstan_bin_dir.iterdir():
-            if exe.is_file() and os.access(exe, os.X_OK):
+            if exe.is_file() and os.access(exe, os.X_OK) and _is_dynamic_elf(exe):
                 _patchelf(
                     "--set-rpath",
                     "$ORIGIN/../stan/lib/stan_math/lib/tbb",
