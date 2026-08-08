@@ -128,14 +128,6 @@ def build_cmdstan_model(target_dir):
         target_name = "prophet_model.bin"
         copy(sm.exe_file, os.path.join(target_dir, target_name))
 
-        # CmdStan also leaves the un-renamed executable next to the .stan file.
-        stale_exe = Path(sm.exe_file)
-        if stale_exe.exists() and stale_exe.name != target_name:
-            try:
-                stale_exe.unlink()
-            except OSError:
-                pass
-
         if IS_WINDOWS and repackage_cmdstan():
             copytree(cmdstan_dir, target_cmdstan_dir)
 

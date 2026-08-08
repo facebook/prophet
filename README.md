@@ -15,7 +15,7 @@
 
 -----
 
-**2026 Update:** Prophet is in maintenance mode as of v1.4.0. Only bug fixes, dependency bumps, and changes to the R package to meet parity with Python will be accepted. No new features are planned. 
+**2026 Update:** Prophet is in maintenance mode as of v1.4.0. Only bug fixes, dependency bumps, and changes to the R package to meet parity with Python will be accepted. No new features are planned.
 
 -----
 
