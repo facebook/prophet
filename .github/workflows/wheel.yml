@@ -54,9 +54,7 @@ jobs:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             MACOSX_DEPLOYMENT_TARGET="${{ matrix.os == 'macos-14-large' && 10.11 || 11.0 }}"
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
-          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
-          # 2026-08-08: `auditwheel repair` (v6.7.0) corrupts prophet_model.bin on this image.
+          # 2026-08-08: `auditwheel repair` (v6.7.0) corrupts prophet_model.bin on manylinux_2_28.
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             python python/scripts/repair_wheel_linux.py {wheel} {dest_dir}
           CIBW_BUILD: ${{ matrix.cibw_build }}
