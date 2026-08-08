@@ -18,8 +18,8 @@ jobs:
         os:
           # - macos-14-large # Intel
           # - macos-14-xlarge # ARM64
-          - ubuntu-24.04 # Intel
-          # - ubuntu-24.04-arm # ARM64
+          # - ubuntu-24.04 # Intel
+          - ubuntu-24.04-arm # ARM64
           # - windows-latest
         cibw_arch: ["native"]
         # Build one wheel (ABI = none) using first build spec, then test on all python versions.
