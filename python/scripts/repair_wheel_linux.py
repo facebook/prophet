@@ -4,16 +4,17 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-"""Repair Linux prophet wheels without letting auditwheel rewrite the Stan binary.
+"""Manual repair for Linux Python wheels.
 
-CmdStan embeds absolute build-directory RPATHs. Default `auditwheel repair`
-vendors libtbb into *.libs and rewrites ELF headers; on manylinux_2_28 that
-rewrite corrupts the Stan model binary (PT_DYNAMIC left outside any PT_LOAD),
-which then SIGSEGVs at runtime (cmdstanpy error -11).
+CmdStan uses absolute RPATHs (i.e. it references the build directory on the CI runner), so we need to patch
+these into relative paths for end users. auditwheel is the defacto tool for this.
 
-Instead:
-  1. Point dynamic binaries at the libtbb.so.2 already shipped under stan_model/
-  2. Run auditwheel with --exclude libtbb.so.2 so it only applies manylinux tags
+As at auditwheel v6.7.0, `auditwheel repair` writes an incorrect header on manylinux_2_28: PT_DYNAMIC is left outside any PT_LOAD,
+so CmdStan segfaults when loading prophet_model.bin.
+
+This script replicates the patching logic using `patchelf` and is intended to run only in Linux CI environments.
+
+auditwheel is still used at the end to apply `manylinux` tags, for wheel discovery.
 """
 
 from __future__ import annotations
@@ -57,16 +58,16 @@ def _fix_bundled_tbb_rpaths(root: Path, patchelf: str) -> None:
             f"Expected exactly one prophet_model.bin in wheel, found {matches}"
         )
     model_bin = matches[0]
-    stan_model = model_bin.parent
+    model_dir = model_bin.parent
 
-    cmdstan_dirs = sorted(stan_model.glob("cmdstan-*"))
+    cmdstan_dirs = sorted(model_dir.glob("cmdstan-*"))
     if len(cmdstan_dirs) != 1:
         raise RuntimeError(
             f"Expected exactly one cmdstan-* directory, found {cmdstan_dirs}"
         )
     cmdstan_dir = cmdstan_dirs[0]
     tbb_rel = f"{cmdstan_dir.name}/stan/lib/stan_math/lib/tbb"
-    tbb_lib = stan_model / tbb_rel / "libtbb.so.2"
+    tbb_lib = model_dir / tbb_rel / "libtbb.so.2"
 
     if not _can_set_rpath(patchelf, model_bin):
         raise RuntimeError(f"Expected dynamic Stan model binary at {model_bin}")

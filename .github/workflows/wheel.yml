@@ -16,14 +16,14 @@ jobs:
     strategy:
       matrix:
         os:
-          # - macos-14-large # Intel
-          # - macos-14-xlarge # ARM64
-          # - ubuntu-24.04 # Intel
+          - macos-14-large # Intel
+          - macos-14-xlarge # ARM64
+          - ubuntu-24.04 # Intel
           - ubuntu-24.04-arm # ARM64
-          # - windows-latest
+          - windows-latest
         cibw_arch: ["native"]
         # Build one wheel (ABI = none) using first build spec, then test on all python versions.
-        cibw_build: ["cp311-* cp312-*"]
+        cibw_build: ["cp311-* cp312-* cp313-* cp314-*"]
       fail-fast: false
 
     steps:
@@ -54,11 +54,9 @@ jobs:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             MACOSX_DEPLOYMENT_TARGET="${{ matrix.os == 'macos-14-large' && 10.11 || 11.0 }}"
-          # manylinux_2_28 is required for modern dependency wheels (numpy, etc).
-          # Custom repair: relative TBB RPATHs + auditwheel --exclude libtbb
-          # (default auditwheel rewrite corrupts the Stan binary on this image).
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
+          # 2026-08-08: `auditwheel repair` (v6.7.0) corrupts prophet_model.bin on this image.
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             python python/scripts/repair_wheel_linux.py {wheel} {dest_dir}
           CIBW_BUILD: ${{ matrix.cibw_build }}
