@@ -55,7 +55,7 @@ jobs:
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
             MACOSX_DEPLOYMENT_TARGET="${{ matrix.os == 'macos-14-large' && 10.11 || 11.0 }}"
           # Ensures proper dynamic linking in Linux wheels
-          CIBW_BEFORE_BUILD: >
+          CIBW_BEFORE_BUILD_LINUX: >
             pip install --upgrade 'auditwheel>=6.8.0'
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_SKIP: "*musllinux*"
