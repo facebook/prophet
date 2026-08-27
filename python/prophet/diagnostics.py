@@ -228,6 +228,7 @@ def cross_validation(
                 raise ImportError("parallel='dask' requires the optional "
                                   "dependency dask.") from e
             pool = get_client()
+            # get_client() returns a client managed by the caller.
             # delay df and model to avoid large objects in task graph.
             df, model = pool.scatter([df, model])
         elif hasattr(parallel, "map"):
@@ -242,10 +243,17 @@ def cross_validation(
         iterables = zip(*iterables)
 
         logger.info("Applying in parallel with %s", pool)
-        predicts = pool.map(single_cutoff_forecast, *iterables)
-        if parallel == "dask":
-            # convert Futures to DataFrames
-            predicts = cast("dd.Client", pool).gather(predicts)
+        try:
+            predicts = pool.map(single_cutoff_forecast, *iterables)
+            if parallel == "dask":
+                # convert Futures to DataFrames
+                predicts = cast("dd.Client", pool).gather(predicts)
+        finally:
+            if (
+                parallel in ("threads", "processes")
+                and isinstance(pool, concurrent.futures.Executor)
+            ):
+                pool.shutdown(wait=True)
 
     else:
         predicts = [
