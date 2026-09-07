@@ -489,7 +489,8 @@ class TestPerformanceMetrics:
 
 class TestProphetCopy:
     @pytest.fixture(scope="class")
-    def data(self, daily_univariate_ts):
+    @staticmethod
+    def data(daily_univariate_ts):
         df = daily_univariate_ts.copy()
         df["cap"] = 200.0
         df["binary_feature"] = [0] * 255 + [1] * 255
