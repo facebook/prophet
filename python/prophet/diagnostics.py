@@ -316,6 +316,8 @@ def single_cutoff_forecast(
         props['condition_name']
         for props in m.seasonalities.values()
         if props['condition_name'] is not None])
+    # Multiple seasonalities can share the same condition column.
+    columns = list(dict.fromkeys(columns))
     yhat = m.predict(df[index_predicted][columns])
     # Merge yhat(predicts), y(df, original data) and cutoff
 
