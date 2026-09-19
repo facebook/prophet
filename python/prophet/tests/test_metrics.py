@@ -78,7 +78,9 @@ class TestRollingMedianByH:
 class TestMetricsRegistered:
     def test_all_registered(self):
         expected = {'mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage'}
-        assert expected == set(metrics.PERFORMANCE_METRICS.keys())
+        assert expected.issubset(set(metrics.PERFORMANCE_METRICS.keys()))
+        for metric_name in expected:
+            assert metrics.PERFORMANCE_METRICS[metric_name] is getattr(metrics, metric_name)
 
     def test_register_custom(self):
         @metrics.register_performance_metric
