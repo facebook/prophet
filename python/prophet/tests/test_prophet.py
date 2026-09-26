@@ -163,6 +163,13 @@ class TestProphetFitPredictDefault:
             result = forecaster.predict(test)
             assert result["yhat"].values[-1] == constant
 
+    def test_fit_constant_history_param_shapes(self, daily_univariate_ts, backend):
+        train = daily_univariate_ts.iloc[:500].copy()
+        train["y"] = 20
+        forecaster = Prophet(stan_backend=backend).fit(train)
+        for par in ["k", "m", "sigma_obs"]:
+            assert forecaster.params[par].shape == (1, 1)
+
     def test_fit_predict_uncertainty_disabled(self, daily_univariate_ts, backend):
         test_days = daily_univariate_ts.shape[0] // 2
         train, future = train_test_split(daily_univariate_ts, test_days)
