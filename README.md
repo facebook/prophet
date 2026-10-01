@@ -38,6 +38,7 @@ Prophet is [open source software](https://code.facebook.com/projects/) released 
 - Prophet Python package: https://pypi.python.org/pypi/prophet/
 - Release blogpost: https://research.facebook.com/blog/2017/2/prophet-forecasting-at-scale/
 - Prophet paper: Sean J. Taylor, Benjamin Letham (2018) Forecasting at scale. The American Statistician 72(1):37-45 (https://peerj.com/preprints/3190.pdf).
+- Helter Skelter, simplified Prophet reimplementation, written in Scala/Apache Spark, optimized for distributed computing: https://github.com/AmadeusITGroup/HelterSkelter
 
 ## Installation in R - CRAN
 
@@ -128,6 +129,18 @@ Make sure compilers (gcc, g++, build-essential) and Python development tools (py
 ### Windows
 
 Using `cmdstanpy` with Windows requires a Unix-compatible C compiler such as mingw-gcc. If cmdstanpy is installed first, one can be installed via the `cmdstanpy.install_cxx_toolchain` command.
+
+## Apache Spark
+
+Helter Skelter is a simplified reimplementation of Prophet's core forecasting approach, written natively in Scala and designed to run on Apache Spark. The algorithm is optimized for the JVM ecosystem and was built from the ground up for large-scale distributed computing.
+
+Helter Skelter is developed and maintained by Amadeus.
+
+GitHub repository: [Helter Skelter](https://github.com/AmadeusITGroup/HelterSkelter)
+
+Maven Central artifacts:
+- Scala 2.12: [helter-skelter_2.12](https://central.sonatype.com/artifact/io.github.amadeusitgroup/helter-skelter_2.12)
+- Scala 2.13: [helter-skelter_2.13](https://central.sonatype.com/artifact/io.github.amadeusitgroup/helter-skelter_2.13)
 
 ## Changelog
 
