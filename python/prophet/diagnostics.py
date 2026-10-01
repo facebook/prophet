@@ -458,6 +458,8 @@ def performance_metrics(
     valid_metrics = ['mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage']
     if metrics is None:
         metrics = valid_metrics
+    # Copy so that removing skipped metrics below does not modify the caller's list
+    metrics = list(metrics)
     if ('yhat_lower' not in df or 'yhat_upper' not in df) and ('coverage' in metrics):
         metrics.remove('coverage')
     if len(set(metrics)) != len(metrics):
