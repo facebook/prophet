@@ -467,6 +467,17 @@ class TestPerformanceMetrics:
                 metrics=["mse", "error_metric"],
             )
 
+    def test_performance_metrics_does_not_modify_metrics(self):
+        df_cv = pd.DataFrame({
+            "ds": pd.date_range("2020-01-02", periods=4),
+            "cutoff": pd.Timestamp("2020-01-01"),
+            "y": [0.0, 1.0, 2.0, 3.0],
+            "yhat": [0.5, 1.5, 2.5, 3.5],
+        })
+        metrics = ["mae", "mape", "coverage"]
+        diagnostics.performance_metrics(df_cv, metrics=metrics)
+        assert metrics == ["mae", "mape", "coverage"]
+
     def test_rolling_mean(self):
         x = np.arange(10)
         h = np.arange(10)
