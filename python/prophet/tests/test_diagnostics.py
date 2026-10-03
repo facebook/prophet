@@ -278,6 +278,32 @@ class TestCrossValidation:
         df_merged = pd.merge(df_cv, ts_short, "left", on="ds")
         assert np.sum((df_merged["y_x"] - df_merged["y_y"]) ** 2) == pytest.approx(0.0)
 
+    def test_cross_validation_shared_seasonality_condition(self, ts_short, backend):
+        df = ts_short.copy()
+        df["is_active"] = np.arange(len(df)) // 7 % 2 == 0
+        m = Prophet(stan_backend=backend, uncertainty_samples=0)
+        for name, period in [("conditional_weekly", 7), ("conditional_monthly", 30.5)]:
+            m.add_seasonality(
+                name=name, period=period, fourier_order=3, condition_name="is_active"
+            )
+        m.fit(df)
+        cutoffs = [df["ds"].iloc[-15], df["ds"].iloc[-8]]
+        horizon = pd.Timedelta("7 days")
+        df_cv = diagnostics.cross_validation(m, horizon=horizon, cutoffs=cutoffs)
+
+        assert set(df_cv["cutoff"]) == set(cutoffs)
+        for cutoff in cutoffs:
+            # A manual forecast already accepts a condition shared by multiple seasonalities.
+            model = diagnostics.prophet_copy(m, cutoff)
+            model.fit(df[df["ds"] <= cutoff])
+            future = df[(df["ds"] > cutoff) & (df["ds"] <= cutoff + horizon)]
+            expected = model.predict(future)
+            actual = df_cv[df_cv["cutoff"] == cutoff]
+            np.testing.assert_array_equal(actual["ds"], expected["ds"])
+            np.testing.assert_allclose(actual["yhat"], expected["yhat"])
+            np.testing.assert_array_equal(actual["y"], future["y"])
+            model.stan_backend.cleanup()
+
     def test_cross_validation_metrics_with_regressor_predictor(self, backend):
         rng = np.random.default_rng(2024)
         n = 90
