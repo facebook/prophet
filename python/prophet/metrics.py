@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Final, cast
+from typing import TYPE_CHECKING, Any, Callable, Final, Sequence, cast
 
 import numpy as np
 import pandas as pd
@@ -41,7 +41,7 @@ def register_performance_metric(func: Callable[..., Any]) -> Callable[..., Any]:
 
 def performance_metrics(
     df: pd.DataFrame,
-    metrics: list[str] | None = None,
+    metrics: Sequence[str] | None = None,
     rolling_window: float = 0.1,
     monthly: bool = False,
 ) -> pd.DataFrame | None:
@@ -80,8 +80,9 @@ def performance_metrics(
     Parameters
     ----------
     df: The dataframe returned by cross_validation.
-    metrics: A list of performance metrics to compute. If not provided, will
-        use ['mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage'].
+    metrics: Performance metrics to compute. A sequence of names; if not
+        provided, uses ['mse', 'rmse', 'mae', 'mape', 'mdape', 'smape',
+        'coverage']. The caller's sequence is not modified.
     rolling_window: Proportion of data to use in each rolling window for
         computing the metrics. Should be in [0, 1] to average.
     monthly: monthly=True will compute horizons as numbers of calendar months
@@ -94,6 +95,8 @@ def performance_metrics(
     valid_metrics = ['mse', 'rmse', 'mae', 'mape', 'mdape', 'smape', 'coverage']
     if metrics is None:
         metrics = valid_metrics
+    # Copy so that removing skipped metrics below does not modify the caller's list
+    metrics = list(metrics)
     if ('yhat_lower' not in df or 'yhat_upper' not in df) and ('coverage' in metrics):
         metrics.remove('coverage')
     if len(set(metrics)) != len(metrics):

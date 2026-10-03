@@ -134,6 +134,40 @@ class TestPerformanceMetrics:
         res = metrics.performance_metrics(df, metrics=['mape'])
         assert res is None
 
+    def test_does_not_modify_metrics_when_coverage_dropped(self):
+        df = self._make_cv_df().drop(columns=['yhat_lower', 'yhat_upper'])
+        caller_metrics = ['mae', 'coverage']
+        res = metrics.performance_metrics(df, metrics=caller_metrics)
+        assert caller_metrics == ['mae', 'coverage']
+        assert res is not None
+        assert 'coverage' not in res.columns
+        assert 'mae' in res.columns
+
+    def test_does_not_modify_metrics_when_mape_dropped(self):
+        df = self._make_cv_df()
+        df['y'] = 0.0
+        caller_metrics = ['mae', 'mape']
+        res = metrics.performance_metrics(df, metrics=caller_metrics)
+        assert caller_metrics == ['mae', 'mape']
+        assert res is not None
+        assert 'mape' not in res.columns
+        assert 'mae' in res.columns
+
+    def test_does_not_modify_metrics_when_all_skipped(self):
+        df = self._make_cv_df()
+        df['y'] = 0.0
+        caller_metrics = ['mape']
+        res = metrics.performance_metrics(df, metrics=caller_metrics)
+        assert res is None
+        assert caller_metrics == ['mape']
+
+    def test_accepts_immutable_metrics_sequence(self):
+        df = self._make_cv_df().drop(columns=['yhat_lower', 'yhat_upper'])
+        res = metrics.performance_metrics(df, metrics=('mae', 'coverage'))
+        assert res is not None
+        assert 'mae' in res.columns
+        assert 'coverage' not in res.columns
+
     def test_invalid_metric(self):
         df = self._make_cv_df()
         with pytest.raises(ValueError):

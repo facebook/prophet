@@ -278,6 +278,32 @@ class TestCrossValidation:
         df_merged = pd.merge(df_cv, ts_short, "left", on="ds")
         assert np.sum((df_merged["y_x"] - df_merged["y_y"]) ** 2) == pytest.approx(0.0)
 
+    def test_cross_validation_shared_seasonality_condition(self, ts_short, backend):
+        df = ts_short.copy()
+        df["is_active"] = np.arange(len(df)) // 7 % 2 == 0
+        m = Prophet(stan_backend=backend, uncertainty_samples=0)
+        for name, period in [("conditional_weekly", 7), ("conditional_monthly", 30.5)]:
+            m.add_seasonality(
+                name=name, period=period, fourier_order=3, condition_name="is_active"
+            )
+        m.fit(df)
+        cutoffs = [df["ds"].iloc[-15], df["ds"].iloc[-8]]
+        horizon = pd.Timedelta("7 days")
+        df_cv = diagnostics.cross_validation(m, horizon=horizon, cutoffs=cutoffs)
+
+        assert set(df_cv["cutoff"]) == set(cutoffs)
+        for cutoff in cutoffs:
+            # A manual forecast already accepts a condition shared by multiple seasonalities.
+            model = diagnostics.prophet_copy(m, cutoff)
+            model.fit(df[df["ds"] <= cutoff])
+            future = df[(df["ds"] > cutoff) & (df["ds"] <= cutoff + horizon)]
+            expected = model.predict(future)
+            actual = df_cv[df_cv["cutoff"] == cutoff]
+            np.testing.assert_array_equal(actual["ds"], expected["ds"])
+            np.testing.assert_allclose(actual["yhat"], expected["yhat"])
+            np.testing.assert_array_equal(actual["y"], future["y"])
+            model.stan_backend.cleanup()
+
     def test_cross_validation_metrics_with_regressor_predictor(self, backend):
         rng = np.random.default_rng(2024)
         n = 90
@@ -441,6 +467,17 @@ class TestPerformanceMetrics:
                 metrics=["mse", "error_metric"],
             )
 
+    def test_performance_metrics_does_not_modify_metrics(self):
+        df_cv = pd.DataFrame({
+            "ds": pd.date_range("2020-01-02", periods=4),
+            "cutoff": pd.Timestamp("2020-01-01"),
+            "y": [0.0, 1.0, 2.0, 3.0],
+            "yhat": [0.5, 1.5, 2.5, 3.5],
+        })
+        metrics = ["mae", "mape", "coverage"]
+        diagnostics.performance_metrics(df_cv, metrics=metrics)
+        assert metrics == ["mae", "mape", "coverage"]
+
     def test_rolling_mean(self):
         x = np.arange(10)
         h = np.arange(10)
@@ -489,7 +526,8 @@ class TestPerformanceMetrics:
 
 class TestProphetCopy:
     @pytest.fixture(scope="class")
-    def data(self, daily_univariate_ts):
+    @staticmethod
+    def data(daily_univariate_ts):
         df = daily_univariate_ts.copy()
         df["cap"] = 200.0
         df["binary_feature"] = [0] * 255 + [1] * 255
