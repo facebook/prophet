@@ -1435,7 +1435,7 @@ class Prophet:
             self.params = stan_init
             self.params['sigma_obs'] = 1e-9
             for par in self.params:
-                self.params[par] = np.array([self.params[par]])
+                self.params[par] = np.array(self.params[par]).reshape((1, -1))
         elif self.mcmc_samples > 0:
             self.params = stan_backend.sampling(stan_init, dat, self.mcmc_samples, **kwargs)
         else:
