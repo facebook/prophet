@@ -16,8 +16,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - macos-14-large # Intel
-          - macos-14-xlarge # ARM64
+          - macos-15-intel # Intel
+          - macos-latest # ARM64
           - ubuntu-24.04 # Intel
           - ubuntu-24.04-arm # ARM64
           - windows-latest
@@ -53,7 +53,7 @@ jobs:
         env:
           CIBW_ENVIRONMENT: >
             STAN_BACKEND="${{ env.STAN_BACKEND }}"
-            MACOSX_DEPLOYMENT_TARGET="${{ matrix.os == 'macos-14-large' && 10.11 || 11.0 }}"
+            MACOSX_DEPLOYMENT_TARGET="${{ matrix.os == 'macos-15-intel' && 10.11 || 11.0 }}"
           # Ensure proper dynamic linking in Linux wheels
           CIBW_BEFORE_BUILD_LINUX: >
             pip install --upgrade 'auditwheel>=6.8.0'

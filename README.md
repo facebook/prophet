@@ -133,6 +133,16 @@ Using `cmdstanpy` with Windows requires a Unix-compatible C compiler such as min
 
 See [Release Notes](https://github.com/facebook/prophet/releases).
 
+### Version 1.5.0 (2026.10.05)
+
+#### Python
+
+- Fixed `cross_validate` with shared seasonality conditions and ensured its executor pools are closed.
+- Fixed `performance_metrics` mutating the `metrics` list passed by the caller.
+- Fixed MAP parameter shapes when the history is constant.
+- Moved `performance_metrics` and the built-in metrics into a new `prophet.metrics` module to resolve a circular import. They remain importable from `prophet.diagnostics`.
+- Added CPython 3.14 wheel builds and refreshed the macOS CI runners.
+
 ### Version 1.4.0 (2026.08.01)
 
 #### Python
