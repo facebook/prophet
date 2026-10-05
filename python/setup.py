@@ -120,6 +120,17 @@ def build_cmdstan_model(target_dir):
         else:
             cmdstan_dir = target_cmdstan_dir
 
+        if platform.system() == "Darwin":
+            # Newer Xcode linkers no longer reserve room in the Mach-O header
+            # for rewritten install names. delocate rewrites the bundled TBB
+            # references, and install_name_tool fails with "larger updated load
+            # commands do not fit" unless the binaries were linked with header
+            # padding. Set it in the environment so cmdstan's `make build`
+            # (which builds the CLI utilities) and the model compile both use it.
+            os.environ["LDFLAGS"] = (
+                os.environ.get("LDFLAGS", "") + " -Wl,-headerpad_max_install_names"
+            ).strip()
+
         install_cmdstan_deps(cmdstan_dir)
         model_name = "prophet.stan"
         # note: ensure copy target is a directory not a file.

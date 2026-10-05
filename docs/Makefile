@@ -4,6 +4,7 @@ API_MODULES = \
 	../python/prophet \
 	../python/prophet/diagnostics.py \
 	../python/prophet/make_holidays.py \
+	../python/prophet/metrics.py \
 	../python/prophet/models.py \
 	../python/prophet/plot.py \
 	../python/prophet/serialize.py \

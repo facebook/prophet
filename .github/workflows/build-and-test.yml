@@ -14,8 +14,8 @@ jobs:
       matrix:
         python-version: ["3.12"]
         os:
-          - macos-14-large # Intel
-          - macos-14-xlarge # ARM64
+          - macos-15-intel # Intel
+          - macos-15 # ARM64
           - ubuntu-24.04 # Intel
           - ubuntu-24.04-arm # ARM64
           - windows-latest
