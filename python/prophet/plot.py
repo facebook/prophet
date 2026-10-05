@@ -11,8 +11,7 @@ from typing import TYPE_CHECKING, cast
 import numpy as np
 import pandas as pd
 
-# TODO: separate performance_metrics into a different module. there is an implicit circular import between forecaster.py and diagnostics.py
-from prophet.diagnostics import performance_metrics
+from prophet.metrics import performance_metrics
 
 if TYPE_CHECKING:
     from typing import Literal, Sequence, TypeVar, type_check_only
