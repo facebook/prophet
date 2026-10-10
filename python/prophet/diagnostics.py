@@ -394,6 +394,7 @@ def prophet_copy(m: _ModelT, cutoff: pd.Timestamp | None = None) -> _ModelT:
             m.stan_backend.get_type() if m.stan_backend is not None
             else None
         ),
+        scaling=m.scaling,
     )
     m2.extra_regressors = deepcopy(m.extra_regressors)
     m2.seasonalities = deepcopy(m.seasonalities)
