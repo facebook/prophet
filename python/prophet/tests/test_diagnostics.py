@@ -587,6 +587,12 @@ class TestProphetCopy:
             assert m1.interval_width == m2.interval_width
             assert m1.uncertainty_samples == m2.uncertainty_samples
 
+    def test_prophet_copy_scaling(self, data, backend):
+        m1 = Prophet(scaling="minmax", stan_backend=backend)
+        m1.history = m1.setup_dataframe(data.copy(), initialize_scales=True)
+        m2 = diagnostics.prophet_copy(m1)
+        assert m2.scaling == "minmax"
+
     def test_prophet_copy_custom(self, data, backend):
         changepoints = pd.date_range("2012-06-15", "2012-09-15")
         cutoff = pd.Timestamp("2012-07-25")
