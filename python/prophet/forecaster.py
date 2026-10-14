@@ -233,6 +233,8 @@ class Prophet:
             ):
                 raise ValueError('holidays must be a DataFrame with "ds" and '
                                  '"holiday" columns.')
+            # Copy so that converting ds below does not modify the caller's dataframe
+            self.holidays = self.holidays.copy()
             self.holidays['ds'] = pd.to_datetime(self.holidays['ds'])
             if (
                 self.holidays['ds'].isnull().any()

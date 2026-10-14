@@ -865,6 +865,21 @@ class TestProphetHolidays:
                 df["ds"], holidays
             )
 
+    def test_holidays_does_not_modify_input(self, backend):
+        holidays = pd.DataFrame(
+            {
+                "ds": ["2016-12-25", "2017-12-25"],
+                "holiday": ["xmas", "xmas"],
+                "lower_window": [-1, -1],
+                "upper_window": [0, 0],
+                "prior_scale": [5.0, 5.0],
+            }
+        )
+        expected = holidays.copy()
+        m = Prophet(holidays=holidays, stan_backend=backend)
+        pd.testing.assert_frame_equal(holidays, expected)
+        assert pd.api.types.is_datetime64_dtype(m.holidays["ds"])
+
     def test_fit_with_holidays(self, daily_univariate_ts, backend):
         holidays = pd.DataFrame(
             {
