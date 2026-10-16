@@ -15,70 +15,92 @@ from prophet.models import CmdStanPyBackend
 class TestWindowsTbbPath:
     """Test that bundled TBB directory is prepended to PATH on Windows."""
 
-    def test_tbb_path_logic_on_windows(self):
-        """Test the TBB PATH prepending logic that should run on Windows."""
-        # Save original PATH
+    def test_cmdstanpy_backend_prepends_tbb_on_windows(self):
+        """Test that CmdStanPyBackend actually prepends TBB to PATH on Windows."""
+        import sys
+        
+        # Save original state
         original_path = os.environ.get("PATH", "")
         
+        # Import prophet.models to get a reference
+        from prophet import models as prophet_models
+        
+        # Save original os.name from the os module that models.py uses
+        original_models_os = getattr(prophet_models, 'os', None)
+        
         try:
-            # Simulate the logic from CmdStanPyBackend.__init__
-            fake_cmdstan_path = "/fake/cmdstan"
-            expected_tbb_dir = os.path.join(fake_cmdstan_path, "stan", "lib", "stan_math", "lib", "tbb")
-            
-            # Clear PATH
+            # Set up test environment
             os.environ["PATH"] = "/usr/bin:/bin"
+            # Expected TBB path based on how the mock constructs paths
+            expected_tbb_dir = f"/fake/prophet/stan_model/cmdstan-{CmdStanPyBackend.CMDSTAN_VERSION}/stan/lib/stan_math/lib/tbb"
             
-            # Simulate the Windows PATH prepending logic from models.py
-            # This is the code that should run when os.name == "nt"
-            tbb_dir = expected_tbb_dir
-            path_entries = os.environ.get("PATH", "").split(os.pathsep)
-            if tbb_dir not in path_entries:
-                os.environ["PATH"] = os.pathsep.join([tbb_dir, *path_entries])
+            # Create a mock os module with name='nt'
+            mock_os_module = MagicMock()
+            mock_os_module.name = 'nt'
+            mock_os_module.environ = os.environ
+            mock_os_module.pathsep = os.pathsep
             
-            # Verify the logic worked
+            # Inject mock os into prophet.models if it exists there, or patch at import level
+            if original_models_os is not None:
+                prophet_models.os = mock_os_module
+            
+            # Mock importlib.resources.files to return a fake cmdstan path
+            with patch('prophet.models.importlib.resources.files') as mock_files:
+                class MockResource:
+                    def __init__(self, path):
+                        self.path = path
+                    
+                    def __truediv__(self, other):
+                        return MockResource(self.path + "/" + str(other))
+                    
+                    def __str__(self):
+                        return self.path
+                    
+                    def exists(self):
+                        return True
+                
+                # Return the root, and let the code build the path
+                mock_files.return_value = MockResource("/fake/prophet")
+                
+                # Mock cmdstanpy module at import time
+                mock_cmdstanpy = MagicMock()
+                mock_cmdstanpy.set_cmdstan_path = MagicMock()
+                
+                with patch.dict('sys.modules', {'cmdstanpy': mock_cmdstanpy}):
+                    # Use a class to track path construction
+                    class MockPath:
+                        def __init__(self, p):
+                            self.path = str(p)
+                        
+                        def __truediv__(self, other):
+                            return MockPath(self.path + "/" + str(other))
+                        
+                        def __str__(self):
+                            return self.path
+                    
+                    # Mock pathlib.Path to avoid WindowsPath issues
+                    with patch('prophet.models.pathlib.Path', MockPath):
+                        # Mock load_model to avoid actual model loading
+                        with patch.object(CmdStanPyBackend, 'load_model', return_value=MagicMock()):
+                            # This should trigger the TBB PATH prepending on Windows
+                            backend = CmdStanPyBackend()
+            
+            # Verify TBB directory was prepended to PATH
             current_path = os.environ.get("PATH", "")
             path_entries = current_path.split(os.pathsep)
             
-            assert expected_tbb_dir in path_entries, f"TBB directory should be in PATH"
-            assert path_entries[0] == expected_tbb_dir, f"TBB directory should be first, got {path_entries[0]}"
+            assert expected_tbb_dir in path_entries, \
+                f"TBB directory '{expected_tbb_dir}' should be in PATH. PATH={current_path}"
+            assert path_entries[0] == expected_tbb_dir, \
+                f"TBB directory should be first in PATH. First entry is '{path_entries[0]}', expected '{expected_tbb_dir}'"
             
         finally:
+            # Restore original state
             os.environ["PATH"] = original_path
-
-    def test_windows_path_prepending_with_os_name_check(self):
-        """Test PATH prepending behavior respects os.name check."""
-        # Save original PATH
-        original_path = os.environ.get("PATH", "")
-        
-        try:
-            # Test the conditional logic: if os.name != "nt", PATH is not modified
-            fake_tbb_dir = "/fake/tbb/path"
-            os.environ["PATH"] = "/usr/bin:/bin"
-            
-            # Simulate non-Windows (os.name != "nt")
-            simulated_os_name = "posix"
-            if simulated_os_name == "nt":
-                # This is the logic from models.py
-                path_entries = os.environ.get("PATH", "").split(os.pathsep)
-                if fake_tbb_dir not in path_entries:
-                    os.environ["PATH"] = os.pathsep.join([fake_tbb_dir, *path_entries])
-            
-            assert os.environ["PATH"] == "/usr/bin:/bin", "PATH should not change when os.name != 'nt'"
-            
-            # Test Windows behavior (os.name == "nt")
-            os.environ["PATH"] = "/usr/bin:/bin"
-            simulated_os_name = "nt"
-            if simulated_os_name == "nt":
-                # This is the logic from models.py
-                path_entries = os.environ.get("PATH", "").split(os.pathsep)
-                if fake_tbb_dir not in path_entries:
-                    os.environ["PATH"] = os.pathsep.join([fake_tbb_dir, *path_entries])
-            
-            assert os.environ["PATH"].startswith(fake_tbb_dir), "TBB dir should be prepended when os.name == 'nt'"
-            assert os.environ["PATH"] == f"{fake_tbb_dir}:/usr/bin:/bin", "PATH should have TBB first"
-            
-        finally:
-            os.environ["PATH"] = original_path
+            if original_models_os is not None:
+                prophet_models.os = original_models_os
+            elif hasattr(prophet_models, 'os'):
+                delattr(prophet_models, 'os')
 
 
 class TestBackendLoadError:
