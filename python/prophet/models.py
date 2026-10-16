@@ -135,7 +135,8 @@ class CmdStanPyBackend(IStanBackend):
             if os.name == "nt":
                 tbb_dir = str(local_cmdstan / "stan" / "lib" / "stan_math" / "lib" / "tbb")
                 path_entries = os.environ.get("PATH", "").split(os.pathsep)
-                if tbb_dir not in path_entries:
+                tbb_dir_normalized = os.path.normcase(tbb_dir)
+                if not any(os.path.normcase(p) == tbb_dir_normalized for p in path_entries):
                     os.environ["PATH"] = os.pathsep.join([tbb_dir, *path_entries])
         super().__init__()
 
