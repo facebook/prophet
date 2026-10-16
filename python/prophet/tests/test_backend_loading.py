@@ -49,7 +49,7 @@ class TestWindowsTbbPath:
                 path_entries = os.environ['PATH'].split(os.pathsep)
                 tbb_count = path_entries.count(expected_tbb_dir)
                 assert tbb_count == 1, f"TBB directory should appear exactly once, found {tbb_count} times"
-                assert path_entries[0] == expected_tbb_dir, f"TBB directory should be first in PATH"
+                assert path_entries[0] == expected_tbb_dir, "TBB directory should be first in PATH"
 
 
 class TestBackendLoadError:
@@ -57,40 +57,40 @@ class TestBackendLoadError:
 
     def test_backend_load_error_raises_runtime_error(self):
         """When backend loading fails, should raise RuntimeError with __cause__ set."""
-        
+
         # Mock StanBackendEnum.get_backend_class to raise an exception
         from prophet.forecaster import StanBackendEnum
-        
+
         test_exception = ValueError("Simulated backend load failure")
-        
+
         with patch.object(StanBackendEnum, 'get_backend_class') as mock_get_backend:
             mock_get_backend.side_effect = test_exception
-            
+
             with pytest.raises(RuntimeError) as exc_info:
                 Prophet(stan_backend='CMDSTANPY')
-            
+
             # Verify the RuntimeError was raised with the original exception as __cause__
             assert exc_info.value.__cause__ is test_exception, "RuntimeError should be chained from the original exception"
             assert "backend" in str(exc_info.value).lower(), "RuntimeError message should mention backend"
 
     def test_backend_auto_load_error_raises_runtime_error(self):
         """When auto-loading backends and all fail, should raise RuntimeError with __cause__ set."""
-        
+
         from prophet.forecaster import StanBackendEnum
-        
+
         test_exception = ValueError("Simulated backend load failure")
-        
+
         with patch.object(StanBackendEnum, 'get_backend_class') as mock_get_backend:
             mock_get_backend.side_effect = test_exception
-            
+
             with pytest.raises(RuntimeError) as exc_info:
                 Prophet(stan_backend=None)
-            
+
             # Verify the RuntimeError was raised with a chained exception
             assert exc_info.value.__cause__ is not None, "RuntimeError should have __cause__ set"
             assert isinstance(exc_info.value.__cause__, Exception), "RuntimeError.__cause__ should be an Exception"
             assert "backend" in str(exc_info.value).lower(), "RuntimeError message should mention backend"
-            
+
             # Verify the exception chain leads to the original error
             current = exc_info.value
             found_original = False
