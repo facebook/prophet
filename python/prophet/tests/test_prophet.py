@@ -1118,6 +1118,22 @@ class TestProphetRegressors:
         assert fcst.shape[0] == 5
         assert any(call == "extra" for call in calls)
 
+    def test_regressor_predictor_with_missing_y_in_history(self, backend):
+        df = self._make_regressor_df()[["ds", "y", "reg"]]
+        df.loc[[10, 11, 40], "y"] = np.nan  # the regressor is known on these dates
+        m = Prophet(uncertainty_samples=50, stan_backend=backend)
+        m.add_regressor("reg", regressor_predictor=True)
+        m.fit(df)
+        future = m.make_future_dataframe(periods=5)  # no regressor column
+        fcst = m.predict(future)
+        assert fcst["yhat"].notnull().all()
+        # History rows use the known regressor values, including the rows with a NaN y.
+        prepared, _ = m._prepare_regressors_for_predict(future.copy())
+        known = df.set_index("ds")["reg"]
+        np.testing.assert_allclose(
+            prepared["reg"].iloc[:len(df)].to_numpy(), known.to_numpy(), rtol=1e-12
+        )
+
 
 class TestProphetWarmStart:
     def test_fit_warm_start(self, daily_univariate_ts, backend):

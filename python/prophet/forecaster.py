@@ -818,6 +818,14 @@ class Prophet:
                     df.loc[missing_hist, name] = hist_lookup.reindex(
                         df.loc[missing_hist, 'ds']
                     ).to_numpy()
+                # Training rows with a NaN y are not in self.history, but the
+                # regressor model was fit on every date where the regressor is known.
+                missing_hist = history_mask & df[name].isna()
+                if missing_hist.any() and predictor.history is not None:
+                    known = predictor.history.set_index('ds')['y']
+                    df.loc[missing_hist, name] = known.reindex(
+                        df.loc[missing_hist, 'ds']
+                    ).to_numpy()
             if future_mask.any():
                 future_dates = df.loc[future_mask, 'ds']
                 reg_future = pd.DataFrame({'ds': future_dates})
