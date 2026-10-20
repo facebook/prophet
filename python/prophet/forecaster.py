@@ -252,6 +252,14 @@ class Prophet:
                 raise ValueError('Holidays must have both lower_window and ' +
                                  'upper_window, or neither')
             if has_lower:
+                # Check for NaN first: comparisons against NaN are False, so a
+                # missing window would slip past the bounds checks below and
+                # then be silently treated as 0 in make_holiday_features.
+                if (
+                    self.holidays['lower_window'].isnull().any()
+                    or self.holidays['upper_window'].isnull().any()  # noqa W503
+                ):
+                    raise ValueError('Found a NaN in holidays dataframe.')
                 if self.holidays['lower_window'].max() > 0:
                     raise ValueError('Holiday lower_window should be <= 0')
                 if self.holidays['upper_window'].min() < 0:
