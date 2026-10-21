@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from collections import OrderedDict
 from enum import Enum
 import importlib.resources
+import os
 import pathlib
 import platform
 from typing import TYPE_CHECKING, Any, Sequence, cast
@@ -131,6 +132,12 @@ class CmdStanPyBackend(IStanBackend):
         )
         if local_cmdstan.exists():
             cmdstanpy.set_cmdstan_path(str(local_cmdstan))
+            if os.name == "nt":
+                tbb_dir = str(local_cmdstan / "stan" / "lib" / "stan_math" / "lib" / "tbb")
+                path_entries = os.environ.get("PATH", "").split(os.pathsep)
+                tbb_dir_normalized = os.path.normcase(tbb_dir)
+                if not any(os.path.normcase(p) == tbb_dir_normalized for p in path_entries):
+                    os.environ["PATH"] = os.pathsep.join([tbb_dir, *path_entries])
         super().__init__()
 
     @staticmethod

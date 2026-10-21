@@ -203,17 +203,22 @@ class Prophet:
 
     def _load_stan_backend(self, stan_backend: str | None) -> None:
         if stan_backend is None:
+            last_err = None
             for i in StanBackendEnum:
                 try:
                     logger.debug("Trying to load backend: %s", i.name)
                     return self._load_stan_backend(i.name)
                 except Exception as e:
                     logger.debug("Unable to load backend %s (%s), trying the next one", i.name, e)
+                    last_err = e
+            raise RuntimeError("Unable to load any Stan backend") from last_err
         else:
-            # pyrefly:ignore[not-callable]
-            self.stan_backend = StanBackendEnum.get_backend_class(stan_backend)()
+            try:
+                # pyrefly:ignore[not-callable]
+                self.stan_backend = StanBackendEnum.get_backend_class(stan_backend)()
+            except Exception as e:
+                raise RuntimeError(f"Unable to load Stan backend '{stan_backend}'") from e
 
-        assert self.stan_backend
         logger.debug("Loaded stan backend: %s", self.stan_backend.get_type())
 
     def validate_inputs(self) -> None:
