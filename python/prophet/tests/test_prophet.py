@@ -803,6 +803,26 @@ class TestProphetHolidays:
         assert priors == [10.0 for _ in range(12)]
         assert names == ["xmas"]
 
+    def test_holidays_nan_window_raises(self, backend):
+        """A missing window must not pass validation.
+
+        Comparisons against NaN are False, so ``lower_window.max() > 0`` and
+        ``upper_window.min() < 0`` both let a NaN through. It was then caught by
+        ``int(nan)`` raising in make_holiday_features, where the except clause
+        set the window to 0 and the holiday silently lost its range.
+        """
+        for lower, upper in (([-1, np.nan], [1, 1]), ([-1, -1], [1, np.nan])):
+            holidays = pd.DataFrame(
+                {
+                    "ds": pd.to_datetime(["2016-12-25", "2016-12-26"]),
+                    "holiday": ["xmas", "boxing"],
+                    "lower_window": lower,
+                    "upper_window": upper,
+                }
+            )
+            with pytest.raises(ValueError, match="NaN"):
+                Prophet(holidays=holidays, stan_backend=backend)
+
     def test_holidays_priors(self, backend):
         # Check prior specifications
         holidays = pd.DataFrame(
