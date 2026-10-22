@@ -2211,6 +2211,8 @@ class Prophet:
         """
         if self.history_dates is None:
             raise Exception('Model has not been fit.')
+        if not isinstance(periods, (int, np.integer)) or periods < 0:
+            raise ValueError('periods must be a non-negative integer.')
         if freq is None:
             # taking the tail makes freq inference more reliable
             freq = pd.infer_freq(self.history_dates.tail(5))

@@ -261,6 +261,9 @@ class TestProphetDataPrep:
         assert len(future) == 3
         assert np.all(future["ds"].values == correct.values)
 
+        with pytest.raises(ValueError, match='periods must be a non-negative integer'):
+            forecaster.make_future_dataframe(periods=-1)
+
     def test_make_future_dataframe_include_history(self, daily_univariate_ts, backend):
         train = daily_univariate_ts.head(468 // 2).copy()
         #cover history with NAs
