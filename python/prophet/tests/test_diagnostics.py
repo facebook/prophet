@@ -593,6 +593,15 @@ class TestProphetCopy:
         m2 = diagnostics.prophet_copy(m1)
         assert m2.scaling == "minmax"
 
+    def test_prophet_copy_fit_kwargs(self, data, backend):
+        m1 = Prophet(stan_backend=backend)
+        m1.history = m1.setup_dataframe(data.copy(), initialize_scales=True)
+        m1.fit_kwargs = {"iter": 500, "algorithm": "Newton"}
+        m2 = diagnostics.prophet_copy(m1)
+        assert m2.fit_kwargs == {"iter": 500, "algorithm": "Newton"}
+        m2.fit_kwargs["iter"] = 1000
+        assert m1.fit_kwargs["iter"] == 500
+
     def test_prophet_copy_custom(self, data, backend):
         changepoints = pd.date_range("2012-06-15", "2012-09-15")
         cutoff = pd.Timestamp("2012-07-25")
