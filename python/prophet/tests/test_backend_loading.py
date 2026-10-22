@@ -3,12 +3,16 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import dataclasses
 import os
 from unittest.mock import patch, MagicMock
 import pytest
 
+import numpy as np
+import pandas as pd
+
 from prophet import Prophet
-from prophet.models import CmdStanPyBackend
+from prophet.models import CmdStanPyBackend, ModelInputData
 
 
 class TestWindowsTbbPath:
@@ -100,3 +104,101 @@ class TestBackendLoadError:
                     break
                 current = current.__cause__
             assert found_original, "Exception chain should contain the original exception"
+
+
+class TestSanitizeCustomInits:
+    """`fit(init=...)` accepts partial and list-valued init dicts, as cmdstanpy does."""
+
+    n_changepoints = 4
+    n_regressors = 2
+
+    def default_inits(self):
+        return {
+            'k': 0.5,
+            'm': 1.0,
+            'sigma_obs': 1.0,
+            'delta': np.zeros(self.n_changepoints),
+            'beta': np.zeros(self.n_regressors),
+        }
+
+    def test_ndarray_init_is_kept(self):
+        custom = {
+            'k': 0.25,
+            'm': 2.0,
+            'sigma_obs': 0.5,
+            'delta': np.arange(self.n_changepoints, dtype=float),
+            'beta': np.arange(self.n_regressors, dtype=float),
+        }
+        res = CmdStanPyBackend.sanitize_custom_inits(self.default_inits(), custom)
+        assert res['k'] == 0.25
+        assert res['m'] == 2.0
+        assert res['sigma_obs'] == 0.5
+        np.testing.assert_array_equal(res['delta'], custom['delta'])
+        np.testing.assert_array_equal(res['beta'], custom['beta'])
+
+    def test_list_init_is_kept(self):
+        custom = {
+            'k': 0.25,
+            'm': 2.0,
+            'sigma_obs': 0.5,
+            'delta': [0.1, 0.2, 0.3, 0.4],
+            'beta': [1.5, 2.5],
+        }
+        res = CmdStanPyBackend.sanitize_custom_inits(self.default_inits(), custom)
+        np.testing.assert_array_equal(res['delta'], np.array(custom['delta']))
+        np.testing.assert_array_equal(res['beta'], np.array(custom['beta']))
+
+    def test_missing_params_fall_back_to_defaults(self):
+        res = CmdStanPyBackend.sanitize_custom_inits(
+            self.default_inits(), {'k': 0.25, 'beta': [1.0, 2.0]}
+        )
+        assert res['k'] == 0.25
+        assert res['m'] == 1.0
+        assert res['sigma_obs'] == 1.0
+        np.testing.assert_array_equal(res['delta'], np.zeros(self.n_changepoints))
+        np.testing.assert_array_equal(res['beta'], np.array([1.0, 2.0]))
+
+    def test_wrong_shape_falls_back_to_defaults(self):
+        res = CmdStanPyBackend.sanitize_custom_inits(
+            self.default_inits(), {'delta': [0.1, 0.2], 'beta': [1.0, 2.0, 3.0, 4.0]}
+        )
+        np.testing.assert_array_equal(res['delta'], np.zeros(self.n_changepoints))
+        np.testing.assert_array_equal(res['beta'], np.zeros(self.n_regressors))
+
+    def test_unusable_values_fall_back_to_defaults(self):
+        res = CmdStanPyBackend.sanitize_custom_inits(
+            self.default_inits(), {'delta': [[0.1, 0.2], [0.3]], 'beta': None}
+        )
+        np.testing.assert_array_equal(res['delta'], np.zeros(self.n_changepoints))
+        np.testing.assert_array_equal(res['beta'], np.zeros(self.n_regressors))
+
+    def test_sanitized_init_feeds_prepare_data(self):
+        """`prepare_data` writes the init file, so it needs every key as an array-like."""
+        res = CmdStanPyBackend.sanitize_custom_inits(
+            self.default_inits(), {'delta': [0.1] * 4, 'beta': [1.0, 2.0]}
+        )
+        assert set(res) == {'k', 'm', 'sigma_obs', 'delta', 'beta'}
+        for param in ['delta', 'beta']:
+            assert res[param].ndim == 1
+
+        data = dataclasses.asdict(
+            ModelInputData(
+                T=3,
+                S=self.n_changepoints,
+                K=self.n_regressors,
+                tau=0.05,
+                trend_indicator=0,
+                y=np.zeros(3),
+                t=np.zeros(3),
+                cap=np.zeros(3),
+                t_change=np.zeros(self.n_changepoints),
+                s_a=np.zeros(self.n_regressors, dtype=int),
+                s_m=np.zeros(self.n_regressors, dtype=int),
+                X=pd.DataFrame(np.zeros((3, self.n_regressors))),
+                sigmas=[0.05] * self.n_regressors,
+            )
+        )
+        stan_init, stan_data = CmdStanPyBackend.prepare_data(res, data)
+        assert stan_init['delta'] == [0.1, 0.1, 0.1, 0.1]
+        assert stan_init['beta'] == [1.0, 2.0]
+        assert stan_data['T'] == 3

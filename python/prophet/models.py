@@ -251,10 +251,15 @@ class CmdStanPyBackend(IStanBackend):
             except Exception:
                 sanitized[param] = default_inits[param]
         for param in ['delta', 'beta']:
-            if default_inits[param].shape == custom_inits[param].shape:
-                sanitized[param] = custom_inits[param]
-            else:
-                sanitized[param] = default_inits[param]
+            # Custom inits may name only some parameters, which cmdstanpy
+            # allows, and may arrive as lists, e.g. params loaded from JSON.
+            try:
+                value = np.asarray(custom_inits[param], dtype=float)
+                if value.shape != default_inits[param].shape:
+                    value = default_inits[param]
+            except Exception:
+                value = default_inits[param]
+            sanitized[param] = value
         return sanitized
 
     @staticmethod
