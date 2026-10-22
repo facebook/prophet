@@ -57,6 +57,16 @@ if TYPE_CHECKING:
 logger: logging.Logger = logging.getLogger('prophet')
 
 
+def _parse_timedelta(value: str | pd.Timedelta) -> pd.Timedelta:
+    """Parse a timedelta and report supported units for invalid values."""
+    try:
+        return pd.Timedelta(value)
+    except ValueError as error:
+        raise ValueError(
+            f"{error}. Valid units are: W, D, h, min, s, ms, us, ns."
+        ) from error
+
+
 def generate_cutoffs(
     df: pd.DataFrame,
     horizon: pd.Timedelta,
@@ -175,7 +185,7 @@ def cross_validation(
         raise Exception('Model has not been fit. Fitting the model provides contextual parameters for cross validation.')
 
     df = model.history.copy().reset_index(drop=True)
-    horizon = pd.Timedelta(horizon)
+    horizon = _parse_timedelta(horizon)
     predict_columns = ['ds', 'yhat']
 
     if model.uncertainty_samples:
@@ -194,12 +204,12 @@ def cross_validation(
 
     if cutoffs is None:
         # Set period
-        period = 0.5 * horizon if period is None else pd.Timedelta(period)
+        period = 0.5 * horizon if period is None else _parse_timedelta(period)
 
         # Set initial
         initial = (
             max(3 * horizon, seasonality_dt) if initial is None
-            else pd.Timedelta(initial)
+            else _parse_timedelta(initial)
         )
 
         # Compute Cutoffs

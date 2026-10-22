@@ -195,6 +195,18 @@ class TestCrossValidation:
         with pytest.raises(ValueError, match="'parallel' should be one"):
             diagnostics.cross_validation(m, horizon="4 days", parallel=object())
 
+    @pytest.mark.parametrize("parameter", ["horizon", "period", "initial"])
+    def test_cross_validation_reports_valid_timedelta_units(self, parameter):
+        m = make_cross_validation_model()
+        kwargs = {"horizon": "1 day", parameter: "1 month"}
+
+        with pytest.raises(ValueError) as exc_info:
+            diagnostics.cross_validation(m, **kwargs)
+
+        message = str(exc_info.value)
+        assert "month" in message
+        assert "Valid units are: W, D, h, min, s, ms, us, ns." in message
+
     def test_check_single_cutoff_forecast_func_calls(self, ts_short, monkeypatch, backend):
         m = Prophet(stan_backend=backend)
         m.fit(ts_short)
