@@ -257,7 +257,7 @@ def cross_validation(
 
         logger.info("Applying in parallel with %s", pool)
         try:
-            predicts = pool.map(single_cutoff_forecast, *iterables)
+            predicts = list(pool.map(single_cutoff_forecast, *iterables))
             if parallel == "dask":
                 # convert Futures to DataFrames
                 predicts = cast("dd.Client", pool).gather(predicts)
