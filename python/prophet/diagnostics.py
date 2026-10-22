@@ -399,6 +399,7 @@ def prophet_copy(m: _ModelT, cutoff: pd.Timestamp | None = None) -> _ModelT:
     m2.extra_regressors = deepcopy(m.extra_regressors)
     m2.seasonalities = deepcopy(m.seasonalities)
     m2.country_holidays = deepcopy(m.country_holidays)
+    m2.fit_kwargs = deepcopy(m.fit_kwargs)
     return m2
 
 
