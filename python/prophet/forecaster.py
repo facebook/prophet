@@ -811,6 +811,10 @@ class Prophet:
                 continue
             if name not in df:
                 df[name] = np.nan
+            # Parse ds like setup_dataframe does, so string dates can be compared.
+            if df['ds'].dtype == np.int64:
+                df['ds'] = df['ds'].astype(str)
+            df['ds'] = pd.to_datetime(df['ds'])
             future_mask = (
                 df['ds'] > last_history_date
                 if last_history_date is not None

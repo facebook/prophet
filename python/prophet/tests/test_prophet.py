@@ -1111,6 +1111,17 @@ class TestProphetRegressors:
         width_pred = np.mean(cv_pred["yhat_upper"] - cv_pred["yhat_lower"])
         assert width_pred > width_base
 
+    def test_regressor_predictor_with_string_dates(self, backend):
+        df = self._make_regressor_df()[["ds", "y", "reg"]]
+        m = Prophet(uncertainty_samples=0, stan_backend=backend)
+        m.add_regressor("reg", regressor_predictor=True)
+        m.fit(df)
+        future = m.make_future_dataframe(periods=5)
+        fcst = m.predict(future)
+        future["ds"] = future["ds"].dt.strftime("%Y-%m-%d")
+        fcst_str = m.predict(future)
+        np.testing.assert_allclose(fcst_str["yhat"], fcst["yhat"])
+
     def test_regressor_predictor_used_for_future(self, backend, monkeypatch):
         df = pd.DataFrame(
             {
