@@ -76,6 +76,10 @@ def generate_cutoffs(
     -------
     list of pd.Timestamp
     """
+    # Each pass subtracts `period` from the cutoff, so anything but a positive
+    # period leaves it where it was and the loop below never terminates.
+    if period <= pd.Timedelta(0):
+        raise ValueError('period must be positive.')
     # Last cutoff is 'latest date in data - horizon' date
     cutoff = df['ds'].max() - horizon
     if cutoff < df['ds'].min():

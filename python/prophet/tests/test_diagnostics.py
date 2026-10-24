@@ -374,6 +374,19 @@ class TestCrossValidation:
         assert ((df_cv1["y"] - df_cv2["y"]) ** 2).sum() == pytest.approx(0.0)
         assert ((df_cv1["yhat"] - df_cv2["yhat"]) ** 2).sum() == pytest.approx(0.0)
 
+    @pytest.mark.parametrize("period", ["0 days", "-7 days"])
+    def test_cross_validation_nonpositive_period_raises(self, period):
+        """A non-positive period must not be accepted.
+
+        Each pass of generate_cutoffs subtracts `period` from the cutoff, so
+        anything but a positive value leaves it where it was: the loop makes no
+        progress, appends a cutoff every iteration, and never returns.
+        """
+        m = make_cross_validation_model()
+
+        with pytest.raises(ValueError, match="period must be positive"):
+            diagnostics.cross_validation(m, horizon="2 days", period=period)
+
     def test_cross_validation_custom_cutoffs(self, ts_short, backend):
         m = Prophet(stan_backend=backend)
         m.fit(ts_short)
