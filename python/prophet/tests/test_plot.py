@@ -162,6 +162,19 @@ class TestSeasonalityPlotData:
         data = _seasonality_plot_data(m, "weekly", days, uncertainty=True)
         assert list(data.columns) == ["ds", "weekly"]
 
+    def test_logistic_minmax_without_floor(self, daily_univariate_ts, backend):
+        # With minmax scaling and no floor column, the floor is the minimum of y.
+        history = daily_univariate_ts.copy()
+        history["cap"] = history["y"].max() * 1.5
+        assert history["y"].min() > 1
+        m = Prophet(stan_backend=backend, growth="logistic", scaling="minmax")
+        m.fit(history, seed=1237861298)
+        days = pd.date_range("2017-01-01", periods=7)
+        data = _seasonality_plot_data(m, "weekly", days)
+        fcst = m.predict(pd.DataFrame({"ds": days, "cap": history["cap"].iloc[0]}))
+        for col in ["weekly", "weekly_lower", "weekly_upper"]:
+            np.testing.assert_allclose(data[col], fcst[col])
+
     @pytest.mark.parametrize("uncertainty", [True, False])
     def test_matplotlib_draws_data(self, model_and_forecast, uncertainty):
         m, _ = model_and_forecast
