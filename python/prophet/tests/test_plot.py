@@ -201,3 +201,17 @@ class TestSeasonalityPlotData:
         traces = get_seasonality_plotly_props(m, "weekly")["traces"]
         np.testing.assert_array_equal(pd.to_datetime(traces[0].x), data["ds"])
         np.testing.assert_array_equal(traces[0].y, data["weekly"])
+
+    def test_seasonality_plot_df_logistic_minmax_without_floor(self):
+        m = Prophet(growth="logistic", scaling="minmax")
+        df = pd.DataFrame({
+            "ds": pd.date_range("2020-01-01", periods=20),
+            "y": np.linspace(100.0, 150.0, 20),
+            "cap": 200.0,
+        })
+        m.fit(df)
+        days = pd.date_range("2020-01-01", periods=7)
+        plot_df = seasonality_plot_df(m, days)
+        assert len(plot_df) == 7
+        assert (plot_df["cap"] > plot_df["floor"]).all()
+

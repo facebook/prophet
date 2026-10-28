@@ -309,7 +309,10 @@ def seasonality_plot_df(
     -------
     A dataframe with seasonal components on ds.
     """
-    df_dict = {'ds': ds, 'cap': 1., 'floor': 0.}
+    cap = 1.0
+    if m.scaling == "minmax" and not m.logistic_floor and m.y_min is not None:
+        cap = float(m.y_min) + 1.0
+    df_dict = {'ds': ds, 'cap': cap, 'floor': 0.}
     for name in m.extra_regressors:
         df_dict[name] = 0.
     # Activate all conditional seasonality columns
