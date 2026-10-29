@@ -534,6 +534,46 @@ class TestProphetSeasonalComponent:
             "condition_name": None,
         }
 
+    def test_auto_yearly_seasonality_order_follows_sampling_rate(self, backend):
+        """Yearly harmonics above the Nyquist limit of the spacing are not identifiable.
+
+        Monthly data carries 12 points a year, so only 6 harmonics can be
+        resolved. The default order of 10 left four of them fixed by the prior
+        rather than by the data, which is what allowed the same series shifted
+        by one year to move the 12-month forecast total by -25% (#2677).
+        Weekly and daily seasonality already decline to turn on once the
+        spacing reaches their period; yearly keeps the component instead and
+        lowers the order, so monthly data still gets a yearly shape.
+        """
+
+        def auto_order(freq, periods, yearly_seasonality="auto"):
+            m = Prophet(
+                yearly_seasonality=yearly_seasonality,
+                weekly_seasonality=False,
+                daily_seasonality=False,
+                stan_backend=backend,
+            )
+            m.history = pd.DataFrame({
+                "ds": pd.date_range("2015-01-01", periods=periods, freq=freq),
+                "y": np.arange(periods, dtype=float),
+            })
+            m.set_auto_seasonalities()
+            return m.seasonalities.get("yearly", {}).get("fourier_order", 0)
+
+        # Well below the limit, so the default order is untouched.
+        assert auto_order("h", 24 * 800) == 10
+        assert auto_order("D", 900) == 10
+        assert auto_order("W", 160) == 10
+        # Past it, the order is only what the spacing can support.
+        assert auto_order("MS", 48) == 6
+        assert auto_order("QS", 20) == 2
+        # Annual sampling resolves no harmonics at all, so it is dropped.
+        assert auto_order("YS", 8) == 0
+        # An explicit order is the caller's decision and is left alone.
+        assert auto_order("MS", 48, yearly_seasonality=10) == 10
+        # True asks for the component, not for one particular order.
+        assert auto_order("MS", 48, yearly_seasonality=True) == 6
+
     def test_yearly_seasonality_warns_on_short_history(self, caplog, backend):
         m = Prophet(
             yearly_seasonality=True,
