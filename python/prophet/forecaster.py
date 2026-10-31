@@ -1209,10 +1209,10 @@ class Prophet:
         # and lowers the order instead, so monthly data still gets a yearly
         # shape. An explicitly requested order is left alone.
         default_yearly_order = 10
-        if pd.notna(min_dt) and min_dt > pd.Timedelta(0):
+        if pd.notna(min_dt) and min_dt > pd.Timedelta(0):  # pyrefly:ignore[unsupported-operation]
             default_yearly_order = min(
                 default_yearly_order,
-                int(365.25 / (2 * (min_dt / pd.Timedelta(days=1)))),
+                int(365.25 / (2 * (min_dt / pd.Timedelta(days=1)))),  # pyrefly:ignore[unsupported-operation]
             )
         fourier_order = self.parse_seasonality_args(
             'yearly', self.yearly_seasonality, yearly_disable,
