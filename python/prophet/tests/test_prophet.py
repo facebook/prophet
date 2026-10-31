@@ -688,6 +688,14 @@ class TestProphetCustomSeasonalComponent:
         with pytest.raises(ValueError):
             m.add_seasonality(name="weekly", period=7, fourier_order=-1)
 
+    def test_custom_period(self, backend):
+        """Period must be > 0"""
+        m = Prophet(stan_backend=backend)
+        for period in [0, 0.0, -7, float("nan")]:
+            with pytest.raises(ValueError, match="Period must be > 0"):
+                m.add_seasonality(name="custom", period=period, fourier_order=3)
+        assert "custom" not in m.seasonalities
+
     def test_custom_priors(self, daily_univariate_ts, backend):
         holidays = pd.DataFrame(
             {

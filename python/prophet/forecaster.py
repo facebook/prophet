@@ -914,6 +914,10 @@ class Prophet:
             ps = float(prior_scale)
         if ps <= 0:
             raise ValueError('Prior scale must be > 0')
+        if not period > 0:
+            # Also rejects NaN. period divides the Fourier frequencies, so 0
+            # only failed later in fit with a ZeroDivisionError.
+            raise ValueError('Period must be > 0')
         if fourier_order <= 0:
             raise ValueError('Fourier Order must be > 0')
         if mode is None:
