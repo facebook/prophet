@@ -1200,8 +1200,41 @@ class Prophet:
 
         # Yearly seasonality
         yearly_disable = last - first < pd.Timedelta(days=730)
+        # A seasonality is only identifiable up to the Nyquist limit of the
+        # sampling interval. Harmonics above period / (2 * min_dt) alias onto
+        # lower ones, so their coefficients are set by the prior rather than by
+        # the data, and the fitted shape then moves a long way for a small
+        # change in the input. Weekly and daily seasonality already decline to
+        # turn on once min_dt reaches their period; yearly keeps the component
+        # and lowers the order instead, so monthly data still gets a yearly
+        # shape. An explicitly requested order is left alone.
+        default_yearly_order = 10
+        if pd.notna(min_dt) and min_dt > pd.Timedelta(0):  # pyrefly:ignore[unsupported-operation]
+            default_yearly_order = min(
+                default_yearly_order,
+                int(365.25 / (2 * (min_dt / pd.Timedelta(days=1)))),  # pyrefly:ignore[unsupported-operation]
+            )
         fourier_order = self.parse_seasonality_args(
-            'yearly', self.yearly_seasonality, yearly_disable, 10)
+            'yearly', self.yearly_seasonality, yearly_disable,
+            default_yearly_order)
+        order_was_chosen_for_us = (
+            self.yearly_seasonality == 'auto' or self.yearly_seasonality is True
+        )
+        if default_yearly_order < 10 and order_was_chosen_for_us:
+            logger.info(
+                'Yearly seasonality {outcome} by the {spacing} spacing between '
+                'dates in the history; harmonics above that are not '
+                'identifiable from this sampling rate. Pass '
+                'yearly_seasonality=<order> to override.'
+                .format(
+                    outcome=(
+                        'disabled' if default_yearly_order == 0
+                        else 'fourier order limited to {0}'.format(
+                            default_yearly_order)
+                    ),
+                    spacing=min_dt,
+                )
+            )
         if fourier_order > 0 and yearly_disable:
             logger.warning(
                 'Yearly seasonality is enabled with less than 730 days '
