@@ -46,8 +46,10 @@ class Prophet:
         then n_changepoints potential changepoints are selected uniformly from
         the first `changepoint_range` proportion of the history.
     changepoint_range: Proportion of history in which trend changepoints will
-        be estimated. Defaults to 0.8 for the first 80%. Not used if
-        `changepoints` is specified.
+        be estimated. Defaults to 0.8 for the first 80%. Can also be a
+        (start, end) tuple of dates, in which case changepoints are placed
+        uniformly among the history dates between start and end, inclusive.
+        Not used if `changepoints` is specified.
     yearly_seasonality: Fit yearly seasonality.
         Can be 'auto', True, False, or a number of Fourier terms to generate.
     weekly_seasonality: Fit weekly seasonality.
@@ -91,7 +93,7 @@ class Prophet:
     changepoints: pd.Series[pd.Timestamp] | None
     n_changepoints: int
     specified_changepoints: bool
-    changepoint_range: float
+    changepoint_range: float | tuple[pd.Timestamp, pd.Timestamp]
     yearly_seasonality: Literal["auto"] | int
     weekly_seasonality: Literal["auto"] | int
     daily_seasonality: Literal["auto"] | int
@@ -132,7 +134,7 @@ class Prophet:
         growth: Literal["linear", "logistic", "flat"] = "linear",
         changepoints: pd.Series | list[pd.Timestamp] | None = None,
         n_changepoints: int = 25,
-        changepoint_range: float = 0.8,
+        changepoint_range: float | tuple[Any, Any] = 0.8,
         yearly_seasonality: Literal["auto"] | int = "auto",
         weekly_seasonality: Literal["auto"] | int = "auto",
         daily_seasonality: Literal["auto"] | int = "auto",
@@ -221,14 +223,39 @@ class Prophet:
 
         logger.debug("Loaded stan backend: %s", self.stan_backend.get_type())
 
+    @staticmethod
+    def _parse_changepoint_dates(
+        date_range: tuple[Any, ...],
+    ) -> tuple[pd.Timestamp, pd.Timestamp]:
+        """Validate a (start, end) changepoint_range and convert it to Timestamps."""
+        if len(date_range) != 2:
+            raise ValueError("changepoint_range tuple must be (start, end)")
+        # pd.Timestamp reads a bare number as an epoch offset, so reject those here.
+        if any(isinstance(date, (int, float)) for date in date_range):
+            raise ValueError("changepoint_range tuple must contain dates, not numbers")
+        try:
+            start, end = pd.Timestamp(date_range[0]), pd.Timestamp(date_range[1])
+        except (TypeError, ValueError) as e:
+            raise ValueError("changepoint_range tuple must contain valid dates") from e
+        if start is pd.NaT or end is pd.NaT:
+            raise ValueError("changepoint_range tuple must contain valid dates")
+        if start.tz is not None or end.tz is not None:
+            raise ValueError("changepoint_range dates must not have a timezone")
+        if start >= end:
+            raise ValueError("changepoint_range start must be before its end")
+        return start, end
+
     def validate_inputs(self) -> None:
         """Validates the inputs to Prophet."""
         if self.growth not in ('linear', 'logistic', 'flat'):
             raise ValueError(
                 'Parameter "growth" should be "linear", "logistic" or "flat".')
-        if not isinstance(self.changepoint_range, (int, float)):
-            raise ValueError("changepoint_range must be a number in [0, 1]'")
-        if ((self.changepoint_range < 0) or (self.changepoint_range > 1)):
+        if isinstance(self.changepoint_range, tuple):
+            self.changepoint_range = self._parse_changepoint_dates(self.changepoint_range)
+        elif not isinstance(self.changepoint_range, (int, float)):
+            raise ValueError(
+                "changepoint_range must be a number in [0, 1] or a (start, end) tuple of dates")
+        elif ((self.changepoint_range < 0) or (self.changepoint_range > 1)):
             raise ValueError('Parameter "changepoint_range" must be in [0, 1]')
         if self.holidays is not None:
             if not (
@@ -492,9 +519,17 @@ class Prophet:
                     raise ValueError('Changepoints must fall within training data.')
         else:
             # Place potential changepoints evenly through first
-            # `changepoint_range` proportion of the history
+            # `changepoint_range` proportion of the history, or through the
+            # history dates inside it when it is a (start, end) tuple
             history = cast(pd.DataFrame, self.history)
-            hist_size = int(np.floor(history.shape[0] * self.changepoint_range))
+            if isinstance(self.changepoint_range, tuple):
+                start, end = self.changepoint_range
+                history = history[(history['ds'] >= start) & (history['ds'] <= end)]
+                if history.empty:
+                    raise ValueError('changepoint_range must overlap the training data.')
+                hist_size = history.shape[0]
+            else:
+                hist_size = int(np.floor(history.shape[0] * self.changepoint_range))
             if self.n_changepoints + 1 > hist_size:
                 self.n_changepoints = hist_size - 1
                 logger.info(
