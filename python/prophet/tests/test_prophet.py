@@ -430,6 +430,53 @@ class TestProphetTrendComponent:
             with pytest.raises(ValueError):
                 m = Prophet(changepoint_range=out_of_range, stan_backend=backend)
 
+    def test_set_changepoint_date_range(self, daily_univariate_ts, backend):
+        train, _ = train_test_split(daily_univariate_ts, daily_univariate_ts.shape[0] // 2)
+        start, end = train["ds"].iloc[100], train["ds"].iloc[200]
+        m = Prophet(changepoint_range=(start, str(end)), stan_backend=backend)
+        assert m.changepoint_range == (start, end)
+        history = m.setup_dataframe(train, initialize_scales=True)
+        m.history = history
+        m.set_changepoints()
+        assert m.changepoints.shape[0] == m.n_changepoints
+        assert m.changepoints.min() > start
+        assert m.changepoints.max() == end
+
+    def test_changepoint_date_range_with_few_dates(self, daily_univariate_ts, backend):
+        train, _ = train_test_split(daily_univariate_ts, daily_univariate_ts.shape[0] // 2)
+        m = Prophet(
+            changepoint_range=(train["ds"].iloc[100], train["ds"].iloc[105]),
+            stan_backend=backend,
+        )
+        m.history = m.setup_dataframe(train, initialize_scales=True)
+        m.set_changepoints()
+        assert m.n_changepoints == 5
+        assert m.changepoints.shape[0] == 5
+
+    def test_changepoint_date_range_outside_history(self, daily_univariate_ts, backend):
+        train, _ = train_test_split(daily_univariate_ts, daily_univariate_ts.shape[0] // 2)
+        m = Prophet(changepoint_range=("2100-01-01", "2100-06-01"), stan_backend=backend)
+        m.history = m.setup_dataframe(train, initialize_scales=True)
+        with pytest.raises(ValueError, match="overlap"):
+            m.set_changepoints()
+
+    @pytest.mark.parametrize(
+        "date_range",
+        [
+            ("2020-01-01",),
+            ("2020-01-01", "2020-02-01", "2020-03-01"),
+            ("2020-02-01", "2020-01-01"),
+            ("2020-01-01", "2020-01-01"),
+            (0.1, 0.5),
+            ("not a date", "2020-01-01"),
+            (None, "2020-01-01"),
+            ("2020-01-01T00:00:00Z", "2020-02-01T00:00:00Z"),
+        ],
+    )
+    def test_invalid_changepoint_date_range(self, date_range, backend):
+        with pytest.raises(ValueError, match="changepoint_range"):
+            Prophet(changepoint_range=date_range, stan_backend=backend)
+
     def test_get_zero_changepoints(self, daily_univariate_ts, backend):
         train, _ = train_test_split(daily_univariate_ts, daily_univariate_ts.shape[0] // 2)
         m = Prophet(n_changepoints=0, stan_backend=backend)

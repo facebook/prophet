@@ -63,6 +63,8 @@ def model_to_dict(model: Prophet) -> dict[str, Any]:
     model_dict = {
         attribute: getattr(model, attribute) for attribute in SIMPLE_ATTRIBUTES
     }
+    if isinstance(model.changepoint_range, tuple):
+        model_dict['changepoint_range'] = [str(date) for date in model.changepoint_range]
     # Handle attributes of non-core types
     for attribute in PD_SERIES:
         if getattr(model, attribute) is None:
@@ -164,6 +166,9 @@ def model_from_dict(model_dict: dict[str, Any]) -> Prophet:
     _handle_simple_attributes_backwards_compat(model_dict)
     for attribute in SIMPLE_ATTRIBUTES:
         setattr(model, attribute, model_dict[attribute])
+    if isinstance(model.changepoint_range, list):
+        start, end = model.changepoint_range
+        model.changepoint_range = (pd.Timestamp(start), pd.Timestamp(end))
     for attribute in PD_SERIES:
         if model_dict[attribute] is None:
             setattr(model, attribute, None)

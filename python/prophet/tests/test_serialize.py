@@ -57,6 +57,17 @@ class TestSerialize:
 
         assert np.array_equal(fcst["yhat"].values, fcst2["yhat"].values)
 
+    def test_serialize_changepoint_date_range(self, daily_univariate_ts, backend):
+        df = daily_univariate_ts.head(daily_univariate_ts.shape[0] - 30)
+        date_range = (df["ds"].iloc[100], df["ds"].iloc[200])
+        m = Prophet(changepoint_range=date_range, stan_backend=backend)
+        m.fit(df)
+
+        m2 = model_from_json(model_to_json(m))
+
+        assert m2.changepoint_range == date_range
+        assert m2.changepoints.equals(m.changepoints)
+
     def test_full_serialize(self, daily_univariate_ts, backend):
         # Construct a model with all attributes
         holidays = pd.DataFrame(
