@@ -32,6 +32,19 @@ logger: logging.Logger = logging.getLogger('prophet')
 logger.setLevel(logging.INFO)
 NANOSECONDS_TO_SECONDS = 1000 * 1000 * 1000
 
+
+def _to_datetime(values: pd.Series) -> pd.Series:
+    """pd.to_datetime that also converts pyarrow-backed timestamps to numpy datetime64.
+
+    pd.to_datetime leaves some pyarrow timestamp columns (for example
+    timestamp[ns][pyarrow] from pd.read_parquet(..., dtype_backend="pyarrow"))
+    as pyarrow, and the numpy-based code downstream fails on them.
+    """
+    ds = pd.to_datetime(values)
+    if isinstance(ds.dtype, getattr(pd, "ArrowDtype", ())):
+        ds = pd.Series(pd.DatetimeIndex(ds), index=ds.index, name=ds.name)
+    return ds
+
 class Prophet:
     """Prophet forecaster.
 
@@ -353,7 +366,7 @@ class Prophet:
                 raise ValueError('Found infinity in column y.')
         if df['ds'].dtype == np.int64:
             df['ds'] = df['ds'].astype(str)
-        df['ds'] = pd.to_datetime(df['ds'])
+        df['ds'] = _to_datetime(df['ds'])
         if df['ds'].dt.tz is not None:
             raise ValueError(
                 'Column ds has timezone specified, which is not supported. '
@@ -1350,7 +1363,7 @@ class Prophet:
         history = df[df['y'].notnull()].copy()
         if history.shape[0] < 2:
             raise ValueError('Dataframe has less than 2 non-NaN rows.')
-        self.history_dates = pd.to_datetime(pd.Series(df['ds'].unique(), name='ds')).sort_values()
+        self.history_dates = _to_datetime(pd.Series(df['ds'].unique(), name='ds')).sort_values()
 
         self.history = self.setup_dataframe(history, initialize_scales=True)
         self.set_auto_seasonalities()

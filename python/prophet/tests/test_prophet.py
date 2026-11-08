@@ -591,6 +591,29 @@ class TestProphetSeasonalComponent:
         m.fit(daily_univariate_ts)
         assert "daily" not in m.seasonalities
 
+    @pytest.mark.parametrize("unit", ["ns", "us"])
+    def test_fit_predict_pyarrow_ds(self, daily_univariate_ts, backend, unit):
+        # ds backed by pyarrow, e.g. from pd.read_parquet(..., dtype_backend="pyarrow")
+        pytest.importorskip("pyarrow")
+        arrow_dtype = f"timestamp[{unit}][pyarrow]"
+        train = daily_univariate_ts.head(100)
+        m_numpy = Prophet(stan_backend=backend).fit(train)
+        m_arrow = Prophet(stan_backend=backend).fit(train.astype({"ds": arrow_dtype}))
+        assert m_arrow.seasonalities == m_numpy.seasonalities
+        future = m_numpy.make_future_dataframe(10)
+        expected = m_numpy.predict(future)["yhat"]
+        np.testing.assert_allclose(m_arrow.predict(future)["yhat"], expected)
+        np.testing.assert_allclose(
+            m_arrow.predict(future.astype({"ds": arrow_dtype}))["yhat"], expected
+        )
+
+    def test_pyarrow_ds_with_timezone(self, daily_univariate_ts, backend):
+        pytest.importorskip("pyarrow")
+        train = daily_univariate_ts.head(100).copy()
+        train["ds"] = train["ds"].dt.tz_localize("UTC").astype("timestamp[ns, tz=UTC][pyarrow]")
+        with pytest.raises(ValueError, match="timezone"):
+            Prophet(stan_backend=backend).fit(train)
+
     def test_set_seasonality_mode(self, backend):
         # Setting attribute
         m = Prophet(stan_backend=backend)
