@@ -1,23 +1,35 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (6.1.7.5)
-      concurrent-ruby (~> 1.0, >= 1.0.2)
+    activesupport (8.0.5.2)
+      base64
+      benchmark (>= 0.3)
+      bigdecimal
+      concurrent-ruby (~> 1.0, >= 1.3.1)
+      connection_pool (>= 2.2.5)
+      drb
       i18n (>= 1.6, < 2)
+      logger (>= 1.4.2)
       minitest (>= 5.1)
-      tzinfo (~> 2.0)
-      zeitwerk (~> 2.3)
+      securerandom (>= 0.3)
+      tzinfo (~> 2.0, >= 2.0.5)
+      uri (>= 0.13.1)
     addressable (2.8.0)
       public_suffix (>= 2.0.2, < 5.0)
+    base64 (0.3.0)
+    benchmark (0.5.0)
+    bigdecimal (4.1.3)
     coffee-script (2.4.1)
       coffee-script-source
       execjs
     coffee-script-source (1.11.1)
     colorator (1.1.0)
     commonmarker (0.23.10)
-    concurrent-ruby (1.3.4)
+    concurrent-ruby (1.3.8)
+    connection_pool (3.0.2)
     dnsruby (1.61.5)
       simpleidn (~> 0.1)
+    drb (2.2.3)
     em-websocket (0.5.2)
       eventmachine (>= 0.12.9)
       http_parser.rb (~> 0.6.0)
@@ -88,7 +100,7 @@ GEM
       activesupport (>= 2)
       nokogiri (>= 1.4)
     http_parser.rb (0.6.0)
-    i18n (1.14.6)
+    i18n (1.15.2)
       concurrent-ruby (~> 1.0)
     jekyll (3.9.3)
       addressable (~> 2.4)
@@ -206,13 +218,16 @@ GEM
     listen (3.4.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
+    logger (1.7.0)
     mercenary (0.3.6)
     mini_portile2 (2.8.9)
     minima (2.5.1)
       jekyll (>= 3.5, < 5.0)
       jekyll-feed (~> 0.9)
       jekyll-seo-tag (~> 2.1)
-    minitest (5.25.1)
+    minitest (6.1.0)
+      drb (~> 2.0)
+      prism (>= 1.5, < 3)
     multipart-post (2.1.1)
     nokogiri (1.18.8)
       mini_portile2 (~> 2.8.2)
@@ -222,6 +237,7 @@ GEM
       sawyer (~> 0.8.0, >= 0.5.3)
     pathutil (0.16.2)
       forwardable-extended (~> 2.6)
+    prism (2.1.0)
     public_suffix (3.1.1)
     racc (1.8.1)
     rb-fsevent (0.10.4)
@@ -240,6 +256,7 @@ GEM
     sawyer (0.8.2)
       addressable (>= 2.3.5)
       faraday (> 0.8, < 2.0)
+    securerandom (0.4.1)
     simpleidn (0.1.1)
       unf (~> 0.1.4)
     terminal-table (1.8.0)
@@ -252,7 +269,7 @@ GEM
       unf_ext
     unf_ext (0.0.7.7)
     unicode-display_width (1.7.0)
-    zeitwerk (2.6.18)
+    uri (1.1.2)
 
 PLATFORMS
   ruby
