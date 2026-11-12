@@ -177,6 +177,24 @@ test_that("performance_metrics", {
   )
 })
 
+test_that("plot_cross_validation_metric uses numeric coverage", {
+  df_cv <- data.frame(
+    ds = as.Date('2020-01-01') + 1:4,
+    cutoff = as.Date('2020-01-01'),
+    y = c(1, 3, 1, 3), yhat = 1, yhat_lower = 0, yhat_upper = 2
+  )
+  for (window in c(-1, 1)) {
+    gg <- suppressWarnings(
+      plot_cross_validation_metric(df_cv, 'coverage', rolling_window = window)
+    )
+    built <- ggplot2::ggplot_build(gg)
+    expect_false(built$layout$panel_scales_y[[1]]$is_discrete())
+    expect_equal(as.numeric(built$data[[1]]$y), c(1, 0, 1, 0))
+    expected <- if (window < 0) c(1, 0, 1, 0) else 0.5
+    expect_equal(as.numeric(built$data[[2]]$y), expected)
+  }
+})
+
 test_that("rolling_mean", {
   skip_if_not(Sys.getenv('R_ARCH') != '/i386')
   x <- 0:9
