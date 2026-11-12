@@ -535,6 +535,8 @@ plot_cross_validation_metric <- function(df_cv, metric, rolling_window=0.1) {
   df_h <- performance_metrics(
     df_cv, metrics = metric, rolling_window = rolling_window
   )
+  df_none[[metric]] <- as.numeric(df_none[[metric]])
+  df_h[[metric]] <- as.numeric(df_h[[metric]])
 
   # Better plotting of difftime
   # Target ~10 ticks
