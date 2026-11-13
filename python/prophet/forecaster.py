@@ -805,6 +805,16 @@ class Prophet:
             {} if n_samples else None
         )
         last_history_date = self.history['ds'].max() if self.history is not None else None
+        if any(
+            props.get('predictor') is not None
+            for props in self.extra_regressors.values()
+        ):
+            # The regressor models return their forecasts sorted by ds, and
+            # setup_dataframe later sorts df by ds. Sort df the same way first,
+            # so the forecasts and sample draws line up with the right dates.
+            if df.index.name == 'ds':
+                df.index.name = None
+            df = df.sort_values('ds', kind='mergesort').reset_index(drop=True)
         for name, props in self.extra_regressors.items():
             predictor = props.get('predictor')
             if props.get('predictor_spec') is None or predictor is None:

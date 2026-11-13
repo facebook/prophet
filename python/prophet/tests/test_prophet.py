@@ -1111,6 +1111,21 @@ class TestProphetRegressors:
         width_pred = np.mean(cv_pred["yhat_upper"] - cv_pred["yhat_lower"])
         assert width_pred > width_base
 
+    def test_regressor_predictor_unsorted_dates(self, backend):
+        df = self._make_regressor_df()[["ds", "y", "reg"]]
+        m = Prophet(uncertainty_samples=100, stan_backend=backend)
+        m.add_regressor("reg", regressor_predictor=True)
+        m.fit(df.iloc[:70])
+        # 10 history dates and 20 future dates, not sorted by ds
+        future = df[["ds"]].iloc[60:]
+        shuffled = future.sample(frac=1, random_state=0)
+        np.random.seed(0)
+        fcst = m.predict(future)
+        np.random.seed(0)
+        fcst_shuffled = m.predict(shuffled)
+        for col in ["yhat", "yhat_lower", "yhat_upper"]:
+            np.testing.assert_allclose(fcst_shuffled[col], fcst[col])
+
     def test_regressor_predictor_used_for_future(self, backend, monkeypatch):
         df = pd.DataFrame(
             {
